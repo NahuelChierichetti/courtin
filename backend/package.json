@@ -1,5 +1,5 @@
 {
-  "name": "pelotearg",
+  "name": "CourtIn",
   "version": "1.0.0",
   "description": "Sistema de reservas de canchas",
   "main": "index.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NahuelChierichetti/pelotearg.git"
+    "url": "git+https://github.com/NahuelChierichetti/courtin.git"
   },
   "keywords": [
     "node",
@@ -21,15 +21,17 @@
   "author": "Nahuel Chierichetti",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.2"
   },
   "bugs": {
-    "url": "https://github.com/NahuelChierichetti/pelotearg/issues"
+    "url": "https://github.com/NahuelChierichetti/courtin/issues"
   },
-  "homepage": "https://github.com/NahuelChierichetti/pelotearg#readme",
+  "homepage": "https://github.com/NahuelChierichetti/courtin#readme",
   "devDependencies": {
     "nodemon": "^3.1.14"
   }

@@ -13,6 +13,22 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true
+    },
+    password: {
+      type: String,
+      required: [true, 'La contraseña es obligatoria'],
+      minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
+      select: false
+    },
+    estado: {
+      type: String,
+      enum: ['activo', 'inactivo'],
+      default: 'activo'
+    },
+    globalRole: {
+      type: String,
+      enum: ['superadmin'],
+      default: undefined
     }
   },
   {
