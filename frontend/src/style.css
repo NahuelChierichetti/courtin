@@ -1,0 +1,325 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primitive-dark-50: #f3f5f8;
+  --color-primitive-dark-100: #e7ebf1;
+  --color-primitive-dark-200: #cfd8e4;
+  --color-primitive-dark-300: #a9b5c7;
+  --color-primitive-dark-400: #131C2A;
+  --color-primitive-dark-500: #0d1321;
+  --color-primitive-dark-600: #0a0f1b;
+  --color-primitive-dark-700: #070b14;
+
+  --color-primitive-orange-50: #fff6ed;
+  --color-primitive-orange-100: #ffecd6;
+  --color-primitive-orange-200: #ffd3ad;
+  --color-primitive-orange-300: #ffb375;
+  --color-primitive-orange-400: #ff8b33;
+  --color-primitive-orange-500: #ff6a00;
+  --color-primitive-orange-600: #db5800;
+  --color-primitive-orange-700: #b54800;
+
+  --color-primitive-yellow-50: #fcffe6;
+  --color-primitive-yellow-100: #f8ffbf;
+  --color-primitive-yellow-200: #f3ff80;
+  --color-primitive-yellow-300: #eeff4d;
+  --color-primitive-yellow-400: #eaff1a;
+  --color-primitive-yellow-500: #e6ff00;
+  --color-primitive-yellow-600: #b8cc00;
+  --color-primitive-yellow-700: #8a9900;
+
+  --color-primitive-blue-50: #eef5ff;
+  --color-primitive-blue-100: #d9e8ff;
+  --color-primitive-blue-200: #b7d3ff;
+  --color-primitive-blue-300: #86b5ff;
+  --color-primitive-blue-400: #4f8fff;
+  --color-primitive-blue-500: #1565e6;
+  --color-primitive-blue-600: #0f52bf;
+  --color-primitive-blue-700: #0c4096;
+
+  --color-primitive-gray-50: #ffffff;
+  --color-primitive-gray-100: #fcfdff;
+  --color-primitive-gray-200: #f9fafb;
+  --color-primitive-gray-300: #f6f8fa;
+  --color-primitive-gray-400: #f4f6f8;
+  --color-primitive-gray-500: #f2f4f7;
+  --color-primitive-gray-600: #d9dee6;
+  --color-primitive-gray-700: #b8c0cc;
+
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-200: #fecaca;
+  --color-error-300: #fca5a5;
+  --color-error-400: #f87171;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
+
+  --color-success-50: #ecfdf3;
+  --color-success-100: #d1fadf;
+  --color-success-200: #a6f4c5;
+  --color-success-300: #6ce9a6;
+  --color-success-400: #32d583;
+  --color-success-500: #12b76a;
+  --color-success-600: #039855;
+  --color-success-700: #027a48;
+
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-400: #fdb022;
+  --color-warning-500: #f79009;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+}
+html,
+body,
+#app {
+  font-family: "Sora", sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+body {
+  margin: 0;
+  font-family: "Sora", sans-serif;
+}
+
+.p-inputtext,
+.p-password-input,
+.p-password .p-inputtext {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.p-inputtext::placeholder,
+.p-password-input::placeholder,
+.p-password .p-inputtext::placeholder {
+  color: #94a3b8;
+}
+
+.p-checkbox .p-checkbox-box {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+.p-checkbox.p-highlight .p-checkbox-box {
+  background: #ff6a00 !important;
+  border-color: #ff6a00 !important;
+}
+
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#app {
+  min-height: 100vh;
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
