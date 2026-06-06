@@ -1,18 +1,70 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import HomeView from '@/views/HomeView.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import LoginView from '@/views/auth/Login.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
 import RegisterView from '@/views/auth/Register.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      component: AppLayout,
       meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          redirect: '/dashboard',
+        },
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('@/views/DashboardView.vue'),
+        },
+        {
+          path: 'turnos',
+          name: 'turnos',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Turnos' },
+        },
+        {
+          path: 'clientes',
+          name: 'clientes',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Clientes' },
+        },
+        {
+          path: 'caja',
+          name: 'caja',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Control de caja' },
+        },
+        {
+          path: 'canchas',
+          name: 'canchas',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Canchas' },
+        },
+        {
+          path: 'horarios',
+          name: 'horarios',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Horarios' },
+        },
+        {
+          path: 'reportes',
+          name: 'reportes',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Reportes' },
+        },
+        {
+          path: 'notificaciones',
+          name: 'notificaciones',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Notificaciones' },
+        },
+      ],
     },
     {
       path: '/login',
@@ -47,7 +99,7 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.guestOnly && isAuthenticated.value) {
-    return { name: 'home' }
+    return { name: 'dashboard' }
   }
 
   return true
