@@ -87,7 +87,7 @@
         :class="{ 'opacity-50': court.estado === 'inactiva' }"
       >
         <!-- Court illustration -->
-        <div class="relative h-40 bg-primitive-dark-500 flex items-center justify-center overflow-hidden">
+        <div class="relative h-40 flex items-center justify-center overflow-hidden" :class="deporteColors[court.tipo].bg">
           <!-- Padel court -->
           <svg v-if="court.tipo === 'padel'" class="h-28 w-36" viewBox="0 0 180 140" fill="none">
             <rect x="10" y="10" width="160" height="120" rx="2" stroke="#334155" stroke-width="2" fill="none" />
@@ -236,9 +236,9 @@ const activeCourtsCount = computed(() => {
 })
 
 const deporteColors = {
-  padel: { bg: 'bg-primitive-orange-50', text: 'text-primitive-orange-600', dot: 'bg-primitive-orange-500' },
-  tenis: { bg: 'bg-success-50', text: 'text-success-600', dot: 'bg-success-500' },
-  futbol: { bg: 'bg-primitive-blue-50', text: 'text-primitive-blue-600', dot: 'bg-primitive-blue-500' },
+  padel: { bg: 'bg-primitive-blue-100', text: 'text-primitive-blue-600', dot: 'bg-primitive-blue-500' },
+  tenis: { bg: 'bg-primitive-orange-100', text: 'text-primitive-orange-600', dot: 'bg-primitive-orange-500' },
+  futbol: { bg: 'bg-success-100', text: 'text-success-600', dot: 'bg-success-500' },
 }
 
 const deporteLabels = {
