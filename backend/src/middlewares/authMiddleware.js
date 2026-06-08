@@ -67,7 +67,7 @@ const authorizeClubRoles = (...roles) => {
         return next();
       }
 
-      const clubId = req.params.clubId || req.body.clubId || req.headers['x-club-id'];
+      const clubId = req.params.clubId || req.body?.clubId || req.headers['x-club-id'];
 
       if (!clubId) {
         return res.status(400).json({

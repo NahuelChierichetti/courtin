@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
+const Membership = require('../models/Membership');
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -93,11 +94,21 @@ const login = async (req, res, next) => {
   }
 };
 
-const getMe = async (req, res) => {
-  res.status(200).json({
-    ok: true,
-    user: req.user
-  });
+const getMe = async (req, res, next) => {
+  try {
+    const memberships = await Membership.find({
+      user: req.user._id,
+      estado: 'activo'
+    }).populate('club', 'nombre slug estado');
+
+    res.status(200).json({
+      ok: true,
+      user: req.user,
+      memberships
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {
