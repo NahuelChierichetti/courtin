@@ -2,7 +2,7 @@ const Club = require('../models/Club');
 
 const createClub = async (req, res, next) => {
     try {
-        const { nombre, slug, direccion, telefono, estado } = req.body;
+        const { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado } = req.body;
 
         const existingClub = await Club.findOne({ slug });
         if (existingClub) {
@@ -13,7 +13,10 @@ const createClub = async (req, res, next) => {
             nombre,
             slug,
             direccion,
+            ciudad,
+            provincia,
             telefono,
+            plan,
             estado
         });
 
@@ -61,7 +64,7 @@ const getClubById = async (req, res, next) => {
 
 const updateClub = async (req, res, next) => {
     try {
-        const { nombre, slug, direccion, telefono, estado } = req.body;
+        const { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado } = req.body;
 
         const club = await Club.findByIdAndUpdate(
             req.params.id,
@@ -69,7 +72,10 @@ const updateClub = async (req, res, next) => {
                 nombre,
                 slug,
                 direccion,
+                ciudad,
+                provincia,
                 telefono,
+                plan,
                 estado
             },
             {

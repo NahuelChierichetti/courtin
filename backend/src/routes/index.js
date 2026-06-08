@@ -6,6 +6,7 @@ const clubRoutes = require('./clubRoutes');
 const membershipRoutes = require('./membershipRoutes');
 const courtRoutes = require('./courtRoutes');
 const reservationRoutes = require('./reservationRoutes');
+const adminRoutes = require('./adminRoutes');
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/clubs', clubRoutes);
 router.use('/memberships', membershipRoutes);
 router.use('/courts', courtRoutes);
 router.use('/reservations', reservationRoutes);
+router.use('/admin', adminRoutes);
 
 module.exports = router;
