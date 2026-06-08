@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import AppLayout from '@/layouts/AppLayout.vue'
+import BackofficeLayout from '@/layouts/BackofficeLayout.vue'
 import LoginView from '@/views/auth/Login.vue'
 import RegisterView from '@/views/auth/Register.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
@@ -43,7 +44,7 @@ const router = createRouter({
         {
           path: 'canchas',
           name: 'canchas',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/CanchasView.vue'),
           meta: { title: 'Canchas' },
         },
         {
@@ -63,6 +64,39 @@ const router = createRouter({
           name: 'notificaciones',
           component: () => import('@/views/PlaceholderView.vue'),
           meta: { title: 'Notificaciones' },
+        },
+      ],
+    },
+    {
+      path: '/admin',
+      component: BackofficeLayout,
+      meta: { requiresAuth: true, requiresSuperadmin: true },
+      children: [
+        {
+          path: '',
+          redirect: '/admin/complejos',
+        },
+        {
+          path: 'complejos',
+          name: 'admin-complejos',
+          component: () => import('@/views/admin/ComplejosView.vue'),
+        },
+        {
+          path: 'usuarios',
+          name: 'admin-usuarios',
+          component: () => import('@/views/admin/UsuariosView.vue'),
+        },
+        {
+          path: 'suscripciones',
+          name: 'admin-suscripciones',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Suscripciones' },
+        },
+        {
+          path: 'reportes',
+          name: 'admin-reportes',
+          component: () => import('@/views/PlaceholderView.vue'),
+          meta: { title: 'Reportes' },
         },
       ],
     },
@@ -87,7 +121,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const { initializeAuth, isAuthenticated } = useAuth()
+  const { initializeAuth, isAuthenticated, isSuperadmin } = useAuth()
 
   await initializeAuth()
 
@@ -96,6 +130,10 @@ router.beforeEach(async (to) => {
       name: 'login',
       query: { redirect: to.fullPath },
     }
+  }
+
+  if (to.meta.requiresSuperadmin && !isSuperadmin.value) {
+    return { name: 'dashboard' }
   }
 
   if (to.meta.guestOnly && isAuthenticated.value) {

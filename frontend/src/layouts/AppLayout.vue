@@ -1,12 +1,63 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import clubService from '@/services/clubService'
 import Button from 'primevue/button'
 
 const route = useRoute()
 const router = useRouter()
-const { user, logout } = useAuth()
+const { user, logout, isSuperadmin, currentClubId, currentClub, memberships, setCurrentClubId } = useAuth()
+
+const clubs = ref([])
+const clubSelectorOpen = ref(false)
+
+const availableClubs = computed(() => {
+  if (isSuperadmin.value) return clubs.value
+  return memberships.value.map((m) => m.club).filter(Boolean)
+})
+
+const selectedClubName = computed(() => {
+  if (currentClub.value) return currentClub.value.nombre
+  if (isSuperadmin.value && currentClubId.value) {
+    const club = clubs.value.find((c) => c._id === currentClubId.value)
+    if (club) return club.nombre
+  }
+  return null
+})
+
+const fetchClubs = async () => {
+  if (!isSuperadmin.value) return
+  try {
+    clubs.value = await clubService.getClubs()
+    if (currentClubId.value) {
+      const stillValid = clubs.value.some((c) => c._id === currentClubId.value)
+      if (!stillValid) setCurrentClubId(null)
+    }
+  } catch (err) {
+    console.error('Error fetching clubs:', err)
+  }
+}
+
+const handleClubChange = (clubId) => {
+  setCurrentClubId(clubId)
+  clubSelectorOpen.value = false
+}
+
+const closeSelector = (e) => {
+  if (clubSelectorOpen.value) {
+    clubSelectorOpen.value = false
+  }
+}
+
+onMounted(() => {
+  fetchClubs()
+  document.addEventListener('click', closeSelector)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeSelector)
+})
 
 const handleLogout = () => {
   logout()
@@ -99,6 +150,17 @@ const userShortName = computed(() => {
         </div>
       </nav>
 
+      <!-- Backoffice link (superadmin only) -->
+      <div v-if="isSuperadmin" class="px-3 pb-1">
+        <RouterLink
+          to="/admin"
+          class="flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-slate-400 no-underline transition-colors hover:bg-white/5 hover:text-white"
+        >
+          <i class="pi pi-shield text-base text-slate-500"></i>
+          <span>Backoffice</span>
+        </RouterLink>
+      </div>
+
       <!-- User profile -->
       <div class="border-t border-white/10 p-3">
         <div class="flex items-center gap-2.5 rounded-xl px-3 py-2">
@@ -132,23 +194,45 @@ const userShortName = computed(() => {
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6">
         <div class="flex items-center gap-2">
           <!-- Club selector -->
-          <div class="mx-3 flex items-center gap-2.5 rounded-md bg-white/10 px-4 py-1 border border-slate-200">
-            <!-- <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primitive-orange-500 text-xs font-bold text-white"
+          <div class="relative mx-3">
+            <button
+              class="flex items-center gap-2.5 rounded-md bg-white/10 px-4 py-1 border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+              @click.stop="clubSelectorOpen = !clubSelectorOpen"
             >
-              CG
-            </div> -->
-            <div class="min-w-0 flex-1">
-              <p class="text-[10px] font-semibold tracking-wider text-primitive-orange-400 uppercase">
-                COMPLEJO
-              </p>
-              <p class="truncate text-sm font-normal text-primitive-dark-700">Club Garín Pádel</p>
+              <div class="min-w-0 flex-1 text-left">
+                <p class="text-[10px] font-semibold tracking-wider text-primitive-orange-400 uppercase">
+                  COMPLEJO
+                </p>
+                <p class="truncate text-sm font-normal text-primitive-dark-700">
+                  {{ selectedClubName || 'Seleccionar club' }}
+                </p>
+              </div>
+              <i class="pi pi-chevron-down text-xs text-slate-500 transition-transform" :class="{ 'rotate-180': clubSelectorOpen }"></i>
+            </button>
+
+            <!-- Dropdown -->
+            <div
+              v-if="clubSelectorOpen"
+              class="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+            >
+              <div v-if="availableClubs.length === 0" class="px-4 py-3 text-sm text-slate-500">
+                No hay clubes disponibles
+              </div>
+              <button
+                v-for="club in availableClubs"
+                :key="club._id"
+                class="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-slate-50 cursor-pointer"
+                :class="{ 'bg-primitive-orange-50 text-primitive-orange-700': club._id === currentClubId }"
+                @click.stop="handleClubChange(club._id)"
+              >
+                <span class="flex-1 truncate">{{ club.nombre }}</span>
+                <i v-if="club._id === currentClubId" class="pi pi-check text-xs text-primitive-orange-500"></i>
+              </button>
             </div>
-            <i class="pi pi-chevron-down text-xs text-slate-500"></i>
           </div>
-  
+
           <div class="flex items-center gap-2 text-sm text-slate-500">
-            <span class="font-medium text-slate-700">Club Garín Pádel</span>
+            <span class="font-medium text-slate-700">{{ selectedClubName || '—' }}</span>
             <i class="pi pi-chevron-right text-[10px] text-slate-300"></i>
             <span>{{ currentPageTitle }}</span>
           </div>
@@ -160,7 +244,7 @@ const userShortName = computed(() => {
           >
             <i class="pi pi-bell text-sm"></i>
           </button>
-          <Button label="Nueva reserva" icon="pi pi-plus" size="small" class="ml-1" />
+          <Button label="Nueva reserva" size="small" class="ml-1" />
         </div>
       </header>
 
