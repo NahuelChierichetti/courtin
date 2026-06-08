@@ -125,67 +125,90 @@
                     Tarifas por franja
                   </label>
                   <button
-                    class="flex items-center gap-1 text-xs font-medium text-primitive-orange-500 transition-colors hover:text-primitive-orange-600 cursor-pointer"
+                    class="text-xs font-medium text-primitive-orange-500 transition-colors hover:text-primitive-orange-600 cursor-pointer"
                     @click="addTarifa"
                   >
                     Agregar franja
                   </button>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-slate-200">
+                <div class="space-y-3">
                   <div
                     v-for="(tarifa, index) in form.tarifas"
                     :key="index"
-                    class="flex items-center gap-4 border-b border-slate-100 px-4 py-4 last:border-b-0"
+                    class="rounded-xl border border-slate-200 p-4"
                   >
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-center gap-2">
-                        <input
-                          v-model="tarifa.nombre"
-                          type="text"
-                          placeholder="Nombre franja"
-                          class="w-28 border-none bg-transparent p-0 text-sm font-medium text-slate-700 outline-none placeholder:text-slate-300"
-                        />
-                        <span class="text-xs text-slate-300">&middot;</span>
-                        <input
-                          v-model="tarifa.dias"
-                          type="text"
-                          placeholder="Dias"
-                          class="w-20 border-none bg-transparent p-0 text-xs text-slate-400 outline-none placeholder:text-slate-300"
-                        />
-                      </div>
-                      <div class="mt-1 flex items-center gap-1">
-                        <input
-                          v-model="tarifa.horaInicio"
-                          type="time"
-                          class="w-auto border-none bg-transparent p-0 text-xs text-primitive-blue-500 outline-none"
-                        />
-                        <span class="text-xs text-slate-300">–</span>
-                        <input
-                          v-model="tarifa.horaFin"
-                          type="time"
-                          class="w-auto border-none bg-transparent p-0 text-xs text-primitive-blue-500 outline-none"
-                        />
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <div class="relative">
-                        <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-slate-400">$</span>
-                        <input
-                          v-model.number="tarifa.precio"
-                          type="number"
-                          min="0"
-                          step="500"
-                          class="w-28 rounded-lg border border-slate-200 py-2 pr-3 pl-7 text-right text-sm font-medium font-secondary text-slate-900 outline-none transition-colors focus:border-primitive-orange-500"
-                        />
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="grid flex-1 grid-cols-2 gap-3">
+                        <div>
+                          <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Nombre</label>
+                          <input
+                            v-model="tarifa.nombre"
+                            type="text"
+                            placeholder="Ej: Lun-Vie Día"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Días</label>
+                          <div class="relative">
+                            <select
+                              v-model="tarifa.dias"
+                              class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                            >
+                              <option v-for="d in diasOptions" :key="d.value" :value="d.value">{{ d.label }}</option>
+                            </select>
+                            <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                          </div>
+                        </div>
                       </div>
                       <button
                         v-if="form.tarifas.length > 1"
-                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-300 transition-colors hover:bg-red-50 hover:text-error-500"
+                        class="mt-5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-red-50 hover:text-error-500 cursor-pointer"
                         @click="removeTarifa(index)"
                       >
                         <i class="pi pi-trash text-xs"></i>
                       </button>
+                    </div>
+
+                    <div class="mt-3 grid grid-cols-3 gap-3">
+                      <div>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Desde</label>
+                        <div class="relative">
+                          <select
+                            v-model="tarifa.horaInicio"
+                            class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                          >
+                            <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
+                          </select>
+                          <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                        </div>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Hasta</label>
+                        <div class="relative">
+                          <select
+                            v-model="tarifa.horaFin"
+                            class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                          >
+                            <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
+                          </select>
+                          <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                        </div>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Precio</label>
+                        <div class="relative">
+                          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-slate-400">$</span>
+                          <input
+                            v-model.number="tarifa.precio"
+                            type="number"
+                            min="0"
+                            step="500"
+                            class="w-full rounded-lg border border-slate-300 py-2 pr-3 pl-7 text-right text-sm font-medium font-secondary text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -295,9 +318,9 @@ const drawerSubtitle = computed(() => {
 })
 
 const deporteColors = {
-  padel: 'bg-primitive-orange-100 text-primitive-orange-600',
-  tenis: 'bg-success-100 text-success-600',
-  futbol: 'bg-primitive-blue-100 text-primitive-blue-600',
+  padel: 'bg-primitive-blue-100 text-primitive-blue-600',
+  tenis: 'bg-primitive-orange-100 text-primitive-orange-600',
+  futbol: 'bg-success-100 text-success-600',
 }
 
 const deporteIcons = {
@@ -308,7 +331,24 @@ const deporteIcons = {
 
 const showJugadores = computed(() => form.value.tipo === 'futbol')
 
-const formatTarifaTime = (inicio, fin) => `${inicio} – ${fin}`
+const diasOptions = [
+  { label: 'Lun a Vie', value: 'Lun a Vie' },
+  { label: 'Sáb y Dom', value: 'Sab y Dom' },
+  { label: 'Lun a Dom', value: 'Lun a Dom' },
+  { label: 'Lun a Sáb', value: 'Lun a Sab' },
+  { label: 'Sólo Sáb', value: 'Sabado' },
+  { label: 'Sólo Dom', value: 'Domingo' },
+  { label: 'Feriados', value: 'Feriados' },
+]
+
+const horasOptions = (() => {
+  const options = []
+  for (let h = 0; h < 24; h++) {
+    options.push(`${String(h).padStart(2, '0')}:00`)
+    options.push(`${String(h).padStart(2, '0')}:30`)
+  }
+  return options
+})()
 
 const addTarifa = () => {
   form.value.tarifas.push({
