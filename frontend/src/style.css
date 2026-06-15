@@ -122,3 +122,24 @@ p {
   background: #ff6a00 !important;
   border-color: #ff6a00 !important;
 }
+
+/* Toast: descripción legible con color oscuro según severidad */
+.p-toast-message-success .p-toast-detail,
+.p-toast-message-success .p-toast-summary {
+  color: #166534 !important; /* green-800 */
+}
+
+.p-toast-message-error .p-toast-detail,
+.p-toast-message-error .p-toast-summary {
+  color: #991b1b !important; /* red-800 */
+}
+
+.p-toast-message-warn .p-toast-detail,
+.p-toast-message-warn .p-toast-summary {
+  color: #854d0e !important; /* amber-800 */
+}
+
+.p-toast-message-info .p-toast-detail,
+.p-toast-message-info .p-toast-summary {
+  color: #1e40af !important; /* blue-800 */
+}

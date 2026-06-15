@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
 import App from './App.vue'
 import router from './router'
 import CourtInPreset from './theme/courtinPreset'
@@ -14,5 +15,6 @@ app.use(PrimeVue, {
     preset: CourtInPreset,
   },
 })
+app.use(ToastService)
 
 app.mount('#app')
