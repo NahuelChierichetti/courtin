@@ -118,6 +118,27 @@
                 </div>
               </div>
 
+              <!-- Duración del turno -->
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  Duración del turno
+                </label>
+                <div class="flex overflow-hidden rounded-lg border border-slate-300">
+                  <button
+                    v-for="opt in duracionOptions"
+                    :key="opt"
+                    class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
+                    :class="form.duracionTurno === opt ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                    @click="form.duracionTurno = opt"
+                  >
+                    {{ opt }} min
+                  </button>
+                </div>
+                <p class="mt-1.5 text-xs text-slate-400">
+                  Fútbol suele ser 60 min; pádel y tenis, 90 min.
+                </p>
+              </div>
+
               <!-- Tarifas -->
               <div>
                 <div class="mb-3 flex items-center justify-between">
@@ -220,10 +241,11 @@
           <div class="flex items-center justify-between border-t border-slate-200 px-6 py-4">
             <button
               v-if="isEditing"
-              class="flex items-center gap-1.5 text-sm font-medium text-error-500 transition-colors hover:text-error-600 cursor-pointer"
+              class="flex items-center gap-1.5 text-sm font-medium text-error-500 transition-colors hover:text-error-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="deactivating"
               @click="handleDeactivate"
             >
-              <i class="pi pi-power-off text-xs"></i>
+              <i :class="deactivating ? 'pi pi-spin pi-spinner' : 'pi pi-power-off'" class="text-xs"></i>
               {{ form.estado === 'activa' ? 'Desactivar' : 'Activar' }}
             </button>
             <div v-else />
@@ -257,6 +279,7 @@ const props = defineProps({
   visible: Boolean,
   court: Object,
   saving: Boolean,
+  deactivating: Boolean,
 })
 
 const emit = defineEmits(['close', 'save', 'deactivate'])
@@ -284,6 +307,7 @@ function getEmptyForm() {
     cubierta: true,
     estado: 'activa',
     jugadores: null,
+    duracionTurno: 60,
     tarifas: defaultTarifas.map((t) => ({ ...t })),
   }
 }
@@ -330,6 +354,19 @@ const deporteIcons = {
 }
 
 const showJugadores = computed(() => form.value.tipo === 'futbol')
+
+const duracionOptions = [60, 90, 120]
+
+const duracionSugerida = { futbol: 60, padel: 90, tenis: 90 }
+
+watch(
+  () => form.value.tipo,
+  (tipo) => {
+    if (!isEditing.value && duracionSugerida[tipo]) {
+      form.value.duracionTurno = duracionSugerida[tipo]
+    }
+  },
+)
 
 const diasOptions = [
   { label: 'Lun a Vie', value: 'Lun a Vie' },

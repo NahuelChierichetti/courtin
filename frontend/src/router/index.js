@@ -50,7 +50,7 @@ const router = createRouter({
         {
           path: 'horarios',
           name: 'horarios',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/HorariosView.vue'),
           meta: { title: 'Horarios' },
         },
         {
@@ -58,6 +58,12 @@ const router = createRouter({
           name: 'reportes',
           component: () => import('@/views/PlaceholderView.vue'),
           meta: { title: 'Reportes' },
+        },
+        {
+          path: 'configuracion',
+          name: 'configuracion',
+          component: () => import('@/views/ConfiguracionView.vue'),
+          meta: { title: 'Configuración' },
         },
         {
           path: 'notificaciones',

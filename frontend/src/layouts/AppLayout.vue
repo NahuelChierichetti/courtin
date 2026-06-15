@@ -173,11 +173,13 @@ const userShortName = computed(() => {
             <p class="truncate text-sm font-semibold text-white">{{ userShortName }}</p>
             <p class="text-xs text-slate-500">Administrador</p>
           </div>
-          <button
-            class="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-white/10 hover:text-slate-300"
+          <RouterLink
+            to="/configuracion"
+            class="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 no-underline transition-colors hover:bg-white/10 hover:text-slate-300"
+            :class="{ 'bg-white/10 text-white': isActive('/configuracion') }"
           >
             <i class="pi pi-cog text-sm"></i>
-          </button>
+          </RouterLink>
           <button
             class="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-white/10 hover:text-error-400"
             @click="handleLogout"

@@ -142,6 +142,19 @@ const setCurrentClubId = (clubId) => {
   persistClubId(clubId)
 }
 
+// Actualiza los datos del club activo (timezone, moneda, etc.) en las membresías
+// para que currentClub se refleje en toda la app sin re-loguear.
+const patchCurrentClub = (clubData) => {
+  if (!clubData?._id) return
+  memberships.value = memberships.value.map((m) => {
+    const cid = m.club?._id || m.club
+    if (cid === clubData._id) {
+      return { ...m, club: { ...(typeof m.club === 'object' ? m.club : {}), ...clubData } }
+    }
+    return m
+  })
+}
+
 export const useAuth = () => ({
   user: readonly(user),
   token: readonly(token),
@@ -157,4 +170,5 @@ export const useAuth = () => ({
   register,
   logout,
   setCurrentClubId,
+  patchCurrentClub,
 })

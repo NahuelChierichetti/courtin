@@ -99,7 +99,7 @@ const getMe = async (req, res, next) => {
     const memberships = await Membership.find({
       user: req.user._id,
       estado: 'activo'
-    }).populate('club', 'nombre slug estado');
+    }).populate('club', 'nombre slug estado timezone moneda');
 
     res.status(200).json({
       ok: true,

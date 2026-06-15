@@ -1,5 +1,86 @@
 const mongoose = require('mongoose');
 
+const HORA_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+const diaSchema = new mongoose.Schema(
+  {
+    abierto: {
+      type: Boolean,
+      default: true
+    },
+    horaInicio: {
+      type: String,
+      match: [HORA_REGEX, 'Formato HH:MM inválido'],
+      default: '08:00'
+    },
+    horaFin: {
+      type: String,
+      match: [HORA_REGEX, 'Formato HH:MM inválido'],
+      default: '23:30'
+    }
+  },
+  { _id: false }
+);
+
+const diaEspecialSchema = new mongoose.Schema(
+  {
+    nombre: {
+      type: String,
+      required: [true, 'El nombre del día especial es obligatorio'],
+      trim: true
+    },
+    fecha: {
+      type: Date,
+      required: [true, 'La fecha es obligatoria']
+    },
+    tipo: {
+      type: String,
+      enum: ['cerrado', 'especial'],
+      default: 'cerrado'
+    },
+    horaInicio: {
+      type: String,
+      match: [HORA_REGEX, 'Formato HH:MM inválido']
+    },
+    horaFin: {
+      type: String,
+      match: [HORA_REGEX, 'Formato HH:MM inválido']
+    }
+  },
+  { _id: true }
+);
+
+const horariosSchema = new mongoose.Schema(
+  {
+    semanal: {
+      lunes: { type: diaSchema, default: () => ({}) },
+      martes: { type: diaSchema, default: () => ({}) },
+      miercoles: { type: diaSchema, default: () => ({}) },
+      jueves: { type: diaSchema, default: () => ({}) },
+      viernes: { type: diaSchema, default: () => ({ horaFin: '00:30' }) },
+      sabado: { type: diaSchema, default: () => ({ horaInicio: '09:00', horaFin: '00:30' }) },
+      domingo: { type: diaSchema, default: () => ({ horaInicio: '09:00', horaFin: '22:00' }) }
+    },
+    diasEspeciales: {
+      type: [diaEspecialSchema],
+      default: []
+    },
+    reservas: {
+      toleranciaCancelacionHoras: {
+        type: Number,
+        min: [0, 'La tolerancia no puede ser negativa'],
+        default: 4
+      },
+      anticipacionMaximaDias: {
+        type: Number,
+        min: [1, 'La anticipación mínima es de 1 día'],
+        default: 15
+      }
+    }
+  },
+  { _id: false }
+);
+
 const clubSchema = new mongoose.Schema(
   {
     nombre: {
@@ -30,6 +111,17 @@ const clubSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    timezone: {
+      type: String,
+      trim: true,
+      default: 'America/Argentina/Buenos_Aires'
+    },
+    moneda: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      default: 'ARS'
+    },
     plan: {
       type: String,
       enum: ['starter', 'pro', 'business', 'enterprise'],
@@ -39,6 +131,10 @@ const clubSchema = new mongoose.Schema(
       type: String,
       enum: ['activo', 'inactivo', 'trial', 'suspendido', 'cancelado', 'impago'],
       default: 'trial'
+    },
+    horarios: {
+      type: horariosSchema,
+      default: () => ({})
     }
   },
   {
