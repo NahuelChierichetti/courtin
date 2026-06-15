@@ -186,6 +186,7 @@
       :visible="showDrawer"
       :court="editingCourt"
       :saving="saving"
+      :deactivating="deactivating"
       @close="showDrawer = false"
       @save="handleSave"
       @deactivate="handleDeactivate"
@@ -196,11 +197,14 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import Button from 'primevue/button'
+import { useToast } from 'primevue/usetoast'
 import CourtDrawer from '@/components/canchas/CourtDrawer.vue'
 import courtService from '@/services/courtService'
 import { useAuth } from '@/composables/useAuth'
+import { formatCurrency } from '@/utils/datetime'
 
-const { currentClubId } = useAuth()
+const { currentClubId, currentClub } = useAuth()
+const toast = useToast()
 
 watch(currentClubId, (newId) => {
   if (newId) fetchCourts()
@@ -253,7 +257,7 @@ const getBasePrice = (court) => {
 }
 
 const formatPrice = (price) => {
-  return '$' + price.toLocaleString('es-AR')
+  return formatCurrency(price, currentClub.value?.moneda || 'ARS')
 }
 
 const fetchCourts = async () => {
@@ -265,6 +269,7 @@ const fetchCourts = async () => {
   } catch (err) {
     error.value = 'Error al cargar las canchas'
     console.error(err)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las canchas.', life: 4000 })
   } finally {
     loading.value = false
   }
@@ -283,21 +288,30 @@ const openEditCourt = (court) => {
 }
 
 const saving = ref(false)
+const deactivating = ref(false)
 
 const handleSave = async (courtData) => {
-  console.log(currentClubId.value)
   if (!currentClubId.value) return
+  const editing = !!courtData._id
   saving.value = true
   try {
-    if (courtData._id) {
+    if (editing) {
       await courtService.updateCourt(courtData._id, courtData, currentClubId.value)
     } else {
       await courtService.createCourt(courtData, currentClubId.value)
     }
     showDrawer.value = false
     await fetchCourts()
+    toast.add({
+      severity: 'success',
+      summary: editing ? 'Cancha actualizada' : 'Cancha creada',
+      detail: `"${courtData.nombre}" se guardó correctamente.`,
+      life: 3000,
+    })
   } catch (err) {
     console.error('Error al guardar cancha:', err)
+    const detail = err.response?.data?.message || 'No se pudo guardar la cancha.'
+    toast.add({ severity: 'error', summary: 'Error al guardar', detail, life: 5000 })
   } finally {
     saving.value = false
   }
@@ -308,12 +322,23 @@ const handleDeactivate = async (courtId) => {
   const court = courts.value.find((c) => c._id === courtId)
   if (!court) return
   const newEstado = court.estado === 'activa' ? 'inactiva' : 'activa'
+  deactivating.value = true
   try {
     await courtService.updateCourt(courtId, { estado: newEstado }, currentClubId.value)
     showDrawer.value = false
     await fetchCourts()
+    toast.add({
+      severity: 'success',
+      summary: newEstado === 'activa' ? 'Cancha activada' : 'Cancha desactivada',
+      detail: `"${court.nombre}" ahora está ${newEstado}.`,
+      life: 3000,
+    })
   } catch (err) {
     console.error('Error al cambiar estado:', err)
+    const detail = err.response?.data?.message || 'No se pudo cambiar el estado de la cancha.'
+    toast.add({ severity: 'error', summary: 'Error', detail, life: 5000 })
+  } finally {
+    deactivating.value = false
   }
 }
 </script>
