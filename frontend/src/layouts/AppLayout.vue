@@ -196,7 +196,7 @@ const userShortName = computed(() => {
           <!-- Club selector -->
           <div class="relative mx-3">
             <button
-              class="flex items-center gap-2.5 rounded-md bg-white/10 px-4 py-1 border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
+              class="flex items-center min-w-[200px] gap-2.5 rounded-md bg-white/10 px-4 py-1 border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors"
               @click.stop="clubSelectorOpen = !clubSelectorOpen"
             >
               <div class="min-w-0 flex-1 text-left">
@@ -231,11 +231,11 @@ const userShortName = computed(() => {
             </div>
           </div>
 
-          <div class="flex items-center gap-2 text-sm text-slate-500">
+          <!-- <div class="flex items-center gap-2 text-sm text-slate-500">
             <span class="font-medium text-slate-700">{{ selectedClubName || '—' }}</span>
             <i class="pi pi-chevron-right text-[10px] text-slate-300"></i>
             <span>{{ currentPageTitle }}</span>
-          </div>
+          </div> -->
         </div>
 
         <div class="flex items-center gap-2">
