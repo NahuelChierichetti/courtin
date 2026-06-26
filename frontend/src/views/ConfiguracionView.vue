@@ -45,7 +45,7 @@
     </div>
 
     <!-- Content -->
-    <div v-else-if="form" class="gap-6">
+    <div v-else-if="form" class="space-y-6">
       <!-- General info -->
       <div class="rounded-2xl border border-slate-200 bg-white">
         <div class="border-b border-slate-200 px-6 py-5">
@@ -85,11 +85,16 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
-              <input
-                v-model="form.ciudad"
-                type="text"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
-              />
+              <div class="relative">
+                <select
+                  v-model="form.ciudad"
+                  class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                >
+                  <option value="">Seleccionar ciudad</option>
+                  <option v-for="c in ciudadOptions" :key="c" :value="c">{{ c }}</option>
+                </select>
+                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+              </div>
             </div>
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Provincia</label>
@@ -128,11 +133,111 @@
                 </select>
                 <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
-              <p class="!!mt-2 text-xs text-neutral-400">
+              <p class="!mt-2 text-xs text-neutral-400">
                 Ejemplo de precio: <span class="font-medium text-slate-600">{{ pricePreview }}</span>
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Perfil público -->
+      <div class="rounded-2xl border border-slate-200 bg-white">
+        <div class="border-b border-slate-200 px-6 py-5">
+          <h2 class="text-base font-semibold text-slate-900">Perfil público</h2>
+          <p class="mt-0.5 text-sm text-neutral-400">
+            Cómo se muestra tu complejo en la web pública de reservas.
+          </p>
+        </div>
+        <div class="space-y-6 px-6 py-6">
+          <!-- Publicado toggle -->
+          <div class="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+            <div class="pr-4">
+              <p class="text-sm font-semibold text-slate-800">Publicar complejo</p>
+              <p class="text-xs text-neutral-400">
+                Si está activo, tu complejo aparece en la búsqueda pública y acepta reservas online.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="form.publicado"
+              class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer"
+              :class="form.publicado ? 'bg-primitive-orange-500' : 'bg-slate-300'"
+              @click="form.publicado = !form.publicado"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                :class="form.publicado ? 'translate-x-5' : ''"
+              ></span>
+            </button>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Descripción</label>
+            <textarea
+              v-model="form.descripcion"
+              rows="3"
+              placeholder="Contá qué hace especial a tu complejo (canchas, servicios, ambiente...)"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">WhatsApp</label>
+              <input
+                v-model="form.whatsapp"
+                type="text"
+                placeholder="Ej: +54 11 5555-5555"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+              />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Email de contacto</label>
+              <input
+                v-model="form.email"
+                type="email"
+                placeholder="Ej: contacto@tucomplejo.com"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Servicios</label>
+            <div class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 transition-colors focus-within:border-primitive-orange-500 focus-within:ring-1 focus-within:ring-primitive-orange-500">
+              <span
+                v-for="(s, i) in form.servicios"
+                :key="i"
+                class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 py-1 pl-3 pr-1.5 text-xs font-medium text-slate-700"
+              >
+                {{ s }}
+                <button
+                  type="button"
+                  class="flex h-4 w-4 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-200 hover:text-error-500 cursor-pointer"
+                  @click="removeServicio(i)"
+                >
+                  <i class="pi pi-times text-[9px]"></i>
+                </button>
+              </span>
+              <input
+                v-model="servicioDraft"
+                type="text"
+                :placeholder="form.servicios.length ? 'Agregar otro...' : 'Ej: Estacionamiento'"
+                class="min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm text-slate-900 outline-none placeholder:text-neutral-400"
+                @keydown.enter.prevent="addServicio"
+                @keydown.,.prevent="addServicio"
+                @keydown.delete="onServicioBackspace"
+                @blur="addServicio"
+              />
+            </div>
+            <p class="!mt-1 text-xs text-neutral-400">Escribí un servicio y presioná Enter para agregarlo.</p>
+          </div>
+
+          <p class="rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-neutral-400">
+            Las fotos, el logo y la ubicación en el mapa se cargarán cuando integremos el almacenamiento de imágenes.
+          </p>
         </div>
       </div>
     </div>
@@ -146,6 +251,7 @@ import { useToast } from 'primevue/usetoast'
 import clubService from '@/services/clubService'
 import { useAuth } from '@/composables/useAuth'
 import { dayjs, formatCurrency } from '@/utils/datetime'
+import { CITIES } from '@/utils/cities'
 
 const { currentClubId, patchCurrentClub } = useAuth()
 const toast = useToast()
@@ -194,6 +300,34 @@ const localTimePreview = computed(() => {
 
 const pricePreview = computed(() => formatCurrency(15000, form.value?.moneda || 'ARS'))
 
+// Si el club ya tenía una ciudad fuera de la lista curada, la incluimos para no perderla.
+const ciudadOptions = computed(() => {
+  const c = form.value?.ciudad
+  return c && !CITIES.includes(c) ? [c, ...CITIES] : CITIES
+})
+
+// --- Servicios (input tipo chips) ---
+const servicioDraft = ref('')
+
+const addServicio = () => {
+  const value = servicioDraft.value.trim()
+  if (!value) return
+  const exists = form.value.servicios.some((s) => s.toLowerCase() === value.toLowerCase())
+  if (!exists) form.value.servicios.push(value)
+  servicioDraft.value = ''
+}
+
+const removeServicio = (index) => {
+  form.value.servicios.splice(index, 1)
+}
+
+// Backspace con el input vacío elimina el último chip.
+const onServicioBackspace = () => {
+  if (!servicioDraft.value && form.value.servicios.length) {
+    form.value.servicios.pop()
+  }
+}
+
 const fetchConfig = async () => {
   if (!currentClubId.value) return
   loading.value = true
@@ -209,6 +343,12 @@ const fetchConfig = async () => {
       provincia: club.provincia || '',
       timezone: club.timezone || 'America/Argentina/Buenos_Aires',
       moneda: club.moneda || 'ARS',
+      // Perfil público
+      publicado: club.publicado === true,
+      descripcion: club.descripcion || '',
+      whatsapp: club.whatsapp || '',
+      email: club.email || '',
+      servicios: Array.isArray(club.servicios) ? [...club.servicios] : [],
     }
   } catch (err) {
     error.value = 'Error al cargar la configuración'
@@ -247,6 +387,11 @@ const save = async () => {
       provincia: form.value.provincia,
       timezone: form.value.timezone,
       moneda: form.value.moneda,
+      publicado: form.value.publicado,
+      descripcion: form.value.descripcion,
+      whatsapp: form.value.whatsapp,
+      email: form.value.email,
+      servicios: form.value.servicios,
     })
     patchCurrentClub(updated)
     toast.add({ severity: 'success', summary: 'Cambios guardados', detail: 'La configuración se actualizó correctamente.', life: 3000 })

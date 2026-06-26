@@ -7,12 +7,19 @@ const {
   getReservationById,
   updateReservation,
   cancelReservation,
+  getReservationByToken,
+  cancelReservationByToken,
   getMyReservations
 } = require('../controllers/reservationController');
 const { protect, authorizeClubRoles } = require('../middlewares/authMiddleware');
 const ROLES = require('../config/roles');
 
 const router = express.Router();
+
+// Gestión pública por token (invitado sin cuenta). Va ANTES de `protect`:
+// estas rutas no requieren autenticación; el token es la prueba de propiedad.
+router.get('/manage/:token', getReservationByToken);
+router.patch('/manage/:token/cancel', cancelReservationByToken);
 
 router.use(protect);
 

@@ -3,7 +3,7 @@ const Club = require('../models/Club');
 
 const createCourt = async (req, res, next) => {
   try {
-    const { clubId, nombre, tipo, superficie, cubierta, jugadores, estado, tarifas, duracionTurno, descripcion } = req.body;
+    const { clubId, nombre, tipo, superficie, cubierta, jugadores, estado, tarifas, duracionTurno, descripcion, visible } = req.body;
 
     const club = await Club.findById(clubId);
 
@@ -24,7 +24,8 @@ const createCourt = async (req, res, next) => {
       estado,
       tarifas: tarifas || [],
       duracionTurno,
-      descripcion
+      descripcion,
+      ...(visible !== undefined && { visible })
     });
 
     const populatedCourt = await Court.findById(court._id).populate(
@@ -87,7 +88,7 @@ const getCourtById = async (req, res, next) => {
 
 const updateCourt = async (req, res, next) => {
   try {
-    const { clubId, nombre, tipo, superficie, cubierta, jugadores, estado, tarifas, duracionTurno, descripcion } = req.body;
+    const { clubId, nombre, tipo, superficie, cubierta, jugadores, estado, tarifas, duracionTurno, descripcion, visible } = req.body;
 
     if (clubId) {
       const club = await Club.findById(clubId);
@@ -113,6 +114,10 @@ const updateCourt = async (req, res, next) => {
 
     if (tarifas !== undefined) {
       updateData.tarifas = tarifas;
+    }
+
+    if (visible !== undefined) {
+      updateData.visible = visible;
     }
 
     if (clubId) {
