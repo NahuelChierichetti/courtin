@@ -28,12 +28,12 @@
     <div class="mb-6 flex flex-wrap items-center gap-4">
       <!-- Search -->
       <div class="relative">
-        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
+        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
         <input
           v-model="search"
           type="text"
           placeholder="Buscar por nombre, ciudad u owner"
-          class="h-10 w-80 rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-300 focus:ring-2 focus:ring-primitive-orange-100"
+          class="h-10 w-80 rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-700 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-300 focus:ring-2 focus:ring-primitive-orange-100"
         />
       </div>
 
@@ -76,13 +76,13 @@
     <div class="rounded-xl border border-slate-200 bg-white">
       <!-- Table header -->
       <div class="grid grid-cols-[2fr_1.2fr_1fr_0.8fr_0.8fr_1fr_1fr_40px] items-center gap-4 border-b border-slate-100 px-6 py-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Complejo</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Owner</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Plan</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">MRR</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 text-center">Canchas</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Última actividad</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Estado</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Complejo</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Owner</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Plan</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400 text-right">MRR</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400 text-center">Canchas</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Última actividad</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Estado</span>
         <span></span>
       </div>
 
@@ -94,7 +94,7 @@
       <!-- Empty -->
       <div v-else-if="clubs.length === 0" class="py-16 text-center">
         <i class="pi pi-building text-4xl text-slate-200"></i>
-        <p class="mt-3 text-sm text-slate-400">No se encontraron complejos</p>
+        <p class="mt-3 text-sm text-neutral-400">No se encontraron complejos</p>
       </div>
 
       <!-- Rows -->
@@ -114,7 +114,7 @@
           </div>
           <div class="min-w-0">
             <p class="truncate text-sm font-semibold text-slate-900">{{ club.nombre }}</p>
-            <p class="truncate text-xs text-slate-400">
+            <p class="truncate text-xs text-neutral-400">
               {{ [club.ciudad, club.provincia].filter(Boolean).join(', ') || club.direccion || '—' }}
             </p>
           </div>
@@ -164,7 +164,7 @@
         <!-- Actions -->
         <div class="relative flex justify-end">
           <button
-            class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 cursor-pointer"
+            class="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 cursor-pointer"
             @click.stop="openDetailDrawer(club)"
           >
             <i class="pi pi-chevron-right text-sm"></i>
@@ -200,7 +200,7 @@
                 </h2>
               </div>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
                 @click="closeDrawer"
               >
                 <i class="pi pi-times text-sm"></i>
@@ -217,14 +217,14 @@
                     class="flex w-full items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                     @click="handleEnterAsAdmin(selectedClub)"
                   >
-                    <i class="pi pi-sign-in text-sm text-slate-400"></i>
+                    <i class="pi pi-sign-in text-sm text-neutral-400"></i>
                     Ingresar como admin
                   </button>
                   <button
                     class="flex w-full items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                     @click="drawerMode = 'edit'"
                   >
-                    <i class="pi pi-pencil text-sm text-slate-400"></i>
+                    <i class="pi pi-pencil text-sm text-neutral-400"></i>
                     Editar complejo
                   </button>
                   <button
@@ -243,34 +243,34 @@
 
                 <!-- Info sections -->
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Información</h3>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Información</h3>
 
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs text-slate-400">Ciudad</p>
+                      <p class="text-xs text-neutral-400">Ciudad</p>
                       <p class="text-sm font-medium text-slate-700">{{ selectedClub?.ciudad || '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-slate-400">Provincia</p>
+                      <p class="text-xs text-neutral-400">Provincia</p>
                       <p class="text-sm font-medium text-slate-700">{{ selectedClub?.provincia || '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-slate-400">Dirección</p>
+                      <p class="text-xs text-neutral-400">Dirección</p>
                       <p class="text-sm font-medium text-slate-700">{{ selectedClub?.direccion || '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-slate-400">Teléfono</p>
+                      <p class="text-xs text-neutral-400">Teléfono</p>
                       <p class="text-sm font-medium text-slate-700">{{ selectedClub?.telefono || '—' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Suscripción</h3>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Suscripción</h3>
 
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs text-slate-400">Plan</p>
+                      <p class="text-xs text-neutral-400">Plan</p>
                       <span
                         class="inline-block rounded px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
                         :class="planStyle(selectedClub?.plan)"
@@ -279,7 +279,7 @@
                       </span>
                     </div>
                     <div>
-                      <p class="text-xs text-slate-400">Estado</p>
+                      <p class="text-xs text-neutral-400">Estado</p>
                       <span
                         class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
                         :class="estadoConfig(selectedClub?.estado).bg"
@@ -289,25 +289,25 @@
                       </span>
                     </div>
                     <div>
-                      <p class="text-xs text-slate-400">Canchas</p>
+                      <p class="text-xs text-neutral-400">Canchas</p>
                       <p class="text-sm font-medium text-slate-700">{{ selectedClub?.canchas ?? '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-slate-400">Owner</p>
+                      <p class="text-xs text-neutral-400">Owner</p>
                       <p class="text-sm font-medium text-slate-700">{{ ownerShortName(selectedClub?.owner) }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Actividad</h3>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Actividad</h3>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs text-slate-400">Última actividad</p>
+                      <p class="text-xs text-neutral-400">Última actividad</p>
                       <p class="text-sm font-medium text-slate-700">{{ formatTimeAgo(selectedClub?.ultimaActividad) }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-slate-400">Creado</p>
+                      <p class="text-xs text-neutral-400">Creado</p>
                       <p class="text-sm font-medium text-slate-700">{{ formatDate(selectedClub?.createdAt) }}</p>
                     </div>
                   </div>
@@ -317,69 +317,69 @@
               <!-- Create / Edit form -->
               <div v-else class="space-y-6">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Nombre</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre</label>
                   <input
                     v-model="form.nombre"
                     type="text"
                     placeholder="Nombre del complejo"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                     @input="drawerMode === 'create' && autoSlug()"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Slug</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Slug</label>
                   <input
                     v-model="form.slug"
                     type="text"
                     placeholder="slug-del-complejo"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                   />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Ciudad</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
                     <input
                       v-model="form.ciudad"
                       type="text"
                       placeholder="Ciudad"
-                      class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                      class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                     />
                   </div>
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Provincia</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Provincia</label>
                     <input
                       v-model="form.provincia"
                       type="text"
                       placeholder="Provincia"
-                      class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                      class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Dirección</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Dirección</label>
                   <input
                     v-model="form.direccion"
                     type="text"
                     placeholder="Dirección completa"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Teléfono</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Teléfono</label>
                   <input
                     v-model="form.telefono"
                     type="text"
                     placeholder="+54 11 1234-5678"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Plan</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Plan</label>
                   <div class="flex gap-2">
                     <button
                       v-for="p in planOptions"
@@ -398,7 +398,7 @@
                 </div>
 
                 <div v-if="drawerMode === 'edit'">
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Estado</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Estado</label>
                   <div class="flex gap-2">
                     <button
                       v-for="e in estadoOptions"

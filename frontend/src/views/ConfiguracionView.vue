@@ -21,17 +21,17 @@
     <!-- No club selected -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-building text-2xl text-slate-400"></i>
+        <i class="pi pi-building text-2xl text-neutral-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-slate-900">Sin club seleccionado</h3>
-      <p class="mt-2 text-sm text-slate-500">
+      <p class="!mt-2 text-sm text-slate-500">
         Seleccioná un club desde el selector en el encabezado para configurarlo.
       </p>
     </div>
 
     <!-- Loading -->
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-slate-400"></i>
+      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando configuración...</p>
     </div>
 
@@ -45,73 +45,64 @@
     </div>
 
     <!-- Content -->
-    <div v-else-if="form" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div v-else-if="form" class="gap-6">
       <!-- General info -->
-      <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white">
+      <div class="rounded-2xl border border-slate-200 bg-white">
         <div class="border-b border-slate-200 px-6 py-5">
           <h2 class="text-base font-semibold text-slate-900">Datos generales</h2>
-          <p class="mt-0.5 text-sm text-slate-400">Información del complejo</p>
+          <p class="mt-0.5 text-sm text-neutral-400">Información del complejo</p>
         </div>
         <div class="space-y-6 px-6 py-6">
           <div>
-            <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Nombre</label>
+            <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre</label>
             <input
               v-model="form.nombre"
               type="text"
               placeholder="Ej: Club Garín Pádel"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
             />
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Teléfono</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Teléfono</label>
               <input
                 v-model="form.telefono"
                 type="text"
                 placeholder="Ej: +54 11 5555-5555"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
               />
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Dirección</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Dirección</label>
               <input
                 v-model="form.direccion"
                 type="text"
                 placeholder="Ej: Av. Siempreviva 742"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
               />
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Ciudad</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
               <input
                 v-model="form.ciudad"
                 type="text"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
               />
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Provincia</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Provincia</label>
               <input
                 v-model="form.provincia"
                 type="text"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
               />
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Regional settings -->
-      <div class="space-y-6">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 class="text-base font-semibold text-slate-900">Regional</h2>
-          <p class="mt-0.5 text-sm text-slate-400">Zona horaria y moneda</p>
-
           <div class="mt-5 space-y-5">
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Zona horaria</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Zona horaria</label>
               <div class="relative">
                 <select
                   v-model="form.timezone"
@@ -119,15 +110,15 @@
                 >
                   <option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
                 </select>
-                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
-              <p class="mt-1.5 text-xs text-slate-400">
+              <p class="!mt-1 text-xs text-neutral-400">
                 Hora local actual: <span class="font-medium text-slate-600">{{ localTimePreview }}</span>
               </p>
             </div>
 
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">Moneda</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Moneda</label>
               <div class="relative">
                 <select
                   v-model="form.moneda"
@@ -135,9 +126,9 @@
                 >
                   <option v-for="c in monedaOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
                 </select>
-                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
-              <p class="mt-1.5 text-xs text-slate-400">
+              <p class="!!mt-2 text-xs text-neutral-400">
                 Ejemplo de precio: <span class="font-medium text-slate-600">{{ pricePreview }}</span>
               </p>
             </div>

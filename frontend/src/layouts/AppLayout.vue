@@ -7,31 +7,34 @@ import Button from 'primevue/button'
 
 const route = useRoute()
 const router = useRouter()
-const { user, logout, isSuperadmin, currentClubId, currentClub, memberships, setCurrentClubId } = useAuth()
+const {
+  user,
+  logout,
+  isSuperadmin,
+  currentClubId,
+  currentClub,
+  memberships,
+  superadminClubs,
+  setCurrentClubId,
+  setSuperadminClubs,
+} = useAuth()
 
-const clubs = ref([])
 const clubSelectorOpen = ref(false)
 
 const availableClubs = computed(() => {
-  if (isSuperadmin.value) return clubs.value
+  if (isSuperadmin.value) return superadminClubs.value
   return memberships.value.map((m) => m.club).filter(Boolean)
 })
 
-const selectedClubName = computed(() => {
-  if (currentClub.value) return currentClub.value.nombre
-  if (isSuperadmin.value && currentClubId.value) {
-    const club = clubs.value.find((c) => c._id === currentClubId.value)
-    if (club) return club.nombre
-  }
-  return null
-})
+const selectedClubName = computed(() => currentClub.value?.nombre || null)
 
 const fetchClubs = async () => {
   if (!isSuperadmin.value) return
   try {
-    clubs.value = await clubService.getClubs()
+    const clubs = await clubService.getClubs()
+    setSuperadminClubs(clubs)
     if (currentClubId.value) {
-      const stillValid = clubs.value.some((c) => c._id === currentClubId.value)
+      const stillValid = clubs.some((c) => c._id === currentClubId.value)
       if (!stillValid) setCurrentClubId(null)
     }
   } catch (err) {
@@ -121,7 +124,7 @@ const userShortName = computed(() => {
           <RouterLink
             :key="item.to"
             :to="item.to"
-            class="group flex items-center gap-3 rounded-md p-3 text-sm font-medium no-underline transition-colors mt-2"
+            class="group flex items-center gap-3 rounded-md p-3 text-sm font-medium no-underline transition-colors !mt-2"
             :class="
               isActive(item.to)
                 ? 'bg-white/10 text-white'
@@ -154,7 +157,7 @@ const userShortName = computed(() => {
       <div v-if="isSuperadmin" class="px-3 pb-1">
         <RouterLink
           to="/admin"
-          class="flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-slate-400 no-underline transition-colors hover:bg-white/5 hover:text-white"
+          class="flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-neutral-400 no-underline transition-colors hover:bg-white/5 hover:text-white"
         >
           <i class="pi pi-shield text-base text-slate-500"></i>
           <span>Backoffice</span>
