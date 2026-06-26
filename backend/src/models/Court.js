@@ -66,6 +66,14 @@ const courtSchema = new mongoose.Schema(
       enum: ['activa', 'inactiva', 'mantenimiento'],
       default: 'activa'
     },
+    // Toggle permanente de reservabilidad pública: si es false, la cancha no
+    // aparece ni acepta reservas desde la interfaz pública (sigue operable
+    // internamente por el admin). El bloqueo de un día puntual se resuelve con
+    // una reserva interna, no con este flag.
+    visible: {
+      type: Boolean,
+      default: true
+    },
     precio: {
       type: Number,
       min: [0, 'El precio no puede ser negativo']

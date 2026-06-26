@@ -107,7 +107,8 @@ const tarifaMatchesDay = (diasRaw, dow) => {
   return false
 }
 
-// Calcula el precio sugerido de una cancha para un día/horario.
+// Precio POR HORA de una cancha para un día/horario. La tarifa configurada se
+// interpreta como valor por hora.
 export const suggestedPrice = (court, dow, horaInicio) => {
   if (!court) return 0
   const startMin = timeToMinutes(horaInicio)
@@ -120,6 +121,14 @@ export const suggestedPrice = (court, dow, horaInicio) => {
   if (match) return match.precio
   if (tarifas.length) return Math.min(...tarifas.map((t) => t.precio))
   return court.precio || 0
+}
+
+// Precio total del turno = precio por hora (franja del inicio) prorrateado por
+// la duración en minutos. Ej: $8.000/h en 90 min => $12.000.
+export const priceForDuration = (court, dow, horaInicio, durationMin) => {
+  const perHour = suggestedPrice(court, dow, horaInicio)
+  const mins = Number(durationMin) || court?.duracionTurno || 60
+  return Math.round(perHour * (mins / 60))
 }
 
 // --- Estados de reserva ---

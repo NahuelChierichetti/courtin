@@ -210,7 +210,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { formatCurrency, dayjs, zonedToUtcISO, DEFAULT_TZ } from '@/utils/datetime'
-import { sportMeta, timeToMinutes, minutesToTime, suggestedPrice, openRangeForDate } from '@/utils/turnos'
+import { sportMeta, timeToMinutes, minutesToTime, priceForDuration, openRangeForDate } from '@/utils/turnos'
 
 const props = defineProps({
   visible: Boolean,
@@ -280,7 +280,9 @@ const subtitle = computed(() => {
 const suggested = computed(() => {
   if (!selectedCourt.value || !form.value.fecha) return null
   const dow = dayjs(form.value.fecha).day()
-  return suggestedPrice(selectedCourt.value, dow, form.value.horaInicio)
+  // Duración del turno según inicio/fin elegidos (prorratea el precio por hora).
+  const durationMin = timeToMinutes(form.value.horaFin) - timeToMinutes(form.value.horaInicio)
+  return priceForDuration(selectedCourt.value, dow, form.value.horaInicio, durationMin > 0 ? durationMin : undefined)
 })
 
 const applySuggested = () => {
@@ -341,6 +343,17 @@ watch(
     if (!isEditing.value) {
       form.value.horaFin = computeEnd(form.value.courtId, form.value.horaInicio)
     }
+    if (!priceTouched.value && suggested.value != null) {
+      form.value.precioFinal = suggested.value
+    }
+  },
+)
+
+// Cambiar la hora de fin (duración) reproratea el precio sugerido.
+watch(
+  () => form.value.horaFin,
+  () => {
+    if (!props.visible) return
     if (!priceTouched.value && suggested.value != null) {
       form.value.precioFinal = suggested.value
     }

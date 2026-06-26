@@ -111,6 +111,15 @@ const clubSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    whatsapp: {
+      type: String,
+      trim: true
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true
+    },
     timezone: {
       type: String,
       trim: true,
@@ -135,6 +144,34 @@ const clubSchema = new mongoose.Schema(
     horarios: {
       type: horariosSchema,
       default: () => ({})
+    },
+    // --- Perfil público (para la card de descubrimiento/reserva) ---
+    descripcion: {
+      type: String,
+      trim: true
+    },
+    // URLs a object storage (Cloudinary/S3); la subida se resuelve en infra.
+    logo: {
+      type: String,
+      trim: true
+    },
+    fotos: {
+      type: [String],
+      default: []
+    },
+    // Coordenadas para el mapa. El picker/geocoding se resuelve en el frontend.
+    ubicacion: {
+      lat: { type: Number },
+      lng: { type: Number }
+    },
+    servicios: {
+      type: [String],
+      default: []
+    },
+    // Opt-in: el club no aparece en la interfaz pública hasta activarlo.
+    publicado: {
+      type: Boolean,
+      default: false
     }
   },
   {
