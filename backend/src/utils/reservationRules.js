@@ -115,7 +115,33 @@ const isReservationInProgress = ({ inicio, fin }) => {
   return !now.isBefore(dayjs(inicio)) && now.isBefore(dayjs(fin));
 };
 
+// ¿Puede cancelarse esta reserva respetando la tolerancia del club?
+// Se usa en la cancelación pública (invitado vía token). El admin no tiene
+// esta restricción. `toleranciaHoras` viene de horarios.reservas.
+const canCancelReservation = ({ inicio }, toleranciaHoras = 0) => {
+  const now = dayjs();
+  const start = dayjs(inicio);
+
+  if (!now.isBefore(start)) {
+    return { ok: false, message: 'El turno ya comenzó o finalizó y no puede cancelarse.' };
+  }
+
+  const limite = start.subtract(toleranciaHoras, 'hour');
+  if (toleranciaHoras > 0 && now.isAfter(limite)) {
+    return {
+      ok: false,
+      message: `Las reservas solo pueden cancelarse con al menos ${toleranciaHoras} horas de anticipación.`
+    };
+  }
+
+  return { ok: true };
+};
+
 module.exports = {
   validateReservationSlot,
-  isReservationInProgress
+  isReservationInProgress,
+  canCancelReservation,
+  dayConfigForDate,
+  toMinutes,
+  normalizeCloseMinutes
 };

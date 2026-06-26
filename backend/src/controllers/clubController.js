@@ -167,19 +167,34 @@ const getClubConfig = async (req, res, next) => {
 
 const updateClubConfig = async (req, res, next) => {
     try {
-        const { nombre, direccion, ciudad, provincia, telefono, timezone, moneda } = req.body;
+        const {
+            nombre, direccion, ciudad, provincia, telefono, timezone, moneda,
+            whatsapp, email, descripcion, logo, fotos, ubicacion, servicios, publicado
+        } = req.body;
+
+        // Sólo seteamos los campos presentes en el body (update parcial).
+        const updateData = {
+            nombre,
+            direccion,
+            ciudad,
+            provincia,
+            telefono,
+            timezone,
+            moneda
+        };
+
+        if (whatsapp !== undefined) updateData.whatsapp = whatsapp;
+        if (email !== undefined) updateData.email = email;
+        if (descripcion !== undefined) updateData.descripcion = descripcion;
+        if (logo !== undefined) updateData.logo = logo;
+        if (fotos !== undefined) updateData.fotos = fotos;
+        if (ubicacion !== undefined) updateData.ubicacion = ubicacion;
+        if (servicios !== undefined) updateData.servicios = servicios;
+        if (publicado !== undefined) updateData.publicado = publicado;
 
         const club = await Club.findByIdAndUpdate(
             req.params.clubId,
-            {
-                nombre,
-                direccion,
-                ciudad,
-                provincia,
-                telefono,
-                timezone,
-                moneda
-            },
+            updateData,
             {
                 new: true,
                 runValidators: true

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import AppLayout from '@/layouts/AppLayout.vue'
 import BackofficeLayout from '@/layouts/BackofficeLayout.vue'
+import PublicLayout from '@/layouts/PublicLayout.vue'
 import LoginView from '@/views/auth/Login.vue'
 import RegisterView from '@/views/auth/Register.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
@@ -103,6 +104,35 @@ const router = createRouter({
           name: 'admin-reportes',
           component: () => import('@/views/PlaceholderView.vue'),
           meta: { title: 'Reportes' },
+        },
+      ],
+    },
+    {
+      // Interfaz pública (sin login obligatorio): búsqueda y reserva.
+      path: '/reservar',
+      component: PublicLayout,
+      children: [
+        {
+          path: '',
+          name: 'public-buscar',
+          component: () => import('@/views/public/BuscarView.vue'),
+        },
+        {
+          path: ':slug',
+          name: 'public-club',
+          component: () => import('@/views/public/ClubDetailView.vue'),
+        },
+      ],
+    },
+    {
+      // Gestión de una reserva por token (invitado sin cuenta).
+      path: '/reserva/:token',
+      component: PublicLayout,
+      children: [
+        {
+          path: '',
+          name: 'public-reserva',
+          component: () => import('@/views/public/ReservaManageView.vue'),
         },
       ],
     },

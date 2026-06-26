@@ -2,7 +2,7 @@ const Reservation = require('../models/Reservation');
 const Court = require('../models/Court');
 const User = require('../models/User');
 const Club = require('../models/Club');
-const { validateReservationSlot, isReservationInProgress } = require('../utils/reservationRules');
+const { validateReservationSlot, isReservationInProgress, canCancelReservation } = require('../utils/reservationRules');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -99,19 +99,28 @@ const createReservation = async (req, res, next) => {
       return res.status(400).json({ ok: false, message: 'Ya existe una reserva para esa cancha en ese horario' });
     }
 
-    const reservation = await Reservation.create({
-      club: clubId,
-      court: courtId,
-      customer: customerId || null,
-      guestName: customerId ? null : guestName,
-      guestPhone: customerId ? null : guestPhone,
-      inicio: new Date(inicio),
-      fin: new Date(fin),
-      estado,
-      precioFinal,
-      notas,
-      creadaPor: req.user._id
-    });
+    let reservation;
+    try {
+      reservation = await Reservation.create({
+        club: clubId,
+        court: courtId,
+        customer: customerId || null,
+        guestName: customerId ? null : guestName,
+        guestPhone: customerId ? null : guestPhone,
+        inicio: new Date(inicio),
+        fin: new Date(fin),
+        estado,
+        precioFinal,
+        notas,
+        creadaPor: req.user._id
+      });
+    } catch (error) {
+      // El índice único atómico ganó la carrera: otra reserva tomó el slot.
+      if (error.code === 11000) {
+        return res.status(409).json({ ok: false, message: 'Ese horario acaba de ser reservado. Probá con otro.' });
+      }
+      throw error;
+    }
 
     const populated = await populateReservation(Reservation.findById(reservation._id));
 
@@ -137,7 +146,9 @@ const getReservationsByClub = async (req, res, next) => {
     if (courtId) filter.court = courtId;
     if (estado) filter.estado = estado;
 
-    const reservations = await populateReservation(Reservation.find(filter)).sort({ inicio: 1 });
+    const reservations = await populateReservation(Reservation.find(filter))
+      .select('-manageToken')
+      .sort({ inicio: 1 });
 
     res.status(200).json({ ok: true, reservations });
   } catch (error) {
@@ -161,6 +172,7 @@ const getUpcomingReservationsByClub = async (req, res, next) => {
     };
 
     const reservations = await populateReservation(Reservation.find(filter))
+      .select('-manageToken')
       .sort({ inicio: 1 })
       .limit(limit);
 
@@ -274,9 +286,18 @@ const updateReservation = async (req, res, next) => {
     if (precioFinal !== undefined) updateData.precioFinal = precioFinal;
     if (notas !== undefined) updateData.notas = notas;
 
-    const reservation = await populateReservation(
-      Reservation.findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
-    );
+    let reservation;
+    try {
+      reservation = await populateReservation(
+        Reservation.findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
+      );
+    } catch (error) {
+      // Mover el turno chocó con el slot exacto de otra reserva activa.
+      if (error.code === 11000) {
+        return res.status(409).json({ ok: false, message: 'Ese horario acaba de ser reservado. Probá con otro.' });
+      }
+      throw error;
+    }
 
     res.status(200).json({ ok: true, reservation });
   } catch (error) {
@@ -306,6 +327,92 @@ const cancelReservation = async (req, res, next) => {
   }
 };
 
+// --- Gestión pública por token (invitado sin cuenta) ---
+// El token es la prueba de propiedad: sin él no se puede ver ni cancelar la
+// reserva. No requiere autenticación. La respuesta es un DTO acotado para no
+// filtrar datos internos (creadaPor, manageToken, etc.).
+
+const TOKEN_POPULATE = [
+  ['club', 'nombre direccion ciudad timezone moneda horarios'],
+  ['court', 'nombre tipo']
+];
+
+const findReservationByToken = (token) => {
+  let query = Reservation.findOne({ manageToken: token });
+  TOKEN_POPULATE.forEach(([path, fields]) => {
+    query = query.populate(path, fields);
+  });
+  return query;
+};
+
+const toPublicReservation = (r) => ({
+  _id: r._id,
+  inicio: r.inicio,
+  fin: r.fin,
+  estado: r.estado,
+  precioFinal: r.precioFinal,
+  guestName: r.guestName,
+  guestPhone: r.guestPhone,
+  notas: r.notas,
+  club: r.club
+    ? {
+        nombre: r.club.nombre,
+        direccion: r.club.direccion,
+        ciudad: r.club.ciudad,
+        timezone: r.club.timezone,
+        moneda: r.club.moneda
+      }
+    : null,
+  court: r.court ? { nombre: r.court.nombre, tipo: r.court.tipo } : null
+});
+
+const getReservationByToken = async (req, res, next) => {
+  try {
+    const reservation = await findReservationByToken(req.params.token);
+
+    if (!reservation) {
+      return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
+    }
+
+    res.status(200).json({ ok: true, reservation: toPublicReservation(reservation) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const cancelReservationByToken = async (req, res, next) => {
+  try {
+    const reservation = await findReservationByToken(req.params.token);
+
+    if (!reservation) {
+      return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
+    }
+
+    if (reservation.estado === 'cancelada') {
+      // Idempotente: ya estaba cancelada.
+      return res.status(200).json({ ok: true, reservation: toPublicReservation(reservation) });
+    }
+
+    if (reservation.estado === 'completada') {
+      return res.status(400).json({ ok: false, message: 'No se puede cancelar un turno ya completado.' });
+    }
+
+    const tolerancia = reservation.club?.horarios?.reservas?.toleranciaCancelacionHoras ?? 0;
+    const check = canCancelReservation({ inicio: reservation.inicio }, tolerancia);
+    if (!check.ok) {
+      return res.status(400).json({ ok: false, message: check.message });
+    }
+
+    await Reservation.findByIdAndUpdate(reservation._id, { estado: 'cancelada' });
+    // Reflejamos el cambio en el DTO sin re-popular (el doc en memoria sigue poblado).
+    reservation.estado = 'cancelada';
+
+    res.status(200).json({ ok: true, reservation: toPublicReservation(reservation) });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getMyReservations = async (req, res, next) => {
   try {
     const reservations = await populateReservation(
@@ -325,5 +432,7 @@ module.exports = {
   getReservationById,
   updateReservation,
   cancelReservation,
+  getReservationByToken,
+  cancelReservationByToken,
   getMyReservations
 };

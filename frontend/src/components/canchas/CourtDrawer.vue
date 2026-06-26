@@ -139,9 +139,32 @@
                 </p>
               </div>
 
+              <!-- Reservable online -->
+              <div class="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+                <div class="pr-4">
+                  <p class="text-sm font-semibold text-slate-800">Reservable online</p>
+                  <p class="text-xs text-neutral-400">
+                    Permitir que los jugadores reserven esta cancha desde la web pública.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  :aria-checked="form.visible"
+                  class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer"
+                  :class="form.visible ? 'bg-primitive-orange-500' : 'bg-slate-300'"
+                  @click="form.visible = !form.visible"
+                >
+                  <span
+                    class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                    :class="form.visible ? 'translate-x-5' : ''"
+                  ></span>
+                </button>
+              </div>
+
               <!-- Tarifas -->
               <div>
-                <div class="mb-3 flex items-center justify-between">
+                <div class="mb-1 flex items-center justify-between">
                   <label class="text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Tarifas por franja
                   </label>
@@ -152,6 +175,9 @@
                     Agregar franja
                   </button>
                 </div>
+                <p class="mb-3 text-xs text-neutral-400">
+                  El precio es <span class="font-medium text-slate-600">por hora</span>. El total del turno se calcula según la duración (ej: 1h 30 = 1.5× el valor por hora).
+                </p>
 
                 <div class="space-y-3">
                   <div
@@ -218,7 +244,7 @@
                         </div>
                       </div>
                       <div>
-                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Precio</label>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Precio /h</label>
                         <div class="relative">
                           <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-neutral-400">$</span>
                           <input
@@ -306,6 +332,7 @@ function getEmptyForm() {
     superficie: '',
     cubierta: true,
     estado: 'activa',
+    visible: true,
     jugadores: null,
     duracionTurno: 60,
     tarifas: defaultTarifas.map((t) => ({ ...t })),
@@ -319,6 +346,8 @@ watch(
       if (props.court) {
         form.value = {
           ...props.court,
+          // Canchas viejas sin el campo: por defecto reservables online.
+          visible: props.court.visible !== false,
           tarifas: props.court.tarifas.map((t) => ({ ...t })),
         }
       } else {
