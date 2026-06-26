@@ -21,10 +21,10 @@
             </div>
             <div class="min-w-0 flex-1">
               <h2 class="text-lg font-semibold text-slate-900">{{ drawerTitle }}</h2>
-              <p class="text-sm text-slate-400">{{ drawerSubtitle }}</p>
+              <p class="text-sm text-neutral-400">{{ drawerSubtitle }}</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
               @click="emit('close')"
             >
               <i class="pi pi-times text-sm"></i>
@@ -37,18 +37,18 @@
               <!-- Name & Sport -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Nombre
                   </label>
                   <input
                     v-model="form.nombre"
                     type="text"
                     placeholder="Ej: Cancha 1"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                   />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Deporte
                   </label>
                   <div class="relative">
@@ -60,7 +60,7 @@
                         {{ opt.label }}
                       </option>
                     </select>
-                    <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                    <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
                   </div>
                 </div>
               </div>
@@ -68,18 +68,18 @@
               <!-- Surface & Cover -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Superficie
                   </label>
                   <input
                     v-model="form.superficie"
                     type="text"
                     placeholder="Ej: Cristal, Cemento..."
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                   />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Cubierta
                   </label>
                   <div class="flex overflow-hidden rounded-lg border border-slate-300">
@@ -104,7 +104,7 @@
               <!-- Players (futbol only) -->
               <div v-if="showJugadores" class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Jugadores por equipo
                   </label>
                   <input
@@ -113,14 +113,14 @@
                     min="3"
                     max="11"
                     placeholder="Ej: 5, 7, 11"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                   />
                 </div>
               </div>
 
               <!-- Duración del turno -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                   Duración del turno
                 </label>
                 <div class="flex overflow-hidden rounded-lg border border-slate-300">
@@ -134,7 +134,7 @@
                     {{ opt }} min
                   </button>
                 </div>
-                <p class="mt-1.5 text-xs text-slate-400">
+                <p class="!!mt-2 text-xs text-neutral-400">
                   Fútbol suele ser 60 min; pádel y tenis, 90 min.
                 </p>
               </div>
@@ -142,7 +142,7 @@
               <!-- Tarifas -->
               <div>
                 <div class="mb-3 flex items-center justify-between">
-                  <label class="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Tarifas por franja
                   </label>
                   <button
@@ -162,16 +162,16 @@
                     <div class="flex items-start justify-between gap-2">
                       <div class="grid flex-1 grid-cols-2 gap-3">
                         <div>
-                          <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Nombre</label>
+                          <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Nombre</label>
                           <input
                             v-model="tarifa.nombre"
                             type="text"
                             placeholder="Ej: Lun-Vie Día"
-                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                           />
                         </div>
                         <div>
-                          <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Días</label>
+                          <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Días</label>
                           <div class="relative">
                             <select
                               v-model="tarifa.dias"
@@ -179,7 +179,7 @@
                             >
                               <option v-for="d in diasOptions" :key="d.value" :value="d.value">{{ d.label }}</option>
                             </select>
-                            <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                            <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
                           </div>
                         </div>
                       </div>
@@ -194,7 +194,7 @@
 
                     <div class="mt-3 grid grid-cols-3 gap-3">
                       <div>
-                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Desde</label>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Desde</label>
                         <div class="relative">
                           <select
                             v-model="tarifa.horaInicio"
@@ -202,11 +202,11 @@
                           >
                             <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
                           </select>
-                          <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                          <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
                         </div>
                       </div>
                       <div>
-                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Hasta</label>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Hasta</label>
                         <div class="relative">
                           <select
                             v-model="tarifa.horaFin"
@@ -214,13 +214,13 @@
                           >
                             <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
                           </select>
-                          <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                          <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
                         </div>
                       </div>
                       <div>
-                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Precio</label>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Precio</label>
                         <div class="relative">
-                          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-slate-400">$</span>
+                          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-neutral-400">$</span>
                           <input
                             v-model.number="tarifa.precio"
                             type="number"

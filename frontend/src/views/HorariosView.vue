@@ -21,17 +21,17 @@
     <!-- No club selected -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-building text-2xl text-slate-400"></i>
+        <i class="pi pi-building text-2xl text-neutral-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-slate-900">Sin club seleccionado</h3>
-      <p class="mt-2 text-sm text-slate-500">
+      <p class="!mt-2 text-sm text-slate-500">
         Seleccioná un club desde el selector en el encabezado para configurar los horarios.
       </p>
     </div>
 
     <!-- Loading -->
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-slate-400"></i>
+      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando horarios...</p>
     </div>
 
@@ -51,7 +51,7 @@
         <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <div>
             <h2 class="text-base font-semibold text-slate-900">Horario semanal regular</h2>
-            <p class="mt-0.5 text-sm text-slate-400">Aplica a todas las canchas salvo excepciones puntuales</p>
+            <p class="mt-0.5 text-sm text-neutral-400">Aplica a todas las canchas salvo excepciones puntuales</p>
           </div>
           <button
             class="text-sm font-medium text-primitive-orange-500 transition-colors hover:text-primitive-orange-600 cursor-pointer"
@@ -83,14 +83,14 @@
               />
             </div>
 
-            <span class="hidden flex-1 text-xs text-slate-400 sm:block">
+            <span class="hidden flex-1 text-xs text-neutral-400 sm:block">
               <template v-if="horarios.semanal[dia.key].abierto">
                 ~{{ slotsCount(horarios.semanal[dia.key]) }} turnos de 1h
               </template>
             </span>
 
             <div class="ml-auto flex items-center gap-3">
-              <span class="text-sm" :class="horarios.semanal[dia.key].abierto ? 'text-slate-600' : 'text-slate-400'">
+              <span class="text-sm" :class="horarios.semanal[dia.key].abierto ? 'text-slate-600' : 'text-neutral-400'">
                 {{ horarios.semanal[dia.key].abierto ? 'Abierto' : 'Cerrado' }}
               </span>
               <button
@@ -116,17 +116,17 @@
           <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
             <div>
               <h2 class="text-base font-semibold text-slate-900">Días especiales</h2>
-              <p class="mt-0.5 text-sm text-slate-400">Feriados y excepciones</p>
+              <p class="mt-0.5 text-sm text-neutral-400">Feriados y excepciones</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+              class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
               @click="openNewSpecialDay"
             >
               <i class="pi pi-plus text-sm"></i>
             </button>
           </div>
 
-          <div v-if="horarios.diasEspeciales.length === 0" class="px-6 py-8 text-center text-sm text-slate-400">
+          <div v-if="horarios.diasEspeciales.length === 0" class="px-6 py-8 text-center text-sm text-neutral-400">
             No hay días especiales cargados.
           </div>
 
@@ -138,19 +138,19 @@
             >
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                :class="dia.tipo === 'especial' ? 'bg-primitive-orange-100 text-primitive-orange-500' : 'bg-slate-100 text-slate-400'"
+                :class="dia.tipo === 'especial' ? 'bg-primitive-orange-100 text-primitive-orange-500' : 'bg-slate-100 text-neutral-400'"
               >
                 <i :class="dia.tipo === 'especial' ? 'pi pi-star' : 'pi pi-power-off'" class="text-sm"></i>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="truncate text-sm font-medium text-slate-900">{{ dia.nombre }}</p>
-                <p class="text-xs text-slate-400">
+                <p class="text-xs text-neutral-400">
                   {{ formatDate(dia.fecha) }} &middot;
                   {{ dia.tipo === 'especial' ? `Extendido ${dia.horaInicio} – ${dia.horaFin}` : 'Cerrado' }}
                 </p>
               </div>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 cursor-pointer group-hover:opacity-100"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 cursor-pointer group-hover:opacity-100"
                 @click="openEditSpecialDay(dia, idx)"
               >
                 <i class="pi pi-pencil text-sm"></i>
@@ -173,7 +173,7 @@
             <div class="flex items-center justify-between gap-4">
               <div class="min-w-0">
                 <p class="text-sm font-medium text-slate-700">Tolerancia para cancelar</p>
-                <p class="text-xs text-slate-400">Tiempo antes del turno para cancelar sin costo</p>
+                <p class="text-xs text-neutral-400">Tiempo antes del turno para cancelar sin costo</p>
               </div>
               <div class="relative shrink-0">
                 <select
@@ -182,14 +182,14 @@
                 >
                   <option v-for="opt in toleranciaOptions" :key="opt" :value="opt">{{ opt }} horas</option>
                 </select>
-                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
             </div>
 
             <div class="flex items-center justify-between gap-4">
               <div class="min-w-0">
                 <p class="text-sm font-medium text-slate-700">Reserva anticipada máx.</p>
-                <p class="text-xs text-slate-400">Cuánto se puede reservar con antelación</p>
+                <p class="text-xs text-neutral-400">Cuánto se puede reservar con antelación</p>
               </div>
               <div class="relative shrink-0">
                 <select
@@ -198,7 +198,7 @@
                 >
                   <option v-for="opt in anticipacionOptions" :key="opt" :value="opt">{{ opt }} días</option>
                 </select>
-                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-slate-400"></i>
+                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
             </div>
           </div>

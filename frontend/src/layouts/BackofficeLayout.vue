@@ -71,7 +71,7 @@ const goToApp = () => {
             :class="
               isActive(item.to)
                 ? 'bg-white/10 text-white'
-                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                : 'text-neutral-400 hover:bg-white/5 hover:text-white'
             "
           >
             <i
@@ -89,7 +89,7 @@ const goToApp = () => {
       <!-- Back to app -->
       <div class="px-3 pb-2">
         <button
-          class="flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white cursor-pointer"
+          class="flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-neutral-400 transition-colors hover:bg-white/5 hover:text-white cursor-pointer"
           @click="goToApp"
         >
           <i class="pi pi-arrow-left text-base text-slate-500"></i>

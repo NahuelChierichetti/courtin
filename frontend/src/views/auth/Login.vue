@@ -103,7 +103,7 @@ const handleSubmit = async () => {
 
         <!-- <div class="mt-7 flex items-center gap-4">
           <div class="h-px flex-1 bg-slate-200"></div>
-          <span class="text-xs font-medium uppercase tracking-wider text-slate-400">O</span>
+          <span class="text-xs font-medium uppercase tracking-wider text-neutral-400">O</span>
           <div class="h-px flex-1 bg-slate-200"></div>
         </div>
 
@@ -161,7 +161,7 @@ const handleSubmit = async () => {
 
           <div class="mt-16 text-center">
             <p class="text-lg font-semibold text-white">Una forma simple de organizar tu juego</p>
-            <p class="mt-2 text-sm text-slate-200">
+            <p class="!mt-2 text-sm text-slate-200">
               Accedé a tu cuenta y gestioná tus turnos, canchas y clientes desde un solo lugar.
             </p>
           </div>

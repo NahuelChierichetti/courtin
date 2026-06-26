@@ -7,6 +7,10 @@ const CLUB_ID_KEY = 'courtin_active_club'
 const token = ref(getToken())
 const user = ref(null)
 const memberships = ref([])
+// Clubes disponibles para superadmin (no tienen membresías). AppLayout los
+// carga vía clubService y los cachea acá para que `currentClub` pueda resolver
+// timezone/moneda del club seleccionado en el header.
+const superadminClubs = ref([])
 const currentClubId = ref(localStorage.getItem(CLUB_ID_KEY))
 const isLoading = ref(false)
 const isInitialized = ref(false)
@@ -40,6 +44,7 @@ const clearSession = () => {
   token.value = null
   user.value = null
   memberships.value = []
+  superadminClubs.value = []
   currentClubId.value = null
 }
 
@@ -131,15 +136,24 @@ const logout = () => {
 const isSuperadmin = computed(() => user.value?.globalRole === 'superadmin')
 
 const currentClub = computed(() => {
-  if (!currentClubId.value || memberships.value.length === 0) return null
+  if (!currentClubId.value) return null
+  // Usuarios con membresías: resolver el club desde ahí.
   const m = memberships.value.find(
     (m) => (m.club._id || m.club) === currentClubId.value,
   )
-  return m?.club || null
+  if (m?.club) return m.club
+  // Superadmin (sin membresías): resolver desde la lista de clubes cacheada.
+  return superadminClubs.value.find((c) => c._id === currentClubId.value) || null
 })
 
 const setCurrentClubId = (clubId) => {
   persistClubId(clubId)
+}
+
+// Cachea la lista completa de clubes del superadmin para que `currentClub`
+// pueda resolver timezone/moneda del club elegido en el header.
+const setSuperadminClubs = (clubs) => {
+  superadminClubs.value = Array.isArray(clubs) ? clubs : []
 }
 
 // Actualiza los datos del club activo (timezone, moneda, etc.) en las membresías
@@ -153,12 +167,16 @@ const patchCurrentClub = (clubData) => {
     }
     return m
   })
+  superadminClubs.value = superadminClubs.value.map((c) =>
+    c._id === clubData._id ? { ...c, ...clubData } : c,
+  )
 }
 
 export const useAuth = () => ({
   user: readonly(user),
   token: readonly(token),
   memberships: readonly(memberships),
+  superadminClubs: readonly(superadminClubs),
   currentClubId: readonly(currentClubId),
   currentClub,
   isSuperadmin,
@@ -170,5 +188,6 @@ export const useAuth = () => ({
   register,
   logout,
   setCurrentClubId,
+  setSuperadminClubs,
   patchCurrentClub,
 })
