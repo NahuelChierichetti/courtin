@@ -35,17 +35,17 @@
     <!-- No club selected -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-building text-2xl text-slate-400"></i>
+        <i class="pi pi-building text-2xl text-neutral-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-slate-900">Sin club seleccionado</h3>
-      <p class="mt-2 text-sm text-slate-500">
+      <p class="!mt-2 text-sm text-slate-500">
         Seleccioná un club desde el selector en el encabezado para ver las canchas.
       </p>
     </div>
 
     <!-- Loading -->
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-slate-400"></i>
+      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando canchas...</p>
     </div>
 
@@ -61,12 +61,12 @@
     <!-- Empty state -->
     <div v-else-if="filteredCourts.length === 0 && !loading" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-objects-column text-2xl text-slate-400"></i>
+        <i class="pi pi-objects-column text-2xl text-neutral-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-slate-900">
         {{ activeFilter === 'todas' ? 'No hay canchas' : 'No hay canchas de ' + deporteLabels[activeFilter] }}
       </h3>
-      <p class="mt-2 text-sm text-slate-500">
+      <p class="!mt-2 text-sm text-slate-500">
         {{ activeFilter === 'todas' ? 'Creá tu primera cancha para empezar.' : 'Probá con otro filtro o creá una nueva.' }}
       </p>
       <Button
@@ -141,7 +141,7 @@
             </span>
           </div>
 
-          <div class="mt-2 flex items-center gap-3 text-xs text-slate-500">
+          <div class="!mt-2 flex items-center gap-3 text-xs text-slate-500">
             <span v-if="court.superficie" class="flex items-center gap-1">
               <i class="pi pi-th-large text-[10px]"></i>
               {{ court.superficie }}
@@ -161,17 +161,17 @@
               <p class="text-xl font-bold font-secondary text-slate-900">
                 {{ formatPrice(getBasePrice(court)) }}
               </p>
-              <p class="text-xs text-slate-400">por hora &middot; tarifa base</p>
+              <p class="text-xs text-neutral-400">por hora &middot; tarifa base</p>
             </div>
             <div class="flex items-center gap-1">
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                 @click="openEditCourt(court)"
               >
                 <i class="pi pi-pencil text-sm"></i>
               </button>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
               >
                 <i class="pi pi-ellipsis-h text-sm"></i>
               </button>

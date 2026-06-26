@@ -26,7 +26,7 @@ const router = createRouter({
         {
           path: 'turnos',
           name: 'turnos',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/TurnosView.vue'),
           meta: { title: 'Turnos' },
         },
         {

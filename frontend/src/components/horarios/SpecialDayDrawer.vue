@@ -21,10 +21,10 @@
             </div>
             <div class="min-w-0 flex-1">
               <h2 class="text-lg font-semibold text-slate-900">{{ drawerTitle }}</h2>
-              <p class="text-sm text-slate-400">Feriados y excepciones de horario</p>
+              <p class="text-sm text-neutral-400">Feriados y excepciones de horario</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
               @click="emit('close')"
             >
               <i class="pi pi-times text-sm"></i>
@@ -36,20 +36,20 @@
             <div class="space-y-6">
               <!-- Nombre -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                   Nombre
                 </label>
                 <input
                   v-model="form.nombre"
                   type="text"
                   placeholder="Ej: Día de la Independencia"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                  class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
                 />
               </div>
 
               <!-- Fecha -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                   Fecha
                 </label>
                 <DatePicker
@@ -65,7 +65,7 @@
 
               <!-- Tipo -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                   Tipo
                 </label>
                 <div class="flex overflow-hidden rounded-lg border border-slate-300">
@@ -89,13 +89,13 @@
               <!-- Horario (solo especial) -->
               <div v-if="form.tipo === 'especial'" class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Desde
                   </label>
                   <TimePicker v-model="form.horaInicio" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                     Hasta
                   </label>
                   <TimePicker v-model="form.horaFin" />

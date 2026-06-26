@@ -40,6 +40,11 @@ export const toDateInputUTC = (value) => {
   return dayjs.utc(value).format('YYYY-MM-DD')
 }
 
+// Combina un día ("YYYY-MM-DD") y una hora ("HH:mm") interpretados en la zona
+// del club y devuelve el instante en ISO UTC (para guardar en backend).
+export const zonedToUtcISO = (dateKey, hhmm, tz = DEFAULT_TZ) =>
+  dayjs.tz(`${dateKey} ${hhmm}`, 'YYYY-MM-DD HH:mm', tz).utc().toISOString()
+
 export const formatCurrency = (amount, moneda = 'ARS', locale = 'es-AR') => {
   const value = Number(amount) || 0
   try {

@@ -27,19 +27,13 @@ const reservationSchema = new mongoose.Schema(
       trim: true,
       default: null
     },
-    fecha: {
+    inicio: {
       type: Date,
-      required: [true, 'La fecha es obligatoria']
+      required: [true, 'El inicio es obligatorio']
     },
-    horaInicio: {
-      type: String,
-      required: [true, 'La hora de inicio es obligatoria'],
-      match: [/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido']
-    },
-    horaFin: {
-      type: String,
-      required: [true, 'La hora de fin es obligatoria'],
-      match: [/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido']
+    fin: {
+      type: Date,
+      required: [true, 'El fin es obligatorio']
     },
     estado: {
       type: String,
@@ -65,6 +59,6 @@ const reservationSchema = new mongoose.Schema(
   }
 );
 
-reservationSchema.index({ club: 1, court: 1, fecha: 1, horaInicio: 1, horaFin: 1 });
+reservationSchema.index({ club: 1, court: 1, inicio: 1, fin: 1 });
 
 module.exports = mongoose.model('Reservation', reservationSchema);

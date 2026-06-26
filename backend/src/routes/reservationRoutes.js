@@ -3,6 +3,7 @@ const express = require('express');
 const {
   createReservation,
   getReservationsByClub,
+  getUpcomingReservationsByClub,
   getReservationById,
   updateReservation,
   cancelReservation,
@@ -21,6 +22,13 @@ router.get(
   '/club/:clubId',
   authorizeClubRoles(ROLES.TENANT_ADMIN, ROLES.EMPLOYEE),
   getReservationsByClub
+);
+
+// Debe ir antes de '/club/:clubId/:id' para que "upcoming" no se interprete como id.
+router.get(
+  '/club/:clubId/upcoming',
+  authorizeClubRoles(ROLES.TENANT_ADMIN, ROLES.EMPLOYEE),
+  getUpcomingReservationsByClub
 );
 
 router.get(

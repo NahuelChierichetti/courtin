@@ -1,74 +1,61 @@
 const Reservation = require('../models/Reservation');
 const Court = require('../models/Court');
 const User = require('../models/User');
+const Club = require('../models/Club');
+const { validateReservationSlot, isReservationInProgress } = require('../utils/reservationRules');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
-const normalizeDate = (value) => {
-  const date = new Date(value);
-  date.setHours(0, 0, 0, 0);
-  return date;
+const POPULATE = [
+  ['club', 'nombre slug estado timezone moneda'],
+  ['court', 'nombre tipo estado precio duracionTurno'],
+  ['customer', 'nombre email estado'],
+  ['creadaPor', 'nombre email']
+];
+
+const populateReservation = (query) => {
+  POPULATE.forEach(([path, fields]) => query.populate(path, fields));
+  return query;
 };
 
-const isValidTimeRange = (horaInicio, horaFin) => {
-  return horaInicio < horaFin;
+const isValidInstantRange = (inicio, fin) => {
+  const a = new Date(inicio).getTime();
+  const b = new Date(fin).getTime();
+  return Number.isFinite(a) && Number.isFinite(b) && a < b;
 };
 
 const validateCustomerData = async ({ customerId, guestName, guestPhone }) => {
   if (!customerId && !guestName) {
-    return {
-      ok: false,
-      status: 400,
-      message: 'Debes indicar un cliente registrado o el nombre del invitado'
-    };
+    return { ok: false, status: 400, message: 'Debes indicar un cliente registrado o el nombre del invitado' };
   }
 
   if (!customerId && !guestPhone) {
-    return {
-      ok: false,
-      status: 400,
-      message: 'Debes indicar el teléfono del invitado si no hay usuario registrado'
-    };
+    return { ok: false, status: 400, message: 'Debes indicar el teléfono del invitado si no hay usuario registrado' };
   }
 
   if (customerId) {
     const customer = await User.findById(customerId);
 
     if (!customer) {
-      return {
-        ok: false,
-        status: 404,
-        message: 'Usuario cliente no encontrado'
-      };
+      return { ok: false, status: 404, message: 'Usuario cliente no encontrado' };
     }
 
     if (customer.estado !== 'activo') {
-      return {
-        ok: false,
-        status: 403,
-        message: 'El usuario cliente está inactivo'
-      };
+      return { ok: false, status: 403, message: 'El usuario cliente está inactivo' };
     }
   }
 
   return { ok: true };
 };
 
-const findOverlappingReservation = async ({
-  clubId,
-  courtId,
-  fecha,
-  horaInicio,
-  horaFin,
-  excludeId
-}) => {
+// Solapamiento por instantes: inicioA < finB && finA > inicioB.
+const findOverlappingReservation = async ({ clubId, courtId, inicio, fin, excludeId }) => {
   const query = {
     club: clubId,
     court: courtId,
-    fecha,
     estado: { $in: ACTIVE_RESERVATION_STATUSES },
-    horaInicio: { $lt: horaFin },
-    horaFin: { $gt: horaInicio }
+    inicio: { $lt: new Date(fin) },
+    fin: { $gt: new Date(inicio) }
   };
 
   if (excludeId) {
@@ -81,70 +68,35 @@ const findOverlappingReservation = async ({
 const createReservation = async (req, res, next) => {
   try {
     const { clubId } = req.params;
-    const {
-      courtId,
-      customerId,
-      guestName,
-      guestPhone,
-      fecha,
-      horaInicio,
-      horaFin,
-      estado,
-      precioFinal,
-      notas
-    } = req.body;
+    const { courtId, customerId, guestName, guestPhone, inicio, fin, estado, precioFinal, notas } = req.body;
 
-    const normalizedDate = normalizeDate(fecha);
-
-    if (!isValidTimeRange(horaInicio, horaFin)) {
-      return res.status(400).json({
-        ok: false,
-        message: 'La hora de inicio debe ser menor a la hora de fin'
-      });
+    if (!isValidInstantRange(inicio, fin)) {
+      return res.status(400).json({ ok: false, message: 'El inicio debe ser anterior al fin' });
     }
 
-    const customerValidation = await validateCustomerData({
-      customerId,
-      guestName,
-      guestPhone
-    });
-
+    const customerValidation = await validateCustomerData({ customerId, guestName, guestPhone });
     if (!customerValidation.ok) {
-      return res.status(customerValidation.status).json({
-        ok: false,
-        message: customerValidation.message
-      });
+      return res.status(customerValidation.status).json({ ok: false, message: customerValidation.message });
     }
 
     const court = await Court.findOne({ _id: courtId, club: clubId });
-
     if (!court) {
-      return res.status(404).json({
-        ok: false,
-        message: 'Cancha no encontrada para ese club'
-      });
+      return res.status(404).json({ ok: false, message: 'Cancha no encontrada para ese club' });
     }
 
     if (court.estado !== 'activa') {
-      return res.status(400).json({
-        ok: false,
-        message: 'No puedes reservar una cancha inactiva o en mantenimiento'
-      });
+      return res.status(400).json({ ok: false, message: 'No puedes reservar una cancha inactiva o en mantenimiento' });
     }
 
-    const overlappingReservation = await findOverlappingReservation({
-      clubId,
-      courtId,
-      fecha: normalizedDate,
-      horaInicio,
-      horaFin
-    });
+    const club = await Club.findById(clubId);
+    const scheduleCheck = validateReservationSlot(club, { inicio, fin, estado, isNew: true });
+    if (!scheduleCheck.ok) {
+      return res.status(400).json({ ok: false, message: scheduleCheck.message });
+    }
 
-    if (overlappingReservation) {
-      return res.status(400).json({
-        ok: false,
-        message: 'Ya existe una reserva para esa cancha en ese horario'
-      });
+    const overlapping = await findOverlappingReservation({ clubId, courtId, inicio, fin });
+    if (overlapping) {
+      return res.status(400).json({ ok: false, message: 'Ya existe una reserva para esa cancha en ese horario' });
     }
 
     const reservation = await Reservation.create({
@@ -153,25 +105,17 @@ const createReservation = async (req, res, next) => {
       customer: customerId || null,
       guestName: customerId ? null : guestName,
       guestPhone: customerId ? null : guestPhone,
-      fecha: normalizedDate,
-      horaInicio,
-      horaFin,
+      inicio: new Date(inicio),
+      fin: new Date(fin),
       estado,
       precioFinal,
       notas,
       creadaPor: req.user._id
     });
 
-    const populatedReservation = await Reservation.findById(reservation._id)
-      .populate('club', 'nombre slug estado')
-      .populate('court', 'nombre tipo estado precio duracionTurno')
-      .populate('customer', 'nombre email estado')
-      .populate('creadaPor', 'nombre email');
+    const populated = await populateReservation(Reservation.findById(reservation._id));
 
-    res.status(201).json({
-      ok: true,
-      reservation: populatedReservation
-    });
+    res.status(201).json({ ok: true, reservation: populated });
   } catch (error) {
     next(error);
   }
@@ -180,33 +124,47 @@ const createReservation = async (req, res, next) => {
 const getReservationsByClub = async (req, res, next) => {
   try {
     const { clubId } = req.params;
-    const { fecha, courtId, estado } = req.query;
+    const { desde, hasta, courtId, estado } = req.query;
 
     const filter = { club: clubId };
 
-    if (fecha) {
-      filter.fecha = normalizeDate(fecha);
+    // Rango de instantes [desde, hasta) por solapamiento con la ventana visible.
+    if (desde || hasta) {
+      if (hasta) filter.inicio = { ...(filter.inicio || {}), $lt: new Date(hasta) };
+      if (desde) filter.fin = { ...(filter.fin || {}), $gt: new Date(desde) };
     }
 
-    if (courtId) {
-      filter.court = courtId;
-    }
+    if (courtId) filter.court = courtId;
+    if (estado) filter.estado = estado;
 
-    if (estado) {
-      filter.estado = estado;
-    }
+    const reservations = await populateReservation(Reservation.find(filter)).sort({ inicio: 1 });
 
-    const reservations = await Reservation.find(filter)
-      .populate('club', 'nombre slug estado')
-      .populate('court', 'nombre tipo estado precio duracionTurno')
-      .populate('customer', 'nombre email estado')
-      .populate('creadaPor', 'nombre email')
-      .sort({ fecha: 1, horaInicio: 1 });
+    res.status(200).json({ ok: true, reservations });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    res.status(200).json({
-      ok: true,
-      reservations
-    });
+// Próximos turnos del club a partir del instante actual: incluye los que están
+// en curso o por comenzar (fin > ahora), ordenados por inicio y acotados a
+// `limit` (por defecto 6) desde el servidor.
+const getUpcomingReservationsByClub = async (req, res, next) => {
+  try {
+    const { clubId } = req.params;
+    const parsedLimit = parseInt(req.query.limit, 10);
+    const limit = Math.min(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 6, 50);
+
+    const filter = {
+      club: clubId,
+      estado: { $in: ACTIVE_RESERVATION_STATUSES },
+      fin: { $gt: new Date() }
+    };
+
+    const reservations = await populateReservation(Reservation.find(filter))
+      .sort({ inicio: 1 })
+      .limit(limit);
+
+    res.status(200).json({ ok: true, reservations });
   } catch (error) {
     next(error);
   }
@@ -216,26 +174,13 @@ const getReservationById = async (req, res, next) => {
   try {
     const { clubId, id } = req.params;
 
-    const reservation = await Reservation.findOne({
-      _id: id,
-      club: clubId
-    })
-      .populate('club', 'nombre slug estado')
-      .populate('court', 'nombre tipo estado precio duracionTurno')
-      .populate('customer', 'nombre email estado')
-      .populate('creadaPor', 'nombre email');
+    const reservation = await populateReservation(Reservation.findOne({ _id: id, club: clubId }));
 
     if (!reservation) {
-      return res.status(404).json({
-        ok: false,
-        message: 'Reserva no encontrada'
-      });
+      return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
     }
 
-    res.status(200).json({
-      ok: true,
-      reservation
-    });
+    res.status(200).json({ ok: true, reservation });
   } catch (error) {
     next(error);
   }
@@ -244,47 +189,22 @@ const getReservationById = async (req, res, next) => {
 const updateReservation = async (req, res, next) => {
   try {
     const { clubId, id } = req.params;
-    const {
-      courtId,
-      customerId,
-      guestName,
-      guestPhone,
-      fecha,
-      horaInicio,
-      horaFin,
-      estado,
-      precioFinal,
-      notas
-    } = req.body;
+    const { courtId, customerId, guestName, guestPhone, inicio, fin, estado, precioFinal, notas } = req.body;
 
-    const existingReservation = await Reservation.findOne({
-      _id: id,
-      club: clubId
-    });
-
-    if (!existingReservation) {
-      return res.status(404).json({
-        ok: false,
-        message: 'Reserva no encontrada'
-      });
+    const existing = await Reservation.findOne({ _id: id, club: clubId });
+    if (!existing) {
+      return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
     }
 
-    const nextCourtId = courtId || existingReservation.court.toString();
-    const nextFecha = fecha ? normalizeDate(fecha) : existingReservation.fecha;
-    const nextHoraInicio = horaInicio || existingReservation.horaInicio;
-    const nextHoraFin = horaFin || existingReservation.horaFin;
-    const nextCustomerId =
-      customerId !== undefined ? customerId : existingReservation.customer;
-    const nextGuestName =
-      guestName !== undefined ? guestName : existingReservation.guestName;
-    const nextGuestPhone =
-      guestPhone !== undefined ? guestPhone : existingReservation.guestPhone;
+    const nextCourtId = courtId || existing.court.toString();
+    const nextInicio = inicio ? new Date(inicio) : existing.inicio;
+    const nextFin = fin ? new Date(fin) : existing.fin;
+    const nextCustomerId = customerId !== undefined ? customerId : existing.customer;
+    const nextGuestName = guestName !== undefined ? guestName : existing.guestName;
+    const nextGuestPhone = guestPhone !== undefined ? guestPhone : existing.guestPhone;
 
-    if (!isValidTimeRange(nextHoraInicio, nextHoraFin)) {
-      return res.status(400).json({
-        ok: false,
-        message: 'La hora de inicio debe ser menor a la hora de fin'
-      });
+    if (!isValidInstantRange(nextInicio, nextFin)) {
+      return res.status(400).json({ ok: false, message: 'El inicio debe ser anterior al fin' });
     }
 
     const customerValidation = await validateCustomerData({
@@ -292,44 +212,53 @@ const updateReservation = async (req, res, next) => {
       guestName: nextGuestName,
       guestPhone: nextGuestPhone
     });
-
     if (!customerValidation.ok) {
-      return res.status(customerValidation.status).json({
-        ok: false,
-        message: customerValidation.message
-      });
+      return res.status(customerValidation.status).json({ ok: false, message: customerValidation.message });
     }
 
     const court = await Court.findOne({ _id: nextCourtId, club: clubId });
-
     if (!court) {
-      return res.status(404).json({
-        ok: false,
-        message: 'Cancha no encontrada para ese club'
-      });
+      return res.status(404).json({ ok: false, message: 'Cancha no encontrada para ese club' });
     }
 
     if (court.estado !== 'activa') {
-      return res.status(400).json({
-        ok: false,
-        message: 'No puedes reservar una cancha inactiva o en mantenimiento'
-      });
+      return res.status(400).json({ ok: false, message: 'No puedes reservar una cancha inactiva o en mantenimiento' });
     }
 
-    const overlappingReservation = await findOverlappingReservation({
+    const club = await Club.findById(clubId);
+
+    // ¿Se cambió el turno de lugar/horario?
+    const slotChanged =
+      (courtId && courtId !== existing.court.toString()) ||
+      (inicio && new Date(inicio).getTime() !== existing.inicio.getTime()) ||
+      (fin && new Date(fin).getTime() !== existing.fin.getTime());
+
+    // No se puede mover/reprogramar un turno que está transcurriendo ahora.
+    if (slotChanged && isReservationInProgress({ inicio: existing.inicio, fin: existing.fin })) {
+      return res.status(400).json({ ok: false, message: 'No se puede mover un turno que está en curso.' });
+    }
+
+    const nextEstado = estado !== undefined ? estado : existing.estado;
+    const scheduleCheck = validateReservationSlot(club, {
+      inicio: nextInicio,
+      fin: nextFin,
+      estado: nextEstado,
+      isNew: false,
+      validateSchedule: slotChanged
+    });
+    if (!scheduleCheck.ok) {
+      return res.status(400).json({ ok: false, message: scheduleCheck.message });
+    }
+
+    const overlapping = await findOverlappingReservation({
       clubId,
       courtId: nextCourtId,
-      fecha: nextFecha,
-      horaInicio: nextHoraInicio,
-      horaFin: nextHoraFin,
+      inicio: nextInicio,
+      fin: nextFin,
       excludeId: id
     });
-
-    if (overlappingReservation) {
-      return res.status(400).json({
-        ok: false,
-        message: 'Ya existe una reserva para esa cancha en ese horario'
-      });
+    if (overlapping) {
+      return res.status(400).json({ ok: false, message: 'Ya existe una reserva para esa cancha en ese horario' });
     }
 
     const updateData = {
@@ -337,36 +266,19 @@ const updateReservation = async (req, res, next) => {
       customer: nextCustomerId || null,
       guestName: nextCustomerId ? null : nextGuestName,
       guestPhone: nextCustomerId ? null : nextGuestPhone,
-      fecha: nextFecha,
-      horaInicio: nextHoraInicio,
-      horaFin: nextHoraFin
+      inicio: nextInicio,
+      fin: nextFin
     };
 
-    if (estado !== undefined) {
-      updateData.estado = estado;
-    }
+    if (estado !== undefined) updateData.estado = estado;
+    if (precioFinal !== undefined) updateData.precioFinal = precioFinal;
+    if (notas !== undefined) updateData.notas = notas;
 
-    if (precioFinal !== undefined) {
-      updateData.precioFinal = precioFinal;
-    }
+    const reservation = await populateReservation(
+      Reservation.findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
+    );
 
-    if (notas !== undefined) {
-      updateData.notas = notas;
-    }
-
-    const reservation = await Reservation.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true
-    })
-      .populate('club', 'nombre slug estado')
-      .populate('court', 'nombre tipo estado precio duracionTurno')
-      .populate('customer', 'nombre email estado')
-      .populate('creadaPor', 'nombre email');
-
-    res.status(200).json({
-      ok: true,
-      reservation
-    });
+    res.status(200).json({ ok: true, reservation });
   } catch (error) {
     next(error);
   }
@@ -376,35 +288,19 @@ const cancelReservation = async (req, res, next) => {
   try {
     const { clubId, id } = req.params;
 
-    const reservation = await Reservation.findOneAndUpdate(
-      {
-        _id: id,
-        club: clubId
-      },
-      {
-        estado: 'cancelada'
-      },
-      {
-        new: true,
-        runValidators: true
-      }
-    )
-      .populate('club', 'nombre slug estado')
-      .populate('court', 'nombre tipo estado precio duracionTurno')
-      .populate('customer', 'nombre email estado')
-      .populate('creadaPor', 'nombre email');
+    const reservation = await populateReservation(
+      Reservation.findOneAndUpdate(
+        { _id: id, club: clubId },
+        { estado: 'cancelada' },
+        { new: true, runValidators: true }
+      )
+    );
 
     if (!reservation) {
-      return res.status(404).json({
-        ok: false,
-        message: 'Reserva no encontrada'
-      });
+      return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
     }
 
-    res.status(200).json({
-      ok: true,
-      reservation
-    });
+    res.status(200).json({ ok: true, reservation });
   } catch (error) {
     next(error);
   }
@@ -412,18 +308,11 @@ const cancelReservation = async (req, res, next) => {
 
 const getMyReservations = async (req, res, next) => {
   try {
-    const reservations = await Reservation.find({
-      customer: req.user._id
-    })
-      .populate('club', 'nombre slug estado')
-      .populate('court', 'nombre tipo estado precio duracionTurno')
-      .populate('creadaPor', 'nombre email')
-      .sort({ fecha: -1, horaInicio: -1 });
+    const reservations = await populateReservation(
+      Reservation.find({ customer: req.user._id })
+    ).sort({ inicio: -1 });
 
-    res.status(200).json({
-      ok: true,
-      reservations
-    });
+    res.status(200).json({ ok: true, reservations });
   } catch (error) {
     next(error);
   }
@@ -432,6 +321,7 @@ const getMyReservations = async (req, res, next) => {
 module.exports = {
   createReservation,
   getReservationsByClub,
+  getUpcomingReservationsByClub,
   getReservationById,
   updateReservation,
   cancelReservation,
