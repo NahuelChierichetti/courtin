@@ -40,7 +40,7 @@ const initials = computed(() => {
               Explorar
             </RouterLink>
             <RouterLink
-              :to="isAuthenticated ? '/dashboard' : '/login'"
+              :to="isAuthenticated ? '/mis-reservas' : '/login'"
               class="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 no-underline transition-colors hover:bg-slate-50"
             >
               Mis reservas
@@ -52,7 +52,7 @@ const initials = computed(() => {
         <div class="flex items-center gap-3">
           <RouterLink
             v-if="isAuthenticated"
-            to="/dashboard"
+            to="/mis-reservas"
             class="flex h-9 w-9 items-center justify-center rounded-full bg-primitive-orange-100 text-xs font-bold text-primitive-orange-600 no-underline"
           >
             {{ initials }}
@@ -101,8 +101,8 @@ const initials = computed(() => {
         <div>
           <p class="text-xs font-semibold tracking-wider text-primitive-gray-600 uppercase">Complejos</p>
           <ul class="mt-3 space-y-2 text-sm text-slate-300">
-            <li>Sumá tu complejo</li>
-            <li><RouterLink to="/login" class="no-underline text-slate-300 hover:text-white">Panel de gestión</RouterLink></li>
+            <li><RouterLink to="/panel/registro" class="no-underline text-slate-300 hover:text-white">Sumá tu complejo</RouterLink></li>
+            <li><RouterLink to="/panel/login" class="no-underline text-slate-300 hover:text-white">Panel de gestión</RouterLink></li>
             <li>Precios</li>
           </ul>
         </div>

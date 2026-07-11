@@ -64,18 +64,18 @@ onUnmounted(() => {
 
 const handleLogout = () => {
   logout()
-  router.push({ name: 'login' })
+  router.push({ name: 'panel-login' })
 }
 
 const navItems = [
-  { label: 'Dashboard', icon: 'pi pi-home', to: '/dashboard' },
-  { label: 'Turnos', icon: 'pi pi-calendar', to: '/turnos', badge: 46 },
-  { label: 'Clientes', icon: 'pi pi-users', to: '/clientes' },
-  { label: 'Control de caja', icon: 'pi pi-wallet', to: '/caja' },
-  { label: 'Canchas', icon: 'pi pi-objects-column', to: '/canchas' },
-  { label: 'Horarios', icon: 'pi pi-clock', to: '/horarios' },
-  { label: 'Reportes', icon: 'pi pi-chart-bar', to: '/reportes' },
-  { label: 'Notificaciones', icon: 'pi pi-bell', to: '/notificaciones', dot: true },
+  { label: 'Dashboard', icon: 'pi pi-home', to: '/panel/dashboard' },
+  { label: 'Turnos', icon: 'pi pi-calendar', to: '/panel/turnos' },
+  { label: 'Clientes', icon: 'pi pi-users', to: '/panel/clientes' },
+  { label: 'Control de caja', icon: 'pi pi-wallet', to: '/panel/caja' },
+  { label: 'Canchas', icon: 'pi pi-objects-column', to: '/panel/canchas' },
+  { label: 'Horarios', icon: 'pi pi-clock', to: '/panel/horarios' },
+  { label: 'Reportes', icon: 'pi pi-chart-bar', to: '/panel/reportes' },
+  { label: 'Notificaciones', icon: 'pi pi-bell', to: '/panel/notificaciones', dot: true },
 ]
 
 const isActive = (to) => route.path === to || route.path.startsWith(to + '/')
@@ -140,12 +140,6 @@ const userShortName = computed(() => {
             ></i>
             <span class="flex-1">{{ item.label }}</span>
             <span
-              v-if="item.badge"
-              class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primitive-orange-500 px-1.5 text-[10px] font-bold text-white"
-            >
-              {{ item.badge }}
-            </span>
-            <span
               v-if="item.dot"
               class="h-2.5 w-2.5 rounded-full bg-error-500"
             ></span>
@@ -177,9 +171,9 @@ const userShortName = computed(() => {
             <p class="text-xs text-slate-500">Administrador</p>
           </div>
           <RouterLink
-            to="/configuracion"
+            to="/panel/configuracion"
             class="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 no-underline transition-colors hover:bg-white/10 hover:text-slate-300"
-            :class="{ 'bg-white/10 text-white': isActive('/configuracion') }"
+            :class="{ 'bg-white/10 text-white': isActive('/panel/configuracion') }"
           >
             <i class="pi pi-cog text-sm"></i>
           </RouterLink>

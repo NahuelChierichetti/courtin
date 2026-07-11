@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -9,7 +9,22 @@ import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
 const router = useRouter()
-const { login, isLoading } = useAuth()
+const { login, resolveLanding, isLoading } = useAuth()
+
+// Variante del acceso: 'club' (backoffice del complejo) o 'customer' (jugador).
+// Cambia sólo el copy y el link de registro; el endpoint de login es el mismo.
+const isClub = computed(() => route.meta.variant === 'club')
+
+const subtitle = computed(() =>
+  isClub.value
+    ? 'Ingresá para administrar tu complejo, canchas y turnos.'
+    : 'Entrá para ver y gestionar tus reservas.',
+)
+const registerTo = computed(() => (isClub.value ? '/panel/registro' : '/registro'))
+const registerLabel = computed(() =>
+  isClub.value ? '¿Querés sumar tu complejo?' : '¿Todavía no tenés cuenta?',
+)
+const registerCta = computed(() => (isClub.value ? 'Registrá tu complejo' : 'Registrate'))
 
 const form = reactive({
   email: '',
@@ -24,8 +39,9 @@ const handleSubmit = async () => {
   try {
     await login(form)
 
+    // Respeta ?redirect= si vino de un guard; si no, aterriza según el rol.
     const redirect =
-      typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+      typeof route.query.redirect === 'string' ? route.query.redirect : resolveLanding()
 
     router.push(redirect)
   } catch (error) {
@@ -54,7 +70,7 @@ const handleSubmit = async () => {
 
           <h1 class="mt-8 text-3xl font-bold text-primitive-dark-500 sm:text-4xl">Iniciar sesión</h1>
           <p class="mt-3 text-sm leading-relaxed text-primitive-dark-500">
-            Entrá con tu email y contraseña para acceder a la aplicación.
+            {{ subtitle }}
           </p>
 
         <Message v-if="errorMessage" severity="error" class="mt-6">
@@ -113,9 +129,9 @@ const handleSubmit = async () => {
         </div> -->
 
         <p class="!mt-6 text-center text-sm text-slate-600">
-          ¿Todavía no tenés cuenta?
-          <RouterLink class="font-semibold text-primitive-orange-500 hover:underline" to="/register">
-            Registrate
+          {{ registerLabel }}
+          <RouterLink class="font-semibold text-primitive-orange-500 hover:underline" :to="registerTo">
+            {{ registerCta }}
           </RouterLink>
         </p>
         </div>

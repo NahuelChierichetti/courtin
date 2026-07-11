@@ -49,6 +49,32 @@ const protect = async (req, res, next) => {
   }
 };
 
+// Autenticación opcional: si viene un token válido de un usuario activo, setea
+// req.user; si no hay token o es inválido, sigue sin cortar. Se usa en rutas
+// públicas que se enriquecen cuando el que las llama está logueado (p.ej.
+// asociar una reserva pública a la cuenta del cliente).
+const attachUserOptional = async (req, res, next) => {
+  try {
+    const header = req.headers.authorization;
+
+    if (!header || !header.startsWith('Bearer ')) {
+      return next();
+    }
+
+    const token = header.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (user && user.estado === 'activo') {
+      req.user = user;
+    }
+  } catch (error) {
+    // Token inválido/vencido: se ignora y se sigue como anónimo.
+  }
+
+  next();
+};
+
 const authorizeSuperadmin = (req, res, next) => {
   if (req.user.globalRole !== ROLES.SUPERADMIN) {
     return res.status(403).json({
@@ -106,6 +132,7 @@ const authorizeClubRoles = (...roles) => {
 
 module.exports = {
   protect,
+  attachUserOptional,
   authorizeSuperadmin,
   authorizeClubRoles
 };

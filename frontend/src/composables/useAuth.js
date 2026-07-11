@@ -128,12 +128,53 @@ const register = async (payload) => {
   }
 }
 
+// Alta de complejo: registra al dueño y su club, y deja la sesión iniciada con
+// la membership tenant_admin ya cargada vía getMe.
+const registerClub = async (payload) => {
+  isLoading.value = true
+
+  try {
+    const data = await authService.registerClub(payload)
+    setToken(data.token)
+    token.value = data.token
+
+    const me = await authService.getMe()
+    setSession(data.token, me.user, me.memberships)
+    isInitialized.value = true
+
+    return {
+      ...data,
+      user: me.user,
+      memberships: me.memberships,
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const logout = () => {
   clearSession()
   isInitialized.value = true
 }
 
 const isSuperadmin = computed(() => user.value?.globalRole === 'superadmin')
+
+// Staff del complejo: superadmin, o quien tenga una membresía de gestión
+// (tenant_admin/employee). Un cliente/jugador no tiene ninguna de estas.
+const CLUB_STAFF_ROLES = ['tenant_admin', 'employee']
+const hasClubAccess = computed(
+  () =>
+    isSuperadmin.value ||
+    memberships.value.some((m) => CLUB_STAFF_ROLES.includes(m.role)),
+)
+
+// Destino de aterrizaje según el rol del usuario logueado. Se usa tras
+// login/registro y para resolver rutas guestOnly cuando ya hay sesión.
+const resolveLanding = () => {
+  if (isSuperadmin.value) return '/admin'
+  if (hasClubAccess.value) return '/panel/dashboard'
+  return '/mis-reservas'
+}
 
 const currentClub = computed(() => {
   if (!currentClubId.value) return null
@@ -180,12 +221,15 @@ export const useAuth = () => ({
   currentClubId: readonly(currentClubId),
   currentClub,
   isSuperadmin,
+  hasClubAccess,
+  resolveLanding,
   isLoading: readonly(isLoading),
   isInitialized: readonly(isInitialized),
   isAuthenticated: computed(() => Boolean(token.value && user.value)),
   initializeAuth,
   login,
   register,
+  registerClub,
   logout,
   setCurrentClubId,
   setSuperadminClubs,

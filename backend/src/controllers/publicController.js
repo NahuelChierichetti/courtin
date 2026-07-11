@@ -41,7 +41,7 @@ const toPublicCourt = (c) => ({
 // cancha) y texto libre.
 const getPublicClubs = async (req, res, next) => {
   try {
-    const { ciudad, tipo, q } = req.query;
+    const { ciudad, tipo, q, fecha, hora } = req.query;
     const filter = { publicado: true };
 
     if (ciudad) filter.ciudad = new RegExp(escapeRegex(ciudad), 'i');
@@ -57,11 +57,55 @@ const getPublicClubs = async (req, res, next) => {
       filter._id = { $in: clubIds };
     }
 
-    const clubs = await Club.find(filter).select(PUBLIC_CLUB_FIELDS).sort({ nombre: 1 });
+    // Se traen los docs completos (incluyen horarios/timezone) para poder calcular
+    // disponibilidad; los campos públicos se seleccionan al armar la respuesta.
+    let clubs = await Club.find(filter).sort({ nombre: 1 });
+
+    const ids = clubs.map((c) => c._id);
+    const courts = await Court.find({ club: { $in: ids }, visible: { $ne: false }, estado: 'activa' });
+
+    // Filtro por hora de inicio: sólo clubes con alguna cancha que tenga un turno
+    // libre que empiece a `hora` en `fecha` (con la duración por defecto de la cancha).
+    const filtraDisponibilidad =
+      fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha) && hora && /^\d{2}:\d{2}$/.test(hora);
+
+    if (filtraDisponibilidad) {
+      // Ventana UTC holgada (±14h) para cubrir el día en cualquier timezone; el
+      // solapamiento fino lo resuelve computeSlots por cada turno.
+      const desde = dayjs.utc(fecha, 'YYYY-MM-DD').subtract(14, 'hour').toDate();
+      const hasta = dayjs.utc(fecha, 'YYYY-MM-DD').add(1, 'day').add(14, 'hour').toDate();
+      const reservations = await Reservation.find({
+        court: { $in: courts.map((c) => c._id) },
+        estado: { $in: ACTIVE_RESERVATION_STATUSES },
+        inicio: { $lt: hasta },
+        fin: { $gt: desde }
+      }).select('court inicio fin');
+
+      const resByCourt = {};
+      for (const r of reservations) {
+        const k = r.court.toString();
+        (resByCourt[k] = resByCourt[k] || []).push(r);
+      }
+
+      const clubById = {};
+      clubs.forEach((c) => { clubById[c._id.toString()] = c; });
+
+      const disponibles = new Set();
+      for (const court of courts) {
+        if (tipo && court.tipo !== tipo) continue;
+        const club = clubById[court.club.toString()];
+        if (!club) continue;
+        const rs = resByCourt[court._id.toString()] || [];
+        const { abierto, slots } = computeSlots(club, court, fecha, rs, court.duracionTurno);
+        if (abierto && slots.some((s) => s.horaInicio === hora && s.disponible)) {
+          disponibles.add(court.club.toString());
+        }
+      }
+
+      clubs = clubs.filter((c) => disponibles.has(c._id.toString()));
+    }
 
     // Deportes y precio "desde" por club (para los chips y el precio de la card).
-    const ids = clubs.map((c) => c._id);
-    const courts = await Court.find({ club: { $in: ids }, visible: { $ne: false }, estado: 'activa' }).select('club tipo precio tarifas');
     const deportesByClub = {};
     const precioByClub = {};
     for (const c of courts) {
@@ -82,8 +126,11 @@ const getPublicClubs = async (req, res, next) => {
 
     const result = clubs.map((c) => {
       const k = c._id.toString();
+      const pub = {};
+      PUBLIC_CLUB_FIELDS.split(' ').forEach((f) => { pub[f] = c[f]; });
+      pub._id = c._id;
       return {
-        ...c.toObject(),
+        ...pub,
         deportes: Array.from(deportesByClub[k] || []),
         precioDesde: Number.isFinite(precioByClub[k]) ? precioByClub[k] : null
       };
@@ -197,7 +244,12 @@ const getPublicCities = async (req, res, next) => {
 const createPublicReservation = async (req, res, next) => {
   try {
     const { slug } = req.params;
-    const { courtId, inicio, fin, guestName, guestPhone, guestEmail, notas } = req.body;
+    const { courtId, inicio, fin, guestPhone, guestEmail, notas } = req.body;
+
+    // Si el que reserva está logueado (attachUserOptional), la reserva queda
+    // asociada a su cuenta y su nombre/email de la cuenta sirven de fallback.
+    const authedUser = req.user || null;
+    const guestName = req.body.guestName || authedUser?.nombre || null;
 
     if (!guestName || !guestPhone) {
       return res.status(400).json({ ok: false, message: 'Indicá tu nombre y teléfono para reservar' });
@@ -241,9 +293,10 @@ const createPublicReservation = async (req, res, next) => {
       reservation = await Reservation.create({
         club: club._id,
         court: court._id,
+        customer: authedUser?._id || null,
         guestName,
         guestPhone,
-        guestEmail: guestEmail || null,
+        guestEmail: guestEmail || authedUser?.email || null,
         inicio: new Date(inicio),
         fin: new Date(fin),
         estado: 'pendiente',
