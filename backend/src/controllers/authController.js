@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
 const Membership = require('../models/Membership');
+const Club = require('../models/Club');
+const ROLES = require('../config/roles');
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -47,6 +49,81 @@ const register = async (req, res, next) => {
       ok: true,
       token,
       user: buildUserResponse(user)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Alta de complejo (onboarding del negocio): crea el usuario dueño, el club y
+// la membresía tenant_admin que lo vincula. Distinto de `register`, que da de
+// alta un cliente/jugador sin club.
+const registerClub = async (req, res, next) => {
+  try {
+    const { owner = {}, club = {} } = req.body;
+    const { nombre, email, password } = owner;
+    const { nombre: clubNombre, slug } = club;
+
+    if (!nombre || !email || !password) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Faltan datos del responsable (nombre, email y contraseña)'
+      });
+    }
+
+    if (!clubNombre || !slug) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Faltan datos del complejo (nombre y slug)'
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Ya existe un usuario con ese email'
+      });
+    }
+
+    const existingClub = await Club.findOne({ slug });
+    if (existingClub) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Ya existe un complejo con ese slug'
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      nombre,
+      email,
+      password: hashedPassword
+    });
+
+    const newClub = await Club.create({
+      nombre: clubNombre,
+      slug,
+      direccion: club.direccion,
+      ciudad: club.ciudad,
+      provincia: club.provincia,
+      telefono: club.telefono
+    });
+
+    await Membership.create({
+      user: user._id,
+      club: newClub._id,
+      role: ROLES.TENANT_ADMIN
+    });
+
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      ok: true,
+      token,
+      user: buildUserResponse(user),
+      club: newClub
     });
   } catch (error) {
     next(error);
@@ -113,6 +190,7 @@ const getMe = async (req, res, next) => {
 
 module.exports = {
   register,
+  registerClub,
   login,
   getMe
 };

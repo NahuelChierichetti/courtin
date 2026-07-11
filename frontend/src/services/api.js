@@ -26,15 +26,18 @@ api.interceptors.response.use(
     const requestUrl = error.config?.url || ''
     const isAuthRequest =
       requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register')
-    const isAuthPage =
-      window.location.pathname === '/login' || window.location.pathname === '/register'
+    const pathname = window.location.pathname
+    const AUTH_PAGES = ['/login', '/registro', '/panel/login', '/panel/registro']
+    const isAuthPage = AUTH_PAGES.includes(pathname)
 
     if (status === 401 && !isAuthRequest) {
       clearToken()
 
       if (!isAuthPage) {
-        const redirect = `${window.location.pathname}${window.location.search}`
-        window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
+        // El backoffice manda a su propio login; el sitio del cliente al suyo.
+        const loginPath = pathname.startsWith('/panel') ? '/panel/login' : '/login'
+        const redirect = `${pathname}${window.location.search}`
+        window.location.href = `${loginPath}?redirect=${encodeURIComponent(redirect)}`
       }
     }
 

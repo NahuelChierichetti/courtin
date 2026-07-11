@@ -3,9 +3,10 @@ import api from './api'
 // Servicio de la interfaz pública (sin autenticación obligatoria).
 const publicService = {
   // Descubrimiento de clubes publicados. Filtros opcionales: ciudad, tipo
-  // (deporte) y q (texto libre).
-  async searchClubs({ ciudad, tipo, q } = {}) {
-    const { data } = await api.get('/public/clubs', { params: { ciudad, tipo, q } })
+  // (deporte), q (texto libre) y disponibilidad por fecha ("YYYY-MM-DD") + hora
+  // de inicio ("HH:MM"): sólo clubes con un turno libre a esa hora.
+  async searchClubs({ ciudad, tipo, q, fecha, hora } = {}) {
+    const { data } = await api.get('/public/clubs', { params: { ciudad, tipo, q, fecha, hora } })
     return data.clubs
   },
 

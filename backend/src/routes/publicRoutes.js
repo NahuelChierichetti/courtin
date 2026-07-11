@@ -7,6 +7,7 @@ const {
   createPublicReservation,
   getPublicCities
 } = require('../controllers/publicController');
+const { attachUserOptional } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
@@ -16,6 +17,6 @@ router.get('/cities', getPublicCities);
 router.get('/clubs', getPublicClubs);
 router.get('/clubs/:slug', getPublicClubBySlug);
 router.get('/clubs/:slug/courts/:courtId/availability', getCourtAvailability);
-router.post('/clubs/:slug/reservations', createPublicReservation);
+router.post('/clubs/:slug/reservations', attachUserOptional, createPublicReservation);
 
 module.exports = router;
