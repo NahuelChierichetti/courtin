@@ -1,0 +1,1 @@
+import{l as e}from"./index-BeF6ITMM.js";var t={async getHorarios(t){let{data:n}=await e.get(`/clubs/${t}/horarios`,{headers:{"x-club-id":t}});return n.horarios},async updateHorarios(t,n){let{data:r}=await e.put(`/clubs/${t}/horarios`,n,{headers:{"x-club-id":t}});return r.horarios}};export{t};
