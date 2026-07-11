@@ -29,6 +29,12 @@ const publicService = {
     return data // { fecha, abierto, nombre, duracion, duracionTurno, slots }
   },
 
+  // Disponibilidad de todas las canchas del club para una fecha (vista timeline).
+  async getClubAvailability(slug, fecha) {
+    const { data } = await api.get(`/public/clubs/${slug}/availability`, { params: { fecha } })
+    return data // { fecha, courts: [{ court, abierto, nombre, slots }] }
+  },
+
   // Reserva como invitado. Devuelve { manageToken, reservation }.
   async createReservation(slug, payload) {
     const { data } = await api.post(`/public/clubs/${slug}/reservations`, payload)

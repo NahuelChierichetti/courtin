@@ -4,7 +4,7 @@ import { useRoute, RouterLink } from 'vue-router'
 import publicService from '@/services/publicService'
 import { useAuth } from '@/composables/useAuth'
 import { dayjs, formatCurrency, DEFAULT_TZ } from '@/utils/datetime'
-import { sportMeta } from '@/utils/turnos'
+import { sportMeta, timeToMinutes } from '@/utils/turnos'
 import BookingModal from '@/components/public/BookingModal.vue'
 
 const route = useRoute()
@@ -17,7 +17,6 @@ const courts = ref([])
 const loading = ref(true)
 const error = ref('')
 
-const selectedCourtId = ref(null)
 // La fecha puede venir preseleccionada desde el buscador (?fecha=YYYY-MM-DD).
 const queryFecha = route.query.fecha
 const currentDate = ref(
@@ -25,31 +24,34 @@ const currentDate = ref(
     ? queryFecha
     : dayjs().format('YYYY-MM-DD'),
 )
-const selectedDuration = ref(null)
+
+// Disponibilidad de TODAS las canchas del club para la fecha (una fila por cancha).
+const clubAvailability = ref(null)
+const loadingSlots = ref(false)
+
+// El turno seleccionado y a qué cancha pertenece (se elige clickeando un bloque).
+const selectedCourtId = ref(null)
 const selectedSlot = ref(null)
 
-const availability = ref(null)
-const loadingSlots = ref(false)
+// Filtro por deporte (solo se muestra si el club tiene más de un tipo de cancha).
+const selectedSport = ref('all')
+const sportMenuOpen = ref(false)
+
+const pickSport = (value) => {
+  selectedSport.value = value
+  sportMenuOpen.value = false
+}
 
 const WEEKDAY_KEYS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
 
-const tz = computed(() => club.value?.timezone || DEFAULT_TZ)
+// Granularidad del eje de tiempo del timeline (min por columna).
+const AXIS_STEP = 30
+
 const moneda = computed(() => club.value?.moneda || 'ARS')
 const selectedCourt = computed(() => courts.value.find((c) => c._id === selectedCourtId.value) || null)
 
-const courtPrice = (c) => {
-  const tarifas = c.tarifas || []
-  const min = tarifas.reduce((m, t) => (typeof t.precio === 'number' ? Math.min(m, t.precio) : m), Infinity)
-  return Number.isFinite(min) ? min : c.precio || 0
-}
-
-// Opciones de duración: las comunes + la duración típica de la cancha.
-const durationOptions = computed(() => {
-  const base = selectedCourt.value?.duracionTurno || 60
-  return [...new Set([60, 90, 120, base])].sort((a, b) => a - b)
-})
-
 const formatDur = (min) => {
+  if (!min) return '—'
   if (min < 60) return `${min} min`
   const h = Math.floor(min / 60)
   const m = min % 60
@@ -84,10 +86,74 @@ const selectedDateLabel = computed(() => {
   return l.charAt(0).toUpperCase() + l.slice(1)
 })
 
-// Slots a mostrar: dentro de horario, sin los pasados / fuera de anticipación.
-const visibleSlots = computed(() =>
-  (availability.value?.slots || []).filter((s) => s.motivo !== 'pasado' && s.motivo !== 'fuera_de_anticipacion'),
+// Deportes disponibles en el club (para el filtro del timeline).
+const sports = computed(() => [...new Set(courts.value.map((c) => c.tipo))])
+
+// Filas del timeline según el filtro de deporte activo.
+const visibleRows = computed(() => {
+  const rows = clubAvailability.value || []
+  if (selectedSport.value === 'all') return rows
+  return rows.filter((r) => r.court.tipo === selectedSport.value)
+})
+
+// ¿Alguna cancha (del filtro actual) abierta este día?
+const anyOpen = computed(() => visibleRows.value.some((r) => r.abierto))
+
+// Eje de tiempo del timeline: se calcula a partir del rango horario que cubren
+// los turnos de las canchas abiertas visibles (redondeado a horas enteras).
+const timeline = computed(() => {
+  const rows = visibleRows.value
+  if (!rows || !rows.length) return null
+
+  let min = Infinity
+  let max = -Infinity
+  for (const r of rows) {
+    if (!r.abierto) continue
+    for (const s of r.slots) {
+      const a = timeToMinutes(s.horaInicio)
+      const b = timeToMinutes(s.horaFin)
+      if (a < min) min = a
+      if (b > max) max = b
+    }
+  }
+  if (!Number.isFinite(min)) return null
+
+  const startMin = Math.floor(min / 60) * 60
+  const endMin = Math.ceil(max / 60) * 60
+  const cols = (endMin - startMin) / AXIS_STEP
+
+  const hours = []
+  for (let h = startMin; h < endMin; h += 60) {
+    hours.push({ label: String(h / 60).padStart(2, '0'), col: 2 + (h - startMin) / AXIS_STEP })
+  }
+  return { startMin, endMin, cols, hours }
+})
+
+const gridStyle = computed(() =>
+  timeline.value
+    ? { gridTemplateColumns: `132px repeat(${timeline.value.cols}, minmax(46px, 1fr))` }
+    : {},
 )
+
+// Posición de un turno en el eje (columna de inicio + cantidad de columnas).
+const slotStyle = (slot) => {
+  const t = timeline.value
+  if (!t) return {}
+  const startMin = timeToMinutes(slot.horaInicio)
+  const finMin = timeToMinutes(slot.horaFin)
+  const startCol = 2 + (startMin - t.startMin) / AXIS_STEP
+  const span = Math.max(1, (finMin - startMin) / AXIS_STEP)
+  return { gridColumn: `${startCol} / span ${span}` }
+}
+
+const isSlotSelected = (court, slot) =>
+  selectedCourtId.value === court._id && selectedSlot.value?.inicio === slot.inicio
+
+const selectSlot = (court, slot) => {
+  if (!slot.disponible) return
+  selectedCourtId.value = court._id
+  selectedSlot.value = slot
+}
 
 const fetchClub = async () => {
   loading.value = true
@@ -96,7 +162,6 @@ const fetchClub = async () => {
     const { club: c, courts: cs } = await publicService.getClub(slug)
     club.value = c
     courts.value = cs
-    selectedCourtId.value = cs[0]?._id || null
   } catch (err) {
     console.error(err)
     error.value = err.response?.status === 404 ? 'Este club no existe o no está disponible.' : 'No se pudo cargar el club.'
@@ -107,39 +172,36 @@ const fetchClub = async () => {
 
 const fetchAvailability = async () => {
   selectedSlot.value = null
-  if (!selectedCourtId.value) {
-    availability.value = null
+  selectedCourtId.value = null
+  if (!courts.value.length) {
+    clubAvailability.value = null
     return
   }
   loadingSlots.value = true
   try {
-    availability.value = await publicService.getAvailability(
-      slug,
-      selectedCourtId.value,
-      currentDate.value,
-      selectedDuration.value || undefined,
-    )
+    const { courts: rows } = await publicService.getClubAvailability(slug, currentDate.value)
+    clubAvailability.value = rows
   } catch (err) {
     console.error(err)
-    availability.value = null
+    clubAvailability.value = null
   } finally {
     loadingSlots.value = false
   }
 }
 
-const selectSlot = (slot) => {
-  if (!slot.disponible) return
-  selectedSlot.value = slot
-}
-
-const isSlotSelected = (slot) => selectedSlot.value?.inicio === slot.inicio
-
-// Al cambiar de cancha, la duración vuelve a la típica de esa cancha.
-watch(selectedCourtId, () => {
-  selectedDuration.value = selectedCourt.value?.duracionTurno || 60
+// Al cambiar el filtro de deporte, si el turno elegido ya no se ve, se limpia.
+watch(selectedSport, () => {
+  if (selectedSport.value !== 'all' && selectedCourt.value?.tipo !== selectedSport.value) {
+    selectedSlot.value = null
+    selectedCourtId.value = null
+  }
 })
-watch([selectedCourtId, currentDate, selectedDuration], fetchAvailability)
-onMounted(fetchClub)
+
+watch(currentDate, fetchAvailability)
+onMounted(async () => {
+  await fetchClub()
+  if (courts.value.length) fetchAvailability()
+})
 
 // --- Booking modal ---
 const bookingOpen = ref(false)
@@ -153,10 +215,8 @@ const openBooking = () => {
 }
 
 const onConfirmed = () => fetchAvailability()
-
 const onCloseModal = () => {
   bookingOpen.value = false
-  selectedSlot.value = null
 }
 </script>
 
@@ -213,45 +273,12 @@ const onCloseModal = () => {
       </div>
 
       <!-- Two columns -->
-      <div v-else class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_340px]">
-        <!-- Left: steps -->
-        <div class="space-y-6">
-          <!-- Step 1: cancha -->
+      <div v-else class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <!-- Left: día + timeline -->
+        <div class="min-w-0 space-y-6">
+          <!-- Step 1: día -->
           <div>
-            <h2 class="mb-3 text-base font-semibold text-slate-900"><span class="text-slate-400">1 ·</span> Elegí la cancha</h2>
-            <div class="space-y-2">
-              <button
-                v-for="c in courts"
-                :key="c._id"
-                class="flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer"
-                :class="selectedCourtId === c._id ? 'border-primitive-orange-400 bg-primitive-orange-50' : 'border-slate-200 bg-white hover:bg-slate-50'"
-                @click="selectedCourtId = c._id"
-              >
-                <div class="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-primitive-dark-500 to-primitive-blue-500">
-                  <div class="absolute inset-1.5 rounded border border-white/20"></div>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-sm font-semibold text-slate-900">{{ c.nombre }}</p>
-                  <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
-                    <span class="inline-flex items-center gap-1"><span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(c.tipo).dot"></span>{{ sportMeta(c.tipo).label }}</span>
-                    <span v-if="c.superficie">· {{ c.superficie }}</span>
-                    <span>· {{ c.cubierta ? 'Cubierta' : 'Descubierta' }}</span>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <p class="text-sm font-bold font-secondary text-slate-900">{{ formatCurrency(courtPrice(c), moneda) }}</p>
-                  <p class="text-[10px] text-neutral-400">/hora</p>
-                </div>
-                <span class="flex h-5 w-5 items-center justify-center rounded-full border-2" :class="selectedCourtId === c._id ? 'border-primitive-orange-500' : 'border-slate-300'">
-                  <span v-if="selectedCourtId === c._id" class="h-2.5 w-2.5 rounded-full bg-primitive-orange-500"></span>
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 2: día -->
-          <div>
-            <h2 class="mb-3 text-base font-semibold text-slate-900"><span class="text-slate-400">2 ·</span> Elegí el día</h2>
+            <h2 class="mb-3 text-base font-semibold text-slate-900"><span class="text-slate-400">1 ·</span> Elegí el día</h2>
             <div class="flex gap-2 overflow-x-auto pb-1">
               <button
                 v-for="d in dayPills"
@@ -267,57 +294,165 @@ const onCloseModal = () => {
             </div>
           </div>
 
-          <!-- Step 3: horario -->
+          <!-- Step 2: turno (timeline) -->
           <div>
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 class="text-base font-semibold text-slate-900"><span class="text-slate-400">3 ·</span> Elegí el horario</h2>
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-neutral-400">Duración</span>
-                <div class="flex items-center gap-0.5 rounded-lg border border-slate-200 p-0.5">
-                  <button
-                    v-for="d in durationOptions"
-                    :key="d"
-                    class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer"
-                    :class="selectedDuration === d ? 'bg-primitive-dark-500 text-white' : 'text-slate-600 hover:bg-slate-50'"
-                    @click="selectedDuration = d"
-                  >
-                    {{ formatDur(d) }}
-                  </button>
-                </div>
-              </div>
+              <h2 class="text-base font-semibold text-slate-900"><span class="text-slate-400">2 ·</span> Elegí tu turno</h2>
+              <span class="text-xs text-neutral-400">{{ selectedDateLabel }}</span>
             </div>
 
-            <div v-if="loadingSlots" class="flex items-center justify-center py-12">
+            <!-- Filtro por deporte (solo con más de un deporte) -->
+            <div v-if="sports.length > 1" class="relative mb-3 inline-block">
+              <button
+                type="button"
+                class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white py-2 pl-2 pr-3 text-left transition-colors hover:bg-slate-50 cursor-pointer"
+                @click="sportMenuOpen = !sportMenuOpen"
+              >
+                <span
+                  class="flex h-8 w-8 items-center justify-center rounded-lg"
+                  :class="selectedSport === 'all' ? 'bg-slate-100' : sportMeta(selectedSport).bg"
+                >
+                  <span
+                    class="h-3 w-3 rounded-full"
+                    :class="selectedSport === 'all' ? 'bg-gradient-to-br from-primitive-dark-500 to-primitive-blue-500' : sportMeta(selectedSport).dot"
+                  ></span>
+                </span>
+                <span class="min-w-[64px]">
+                  <span class="block text-[10px] leading-none text-neutral-400">Deporte</span>
+                  <span class="block text-sm font-semibold leading-tight text-slate-800">
+                    {{ selectedSport === 'all' ? 'Todos' : sportMeta(selectedSport).label }}
+                  </span>
+                </span>
+                <i class="pi pi-chevron-down text-[10px] text-slate-400 transition-transform" :class="{ 'rotate-180': sportMenuOpen }"></i>
+              </button>
+
+              <!-- Menú -->
+              <template v-if="sportMenuOpen">
+                <div class="fixed inset-0 z-10" @click="sportMenuOpen = false"></div>
+                <div class="absolute left-0 top-full z-20 mt-1.5 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
+                  <button
+                    type="button"
+                    class="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm transition-colors cursor-pointer"
+                    :class="selectedSport === 'all' ? 'bg-primitive-orange-50 text-primitive-orange-700' : 'text-slate-700 hover:bg-slate-50'"
+                    @click="pickSport('all')"
+                  >
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
+                      <span class="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-primitive-dark-500 to-primitive-blue-500"></span>
+                    </span>
+                    <span class="flex-1 font-medium">Todos los deportes</span>
+                    <i v-if="selectedSport === 'all'" class="pi pi-check text-xs text-primitive-orange-500"></i>
+                  </button>
+                  <button
+                    v-for="s in sports"
+                    :key="s"
+                    type="button"
+                    class="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm transition-colors cursor-pointer"
+                    :class="selectedSport === s ? 'bg-primitive-orange-50 text-primitive-orange-700' : 'text-slate-700 hover:bg-slate-50'"
+                    @click="pickSport(s)"
+                  >
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg" :class="sportMeta(s).bg">
+                      <span class="h-2.5 w-2.5 rounded-full" :class="sportMeta(s).dot"></span>
+                    </span>
+                    <span class="flex-1 font-medium">{{ sportMeta(s).label }}</span>
+                    <i v-if="selectedSport === s" class="pi pi-check text-xs text-primitive-orange-500"></i>
+                  </button>
+                </div>
+              </template>
+            </div>
+
+            <div v-if="loadingSlots" class="flex items-center justify-center py-16">
               <i class="pi pi-spin pi-spinner text-2xl text-neutral-400"></i>
             </div>
-            <div v-else-if="!availability || !availability.abierto" class="rounded-xl bg-slate-50 py-10 text-center text-sm text-slate-500">
-              {{ availability && availability.nombre ? `Cerrado (${availability.nombre})` : 'El complejo está cerrado este día.' }}
+
+            <div v-else-if="!anyOpen" class="rounded-xl bg-slate-50 py-12 text-center text-sm text-slate-500">
+              {{ selectedSport === 'all'
+                ? 'El complejo está cerrado este día.'
+                : `No hay canchas de ${sportMeta(selectedSport).label} disponibles este día.` }}
             </div>
-            <div v-else-if="!visibleSlots.length" class="rounded-xl bg-slate-50 py-10 text-center text-sm text-slate-500">
-              No quedan horarios disponibles para esta fecha.
-            </div>
-            <div v-else>
-              <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-                <button
-                  v-for="slot in visibleSlots"
-                  :key="slot.inicio"
-                  :disabled="!slot.disponible"
-                  class="rounded-lg border py-2 text-sm font-medium transition-colors"
-                  :class="isSlotSelected(slot)
-                    ? 'border-primitive-orange-500 bg-primitive-orange-500 text-white'
-                    : slot.disponible
-                      ? 'border-slate-200 bg-white text-slate-700 hover:border-primitive-orange-400 cursor-pointer'
-                      : 'border-transparent bg-slate-100 text-slate-300 line-through cursor-not-allowed'"
-                  @click="selectSlot(slot)"
-                >
-                  {{ slot.horaInicio }}
-                </button>
+
+            <div v-else class="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
+              <div class="overflow-x-auto">
+                <div class="min-w-[640px]">
+                  <!-- Encabezado de horas -->
+                  <div class="grid" :style="gridStyle">
+                    <div></div>
+                    <div
+                      v-for="h in timeline.hours"
+                      :key="h.label"
+                      class="pb-1 text-[11px] font-medium text-neutral-400"
+                      :style="{ gridColumn: `${h.col} / span 2` }"
+                    >
+                      {{ h.label }}
+                    </div>
+                  </div>
+
+                  <!-- Una fila por cancha -->
+                  <div
+                    v-for="row in visibleRows"
+                    :key="row.court._id"
+                    class="grid items-center border-t border-slate-100"
+                    :style="gridStyle"
+                  >
+                    <!-- Etiqueta de la cancha -->
+                    <div class="py-2 pr-3" style="grid-column: 1">
+                      <p class="truncate text-xs font-semibold text-slate-800">{{ row.court.nombre }}</p>
+                      <p class="mt-0.5 flex items-center gap-1 text-[10px] text-neutral-400">
+                        <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(row.court.tipo).dot"></span>
+                        {{ formatDur(row.court.duracionTurno) }}
+                      </p>
+                    </div>
+
+                    <!-- Líneas guía verticales por columna -->
+                    <div
+                      v-for="n in timeline.cols"
+                      :key="'g' + n"
+                      class="h-full border-l border-slate-50"
+                      :style="{ gridColumn: n + 1, gridRow: 1 }"
+                    ></div>
+
+                    <!-- Cancha cerrada este día -->
+                    <div
+                      v-if="!row.abierto"
+                      class="my-1 flex h-9 items-center justify-center rounded-md bg-slate-50 text-[11px] font-medium text-slate-400"
+                      :style="{ gridColumn: `2 / span ${timeline.cols}`, gridRow: 1 }"
+                    >
+                      {{ row.nombre ? `Cerrado · ${row.nombre}` : 'Cerrado' }}
+                    </div>
+
+                    <!-- Turnos -->
+                    <template v-else>
+                      <button
+                        v-for="slot in row.slots"
+                        :key="slot.inicio"
+                        :disabled="!slot.disponible"
+                        :style="{ ...slotStyle(slot), gridRow: 1 }"
+                        class="my-1 flex h-9 flex-col items-center justify-center rounded-md border px-1 text-center leading-none transition-colors"
+                        :class="isSlotSelected(row.court, slot)
+                          ? 'border-primitive-orange-500 bg-primitive-orange-500 text-white shadow-sm cursor-pointer'
+                          : slot.disponible
+                            ? 'border-slate-200 bg-white text-slate-700 hover:border-primitive-orange-400 hover:bg-primitive-orange-50 cursor-pointer'
+                            : slot.motivo === 'reservado'
+                              ? 'border-transparent bg-slate-200 text-slate-400 cursor-not-allowed'
+                              : 'border-transparent bg-slate-50 text-slate-300 cursor-not-allowed'"
+                        @click="selectSlot(row.court, slot)"
+                      >
+                        <template v-if="slot.disponible || isSlotSelected(row.court, slot)">
+                          <span class="text-[11px] font-semibold">{{ slot.horaInicio }}</span>
+                        </template>
+                        <template v-else-if="slot.motivo === 'reservado'">
+                          <i class="pi pi-lock text-[10px]"></i>
+                        </template>
+                      </button>
+                    </template>
+                  </div>
+                </div>
               </div>
+
               <!-- Legend -->
-              <div class="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-500">
+              <div class="mt-3 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
                 <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded border border-slate-200 bg-white"></span>Disponible</span>
-                <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-primitive-orange-500"></span>Seleccionado</span>
-                <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-slate-100"></span>Ocupado</span>
+                <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-primitive-orange-500"></span>Tu selección</span>
+                <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-slate-200"></span>No disponible</span>
               </div>
             </div>
           </div>
@@ -354,7 +489,7 @@ const onCloseModal = () => {
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-slate-500">Duración</span>
-                <span class="font-medium text-slate-800">{{ selectedDuration ? formatDur(selectedDuration) : '—' }}</span>
+                <span class="font-medium text-slate-800">{{ formatDur(selectedCourt?.duracionTurno) }}</span>
               </div>
             </div>
 
@@ -385,7 +520,7 @@ const onCloseModal = () => {
             >
               Reservar ahora <i class="pi pi-arrow-right text-xs"></i>
             </button>
-            <p class="mt-2 text-center text-[11px] text-neutral-400">Elegí cancha, día y horario para continuar.</p>
+            <p class="mt-2 text-center text-[11px] text-neutral-400">Elegí el día y tocá un turno libre para continuar.</p>
           </div>
         </div>
       </div>
