@@ -241,6 +241,54 @@ const getCourtAvailability = async (req, res, next) => {
   }
 };
 
+// GET /public/clubs/:slug/availability?fecha=YYYY-MM-DD
+// Disponibilidad de TODAS las canchas públicas del club para una fecha, en un
+// solo request (alimenta la vista de timeline). Cada cancha usa su propia
+// duración de turno.
+const getClubAvailability = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const { fecha } = req.query;
+
+    if (!fecha || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+      return res.status(400).json({ ok: false, message: 'Indicá una fecha válida (YYYY-MM-DD)' });
+    }
+
+    const club = await Club.findOne({ slug, publicado: true });
+    if (!club) return res.status(404).json({ ok: false, message: 'Club no encontrado' });
+
+    const courts = await Court.find({ club: club._id, visible: { $ne: false }, estado: 'activa' }).sort({ nombre: 1 });
+
+    const tz = club.timezone || DEFAULT_TZ;
+    // Ventana del día en instantes UTC para traer las reservas que lo solapan.
+    const desde = dayjs.tz(`${fecha} 00:00`, 'YYYY-MM-DD HH:mm', tz).utc().toDate();
+    const hasta = dayjs.tz(`${fecha} 00:00`, 'YYYY-MM-DD HH:mm', tz).add(1, 'day').utc().toDate();
+
+    const reservations = await Reservation.find({
+      court: { $in: courts.map((c) => c._id) },
+      estado: { $in: ACTIVE_RESERVATION_STATUSES },
+      inicio: { $lt: hasta },
+      fin: { $gt: desde }
+    }).select('court inicio fin');
+
+    const resByCourt = {};
+    for (const r of reservations) {
+      const k = r.court.toString();
+      (resByCourt[k] = resByCourt[k] || []).push(r);
+    }
+
+    const result = courts.map((court) => {
+      const rs = resByCourt[court._id.toString()] || [];
+      const { abierto, nombre, slots } = computeSlots(club, court, fecha, rs, court.duracionTurno);
+      return { court: toPublicCourt(court), abierto, nombre, slots };
+    });
+
+    res.status(200).json({ ok: true, fecha, courts: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // GET /public/cities
 // Ciudades (distinct) con al menos un club publicado, para el filtro del buscador.
 const getPublicCities = async (req, res, next) => {
@@ -351,6 +399,7 @@ module.exports = {
   getPublicClubs,
   getPublicClubBySlug,
   getCourtAvailability,
+  getClubAvailability,
   createPublicReservation,
   getPublicCities
 };
