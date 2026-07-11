@@ -11,6 +11,12 @@ const authService = {
     return data
   },
 
+  // Alta de complejo: crea usuario dueño + club + membership tenant_admin.
+  async registerClub(payload) {
+    const { data } = await api.post('/auth/register-club', payload)
+    return data
+  },
+
   async getMe() {
     const { data } = await api.get('/auth/me')
     return data

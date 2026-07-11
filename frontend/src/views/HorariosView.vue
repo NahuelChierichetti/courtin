@@ -165,7 +165,7 @@
 
           <div class="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-500">
             La duración del turno se configura por cancha (60, 90 o 120 min) desde la sección
-            <RouterLink to="/canchas" class="font-medium text-primitive-orange-500 hover:text-primitive-orange-600">Canchas</RouterLink>,
+            <RouterLink to="/panel/canchas" class="font-medium text-primitive-orange-500 hover:text-primitive-orange-600">Canchas</RouterLink>,
             para contemplar deportes con duraciones distintas.
           </div>
 

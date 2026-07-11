@@ -43,6 +43,13 @@ const reservationService = {
     )
     return data.reservation
   },
+
+  // Reservas del cliente logueado (las que hizo con su cuenta). Scope por token,
+  // sin clubId. Alimenta la vista "Mis reservas" del sitio del cliente.
+  async getMyReservations() {
+    const { data } = await api.get('/reservations/my')
+    return data.reservations
+  },
 }
 
 export default reservationService
