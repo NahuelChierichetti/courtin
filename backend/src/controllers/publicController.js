@@ -10,7 +10,7 @@ dayjs.extend(customParseFormat);
 const Club = require('../models/Club');
 const Court = require('../models/Court');
 const Reservation = require('../models/Reservation');
-const { validateReservationSlot } = require('../utils/reservationRules');
+const { validateReservationSlot, dayConfigForDate } = require('../utils/reservationRules');
 const { computeSlots } = require('../utils/availability');
 const { priceForDuration } = require('../utils/pricing');
 const { horariosToLocal, DEFAULT_TZ } = require('../utils/timezone');
@@ -64,12 +64,27 @@ const getPublicClubs = async (req, res, next) => {
     const ids = clubs.map((c) => c._id);
     const courts = await Court.find({ club: { $in: ids }, visible: { $ne: false }, estado: 'activa' });
 
+    const fechaValida = fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha);
+    const horaValida = hora && /^\d{2}:\d{2}$/.test(hora);
+
+    // Con fecha pero sin hora puntual: ocultar los clubes que ese día están
+    // cerrados (día especial "cerrado" o día semanal no abierto). No se filtra
+    // por ocupación: un club abierto sigue apareciendo aunque esté lleno.
+    if (fechaValida && !horaValida) {
+      clubs = clubs.filter((club) => {
+        const horarios = club.horarios
+          ? (club.horarios.toObject ? club.horarios.toObject() : club.horarios)
+          : null;
+        const horariosLocal = horarios
+          ? horariosToLocal(horarios, club.timezone || DEFAULT_TZ)
+          : null;
+        return dayConfigForDate(horariosLocal, fecha).abierto !== false;
+      });
+    }
+
     // Filtro por hora de inicio: sólo clubes con alguna cancha que tenga un turno
     // libre que empiece a `hora` en `fecha` (con la duración por defecto de la cancha).
-    const filtraDisponibilidad =
-      fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha) && hora && /^\d{2}:\d{2}$/.test(hora);
-
-    if (filtraDisponibilidad) {
+    if (fechaValida && horaValida) {
       // Ventana UTC holgada (±14h) para cubrir el día en cualquier timezone; el
       // solapamiento fino lo resuelve computeSlots por cada turno.
       const desde = dayjs.utc(fecha, 'YYYY-MM-DD').subtract(14, 'hour').toDate();
