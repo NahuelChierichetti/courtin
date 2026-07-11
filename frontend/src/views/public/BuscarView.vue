@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import DatePicker from 'primevue/datepicker'
 import publicService from '@/services/publicService'
 import { sportMeta } from '@/utils/turnos'
 import { dayjs, formatCurrency } from '@/utils/datetime'
@@ -14,7 +15,22 @@ const error = ref('')
 const cities = ref([])
 const ciudad = ref('')
 const tipo = ref('')
-const cuando = ref(dayjs().format('YYYY-MM-DD'))
+const cuando = ref(new Date())
+const hora = ref('')
+
+// Fecha elegida como string "YYYY-MM-DD" para las queries y la navegación.
+const fechaStr = computed(() => dayjs(cuando.value).format('YYYY-MM-DD'))
+
+// Horas de inicio ofrecidas en el buscador (cada 30 min, 06:00–23:00).
+const horaOptions = (() => {
+  const opts = []
+  for (let m = 6 * 60; m <= 23 * 60; m += 30) {
+    const hh = String(Math.floor(m / 60)).padStart(2, '0')
+    const mm = String(m % 60).padStart(2, '0')
+    opts.push(`${hh}:${mm}`)
+  }
+  return opts
+})()
 
 const fetchCities = async () => {
   try {
@@ -29,7 +45,6 @@ const sportChips = [
   { label: 'Pádel', value: 'padel' },
   { label: 'Fútbol', value: 'futbol' },
   { label: 'Tenis', value: 'tenis' },
-  { label: 'Básquet', value: 'basquet' },
 ]
 
 const sportLabel = computed(() => sportChips.find((s) => s.value === tipo.value)?.label || 'Todos')
@@ -41,6 +56,8 @@ const fetchClubs = async () => {
     clubs.value = await publicService.searchClubs({
       ciudad: ciudad.value || undefined,
       tipo: tipo.value || undefined,
+      fecha: fechaStr.value,
+      hora: hora.value || undefined,
     })
   } catch (err) {
     console.error(err)
@@ -59,7 +76,11 @@ const selectSport = (value) => {
 }
 
 const goToClub = (slug) =>
-  router.push({ name: 'public-club', params: { slug }, query: { fecha: cuando.value } })
+  router.push({
+    name: 'public-club',
+    params: { slug },
+    query: { fecha: fechaStr.value, ...(hora.value ? { hora: hora.value } : {}) },
+  })
 
 onMounted(() => {
   fetchCities()
@@ -117,12 +138,33 @@ onMounted(() => {
           <div class="flex-1 px-2">
             <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Cuándo</label>
             <div class="relative">
-              <i class="pi pi-calendar absolute left-0 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
-              <input
+              <i class="pi pi-calendar absolute left-0 top-1/2 z-10 -translate-y-1/2 text-sm text-neutral-400"></i>
+              <DatePicker
                 v-model="cuando"
-                type="date"
-                class="h-9 w-full border-0 bg-transparent pl-6 text-sm text-slate-800 outline-none"
+                date-format="dd/mm/yy"
+                :min-date="new Date()"
+                fluid
+                :pt="{
+                  pcInputText: {
+                    root: '!h-9 !w-full !rounded-none !border-0 !bg-transparent !pl-6 !text-sm !text-slate-800 !shadow-none !outline-none !ring-0',
+                  },
+                }"
               />
+            </div>
+          </div>
+          <div class="hidden w-px self-stretch bg-slate-100 sm:block"></div>
+          <div class="flex-1 px-2">
+            <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Hora de inicio</label>
+            <div class="relative">
+              <i class="pi pi-clock absolute left-0 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
+              <select
+                v-model="hora"
+                class="h-9 w-full appearance-none border-0 bg-transparent pl-6 pr-6 text-sm text-slate-800 outline-none"
+              >
+                <option value="">Cualquier hora</option>
+                <option v-for="h in horaOptions" :key="h" :value="h">{{ h }}</option>
+              </select>
+              <i class="pi pi-chevron-down pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-xs text-neutral-400"></i>
             </div>
           </div>
           <button
@@ -158,7 +200,9 @@ onMounted(() => {
           <h2 class="text-xl font-bold text-slate-900">
             {{ clubs.length }} {{ clubs.length === 1 ? 'complejo disponible' : 'complejos disponibles' }}
           </h2>
-          <p class="mt-0.5 text-xs text-neutral-400">Filtrando por {{ sportLabel }}</p>
+          <p class="mt-0.5 text-xs text-neutral-400">
+            Filtrando por {{ sportLabel }}<span v-if="hora"> · disponibles a las {{ hora }}</span>
+          </p>
         </div>
       </div>
 
@@ -179,7 +223,7 @@ onMounted(() => {
           <i class="pi pi-building text-2xl text-neutral-400"></i>
         </div>
         <h3 class="mt-4 text-lg font-semibold text-slate-900">No encontramos complejos</h3>
-        <p class="!mt-2 text-sm text-slate-500">Probá ajustar la zona o el deporte.</p>
+        <p class="!mt-2 text-sm text-slate-500">Probá ajustar la zona, el deporte o la hora.</p>
       </div>
 
       <!-- Grid -->

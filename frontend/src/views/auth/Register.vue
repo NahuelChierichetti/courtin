@@ -9,7 +9,7 @@ import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
 const router = useRouter()
-const { register, isLoading } = useAuth()
+const { register, resolveLanding, isLoading } = useAuth()
 
 const form = reactive({
   nombre: '',
@@ -41,7 +41,7 @@ const handleSubmit = async () => {
     })
 
     const redirect =
-      typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+      typeof route.query.redirect === 'string' ? route.query.redirect : resolveLanding()
 
     router.push(redirect)
   } catch (error) {
@@ -70,7 +70,7 @@ const handleSubmit = async () => {
 
           <h1 class="mt-8 text-3xl font-bold text-primitive-dark-500 sm:text-4xl">Crear una cuenta</h1>
           <p class="mt-3 text-sm leading-relaxed text-primitive-dark-500">
-            Registrate para empezar a usar CourtIn.
+            Registrate para reservar canchas y ver tus reservas en un solo lugar.
           </p>
 
         <Message v-if="errorMessage" severity="error" class="mt-6">
@@ -208,9 +208,9 @@ const handleSubmit = async () => {
           </div>
 
           <div class="mt-16 text-center">
-            <p class="text-lg font-semibold text-white">Muy fácil de empezar</p>
+            <p class="text-lg font-semibold text-white">Reservá en segundos</p>
             <p class="!mt-2 text-sm text-slate-200">
-              Creá tu cuenta y empezá a administrar tu cancha, reservas y cobros de forma simple.
+              Creá tu cuenta y reservá canchas de pádel, tenis o fútbol cuando quieras.
             </p>
           </div>
         </div>
