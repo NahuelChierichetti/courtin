@@ -1,10 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
-import Password from 'primevue/password'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
@@ -17,7 +13,8 @@ const form = reactive({
   password: '',
   confirmPassword: '',
 })
-
+const showPassword = ref(false)
+const showConfirm = ref(false)
 const errorMessage = ref('')
 
 const handleSubmit = async () => {
@@ -27,193 +24,159 @@ const handleSubmit = async () => {
     errorMessage.value = 'La contraseña debe tener al menos 6 caracteres.'
     return
   }
-
   if (form.password !== form.confirmPassword) {
     errorMessage.value = 'Las contraseñas no coinciden.'
     return
   }
 
   try {
-    await register({
-      nombre: form.nombre,
-      email: form.email,
-      password: form.password,
-    })
-
+    await register({ nombre: form.nombre, email: form.email, password: form.password })
     const redirect =
       typeof route.query.redirect === 'string' ? route.query.redirect : resolveLanding()
-
     router.push(redirect)
   } catch (error) {
-    errorMessage.value =
-      error.response?.data?.message || 'No se pudo crear la cuenta.'
+    errorMessage.value = error.response?.data?.message || 'No se pudo crear la cuenta.'
   }
 }
 </script>
 
 <template>
-  <section class="min-h-screen bg-slate-50">
-    <div
-      class="min-h-screen w-full bg-white lg:grid lg:grid-cols-2"
-    >
-      <div class="flex min-h-screen flex-col justify-center px-8 py-10 sm:px-12 lg:px-16">
-        <div class="mx-auto w-full max-w-md">
-          <RouterLink to="/" class="inline-flex items-center gap-3 no-underline">
-            <div class="grid h-10 w-10 place-items-center rounded-xl bg-primitive-dark-500 text-white">
-              <span class="text-sm font-bold">CI</span>
-            </div>
-            <div class="leading-tight">
-              <p class="text-sm font-semibold tracking-wide text-slate-900">CourtIn</p>
-              <p class="text-xs text-slate-500">Registro</p>
-            </div>
-          </RouterLink>
+  <section class="min-h-screen bg-[#faf5ef] lg:grid lg:grid-cols-2">
+    <!-- Columna formulario -->
+    <div class="flex min-h-screen flex-col px-6 py-8 sm:px-12 lg:px-16">
+      <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
+        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primitive-orange-500">
+          <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 4.5 3.5 19h17L12 4.5Zm0 4.8 3.1 5.3-1.6.9-1.5-1-1.5 1-1.6-.9L12 9.3Z" />
+          </svg>
+        </div>
+        <div class="leading-none">
+          <p class="text-lg font-bold tracking-tight text-primitive-dark-500">
+            Court<span class="text-primitive-orange-500">In</span>
+          </p>
+          <p class="mt-0.5 text-[10px] font-semibold tracking-[0.22em] text-slate-400">SPORT COMPLEX</p>
+        </div>
+      </RouterLink>
 
-          <h1 class="mt-8 text-3xl font-bold text-primitive-dark-500 sm:text-4xl">Crear una cuenta</h1>
-          <p class="mt-3 text-sm leading-relaxed text-primitive-dark-500">
+      <div class="flex flex-1 flex-col justify-center py-10">
+        <div class="mx-auto w-full max-w-md">
+          <h1 class="text-3xl font-bold text-primitive-dark-500 sm:text-4xl">Crear una cuenta</h1>
+          <p class="mt-3 text-sm leading-relaxed text-slate-500">
             Registrate para reservar canchas y ver tus reservas en un solo lugar.
           </p>
 
-        <Message v-if="errorMessage" severity="error" class="mt-6">
-          {{ errorMessage }}
-        </Message>
-
-        <form class="mt-6 space-y-5" @submit.prevent="handleSubmit">
-          <div class="space-y-2">
-            <label class="text-sm font-medium text-primitive-dark-500" for="nombre">Nombre</label>
-            <InputText
-              id="nombre"
-              v-model="form.nombre"
-              class="w-full"
-              autocomplete="name"
-              placeholder="Tu nombre"
-              required
-            />
+          <div v-if="errorMessage" class="mt-6 flex items-center gap-2 rounded-xl border border-error-100 bg-error-50 px-4 py-3 text-sm text-error-600">
+            <i class="icon-[material-symbols--error] shrink-0"></i>{{ errorMessage }}
           </div>
 
-          <div class="space-y-2">
-            <label class="text-sm font-medium text-primitive-dark-500" for="email">Email</label>
-            <InputText
-              id="email"
-              v-model="form.email"
-              class="w-full"
-              type="email"
-              autocomplete="email"
-              placeholder="tuemail@ejemplo.com"
-              required
-            />
-          </div>
+          <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="nombre">Nombre</label>
+              <div class="relative">
+                <i class="icon-[material-symbols--person-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input
+                  id="nombre"
+                  v-model="form.nombre"
+                  autocomplete="name"
+                  placeholder="Tu nombre"
+                  required
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                />
+              </div>
+            </div>
 
-          <div class="space-y-2">
-            <label class="text-sm font-medium text-primitive-dark-500" for="password">Contraseña</label>
-            <Password
-              id="password"
-              v-model="form.password"
-              class="w-full"
-              inputClass="w-full"
-              :feedback="false"
-              toggleMask
-              autocomplete="new-password"
-              placeholder="Mínimo 6 caracteres"
-              required
-            />
-          </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="email">Email</label>
+              <div class="relative">
+                <i class="icon-[material-symbols--mail-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input
+                  id="email"
+                  v-model="form.email"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="tuemail@ejemplo.com"
+                  required
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                />
+              </div>
+            </div>
 
-          <div class="space-y-2">
-            <label class="text-sm font-medium text-primitive-dark-500" for="confirmPassword">
-              Confirmar contraseña
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="password">Contraseña</label>
+              <div class="relative">
+                <i class="icon-[material-symbols--lock-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input
+                  id="password"
+                  v-model="form.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  placeholder="Mínimo 6 caracteres"
+                  required
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                />
+                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 cursor-pointer" @click="showPassword = !showPassword">
+                  <i :class="showPassword ? 'icon-[material-symbols--visibility-off]' : 'icon-[material-symbols--visibility]'"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="confirmPassword">Confirmar contraseña</label>
+              <div class="relative">
+                <i class="icon-[material-symbols--lock-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input
+                  id="confirmPassword"
+                  v-model="form.confirmPassword"
+                  :type="showConfirm ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  placeholder="Repetí la contraseña"
+                  required
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                />
+                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 cursor-pointer" @click="showConfirm = !showConfirm">
+                  <i :class="showConfirm ? 'icon-[material-symbols--visibility-off]' : 'icon-[material-symbols--visibility]'"></i>
+                </button>
+              </div>
+            </div>
+
+            <label class="flex items-start gap-2 text-sm text-slate-600">
+              <input type="checkbox" class="mt-0.5 h-4 w-4 shrink-0 rounded border border-slate-300 bg-white accent-primitive-orange-500 [color-scheme:light]" />
+              <span>Acepto los <a href="#" class="font-semibold text-slate-700 hover:underline">Términos y Condiciones</a></span>
             </label>
-            <Password
-              id="confirmPassword"
-              v-model="form.confirmPassword"
-              class="w-full"
-              inputClass="w-full"
-              :feedback="false"
-              toggleMask
-              autocomplete="new-password"
-              placeholder="Repetí la contraseña"
-              required
-            />
-          </div>
 
-          <label class="flex items-start gap-2 text-sm text-slate-600">
-            <input
-              type="checkbox"
-              class="mt-0.5 h-4 w-4 shrink-0 rounded border border-slate-300 bg-white accent-primitive-orange-500 [color-scheme:light] focus:ring-primitive-orange-500"
-            />
-            <span>
-              Acepto los
-              <a href="#" class="font-semibold text-slate-700 hover:underline">Términos y Condiciones</a>
-            </span>
-          </label>
+            <button
+              type="submit"
+              :disabled="isLoading"
+              class="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:opacity-60 cursor-pointer"
+            >
+              <i v-if="isLoading" class="icon-[material-symbols--progress-activity] animate-spin"></i>
+              {{ isLoading ? 'Creando cuenta...' : 'Crear cuenta' }}
+            </button>
+          </form>
 
-          <Button type="submit" label="Crear cuenta" class="w-full" :loading="isLoading" />
-        </form>
-
-        <!-- <div class="mt-7 flex items-center gap-4">
-          <div class="h-px flex-1 bg-slate-200"></div>
-          <span class="text-xs font-medium uppercase tracking-wider text-neutral-400">O</span>
-          <div class="h-px flex-1 bg-slate-200"></div>
-        </div>
-
-        <div class="mt-6 grid gap-3 sm:grid-cols-2">
-          <Button label="Google" outlined class="w-full" />
-          <Button label="Facebook" outlined class="w-full" />
-        </div> -->
-
-        <p class="!mt-6 text-center text-sm text-slate-600">
-          ¿Ya tenés cuenta?
-          <RouterLink class="font-semibold text-primitive-orange-500 hover:underline" to="/login">
-            Ingresá acá
-          </RouterLink>
-        </p>
+          <p class="mt-7 text-center text-sm text-slate-500">
+            ¿Ya tenés cuenta?
+            <RouterLink class="font-semibold text-primitive-orange-500 hover:underline" to="/login">
+              Ingresá acá
+            </RouterLink>
+          </p>
         </div>
       </div>
+    </div>
 
-      <div class="relative hidden min-h-screen overflow-hidden bg-primitive-dark-500 lg:block">
-        <div class="absolute inset-0 opacity-20">
-          <div class="absolute right-10 top-10 h-5 w-5 rounded bg-white/20"></div>
-          <div class="absolute right-20 top-20 h-3 w-3 rounded bg-white/20"></div>
-          <div class="absolute right-14 top-32 h-4 w-4 rounded bg-white/20"></div>
-          <div class="absolute right-28 top-44 h-3 w-3 rounded bg-white/20"></div>
-          <div class="absolute right-16 top-56 h-5 w-5 rounded bg-white/20"></div>
-          <div class="absolute right-32 top-64 h-4 w-4 rounded bg-white/20"></div>
-        </div>
+    <!-- Columna branding -->
+    <div class="relative hidden overflow-hidden bg-primitive-dark-500 lg:block">
+      <img src="/images/hero-tenista.png" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center" />
+      <div class="absolute inset-0 bg-gradient-to-t from-primitive-dark-500 via-primitive-dark-500/40 to-primitive-dark-500/20"></div>
 
-        <div class="relative flex h-full flex-col items-center justify-center p-10">
-          <div class="relative w-full max-w-md">
-            <div class="rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-900/10">
-              <p class="text-xs font-semibold text-primitive-dark-500">Analytics</p>
-              <div class="mt-4 h-20 w-full rounded-xl bg-slate-100"></div>
-              <div class="mt-3 grid grid-cols-4 gap-2 text-[10px] font-medium text-primitive-dark-500">
-                <span>MON</span>
-                <span>TUE</span>
-                <span>WED</span>
-                <span>THU</span>
-              </div>
-            </div>
-
-            <div class="absolute -bottom-8 -right-6 rounded-2xl bg-white p-5 shadow-xl ring-1 ring-slate-900/10">
-              <div class="flex items-center gap-4">
-                <div class="relative h-16 w-16 rounded-full bg-slate-100">
-                  <div class="absolute inset-2 rounded-full bg-white"></div>
-                  <div class="absolute inset-0 rounded-full [background:conic-gradient(theme(colors.primitive.orange.500)_0_40%,theme(colors.slate.200)_40%_100%)]"></div>
-                  <div class="absolute inset-3 rounded-full bg-white"></div>
-                </div>
-                <div>
-                  <p class="text-xs font-semibold text-primitive-dark-500">Total</p>
-                  <p class="text-lg font-bold text-primitive-dark-500">42%</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-16 text-center">
-            <p class="text-lg font-semibold text-white">Reservá en segundos</p>
-            <p class="!mt-2 text-sm text-slate-200">
-              Creá tu cuenta y reservá canchas de pádel, tenis o fútbol cuando quieras.
-            </p>
-          </div>
-        </div>
+      <div class="relative flex h-full flex-col justify-end p-12">
+        <h2 class="text-4xl font-bold leading-tight text-white">
+          Tu próximo<br />partido, <span class="text-primitive-orange-500">en juego.</span>
+        </h2>
+        <p class="mt-4 text-sm font-semibold tracking-[0.15em] text-white/70 uppercase">Gestioná · Reservá · Jugá</p>
+        <p class="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
+          Creá tu cuenta y reservá canchas de pádel, tenis o fútbol cuando quieras.
+        </p>
       </div>
     </div>
   </section>

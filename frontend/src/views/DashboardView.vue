@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
-import Button from 'primevue/button'
 import reservationService from '@/services/reservationService'
 import { dayjs, DEFAULT_TZ } from '@/utils/datetime'
 import { ESTADO_META, reservationLabel } from '@/utils/turnos'
@@ -43,7 +42,7 @@ const stats = [
     value: '46',
     trend: '+8 vs ayer',
     trendUp: true,
-    icon: 'pi pi-calendar',
+    icon: 'icon-[material-symbols--calendar-month]',
     color: 'blue',
   },
   {
@@ -52,7 +51,7 @@ const stats = [
     trend: '+24%',
     trendUp: true,
     subtitle: 'vs $493k mismo día semana anterior',
-    icon: 'pi pi-dollar',
+    icon: 'icon-[material-symbols--attach-money]',
     color: 'green',
   },
   {
@@ -61,7 +60,7 @@ const stats = [
     trend: '+12 pts',
     trendUp: true,
     subtitle: '45 turnos / 128 disponibles',
-    icon: 'pi pi-chart-pie',
+    icon: 'icon-[material-symbols--pie-chart]',
     color: 'orange',
   },
   {
@@ -70,7 +69,7 @@ const stats = [
     trend: '-2 vs ayer',
     trendUp: false,
     subtitle: 'Esta semana: 23',
-    icon: 'pi pi-user-plus',
+    icon: 'icon-[material-symbols--person-add]',
     color: 'purple',
   },
 ]
@@ -199,31 +198,31 @@ const getHeatmapColor = (value) => {
 
 const recentActivity = [
   {
-    icon: 'pi pi-check-circle',
+    icon: 'icon-[material-symbols--check-circle]',
     iconColor: 'text-success-500 bg-success-50',
     text: 'Federico Méndez pagó <strong>$18.000</strong> por reserva Cancha 1',
     time: 'hace 4 min',
   },
   {
-    icon: 'pi pi-calendar-plus',
+    icon: 'icon-[material-symbols--edit-calendar]',
     iconColor: 'text-primitive-blue-500 bg-primitive-blue-50',
     text: 'Joaquín Aguirre reservó <strong>Cancha 1</strong> mañana 19:30',
     time: 'hace 12 min',
   },
   {
-    icon: 'pi pi-times-circle',
+    icon: 'icon-[material-symbols--cancel]',
     iconColor: 'text-primitive-orange-500 bg-primitive-orange-50',
     text: 'Agustina Ríos canceló <strong>Cancha 2</strong> hoy 13:00',
     time: 'hace 28 min',
   },
   {
-    icon: 'pi pi-money-bill',
+    icon: 'icon-[material-symbols--payments]',
     iconColor: 'text-error-500 bg-error-50',
     text: 'Egreso registrado · <strong>Insumos kiosco</strong> -$32.400',
     time: 'hace 1 h',
   },
   {
-    icon: 'pi pi-star',
+    icon: 'icon-[material-symbols--star]',
     iconColor: 'text-warning-500 bg-warning-50',
     text: 'Sofía López dejó una reseña <strong>★★★★★</strong>',
     time: 'hace 3 h',
@@ -236,13 +235,13 @@ const recentActivity = [
     <!-- Page header -->
     <div class="flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <h1 class="text-2xl font-bold text-primitive-dark-500">Dashboard</h1>
         <p class="mt-1 text-xs text-slate-500 first-letter:uppercase">
           {{ todayFormatted }}
         </p>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex overflow-hidden rounded-lg border border-slate-200">
+        <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
             v-for="period in periods"
             :key="period.value"
@@ -257,7 +256,9 @@ const recentActivity = [
             {{ period.label }}
           </button>
         </div>
-        <Button label="Exportar" icon="pi pi-download" severity="secondary" class="cursor-pointer !bg-white !border !border-slate-300 !text-neutral-400" size="small" />
+        <button class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer">
+          <i class="icon-[material-symbols--download] text-base text-slate-400"></i> Exportar
+        </button>
       </div>
     </div>
 
@@ -266,24 +267,33 @@ const recentActivity = [
       <div
         v-for="stat in stats"
         :key="stat.title"
-        class="rounded-2xl border border-slate-200 bg-white p-6"
+        class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm"
       >
-        <div class="flex items-start justify-between">
-          <div class="flex flex-col gap-2">
-            <p class="text-sm font-medium text-slate-700">{{ stat.title }}</p>
-            <p class="text-3xl font-bold font-secondary text-primitive-dark-500">{{ stat.value }}</p>
-          </div>
+        <div class="flex items-center justify-between">
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl" :class="statColorMap[stat.color].bg">
+            <i :class="[stat.icon, statColorMap[stat.color].icon]" class="text-xl"></i>
+          </span>
+          <span
+            v-if="stat.trend"
+            class="rounded-full px-2 py-0.5 text-xs font-semibold"
+            :class="stat.trendUp ? 'bg-success-50 text-success-600' : 'bg-error-50 text-error-600'"
+          >
+            {{ stat.trend }}
+          </span>
         </div>
+        <p class="mt-4 text-sm font-medium text-slate-500">{{ stat.title }}</p>
+        <p class="mt-1 text-3xl font-bold font-secondary text-primitive-dark-500">{{ stat.value }}</p>
+        <p v-if="stat.subtitle" class="mt-1 text-xs text-slate-400">{{ stat.subtitle }}</p>
       </div>
     </div>
 
     <!-- Middle row -->
     <div class="grid grid-cols-3 gap-4">
       <!-- Próximas reservas -->
-      <div class="col-span-2 rounded-2xl border border-slate-200 bg-white min-h-[400px]">
+      <div class="col-span-2 rounded-2xl border border-black/[0.06] bg-white shadow-sm min-h-[400px]">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
-            <h2 class="text-base font-semibold text-slate-900">Próximas reservas</h2>
+            <h2 class="text-base font-semibold text-primitive-dark-500">Próximas reservas</h2>
             <p class="text-xs text-neutral-400">Próximos turnos desde las {{ nowLabel }} hs</p>
           </div>
           <button
@@ -305,7 +315,7 @@ const recentActivity = [
 
           <!-- Loading -->
           <div v-if="loadingUpcoming" class="flex min-h-[400px] flex-col items-center justify-center text-center">
-            <i class="pi pi-spin pi-spinner text-2xl text-neutral-400"></i>
+            <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-neutral-400"></i>
             <p class="mt-3 text-sm text-slate-500">Cargando reservas...</p>
           </div>
 
@@ -315,9 +325,9 @@ const recentActivity = [
             class="flex min-h-[400px] flex-col items-center justify-center text-center"
           >
             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-              <i class="pi pi-calendar text-xl text-neutral-400"></i>
+              <i class="icon-[material-symbols--calendar-month] text-xl text-neutral-400"></i>
             </div>
-            <h3 class="mt-4 text-sm font-semibold text-slate-900">No hay próximas reservas</h3>
+            <h3 class="mt-4 text-sm font-semibold text-primitive-dark-500">No hay próximas reservas</h3>
             <p class="!mt-1 text-xs text-slate-500">Las reservas que cargues aparecerán acá.</p>
             <button
               class="mt-4 text-sm font-medium text-primitive-orange-500 hover:text-primitive-orange-600 cursor-pointer"
@@ -359,8 +369,8 @@ const recentActivity = [
                   {{ reservation.estadoLabel }}
                 </span>
               </div>
-              <button class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-slate-50 hover:text-slate-500 cursor-pointer" @click="goToTurnos">
-                <i class="pi pi-chevron-right text-xs"></i>
+              <button class="flex h-7 w-7 items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-slate-50 hover:text-slate-500 cursor-pointer" @click="goToTurnos">
+                <i class="icon-[material-symbols--chevron-right] text-xs"></i>
               </button>
             </div>
           </template>
@@ -368,10 +378,10 @@ const recentActivity = [
       </div>
 
       <!-- Ocupación por cancha -->
-      <div class="rounded-2xl border border-slate-200 bg-white">
+      <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
-            <h2 class="text-base font-semibold text-slate-900">Ocupación por cancha</h2>
+            <h2 class="text-base font-semibold text-primitive-dark-500">Ocupación por cancha</h2>
             <p class="text-xs text-neutral-400">Hoy · 08:00 a 23:00</p>
           </div>
         </div>
@@ -397,13 +407,13 @@ const recentActivity = [
     <!-- Bottom row -->
     <div class="grid grid-cols-3 gap-4">
       <!-- Mapa de calor -->
-      <div class="col-span-2 rounded-2xl border border-slate-200 bg-white">
+      <div class="col-span-2 rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
-            <h2 class="text-base font-semibold text-slate-900">Mapa de calor — Esta semana</h2>
+            <h2 class="text-base font-semibold text-primitive-dark-500">Mapa de calor — Esta semana</h2>
             <p class="text-xs text-neutral-400">Ocupación por día y franja horaria</p>
           </div>
-          <span class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium font-secondary text-slate-700">
+          <span class="rounded-lg border border-black/[0.06] px-3 py-1.5 text-xs font-medium font-secondary text-slate-700">
             85 % ocupación
           </span>
         </div>
@@ -453,13 +463,13 @@ const recentActivity = [
       </div>
 
       <!-- Actividad reciente -->
-      <div class="rounded-2xl border border-slate-200 bg-white">
+      <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
-            <h2 class="text-base font-semibold text-slate-900">Actividad reciente</h2>
+            <h2 class="text-base font-semibold text-primitive-dark-500">Actividad reciente</h2>
             <p class="text-xs text-neutral-400">Eventos que han ocurrido en el último día</p>
           </div>
-          <button class="text-sm font-medium text-primitive-orange-500 hover:text-primitive-orange-600">
+          <button class="text-sm font-medium text-primitive-orange-500 hover:text-primitive-orange-600 cursor-pointer">
             Ver todo
           </button>
         </div>

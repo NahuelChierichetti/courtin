@@ -12,22 +12,22 @@
         <!-- Drawer panel -->
         <div class="relative flex w-full max-w-md flex-col bg-white shadow-2xl">
           <!-- Header -->
-          <div class="flex items-center gap-4 border-b border-slate-200 px-6 py-5">
+          <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
               :class="form.tipo === 'especial' ? 'bg-primitive-orange-100 text-primitive-orange-600' : 'bg-slate-100 text-slate-500'"
             >
-              <i :class="form.tipo === 'especial' ? 'pi pi-star' : 'pi pi-power-off'" class="text-base"></i>
+              <i :class="form.tipo === 'especial' ? 'icon-[material-symbols--star]' : 'icon-[material-symbols--power-settings-new]'" class="text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-slate-900">{{ drawerTitle }}</h2>
+              <h2 class="text-lg font-semibold text-primitive-dark-500">{{ drawerTitle }}</h2>
               <p class="text-sm text-neutral-400">Feriados y excepciones de horario</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
               @click="emit('close')"
             >
-              <i class="pi pi-times text-sm"></i>
+              <i class="icon-[material-symbols--close] text-sm"></i>
             </button>
           </div>
 
@@ -43,7 +43,7 @@
                   v-model="form.nombre"
                   type="text"
                   placeholder="Ej: Día de la Independencia"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
                 />
               </div>
 
@@ -68,7 +68,7 @@
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
                   Tipo
                 </label>
-                <div class="flex overflow-hidden rounded-lg border border-slate-300">
+                <div class="flex overflow-hidden rounded-full border border-black/[0.08]">
                   <button
                     class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
                     :class="form.tipo === 'cerrado' ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
@@ -109,7 +109,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex items-center justify-between border-t border-slate-200 px-6 py-4">
+          <div class="flex items-center justify-between border-t border-black/[0.06] px-6 py-4">
             <button
               v-if="isEditing"
               class="text-sm font-medium text-error-500 transition-colors hover:text-error-600 cursor-pointer"
@@ -120,13 +120,13 @@
             <div v-else />
             <div class="flex items-center gap-3">
               <button
-                class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                 @click="emit('close')"
               >
                 Cancelar
               </button>
               <button
-                class="rounded-lg bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="!canSave"
                 @click="handleSave"
               >

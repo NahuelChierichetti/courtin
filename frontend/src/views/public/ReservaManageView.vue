@@ -72,14 +72,14 @@ onMounted(fetchReservation)
   <div class="mx-auto max-w-lg">
     <!-- Loading -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando reserva...</p>
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-exclamation-triangle text-2xl text-neutral-400"></i>
+        <i class="icon-[material-symbols--warning] text-2xl text-neutral-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-slate-900">{{ error }}</h3>
       <RouterLink :to="{ name: 'public-buscar' }" class="!mt-3 text-sm font-medium text-primitive-orange-500 no-underline">
@@ -141,14 +141,14 @@ onMounted(fetchReservation)
           <p v-if="cancelError" class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ cancelError }}</p>
           <div class="mt-3 flex gap-2">
             <button
-              class="h-9 rounded-lg bg-red-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-60 cursor-pointer"
+              class="h-9 rounded-full bg-red-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-60 cursor-pointer"
               :disabled="cancelling"
               @click="confirmCancel"
             >
-              <i v-if="cancelling" class="pi pi-spin pi-spinner mr-1.5"></i>
+              <i v-if="cancelling" class="icon-[material-symbols--progress-activity] animate-spin mr-1.5"></i>
               {{ cancelling ? 'Cancelando...' : 'Sí, cancelar' }}
             </button>
-            <button class="h-9 rounded-lg border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer" :disabled="cancelling" @click="confirmingCancel = false">
+            <button class="h-9 rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer" :disabled="cancelling" @click="confirmingCancel = false">
               No
             </button>
           </div>

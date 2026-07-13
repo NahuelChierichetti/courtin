@@ -3,13 +3,13 @@
     <!-- Header -->
     <div class="flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Canchas</h1>
+        <h1 class="text-2xl font-bold text-primitive-dark-500">Canchas</h1>
         <p class="mt-1 text-sm text-slate-500">
           {{ activeCourtsCount }} canchas activas &middot; {{ deporteCount }} deportes
         </p>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex overflow-hidden rounded-lg border border-slate-200">
+        <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
             v-for="filter in deporteFilters"
             :key="filter.value"
@@ -24,20 +24,21 @@
             {{ filter.label }}
           </button>
         </div>
-        <Button
-          label="Nueva cancha"
-          size="small"
+        <button
+          class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer"
           @click="openNewCourt"
-        />
+        >
+          <i class="icon-[material-symbols--add] text-base"></i> Nueva cancha
+        </button>
       </div>
     </div>
 
     <!-- No club selected -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-building text-2xl text-neutral-400"></i>
+        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-slate-900">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-slate-500">
         Seleccioná un club desde el selector en el encabezado para ver las canchas.
       </p>
@@ -45,37 +46,39 @@
 
     <!-- Loading -->
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando canchas...</p>
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-error-50">
-        <i class="pi pi-exclamation-triangle text-2xl text-error-500"></i>
+        <i class="icon-[material-symbols--warning] text-2xl text-error-500"></i>
       </div>
       <p class="mt-4 text-sm text-slate-500">{{ error }}</p>
-      <Button label="Reintentar" icon="pi pi-refresh" severity="secondary" size="small" class="mt-4" @click="fetchCourts" />
+      <button class="mt-4 flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer" @click="fetchCourts">
+        <i class="icon-[material-symbols--refresh] text-base text-slate-400"></i> Reintentar
+      </button>
     </div>
 
     <!-- Empty state -->
     <div v-else-if="filteredCourts.length === 0 && !loading" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-objects-column text-2xl text-neutral-400"></i>
+        <i class="icon-[material-symbols--grid-view] text-2xl text-neutral-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-slate-900">
+      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">
         {{ activeFilter === 'todas' ? 'No hay canchas' : 'No hay canchas de ' + deporteLabels[activeFilter] }}
       </h3>
       <p class="!mt-2 text-sm text-slate-500">
         {{ activeFilter === 'todas' ? 'Creá tu primera cancha para empezar.' : 'Probá con otro filtro o creá una nueva.' }}
       </p>
-      <Button
+      <button
         v-if="activeFilter === 'todas'"
-        label="Nueva cancha"
-        size="small"
-        class="mt-4"
+        class="mt-4 flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer"
         @click="openNewCourt"
-      />
+      >
+        <i class="icon-[material-symbols--add] text-base"></i> Nueva cancha
+      </button>
     </div>
 
     <!-- Court cards grid -->
@@ -83,7 +86,7 @@
       <div
         v-for="court in filteredCourts"
         :key="court._id"
-        class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow hover:shadow-md"
+        class="group relative overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm transition-shadow hover:shadow-md"
         :class="{ 'opacity-50': court.estado === 'inactiva' }"
       >
         <!-- Court illustration -->
@@ -122,7 +125,7 @@
             v-if="!court.cubierta"
             class="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 backdrop-blur-sm"
           >
-            <i class="pi pi-sun text-[10px] text-amber-300"></i>
+            <i class="icon-[material-symbols--light-mode] text-[10px] text-amber-300"></i>
             <span class="text-[10px] font-semibold tracking-wider text-white/80 uppercase">Al aire</span>
           </div>
         </div>
@@ -130,7 +133,7 @@
         <!-- Court info -->
         <div class="p-5">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-slate-900">{{ court.nombre }}</h3>
+            <h3 class="text-base font-semibold text-primitive-dark-500">{{ court.nombre }}</h3>
             <span
               v-if="deporteColors[court.tipo]"
               class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
@@ -143,37 +146,37 @@
 
           <div class="!mt-2 flex items-center gap-3 text-xs text-slate-500">
             <span v-if="court.superficie" class="flex items-center gap-1">
-              <i class="pi pi-th-large text-[10px]"></i>
+              <i class="icon-[material-symbols--grid-view] text-[10px]"></i>
               {{ court.superficie }}
             </span>
             <span class="flex items-center gap-1">
-              <i class="pi pi-cloud text-[10px]"></i>
+              <i class="icon-[material-symbols--cloud] text-[10px]"></i>
               {{ court.cubierta ? 'Cubierta' : 'Descubierta' }}
             </span>
             <span v-if="court.jugadores" class="flex items-center gap-1">
-              <i class="pi pi-users text-[10px]"></i>
+              <i class="icon-[material-symbols--group] text-[10px]"></i>
               F {{ court.jugadores }}
             </span>
           </div>
 
           <div class="mt-4 flex items-end justify-between">
             <div>
-              <p class="text-xl font-bold font-secondary text-slate-900">
+              <p class="text-xl font-bold font-secondary text-primitive-dark-500">
                 {{ formatPrice(getBasePrice(court)) }}
               </p>
               <p class="text-xs text-neutral-400">por hora &middot; tarifa base</p>
             </div>
             <div class="flex items-center gap-1">
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
                 @click="openEditCourt(court)"
               >
-                <i class="pi pi-pencil text-sm"></i>
+                <i class="icon-[material-symbols--edit] text-sm"></i>
               </button>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
               >
-                <i class="pi pi-ellipsis-h text-sm"></i>
+                <i class="icon-[material-symbols--more-horiz] text-sm"></i>
               </button>
             </div>
           </div>
@@ -196,7 +199,6 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import CourtDrawer from '@/components/canchas/CourtDrawer.vue'
 import courtService from '@/services/courtService'

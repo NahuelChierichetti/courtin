@@ -3,27 +3,29 @@
     <!-- Header -->
     <div class="flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Configuración del complejo</h1>
+        <h1 class="text-2xl font-bold text-primitive-dark-500">Configuración del complejo</h1>
         <p class="mt-1 text-sm text-slate-500">
           Datos generales, zona horaria y moneda del complejo.
         </p>
       </div>
       <div v-if="currentClubId && !loading && !error">
-        <Button
-          label="Guardar cambios"
-          size="small"
-          :loading="saving"
+        <button
+          class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:opacity-60 cursor-pointer"
+          :disabled="saving"
           @click="save"
-        />
+        >
+          <i v-if="saving" class="icon-[material-symbols--progress-activity] animate-spin"></i>
+          {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
       </div>
     </div>
 
     <!-- No club selected -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-building text-2xl text-neutral-400"></i>
+        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-slate-900">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-slate-500">
         Seleccioná un club desde el selector en el encabezado para configurarlo.
       </p>
@@ -31,25 +33,27 @@
 
     <!-- Loading -->
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando configuración...</p>
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-error-50">
-        <i class="pi pi-exclamation-triangle text-2xl text-error-500"></i>
+        <i class="icon-[material-symbols--warning] text-2xl text-error-500"></i>
       </div>
       <p class="mt-4 text-sm text-slate-500">{{ error }}</p>
-      <Button label="Reintentar" icon="pi pi-refresh" severity="secondary" size="small" class="mt-4" @click="fetchConfig" />
+      <button class="mt-4 flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer" @click="fetchConfig">
+        <i class="icon-[material-symbols--refresh] text-base text-slate-400"></i> Reintentar
+      </button>
     </div>
 
     <!-- Content -->
     <div v-else-if="form" class="space-y-6">
       <!-- General info -->
-      <div class="rounded-2xl border border-slate-200 bg-white">
-        <div class="border-b border-slate-200 px-6 py-5">
-          <h2 class="text-base font-semibold text-slate-900">Datos generales</h2>
+      <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+        <div class="border-b border-black/[0.06] px-6 py-5">
+          <h2 class="text-base font-semibold text-primitive-dark-500">Datos generales</h2>
           <p class="mt-0.5 text-sm text-neutral-400">Información del complejo</p>
         </div>
         <div class="space-y-6 px-6 py-6">
@@ -59,7 +63,7 @@
               v-model="form.nombre"
               type="text"
               placeholder="Ej: Club Garín Pádel"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+              class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
             />
           </div>
           <div class="grid grid-cols-2 gap-4">
@@ -69,7 +73,7 @@
                 v-model="form.telefono"
                 type="text"
                 placeholder="Ej: +54 11 5555-5555"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
               />
             </div>
             <div>
@@ -78,7 +82,7 @@
                 v-model="form.direccion"
                 type="text"
                 placeholder="Ej: Av. Siempreviva 742"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
               />
             </div>
           </div>
@@ -88,12 +92,12 @@
               <div class="relative">
                 <select
                   v-model="form.ciudad"
-                  class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                  class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
                 >
                   <option value="">Seleccionar ciudad</option>
                   <option v-for="c in ciudadOptions" :key="c" :value="c">{{ c }}</option>
                 </select>
-                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
             </div>
             <div>
@@ -101,7 +105,7 @@
               <input
                 v-model="form.provincia"
                 type="text"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
               />
             </div>
           </div>
@@ -111,13 +115,13 @@
               <div class="relative">
                 <select
                   v-model="form.timezone"
-                  class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                  class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
                 >
                   <option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
                 </select>
-                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
-              <p class="!mt-1 text-xs text-neutral-400">
+              <p class="!mt-2.5 text-xs text-neutral-400">
                 Hora local actual: <span class="font-medium text-slate-600">{{ localTimePreview }}</span>
               </p>
             </div>
@@ -127,13 +131,13 @@
               <div class="relative">
                 <select
                   v-model="form.moneda"
-                  class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                  class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
                 >
                   <option v-for="c in monedaOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
                 </select>
-                <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
               </div>
-              <p class="!mt-2 text-xs text-neutral-400">
+              <p class="!mt-2.5 text-xs text-neutral-400">
                 Ejemplo de precio: <span class="font-medium text-slate-600">{{ pricePreview }}</span>
               </p>
             </div>
@@ -142,16 +146,16 @@
       </div>
 
       <!-- Perfil público -->
-      <div class="rounded-2xl border border-slate-200 bg-white">
-        <div class="border-b border-slate-200 px-6 py-5">
-          <h2 class="text-base font-semibold text-slate-900">Perfil público</h2>
+      <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+        <div class="border-b border-black/[0.06] px-6 py-5">
+          <h2 class="text-base font-semibold text-primitive-dark-500">Perfil público</h2>
           <p class="mt-0.5 text-sm text-neutral-400">
             Cómo se muestra tu complejo en la web pública de reservas.
           </p>
         </div>
         <div class="space-y-6 px-6 py-6">
           <!-- Publicado toggle -->
-          <div class="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+          <div class="flex items-center justify-between rounded-xl border border-black/[0.06] p-4">
             <div class="pr-4">
               <p class="text-sm font-semibold text-slate-800">Publicar complejo</p>
               <p class="text-xs text-neutral-400">
@@ -179,7 +183,7 @@
               v-model="form.descripcion"
               rows="3"
               placeholder="Contá qué hace especial a tu complejo (canchas, servicios, ambiente...)"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+              class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
             ></textarea>
           </div>
 
@@ -190,7 +194,7 @@
                 v-model="form.whatsapp"
                 type="text"
                 placeholder="Ej: +54 11 5555-5555"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
               />
             </div>
             <div>
@@ -199,14 +203,14 @@
                 v-model="form.email"
                 type="email"
                 placeholder="Ej: contacto@tucomplejo.com"
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
               />
             </div>
           </div>
 
           <div>
             <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Servicios</label>
-            <div class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 transition-colors focus-within:border-primitive-orange-500 focus-within:ring-1 focus-within:ring-primitive-orange-500">
+            <div class="flex flex-wrap items-center gap-2 rounded-xl border border-black/[0.08] px-3 py-2 transition-colors focus-within:border-primitive-orange-400 focus-within:ring-2 focus-within:ring-primitive-orange-100">
               <span
                 v-for="(s, i) in form.servicios"
                 :key="i"
@@ -218,21 +222,21 @@
                   class="flex h-4 w-4 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-200 hover:text-error-500 cursor-pointer"
                   @click="removeServicio(i)"
                 >
-                  <i class="pi pi-times text-[9px]"></i>
+                  <i class="icon-[material-symbols--close] text-[9px]"></i>
                 </button>
               </span>
               <input
                 v-model="servicioDraft"
                 type="text"
                 :placeholder="form.servicios.length ? 'Agregar otro...' : 'Ej: Estacionamiento'"
-                class="min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm text-slate-900 outline-none placeholder:text-neutral-400"
+                class="min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm text-primitive-dark-500 outline-none placeholder:text-neutral-400"
                 @keydown.enter.prevent="addServicio"
                 @keydown.,.prevent="addServicio"
                 @keydown.delete="onServicioBackspace"
                 @blur="addServicio"
               />
             </div>
-            <p class="!mt-1 text-xs text-neutral-400">Escribí un servicio y presioná Enter para agregarlo.</p>
+            <p class="!mt-2.5 text-xs text-neutral-400">Escribí un servicio y presioná Enter para agregarlo.</p>
           </div>
 
           <p class="rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-neutral-400">
@@ -246,7 +250,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import clubService from '@/services/clubService'
 import { useAuth } from '@/composables/useAuth'

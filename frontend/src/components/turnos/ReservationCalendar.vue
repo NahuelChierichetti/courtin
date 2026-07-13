@@ -1,24 +1,24 @@
 <template>
-  <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+  <div class="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
     <div ref="scrollEl" class="max-h-[calc(100vh-13rem)] overflow-auto">
       <div class="min-w-max">
         <!-- Header row -->
         <div
           data-cal-header
-          class="sticky top-0 z-20 flex border-b border-slate-200 bg-white"
+          class="sticky top-0 z-20 flex border-b border-black/[0.06] bg-white"
         >
-          <div class="w-16 text-center shrink-0 border-r border-slate-200 px-2 py-3">
+          <div class="w-16 text-center shrink-0 border-r border-black/[0.06] px-2 py-3">
             <span class="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Hora</span>
           </div>
           <div
             v-for="col in columns"
             :key="col.key"
-            class="flex-1 border-r border-slate-200 px-4 py-3 last:border-r-0"
+            class="flex-1 border-r border-black/[0.06] px-4 py-3 last:border-r-0"
             :style="{ minWidth: colMinWidth }"
           >
             <div class="flex items-center gap-2">
               <span class="h-2.5 w-2.5 shrink-0 rounded-sm" :class="sportMeta(col.tipo).bgStrong" v-if="col.tipo" />
-              <span class="text-sm font-semibold text-slate-900">{{ col.label }}</span>
+              <span class="text-sm font-semibold text-primitive-dark-500">{{ col.label }}</span>
             </div>
             <p v-if="col.sublabel" class="mt-0.5 truncate text-xs text-neutral-400">{{ col.sublabel }}</p>
           </div>
@@ -27,11 +27,11 @@
         <!-- Body (pt para que no se corte la primera etiqueta de hora) -->
         <div class="flex">
           <!-- Time gutter -->
-          <div class="w-16 shrink-0 border-r border-slate-200">
+          <div class="w-16 shrink-0 border-r border-black/[0.06]">
             <div
               v-for="h in hourMarks"
               :key="h.min"
-              class="relative border-b border-slate-200 flex items-center justify-center"
+              class="relative border-b border-black/[0.06] flex items-center justify-center"
               :style="{ height: hourHeight + 'px' }"
             >
               <span class="-top-2 right-2 text-xs font-medium text-neutral-400 font-secondary">
@@ -45,7 +45,7 @@
             v-for="(col, colIndex) in columns"
             :key="col.key"
             :ref="(el) => setColRef(el, colIndex)"
-            class="relative flex-1 border-r border-slate-300 last:border-r-0"
+            class="relative flex-1 border-r border-black/[0.06] last:border-r-0"
             :style="{ minWidth: colMinWidth, height: bodyHeight + 'px' }"
             @dblclick="onColumnDblClick($event, col)"
           >
@@ -61,7 +61,7 @@
             <div
               v-for="h in hourMarks"
               :key="h.min"
-              class="pointer-events-none absolute inset-x-0 border-b border-slate-200"
+              class="pointer-events-none absolute inset-x-0 border-b border-black/[0.06]"
               :style="{ top: yFor(h.min) + 'px' }"
             />
 
@@ -233,7 +233,7 @@ const textColor = (r, part) => {
   if (st === 'cancelada') return part === 'name' ? 'text-neutral-400 line-through' : 'text-neutral-400'
   if (st === 'completada') return 'text-slate-500'
   if (part === 'time') return sportMeta(r.tipo).textSoft
-  if (part === 'name') return 'text-slate-900'
+  if (part === 'name') return 'text-primitive-dark-500'
   return 'text-slate-500'
 }
 

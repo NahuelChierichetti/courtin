@@ -7,17 +7,31 @@ const { toMinutes, normalizeCloseMinutes } = require('./reservationRules');
 const isWeekday = (dow) => dow >= 1 && dow <= 5; // lun-vie
 const isWeekend = (dow) => dow === 0 || dow === 6;
 
+// Códigos de día canónicos. Índice = dow (0=Dom..6=Sáb).
+const DAY_CODES = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'];
+const CODE_SET = new Set(DAY_CODES);
+
 // ¿Aplica una tarifa a un día de la semana (0=Dom..6=Sáb)?
+// Soporta el formato canónico ("lun,mar,mie,...") y, por compatibilidad, los
+// combos legacy ("Lun a Vie", "Finde", "Lun a Dom", etc.).
 const tarifaMatchesDay = (diasRaw, dow) => {
-  const dias = (diasRaw || '').toLowerCase();
+  const dias = (diasRaw || '').toLowerCase().trim();
   if (!dias) return true;
+
+  // Formato canónico: lista de códigos separados por coma.
+  const tokens = dias.split(',').map((s) => s.trim()).filter(Boolean);
+  if (tokens.length && tokens.every((t) => CODE_SET.has(t))) {
+    return tokens.includes(DAY_CODES[dow]);
+  }
+
+  // Legacy (datos previos / seed).
+  if (dias.includes('lun a dom')) return true;
+  if (dias.includes('lun a sab') && dow >= 1) return true;
+  if ((dias.includes('lun a vie') || dias.includes('lun-vie')) && isWeekday(dow)) return true;
+  if (dias.includes('finde') && isWeekend(dow)) return true;
+  if (dias.includes('feriado')) return false;
   if (dias.includes('dom') && dow === 0) return true;
   if (dias.includes('sab') && dow === 6) return true;
-  if (dias.includes('lun a dom')) return true;
-  if (dias.includes('finde') && isWeekend(dow)) return true;
-  if ((dias.includes('lun a vie') || dias.includes('lun-vie')) && isWeekday(dow)) return true;
-  if (dias.includes('lun a sab') && dow >= 1) return true;
-  if (dias.includes('feriado')) return false;
   return false;
 };
 
