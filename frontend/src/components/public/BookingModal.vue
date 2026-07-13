@@ -25,9 +25,9 @@ const submitError = ref('')
 const result = ref(null)
 
 const metodos = [
-  { value: 'mercadopago', label: 'MercadoPago', desc: 'Tarjeta, dinero en cuenta o QR', icon: 'pi pi-wallet' },
-  { value: 'tarjeta', label: 'Tarjeta de crédito / débito', desc: 'Visa, Mastercard, Amex', icon: 'pi pi-credit-card' },
-  { value: 'complejo', label: 'Pagar en el complejo', desc: 'Reservás ahora, pagás al llegar', icon: 'pi pi-building' },
+  { value: 'mercadopago', label: 'MercadoPago', desc: 'Tarjeta, dinero en cuenta o QR', icon: 'icon-[material-symbols--account-balance-wallet]' },
+  { value: 'tarjeta', label: 'Tarjeta de crédito / débito', desc: 'Visa, Mastercard, Amex', icon: 'icon-[material-symbols--credit-card]' },
+  { value: 'complejo', label: 'Pagar en el complejo', desc: 'Reservás ahora, pagás al llegar', icon: 'icon-[material-symbols--apartment]' },
 ]
 
 const dateLabel = computed(() => {
@@ -87,6 +87,7 @@ const confirmar = async () => {
       guestPhone: form.value.telefono.trim(),
       guestEmail: form.value.email.trim() || undefined,
       notas: form.value.notas.trim() || undefined,
+      metodoPago: metodo.value,
     })
     result.value = res
     step.value = 3
@@ -113,7 +114,7 @@ const confirmar = async () => {
               {{ step === 1 ? 'Confirmá tus datos' : 'Elegí cómo pagar' }}
             </h3>
             <button class="text-slate-400 hover:text-slate-600 cursor-pointer" @click="emit('close')">
-              <i class="pi pi-times"></i>
+              <i class="icon-[material-symbols--close]"></i>
             </button>
           </div>
           <div class="mt-4 flex gap-1.5">
@@ -162,11 +163,11 @@ const confirmar = async () => {
           <p v-if="submitError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ submitError }}</p>
 
           <div class="mt-2 flex gap-3">
-            <button class="h-11 flex-1 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer" @click="emit('close')">
+            <button class="h-11 flex-1 rounded-full border border-slate-200 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer" @click="emit('close')">
               Cancelar
             </button>
-            <button class="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer" @click="goToPago">
-              Continuar <i class="pi pi-arrow-right text-xs"></i>
+            <button class="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer" @click="goToPago">
+              Continuar <i class="icon-[material-symbols--arrow-forward] text-xs"></i>
             </button>
           </div>
         </div>
@@ -176,7 +177,7 @@ const confirmar = async () => {
           <button
             v-for="m in metodos"
             :key="m.value"
-            class="flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer"
+            class="flex w-full items-center gap-3 rounded-full border p-3 text-left transition-colors cursor-pointer"
             :class="metodo === m.value ? 'border-primitive-orange-400 bg-primitive-orange-50' : 'border-slate-200 hover:bg-slate-50'"
             @click="metodo = m.value"
           >
@@ -204,11 +205,11 @@ const confirmar = async () => {
           <p v-if="submitError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ submitError }}</p>
 
           <div class="mt-2 flex gap-3">
-            <button class="h-11 flex-1 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer disabled:opacity-60" :disabled="submitting" @click="step = 1">
+            <button class="h-11 flex-1 rounded-full border border-slate-200 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer disabled:opacity-60" :disabled="submitting" @click="step = 1">
               Atrás
             </button>
-            <button class="flex h-11 flex-[1.4] items-center justify-center gap-1.5 rounded-lg bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-60" :disabled="submitting" @click="confirmar">
-              <i v-if="submitting" class="pi pi-spin pi-spinner"></i>
+            <button class="flex h-11 flex-[1.4] items-center justify-center gap-1.5 rounded-full bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-60" :disabled="submitting" @click="confirmar">
+              <i v-if="submitting" class="icon-[material-symbols--progress-activity] animate-spin"></i>
               {{ submitting ? 'Procesando...' : (metodo === 'complejo' ? 'Confirmar reserva' : `Pagar ${formatCurrency(total, moneda)}`) }}
             </button>
           </div>
@@ -217,7 +218,7 @@ const confirmar = async () => {
         <!-- STEP 3: confirmado -->
         <div v-else class="text-center">
           <div class="mx-auto mt-2 flex h-16 w-16 items-center justify-center rounded-full bg-success-50">
-            <i class="pi pi-check text-3xl text-success-500"></i>
+            <i class="icon-[material-symbols--check] text-3xl text-success-500"></i>
           </div>
           <h3 class="mt-4 text-xl font-bold text-slate-900">¡Reserva confirmada!</h3>
           <p class="mt-1 text-sm text-slate-500">{{ court?.nombre }} en {{ club?.nombre }}</p>
@@ -232,7 +233,7 @@ const confirmar = async () => {
             Te enviamos los detalles por WhatsApp y email.<br />Tu reserva quedó registrada como pendiente de confirmación.
           </p>
 
-          <button class="mt-5 h-11 w-full rounded-lg bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer" @click="emit('close')">
+          <button class="mt-5 h-11 w-full rounded-full bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer" @click="emit('close')">
             Listo
           </button>
         </div>

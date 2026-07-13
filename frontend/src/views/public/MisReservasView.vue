@@ -61,7 +61,7 @@ onMounted(fetchReservations)
 
     <!-- Loading -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando tus reservas...</p>
     </div>
 
@@ -73,13 +73,13 @@ onMounted(fetchReservations)
     <!-- Empty -->
     <div v-else-if="reservations.length === 0" class="flex flex-col items-center justify-center py-20 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-calendar text-2xl text-neutral-400"></i>
+        <i class="icon-[material-symbols--calendar-month] text-2xl text-neutral-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-slate-900">Todavía no tenés reservas</h3>
       <p class="mt-1 text-sm text-slate-500">Buscá un complejo y reservá tu primera cancha.</p>
       <RouterLink
         :to="{ name: 'public-buscar' }"
-        class="mt-4 rounded-lg bg-primitive-orange-500 px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-primitive-orange-600"
+        class="mt-4 rounded-full bg-primitive-orange-500 px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-primitive-orange-600"
       >
         Buscar canchas
       </RouterLink>
@@ -109,8 +109,8 @@ onMounted(fetchReservations)
               </span>
             </div>
             <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-slate-700">
-              <span><i class="pi pi-calendar mr-1.5 text-xs text-neutral-400"></i>{{ fechaOf(r) }}</span>
-              <span><i class="pi pi-clock mr-1.5 text-xs text-neutral-400"></i>{{ horarioOf(r) }}</span>
+              <span><i class="icon-[material-symbols--calendar-month] mr-1.5 text-xs text-neutral-400"></i>{{ fechaOf(r) }}</span>
+              <span><i class="icon-[material-symbols--schedule] mr-1.5 text-xs text-neutral-400"></i>{{ horarioOf(r) }}</span>
               <span class="font-semibold">{{ formatCurrency(r.precioFinal, monedaOf(r)) }}</span>
             </div>
           </article>
@@ -139,8 +139,8 @@ onMounted(fetchReservations)
               </span>
             </div>
             <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-slate-600">
-              <span><i class="pi pi-calendar mr-1.5 text-xs text-neutral-400"></i>{{ fechaOf(r) }}</span>
-              <span><i class="pi pi-clock mr-1.5 text-xs text-neutral-400"></i>{{ horarioOf(r) }}</span>
+              <span><i class="icon-[material-symbols--calendar-month] mr-1.5 text-xs text-neutral-400"></i>{{ fechaOf(r) }}</span>
+              <span><i class="icon-[material-symbols--schedule] mr-1.5 text-xs text-neutral-400"></i>{{ horarioOf(r) }}</span>
               <span class="font-semibold">{{ formatCurrency(r.precioFinal, monedaOf(r)) }}</span>
             </div>
           </article>

@@ -1,289 +1,251 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import DatePicker from 'primevue/datepicker'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import publicService from '@/services/publicService'
 import { sportMeta } from '@/utils/turnos'
-import { dayjs, formatCurrency } from '@/utils/datetime'
+import { dayjs } from '@/utils/datetime'
+import ClubCard from '@/components/public/ClubCard.vue'
 
+const route = useRoute()
 const router = useRouter()
+
+// --- Filtros (se inicializan desde la query del home / navbar) ---
+const q = ref(typeof route.query.q === 'string' ? route.query.q : '')
+const ciudad = ref(typeof route.query.ciudad === 'string' ? route.query.ciudad : '')
+const tipo = ref(typeof route.query.tipo === 'string' ? route.query.tipo : '')
+const fecha = ref(
+  typeof route.query.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(route.query.fecha)
+    ? route.query.fecha
+    : dayjs().format('YYYY-MM-DD'),
+)
+const hora = ref(typeof route.query.hora === 'string' ? route.query.hora : '')
+
+const sortBy = ref('todos')
 
 const clubs = ref([])
 const loading = ref(false)
 const error = ref('')
-
-const cities = ref([])
-const ciudad = ref('')
-const tipo = ref('')
-const cuando = ref(new Date())
-const hora = ref('')
-
-// Fecha elegida como string "YYYY-MM-DD" para las queries y la navegación.
-const fechaStr = computed(() => dayjs(cuando.value).format('YYYY-MM-DD'))
-
-// Horas de inicio ofrecidas en el buscador (cada 30 min, 06:00–23:00).
-const horaOptions = (() => {
-  const opts = []
-  for (let m = 6 * 60; m <= 23 * 60; m += 30) {
-    const hh = String(Math.floor(m / 60)).padStart(2, '0')
-    const mm = String(m % 60).padStart(2, '0')
-    opts.push(`${hh}:${mm}`)
-  }
-  return opts
-})()
-
-const fetchCities = async () => {
-  try {
-    cities.value = await publicService.getCities()
-  } catch (err) {
-    console.error(err)
-  }
-}
 
 const sportChips = [
   { label: 'Todos', value: '' },
   { label: 'Pádel', value: 'padel' },
   { label: 'Fútbol', value: 'futbol' },
   { label: 'Tenis', value: 'tenis' },
+  { label: 'Básquet', value: 'basquet' },
+  { label: 'Vóley', value: 'voley' },
+  { label: 'Hockey', value: 'hockey' },
+]
+
+const sortChips = [
+  { label: 'Todos', value: 'todos' },
+  { label: 'Cercanos', value: 'cercanos' },
+  { label: 'Mejor valorados', value: 'valorados' },
+  { label: 'Menor precio', value: 'precio' },
 ]
 
 const sportLabel = computed(() => sportChips.find((s) => s.value === tipo.value)?.label || 'Todos')
 
+const resultsMeta = computed(() => {
+  const parts = [fecha.value]
+  if (hora.value) parts.push(`desde ${hora.value}`)
+  parts.push(sportLabel.value)
+  return parts.join(' · ')
+})
+
+// Orden en cliente: precio asc y (si hubiera) rating desc. El resto respeta el orden del back.
+const sortedClubs = computed(() => {
+  const list = [...clubs.value]
+  if (sortBy.value === 'precio') {
+    return list.sort((a, b) => (a.precioDesde ?? Infinity) - (b.precioDesde ?? Infinity))
+  }
+  if (sortBy.value === 'valorados') {
+    return list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+  }
+  return list
+})
+
+let debounce
 const fetchClubs = async () => {
   loading.value = true
   error.value = ''
   try {
     clubs.value = await publicService.searchClubs({
-      ciudad: ciudad.value || undefined,
+      q: q.value.trim() || undefined,
+      ciudad: ciudad.value.trim() || undefined,
       tipo: tipo.value || undefined,
-      fecha: fechaStr.value,
+      fecha: fecha.value,
       hora: hora.value || undefined,
     })
   } catch (err) {
     console.error(err)
-    error.value = 'No se pudieron cargar los clubes. Probá de nuevo.'
+    error.value = 'No se pudieron cargar los complejos. Probá de nuevo.'
     clubs.value = []
   } finally {
     loading.value = false
   }
 }
 
-const onSubmit = () => fetchClubs()
+// Sincroniza los filtros con la URL (para poder compartir/volver).
+const syncUrl = () => {
+  const query = {}
+  if (q.value.trim()) query.q = q.value.trim()
+  if (ciudad.value.trim()) query.ciudad = ciudad.value.trim()
+  if (tipo.value) query.tipo = tipo.value
+  if (fecha.value) query.fecha = fecha.value
+  if (hora.value) query.hora = hora.value
+  router.replace({ query })
+}
+
+const scheduleFetch = () => {
+  clearTimeout(debounce)
+  debounce = setTimeout(() => {
+    syncUrl()
+    fetchClubs()
+  }, 350)
+}
+
+// Texto/ubicación: con debounce. Deporte/fecha/hora: inmediato.
+watch([q, ciudad], scheduleFetch)
+watch([tipo, fecha, hora], () => {
+  clearTimeout(debounce)
+  syncUrl()
+  fetchClubs()
+})
 
 const selectSport = (value) => {
   tipo.value = value
-  fetchClubs()
 }
 
-const goToClub = (slug) =>
+const goToClub = (club) =>
   router.push({
     name: 'public-club',
-    params: { slug },
-    query: { fecha: fechaStr.value, ...(hora.value ? { hora: hora.value } : {}) },
+    params: { slug: club.slug },
+    query: { fecha: fecha.value, ...(hora.value ? { hora: hora.value } : {}) },
   })
 
-onMounted(() => {
-  fetchCities()
-  fetchClubs()
-})
+onMounted(fetchClubs)
 </script>
 
 <template>
-  <div>
-    <!-- Hero -->
-    <section class="relative overflow-hidden bg-gradient-to-br from-[#fdf1e7] via-white to-[#eef2fb]">
-      <div class="mx-auto w-full max-w-6xl px-4 pt-14 pb-28">
-        <h1 class="max-w-2xl text-4xl font-bold leading-tight text-primitive-dark-500 sm:text-5xl">
-          Tu próximo partido empieza <span class="text-primitive-orange-500">acá.</span>
-        </h1>
-        <p class="mt-4 max-w-xl text-base text-slate-500">
-          Encontrá y reservá canchas de pádel, tenis y fútbol cerca tuyo. Disponibilidad en tiempo real, pagás online.
-        </p>
-      </div>
+  <div class="mx-auto w-full max-w-7xl px-4 py-8">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <!-- Sidebar filtros -->
+      <aside class="lg:sticky lg:top-24 lg:self-start">
+        <div class="rounded-3xl border border-black/[0.06] bg-white p-6 shadow-sm">
+          <div class="flex items-center gap-2.5">
+            <i class="icon-[material-symbols--tune] text-primitive-orange-500"></i>
+            <h2 class="text-lg font-bold text-primitive-dark-500">Filtros</h2>
+          </div>
 
-      <!-- Search card (floats over hero edge) -->
-      <div class="mx-auto -mt-16 w-full max-w-6xl px-4">
-        <form
-          class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg sm:flex-row sm:items-end"
-          @submit.prevent="onSubmit"
-        >
-          <div class="flex-1 px-2">
-            <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
-            <div class="relative">
-              <i class="pi pi-map-marker absolute left-0 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
-              <select
-                v-model="ciudad"
-                class="h-9 w-full appearance-none border-0 bg-transparent pl-6 pr-6 text-sm text-slate-800 outline-none"
-              >
-                <option value="">Todas las ciudades</option>
-                <option v-for="c in cities" :key="c" :value="c">{{ c }}</option>
-              </select>
-              <i class="pi pi-chevron-down pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-xs text-neutral-400"></i>
-            </div>
+          <!-- ¿Qué buscás? -->
+          <div class="mt-6">
+            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
+              <i class="icon-[material-symbols--search] text-[11px] text-primitive-orange-500"></i> ¿Qué buscás?
+            </label>
+            <input v-model="q" type="text" placeholder="Cancha o complejo"
+              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400" />
           </div>
-          <div class="hidden w-px self-stretch bg-slate-100 sm:block"></div>
-          <div class="flex-1 px-2">
-            <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Deporte</label>
-            <div class="relative">
-              <select
-                v-model="tipo"
-                class="h-9 w-full appearance-none border-0 bg-transparent pr-6 text-sm text-slate-800 outline-none"
-              >
-                <option v-for="s in sportChips" :key="s.value" :value="s.value">{{ s.label }}</option>
-              </select>
-              <i class="pi pi-chevron-down pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-xs text-neutral-400"></i>
-            </div>
-          </div>
-          <div class="hidden w-px self-stretch bg-slate-100 sm:block"></div>
-          <div class="flex-1 px-2">
-            <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Cuándo</label>
-            <div class="relative">
-              <i class="pi pi-calendar absolute left-0 top-1/2 z-10 -translate-y-1/2 text-sm text-neutral-400"></i>
-              <DatePicker
-                v-model="cuando"
-                date-format="dd/mm/yy"
-                :min-date="new Date()"
-                fluid
-                :pt="{
-                  pcInputText: {
-                    root: '!h-9 !w-full !rounded-none !border-0 !bg-transparent !pl-6 !text-sm !text-slate-800 !shadow-none !outline-none !ring-0',
-                  },
-                }"
-              />
-            </div>
-          </div>
-          <div class="hidden w-px self-stretch bg-slate-100 sm:block"></div>
-          <div class="flex-1 px-2">
-            <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Hora de inicio</label>
-            <div class="relative">
-              <i class="pi pi-clock absolute left-0 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
-              <select
-                v-model="hora"
-                class="h-9 w-full appearance-none border-0 bg-transparent pl-6 pr-6 text-sm text-slate-800 outline-none"
-              >
-                <option value="">Cualquier hora</option>
-                <option v-for="h in horaOptions" :key="h" :value="h">{{ h }}</option>
-              </select>
-              <i class="pi pi-chevron-down pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-xs text-neutral-400"></i>
-            </div>
-          </div>
-          <button
-            type="submit"
-            class="flex h-11 items-center justify-center gap-2 rounded-xl bg-primitive-orange-500 px-6 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer"
-          >
-            <i class="pi pi-search text-sm"></i> Buscar
-          </button>
-        </form>
 
-        <!-- Quick filters -->
-        <div class="mt-4 flex flex-wrap items-center gap-2">
-          <span class="text-xs font-medium text-neutral-400">Popular</span>
-          <button
-            v-for="s in sportChips"
-            :key="s.value"
-            class="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
-            :class="tipo === s.value
-              ? 'border-primitive-dark-500 bg-primitive-dark-500 text-white'
-              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
-            @click="selectSport(s.value)"
-          >
-            {{ s.label }}
-          </button>
+          <!-- Ubicación -->
+          <div class="mt-5">
+            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
+              <i class="icon-[material-symbols--location-on] text-[11px] text-primitive-orange-500"></i> Ubicación
+            </label>
+            <input v-model="ciudad" type="text" placeholder="Barrio o ciudad"
+              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400" />
+          </div>
+
+          <!-- Fecha + Hora -->
+          <div class="mt-5 grid grid-cols-2 gap-3">
+            <div>
+              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
+                <i class="icon-[material-symbols--calendar-month] text-[11px] text-primitive-orange-500"></i> Fecha
+              </label>
+              <input v-model="fecha" type="date" :min="dayjs().format('YYYY-MM-DD')"
+                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none focus:border-primitive-orange-400" />
+            </div>
+            <div>
+              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
+                <i class="icon-[material-symbols--schedule] text-[11px] text-primitive-orange-500"></i> Hora
+              </label>
+              <input v-model="hora" type="time"
+                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none focus:border-primitive-orange-400" />
+            </div>
+          </div>
+
+          <!-- Deporte -->
+          <div class="mt-5">
+            <label class="text-xs font-bold tracking-wide text-slate-500 uppercase">Deporte</label>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button
+                v-for="s in sportChips"
+                :key="s.value"
+                type="button"
+                class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+                :class="tipo === s.value
+                  ? 'bg-primitive-orange-500 text-white'
+                  : 'border border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+                @click="selectSport(s.value)"
+              >
+                {{ s.label }}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </aside>
 
-    <!-- Results -->
-    <div class="mx-auto w-full max-w-6xl px-4 py-10">
-      <div class="flex items-end justify-between">
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">
-            {{ clubs.length }} {{ clubs.length === 1 ? 'complejo disponible' : 'complejos disponibles' }}
-          </h2>
-          <p class="mt-0.5 text-xs text-neutral-400">
-            Filtrando por {{ sportLabel }}<span v-if="hora"> · disponibles a las {{ hora }}</span>
-          </p>
-        </div>
-      </div>
-
-      <!-- Loading -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-center">
-        <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
-        <p class="mt-4 text-sm text-slate-500">Buscando clubes...</p>
-      </div>
-
-      <!-- Error -->
-      <div v-else-if="error" class="mt-6 rounded-2xl border border-red-100 bg-red-50 p-6 text-center text-sm text-red-600">
-        {{ error }}
-      </div>
-
-      <!-- Empty -->
-      <div v-else-if="!clubs.length" class="flex flex-col items-center justify-center py-20 text-center">
-        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-          <i class="pi pi-building text-2xl text-neutral-400"></i>
-        </div>
-        <h3 class="mt-4 text-lg font-semibold text-slate-900">No encontramos complejos</h3>
-        <p class="!mt-2 text-sm text-slate-500">Probá ajustar la zona, el deporte o la hora.</p>
-      </div>
-
-      <!-- Grid -->
-      <div v-else class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        <button
-          v-for="club in clubs"
-          :key="club._id"
-          class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition-shadow hover:shadow-md cursor-pointer"
-          @click="goToClub(club.slug)"
-        >
-          <!-- Cover -->
-          <div class="relative h-40 w-full overflow-hidden">
-            <img v-if="club.fotos && club.fotos.length" :src="club.fotos[0]" :alt="club.nombre" class="h-full w-full object-cover" />
-            <div v-else class="relative h-full w-full bg-gradient-to-br from-primitive-dark-500 to-primitive-blue-500">
-              <!-- court lines -->
-              <div class="absolute inset-4 rounded-md border border-white/20">
-                <div class="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-white/20"></div>
-                <div class="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-white/20"></div>
-                <div class="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20"></div>
-              </div>
-            </div>
-            <div v-if="club.logo" class="absolute bottom-3 left-3 flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border-2 border-white bg-white shadow">
-              <img :src="club.logo" :alt="club.nombre" class="h-full w-full object-cover" />
-            </div>
+      <!-- Resultados -->
+      <section>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-primitive-dark-500">
+              {{ sortedClubs.length }} {{ sortedClubs.length === 1 ? 'resultado' : 'resultados' }}
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">{{ resultsMeta }}</p>
           </div>
 
-          <div class="flex flex-1 flex-col gap-2 p-4">
-            <h3 class="text-base font-semibold text-slate-900">{{ club.nombre }}</h3>
-            <p v-if="club.ciudad || club.direccion" class="flex items-center gap-1.5 text-xs text-slate-500">
-              <i class="pi pi-map-marker text-[11px]"></i>
-              {{ [club.direccion, club.ciudad].filter(Boolean).join(', ') }}
-            </p>
-
-            <!-- Sports -->
-            <div v-if="club.deportes && club.deportes.length" class="mt-0.5 flex flex-wrap gap-1.5">
-              <span
-                v-for="d in club.deportes"
-                :key="d"
-                class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
-                :class="[sportMeta(d).bg, sportMeta(d).text]"
-              >
-                <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(d).dot"></span>
-                {{ sportMeta(d).label }}
-              </span>
-            </div>
-
-            <!-- Footer: price + CTA -->
-            <div class="mt-auto flex items-center justify-between pt-3">
-              <div v-if="club.precioDesde">
-                <p class="text-[10px] text-neutral-400">desde</p>
-                <p class="text-base font-bold font-secondary text-slate-900">{{ formatCurrency(club.precioDesde, club.moneda) }}<span class="text-xs font-normal text-neutral-400"> /hora</span></p>
-              </div>
-              <span v-else></span>
-              <span class="rounded-lg bg-primitive-dark-500 px-4 py-2 text-xs font-semibold text-white transition-colors group-hover:bg-primitive-dark-700">
-                Ver turnos
-              </span>
-            </div>
+          <!-- Orden -->
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="s in sortChips"
+              :key="s.value"
+              type="button"
+              class="rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+              :class="sortBy === s.value
+                ? 'bg-primitive-orange-500 text-white'
+                : 'border border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+              @click="sortBy = s.value"
+            >
+              {{ s.label }}
+            </button>
           </div>
-        </button>
-      </div>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
+          <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-slate-300"></i>
+          <p class="mt-4 text-sm text-slate-500">Buscando complejos...</p>
+        </div>
+
+        <!-- Error -->
+        <div v-else-if="error" class="mt-6 rounded-2xl border border-error-100 bg-error-50 p-6 text-center text-sm text-error-600">
+          {{ error }}
+        </div>
+
+        <!-- Empty -->
+        <div v-else-if="!sortedClubs.length" class="flex flex-col items-center justify-center py-24 text-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
+            <i class="icon-[material-symbols--search] text-2xl text-slate-300"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">No encontramos complejos</h3>
+          <p class="mt-2 text-sm text-slate-500">Probá ajustar la zona, el deporte o la hora.</p>
+        </div>
+
+        <!-- Grid -->
+        <div v-else class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <ClubCard v-for="club in sortedClubs" :key="club._id" :club="club" @select="goToClub" />
+        </div>
+      </section>
     </div>
   </div>
 </template>

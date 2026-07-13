@@ -18,6 +18,11 @@ const router = createRouter({
       children: [
         {
           path: '',
+          name: 'public-home',
+          component: () => import('@/views/public/PublicHomeView.vue'),
+        },
+        {
+          path: 'buscar',
           name: 'public-buscar',
           component: () => import('@/views/public/BuscarView.vue'),
         },
@@ -70,13 +75,13 @@ const router = createRouter({
         {
           path: 'clientes',
           name: 'clientes',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/ClientesView.vue'),
           meta: { title: 'Clientes' },
         },
         {
           path: 'caja',
           name: 'caja',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/CajaView.vue'),
           meta: { title: 'Control de caja' },
         },
         {

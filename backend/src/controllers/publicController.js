@@ -14,6 +14,8 @@ const { validateReservationSlot, dayConfigForDate } = require('../utils/reservat
 const { computeSlots } = require('../utils/availability');
 const { priceForDuration } = require('../utils/pricing');
 const { horariosToLocal, DEFAULT_TZ } = require('../utils/timezone');
+const { recordReservationPayment } = require('../utils/cashLedger');
+const { upsertClientFromReservation } = require('../utils/clients');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -307,7 +309,7 @@ const getPublicCities = async (req, res, next) => {
 const createPublicReservation = async (req, res, next) => {
   try {
     const { slug } = req.params;
-    const { courtId, inicio, fin, guestPhone, guestEmail, notas } = req.body;
+    const { courtId, inicio, fin, guestPhone, guestEmail, notas, metodoPago } = req.body;
 
     // Si el que reserva está logueado (attachUserOptional), la reserva queda
     // asociada a su cuenta y su nombre/email de la cuenta sirven de fallback.
@@ -374,6 +376,13 @@ const createPublicReservation = async (req, res, next) => {
       }
       throw err;
     }
+
+    // Si el pago fue online (MP/tarjeta), registra el ingreso en la caja del
+    // club. Best-effort: no bloquea la reserva si falla.
+    await recordReservationPayment(reservation, metodoPago);
+
+    // Registra/actualiza el cliente del club (clave: email). Best-effort.
+    await upsertClientFromReservation(reservation);
 
     res.status(201).json({
       ok: true,
