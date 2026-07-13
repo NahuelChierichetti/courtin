@@ -1,10 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
-import Password from 'primevue/password'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
@@ -25,6 +21,9 @@ const form = reactive({
   direccion: '',
   telefono: '',
 })
+
+const showPassword = ref(false)
+const showConfirm = ref(false)
 
 // El slug se autogenera desde el nombre del complejo hasta que el usuario lo
 // edite manualmente (para no pisar su elección).
@@ -52,12 +51,7 @@ const onSlugInput = () => {
 const errorMessage = ref('')
 
 const canSubmit = computed(
-  () =>
-    form.nombre &&
-    form.email &&
-    form.password &&
-    form.clubNombre &&
-    form.slug,
+  () => form.nombre && form.email && form.password && form.clubNombre && form.slug,
 )
 
 const handleSubmit = async () => {
@@ -67,7 +61,6 @@ const handleSubmit = async () => {
     errorMessage.value = 'La contraseña debe tener al menos 6 caracteres.'
     return
   }
-
   if (form.password !== form.confirmPassword) {
     errorMessage.value = 'Las contraseñas no coinciden.'
     return
@@ -75,11 +68,7 @@ const handleSubmit = async () => {
 
   try {
     await registerClub({
-      owner: {
-        nombre: form.nombre,
-        email: form.email,
-        password: form.password,
-      },
+      owner: { nombre: form.nombre, email: form.email, password: form.password },
       club: {
         nombre: form.clubNombre,
         slug: form.slug,
@@ -92,101 +81,131 @@ const handleSubmit = async () => {
 
     const redirect =
       typeof route.query.redirect === 'string' ? route.query.redirect : resolveLanding()
-
     router.push(redirect)
   } catch (error) {
-    errorMessage.value =
-      error.response?.data?.message || 'No se pudo registrar el complejo.'
+    errorMessage.value = error.response?.data?.message || 'No se pudo registrar el complejo.'
   }
 }
+
+// Clases compartidas de input.
+const inputBase =
+  'h-12 w-full rounded-xl border border-black/[0.08] bg-white text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100'
 </script>
 
 <template>
-  <section class="min-h-screen bg-slate-50">
-    <div class="min-h-screen w-full bg-white lg:grid lg:grid-cols-2">
-      <div class="flex min-h-screen flex-col justify-center px-8 py-10 sm:px-12 lg:px-16">
-        <div class="mx-auto w-full max-w-md">
-          <RouterLink to="/" class="inline-flex items-center gap-3 no-underline">
-            <div class="grid h-10 w-10 place-items-center rounded-xl bg-primitive-dark-500 text-white">
-              <span class="text-sm font-bold">CI</span>
-            </div>
-            <div class="leading-tight">
-              <p class="text-sm font-semibold tracking-wide text-slate-900">CourtIn</p>
-              <p class="text-xs text-slate-500">Sumá tu complejo</p>
-            </div>
-          </RouterLink>
+  <section class="min-h-screen bg-[#faf5ef] lg:grid lg:grid-cols-2">
+    <!-- Columna formulario -->
+    <div class="flex min-h-screen flex-col px-6 py-8 sm:px-12 lg:px-16">
+      <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
+        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primitive-orange-500">
+          <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 4.5 3.5 19h17L12 4.5Zm0 4.8 3.1 5.3-1.6.9-1.5-1-1.5 1-1.6-.9L12 9.3Z" />
+          </svg>
+        </div>
+        <div class="leading-none">
+          <p class="text-lg font-bold tracking-tight text-primitive-dark-500">
+            Court<span class="text-primitive-orange-500">In</span>
+          </p>
+          <p class="mt-0.5 text-[10px] font-semibold tracking-[0.22em] text-slate-400">SPORT COMPLEX</p>
+        </div>
+      </RouterLink>
 
-          <h1 class="mt-8 text-3xl font-bold text-primitive-dark-500 sm:text-4xl">Registrá tu complejo</h1>
-          <p class="mt-3 text-sm leading-relaxed text-primitive-dark-500">
+      <div class="flex flex-1 flex-col justify-center py-10">
+        <div class="mx-auto w-full max-w-md">
+          <h1 class="text-3xl font-bold text-primitive-dark-500 sm:text-4xl">Registrá tu complejo</h1>
+          <p class="mt-3 text-sm leading-relaxed text-slate-500">
             Creá tu cuenta de administrador y empezá a gestionar tus canchas y turnos.
           </p>
 
-          <Message v-if="errorMessage" severity="error" class="mt-6">
-            {{ errorMessage }}
-          </Message>
+          <div v-if="errorMessage" class="mt-6 flex items-center gap-2 rounded-xl border border-error-100 bg-error-50 px-4 py-3 text-sm text-error-600">
+            <i class="icon-[material-symbols--error] shrink-0"></i>{{ errorMessage }}
+          </div>
 
-          <form class="mt-6 space-y-5" @submit.prevent="handleSubmit">
-            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Responsable</p>
+          <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
+            <!-- Responsable -->
+            <p class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <i class="icon-[material-symbols--person-outline] text-sm text-primitive-orange-500"></i> Responsable
+            </p>
 
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-primitive-dark-500" for="nombre">Nombre</label>
-              <InputText id="nombre" v-model="form.nombre" class="w-full" autocomplete="name" placeholder="Tu nombre" required />
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="nombre">Nombre</label>
+              <input id="nombre" v-model="form.nombre" autocomplete="name" placeholder="Tu nombre" required :class="inputBase" class="px-4" />
             </div>
 
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-primitive-dark-500" for="email">Email</label>
-              <InputText id="email" v-model="form.email" class="w-full" type="email" autocomplete="email" placeholder="tuemail@ejemplo.com" required />
-            </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-primitive-dark-500" for="password">Contraseña</label>
-                <Password id="password" v-model="form.password" class="w-full" inputClass="w-full" :feedback="false" toggleMask autocomplete="new-password" placeholder="Mínimo 6 caracteres" required />
-              </div>
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-primitive-dark-500" for="confirmPassword">Confirmar</label>
-                <Password id="confirmPassword" v-model="form.confirmPassword" class="w-full" inputClass="w-full" :feedback="false" toggleMask autocomplete="new-password" placeholder="Repetí la contraseña" required />
-              </div>
-            </div>
-
-            <p class="!mt-8 text-xs font-semibold uppercase tracking-wider text-slate-400">Complejo</p>
-
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-primitive-dark-500" for="clubNombre">Nombre del complejo</label>
-              <InputText id="clubNombre" v-model="form.clubNombre" class="w-full" placeholder="Ej: Club Central Pádel" required />
-            </div>
-
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-primitive-dark-500" for="slug">Identificador (URL)</label>
-              <InputText id="slug" v-model="form.slug" class="w-full" placeholder="club-central-padel" required @input="onSlugInput" />
-              <p class="text-xs text-slate-500">courtin.com/club/{{ form.slug || 'tu-complejo' }}</p>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="email">Email</label>
+              <input id="email" v-model="form.email" type="email" autocomplete="email" placeholder="tuemail@ejemplo.com" required :class="inputBase" class="px-4" />
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-primitive-dark-500" for="ciudad">Ciudad</label>
-                <InputText id="ciudad" v-model="form.ciudad" class="w-full" placeholder="Ciudad" />
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="password">Contraseña</label>
+                <div class="relative">
+                  <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Mín. 6" required :class="inputBase" class="pl-4 pr-10" />
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer" @click="showPassword = !showPassword">
+                    <i :class="showPassword ? 'icon-[material-symbols--visibility-off]' : 'icon-[material-symbols--visibility]'"></i>
+                  </button>
+                </div>
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-primitive-dark-500" for="provincia">Provincia</label>
-                <InputText id="provincia" v-model="form.provincia" class="w-full" placeholder="Provincia" />
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="confirmPassword">Confirmar</label>
+                <div class="relative">
+                  <input id="confirmPassword" v-model="form.confirmPassword" :type="showConfirm ? 'text' : 'password'" autocomplete="new-password" placeholder="Repetí" required :class="inputBase" class="pl-4 pr-10" />
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer" @click="showConfirm = !showConfirm">
+                    <i :class="showConfirm ? 'icon-[material-symbols--visibility-off]' : 'icon-[material-symbols--visibility]'"></i>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-primitive-dark-500" for="direccion">Dirección</label>
-              <InputText id="direccion" v-model="form.direccion" class="w-full" placeholder="Calle y número" />
+            <!-- Complejo -->
+            <p class="!mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <i class="icon-[material-symbols--apartment] text-sm text-primitive-orange-500"></i> Complejo
+            </p>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="clubNombre">Nombre del complejo</label>
+              <input id="clubNombre" v-model="form.clubNombre" placeholder="Ej: Club Central Pádel" required :class="inputBase" class="px-4" />
             </div>
 
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-primitive-dark-500" for="telefono">Teléfono</label>
-              <InputText id="telefono" v-model="form.telefono" class="w-full" placeholder="Teléfono de contacto" />
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="slug">Identificador (URL)</label>
+              <input id="slug" v-model="form.slug" placeholder="club-central-padel" required :class="inputBase" class="px-4" @input="onSlugInput" />
+              <p class="mt-2.5 text-xs text-slate-400">courtin.com/club/{{ form.slug || 'tu-complejo' }}</p>
             </div>
 
-            <Button type="submit" label="Registrar complejo" class="w-full" :loading="isLoading" :disabled="!canSubmit" />
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="ciudad">Ciudad</label>
+                <input id="ciudad" v-model="form.ciudad" placeholder="Ciudad" :class="inputBase" class="px-4" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="provincia">Provincia</label>
+                <input id="provincia" v-model="form.provincia" placeholder="Provincia" :class="inputBase" class="px-4" />
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="direccion">Dirección</label>
+              <input id="direccion" v-model="form.direccion" placeholder="Calle y número" :class="inputBase" class="px-4" />
+            </div>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="telefono">Teléfono</label>
+              <input id="telefono" v-model="form.telefono" placeholder="Teléfono de contacto" :class="inputBase" class="px-4" />
+            </div>
+
+            <button
+              type="submit"
+              :disabled="isLoading || !canSubmit"
+              class="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            >
+              <i v-if="isLoading" class="icon-[material-symbols--progress-activity] animate-spin"></i>
+              {{ isLoading ? 'Registrando...' : 'Registrar complejo' }}
+            </button>
           </form>
 
-          <p class="!mt-6 text-center text-sm text-slate-600">
+          <p class="mt-7 text-center text-sm text-slate-500">
             ¿Ya tenés cuenta de complejo?
             <RouterLink class="font-semibold text-primitive-orange-500 hover:underline" to="/panel/login">
               Ingresá acá
@@ -194,16 +213,21 @@ const handleSubmit = async () => {
           </p>
         </div>
       </div>
+    </div>
 
-      <div class="relative hidden min-h-screen overflow-hidden bg-primitive-dark-500 lg:block">
-        <div class="relative flex h-full flex-col items-center justify-center p-10">
-          <div class="max-w-md text-center">
-            <p class="text-2xl font-bold text-white">Gestioná tu complejo desde un solo lugar</p>
-            <p class="!mt-4 text-sm leading-relaxed text-slate-200">
-              Turnos, canchas, horarios y reservas online. Todo integrado para que te ocupes de jugar.
-            </p>
-          </div>
-        </div>
+    <!-- Columna branding (fija) -->
+    <div class="relative hidden overflow-hidden bg-primitive-dark-500 lg:sticky lg:top-0 lg:block lg:h-screen">
+      <img src="/images/hero-tenista.png" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center" />
+      <div class="absolute inset-0 bg-gradient-to-t from-primitive-dark-500 via-primitive-dark-500/40 to-primitive-dark-500/20"></div>
+
+      <div class="relative flex h-full flex-col justify-end p-12">
+        <h2 class="text-4xl font-bold leading-tight text-white">
+          Tu complejo,<br />todo <span class="text-primitive-orange-500">en juego.</span>
+        </h2>
+        <p class="mt-4 text-sm font-semibold tracking-[0.15em] text-white/70 uppercase">Gestioná · Reservá · Jugá</p>
+        <p class="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
+          Turnos, canchas, horarios y reservas online. Todo integrado para que te ocupes de jugar.
+        </p>
       </div>
     </div>
   </section>

@@ -13,6 +13,7 @@
 require('dotenv').config();
 
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
@@ -25,9 +26,19 @@ dayjs.extend(customParseFormat);
 const Club = require('../models/Club');
 const Court = require('../models/Court');
 const Reservation = require('../models/Reservation');
+const CashMovement = require('../models/CashMovement');
+const Client = require('../models/Client');
+const User = require('../models/User');
+const Membership = require('../models/Membership');
+const ROLES = require('../config/roles');
+const { upsertClientFromReservation } = require('../utils/clients');
 
 const SLUG = 'demo-multideporte';
 const TZ = 'America/Argentina/Buenos_Aires';
+
+// Credenciales del dueño demo para acceder al backoffice (/panel).
+const OWNER_EMAIL = 'demo@courtin.test';
+const OWNER_PASSWORD = 'demo1234';
 
 const uri = process.env.MONGODB_URI || '';
 const isLocal = /(^|@|\/\/)(localhost|127\.0\.0\.1)(:|\/)/.test(uri);
@@ -58,10 +69,15 @@ const run = async () => {
   const existing = await Club.findOne({ slug: SLUG });
   if (existing) {
     await Reservation.deleteMany({ club: existing._id });
+    await CashMovement.deleteMany({ club: existing._id });
+    await Client.deleteMany({ club: existing._id });
     await Court.deleteMany({ club: existing._id });
+    await Membership.deleteMany({ club: existing._id });
     await Club.deleteOne({ _id: existing._id });
     console.log('· Club demo previo eliminado (reseed limpio).');
   }
+  // El usuario dueño se recrea siempre (idempotente por email).
+  await User.deleteOne({ email: OWNER_EMAIL });
 
   const club = await Club.create({
     nombre: 'Demo Multideporte',
@@ -81,6 +97,19 @@ const run = async () => {
     publicado: true
   });
 
+  // Dueño del complejo (acceso al backoffice) + su membership tenant_admin.
+  const owner = await User.create({
+    nombre: 'Dueño Demo',
+    email: OWNER_EMAIL,
+    password: await bcrypt.hash(OWNER_PASSWORD, 10),
+    estado: 'activo'
+  });
+  await Membership.create({
+    user: owner._id,
+    club: club._id,
+    role: ROLES.TENANT_ADMIN
+  });
+
   const tarifa = (precio) => [{ nombre: 'General', dias: 'lun a dom', horaInicio: '08:00', horaFin: '23:59', precio }];
 
   const courtsData = [
@@ -98,31 +127,73 @@ const run = async () => {
   // Reservas de ejemplo (alineadas a la grilla de cada cancha) para hoy y mañana.
   const hoy = dayjs().tz(TZ).format('YYYY-MM-DD');
   const manana = dayjs().tz(TZ).add(1, 'day').format('YYYY-MM-DD');
+  const hace = (d) => dayjs().tz(TZ).subtract(d, 'day').format('YYYY-MM-DD');
+
+  // Invitados demo (la identidad del cliente es el email).
+  const JUAN = { name: 'Juan Pérez', email: 'juan.perez@mail.com', phone: '2216001001' };
+  const ANA = { name: 'Ana Gómez', email: 'ana.gomez@mail.com', phone: '2216001002' };
+  const CARLOS = { name: 'Carlos Ruiz', email: 'carlos.ruiz@mail.com', phone: '2216001003' };
+  const PIBES = { name: 'Los Pibes FC', email: 'pibes.fc@mail.com', phone: '2216001004' };
 
   const reservasData = [
-    // Pádel 1 (turnos de 90m alineados a 08:00): 20:00–21:30 mañana
-    { court: byName['Pádel 1'], date: manana, ini: '20:00', fin: '21:30', name: 'Juan Pérez' },
-    // Pádel 2: 18:30–20:00 mañana
-    { court: byName['Pádel 2'], date: manana, ini: '18:30', fin: '20:00', name: 'Ana Gómez' },
-    // Tenis: 17:00–18:30 hoy
-    { court: byName['Tenis Central'], date: hoy, ini: '17:00', fin: '18:30', name: 'Carlos Ruiz' },
-    // Fútbol 5 (turnos de 60m): 21:00–22:00 mañana
-    { court: byName['Fútbol 5'], date: manana, ini: '21:00', fin: '22:00', name: 'Los Pibes FC' }
+    // Próximas
+    { court: byName['Pádel 1'], date: manana, ini: '20:00', fin: '21:30', g: JUAN },
+    { court: byName['Pádel 2'], date: manana, ini: '18:30', fin: '20:00', g: ANA },
+    { court: byName['Tenis Central'], date: hoy, ini: '17:00', fin: '18:30', g: CARLOS },
+    { court: byName['Fútbol 5'], date: manana, ini: '21:00', fin: '22:00', g: PIBES },
+    // Históricas (para que haya clientes recurrentes)
+    { court: byName['Pádel 1'], date: hace(7), ini: '19:00', fin: '20:30', g: JUAN, estado: 'completada' },
+    { court: byName['Pádel 2'], date: hace(10), ini: '18:00', fin: '19:30', g: JUAN, estado: 'completada' },
+    { court: byName['Tenis Central'], date: hace(4), ini: '10:00', fin: '11:30', g: ANA, estado: 'completada' }
   ];
 
   for (const r of reservasData) {
-    await Reservation.create({
+    const reservation = await Reservation.create({
       club: club._id,
       court: r.court._id,
-      guestName: r.name,
-      guestPhone: '2216000001',
-      guestEmail: 'reserva.demo@courtin.test',
+      guestName: r.g.name,
+      guestPhone: r.g.phone,
+      guestEmail: r.g.email,
       inicio: localToUtc(r.date, r.ini),
       fin: localToUtc(r.date, r.fin),
-      estado: 'confirmada',
+      estado: r.estado || 'confirmada',
       precioFinal: r.court.precio,
       origen: 'publica',
       creadaPor: null
+    });
+    // Registra/actualiza el cliente del club (dedup por email).
+    await upsertClientFromReservation(reservation);
+  }
+
+  // --- Movimientos de caja de ejemplo (hoy + días previos) ---
+  const cashAt = (daysAgo, hhmm) =>
+    dayjs().tz(TZ).subtract(daysAgo, 'day').hour(Number(hhmm.slice(0, 2))).minute(Number(hhmm.slice(3))).second(0).utc().toDate();
+
+  const cashData = [
+    // Hoy
+    { d: 0, t: '09:30', tipo: 'ingreso', categoria: 'reserva', concepto: 'Reserva Martín S.', monto: 16000, metodoPago: 'mercadopago', origen: 'online' },
+    { d: 0, t: '11:00', tipo: 'ingreso', categoria: 'venta', concepto: '2 Gatorade + grip', monto: 4200, metodoPago: 'efectivo' },
+    { d: 0, t: '12:15', tipo: 'ingreso', categoria: 'alquiler', concepto: '2 paletas', monto: 2000, metodoPago: 'efectivo' },
+    { d: 0, t: '18:40', tipo: 'ingreso', categoria: 'saldo', concepto: 'Saldo turno Tenis', monto: 6000, metodoPago: 'tarjeta' },
+    { d: 0, t: '19:10', tipo: 'egreso', categoria: 'gasto', concepto: 'Insumos kiosco', monto: 12400, metodoPago: 'efectivo' },
+    // Días previos
+    { d: 1, t: '20:00', tipo: 'ingreso', categoria: 'reserva', concepto: 'Reserva Joaquín A.', monto: 20000, metodoPago: 'mercadopago', origen: 'online' },
+    { d: 1, t: '21:30', tipo: 'ingreso', categoria: 'venta', concepto: 'Bebidas', monto: 3500, metodoPago: 'efectivo' },
+    { d: 3, t: '10:00', tipo: 'ingreso', categoria: 'reserva', concepto: 'Reserva Ana G.', monto: 12000, metodoPago: 'tarjeta', origen: 'online' },
+    { d: 5, t: '17:00', tipo: 'egreso', categoria: 'retiro', concepto: 'Retiro a banco', monto: 50000, metodoPago: 'efectivo' }
+  ];
+
+  for (const c of cashData) {
+    await CashMovement.create({
+      club: club._id,
+      tipo: c.tipo,
+      categoria: c.categoria,
+      concepto: c.concepto,
+      monto: c.monto,
+      metodoPago: c.metodoPago,
+      origen: c.origen || 'manual',
+      fecha: cashAt(c.d, c.t),
+      createdBy: owner._id
     });
   }
 
@@ -130,6 +201,9 @@ const run = async () => {
   console.log(`   Club:     ${club.nombre}  (slug: ${club.slug}, publicado)`);
   console.log(`   Canchas:  ${courts.map((c) => `${c.nombre} [${c.tipo}]`).join(', ')}`);
   console.log(`   Reservas: ${reservasData.length} de ejemplo (hoy/mañana)`);
+  console.log(`   Caja:     ${cashData.length} movimientos de ejemplo`);
+  console.log(`   Clientes: ${await Client.countDocuments({ club: club._id })} (dedup por email)`);
+  console.log(`   Acceso backoffice (/panel/login):  ${OWNER_EMAIL}  /  ${OWNER_PASSWORD}`);
   console.log(`\n   Abrí en el front:  /clubs/${SLUG}`);
   console.log(`   Compass:           mongodb://127.0.0.1:27017  →  db "courtin_dev"\n`);
 

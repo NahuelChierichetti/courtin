@@ -4,33 +4,33 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-3">
         <!-- Date nav -->
-        <div class="flex items-center rounded-lg border border-slate-200 bg-white">
+        <div class="flex items-center rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
-            class="flex h-9 w-9 items-center justify-center rounded-l-lg text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
+            class="flex h-9 w-9 items-center justify-center rounded-l-full text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
             @click="shiftDate(-1)"
           >
-            <i class="pi pi-chevron-left text-xs"></i>
+            <i class="icon-[material-symbols--chevron-left] text-xs"></i>
           </button>
-          <span class="min-w-[180px] px-3 text-center text-sm font-semibold text-slate-900">
+          <span class="min-w-[180px] px-3 text-center text-sm font-semibold text-primitive-dark-500">
             {{ dateLabel }}
           </span>
           <button
-            class="flex h-9 w-9 items-center justify-center rounded-r-lg text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
+            class="flex h-9 w-9 items-center justify-center rounded-r-full text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
             @click="shiftDate(1)"
           >
-            <i class="pi pi-chevron-right text-xs"></i>
+            <i class="icon-[material-symbols--chevron-right] text-xs"></i>
           </button>
         </div>
 
         <button
-          class="h-9 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
+          class="h-9 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
           @click="goToday"
         >
           Hoy
         </button>
 
         <!-- Day / Week toggle -->
-        <div class="flex overflow-hidden rounded-lg border border-slate-200">
+        <div class="flex overflow-hidden rounded-full border border-black/[0.06]">
           <button
             v-for="opt in viewOptions"
             :key="opt.value"
@@ -45,16 +45,16 @@
         <!-- Court filter -->
         <div class="relative" @click.stop>
           <button
-            class="flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+            class="flex h-9 items-center gap-2 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
             @click="courtMenuOpen = !courtMenuOpen"
           >
-            <i class="pi pi-filter text-xs text-neutral-400"></i>
+            <i class="icon-[material-symbols--filter-alt] text-xs text-neutral-400"></i>
             {{ selectedCourt ? selectedCourt.nombre : 'Todas las canchas' }}
-            <i class="pi pi-chevron-down text-[10px] text-neutral-400"></i>
+            <i class="icon-[material-symbols--keyboard-arrow-down] text-[10px] text-neutral-400"></i>
           </button>
           <div
             v-if="courtMenuOpen"
-            class="absolute left-0 top-full z-30 mt-1 w-56 rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+            class="absolute left-0 top-full z-30 mt-1 w-56 rounded-lg border border-black/[0.06] bg-white shadow-sm py-1 shadow-lg"
           >
             <button
               class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
@@ -63,7 +63,7 @@
               @click="selectCourt(null)"
             >
               <span class="flex-1">Todas las canchas</span>
-              <i v-if="!selectedCourtId" class="pi pi-check text-xs text-primitive-orange-500"></i>
+              <i v-if="!selectedCourtId" class="icon-[material-symbols--check] text-xs text-primitive-orange-500"></i>
             </button>
             <button
               v-for="c in courts"
@@ -74,7 +74,7 @@
             >
               <span class="h-2 w-2 shrink-0 rounded-sm" :class="sportMeta(c.tipo).bgStrong" />
               <span class="flex-1 truncate">{{ c.nombre }}</span>
-              <i v-if="selectedCourtId === c._id" class="pi pi-check text-xs text-primitive-orange-500"></i>
+              <i v-if="selectedCourtId === c._id" class="icon-[material-symbols--check] text-xs text-primitive-orange-500"></i>
             </button>
           </div>
         </div>
@@ -86,7 +86,7 @@
             :key="s.value"
             class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
             :class="sportFilter === s.value
-              ? 'border-slate-300 bg-slate-100 text-slate-900'
+              ? 'border-slate-300 bg-slate-100 text-primitive-dark-500'
               : 'border-transparent text-slate-500 hover:bg-slate-50'"
             @click="toggleSport(s.value)"
           >
@@ -98,56 +98,61 @@
 
       <div class="flex items-center gap-2">
         <button
-          class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          class="flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           title="Exportar a CSV"
           :disabled="!calendarItems.length"
           @click="exportCsv"
         >
-          <i class="pi pi-download text-sm"></i>
+          <i class="icon-[material-symbols--download] text-base"></i>
         </button>
-        <Button label="Nuevo turno" size="small" @click="openNew" />
+        <button
+          class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer"
+          @click="openNew"
+        >
+          <i class="icon-[material-symbols--add] text-base"></i> Nuevo turno
+        </button>
       </div>
     </div>
 
     <!-- Summary strip -->
     <div v-if="currentClubId && courts.length" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
         <p class="text-xs text-neutral-400">Turnos {{ viewMode === 'day' ? 'del día' : 'de la semana' }}</p>
-        <p class="mt-0.5 text-xl font-bold font-secondary text-slate-900">{{ stats.total }}</p>
+        <p class="mt-0.5 text-xl font-bold font-secondary text-primitive-dark-500">{{ stats.total }}</p>
       </div>
-      <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
         <p class="text-xs text-neutral-400">Confirmados</p>
         <p class="mt-0.5 text-xl font-bold font-secondary text-success-600">{{ stats.confirmados }}</p>
       </div>
-      <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
         <p class="text-xs text-neutral-400">Pendientes</p>
         <p class="mt-0.5 text-xl font-bold font-secondary text-warning-600">{{ stats.pendientes }}</p>
       </div>
-      <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
         <p class="text-xs text-neutral-400">Ingresos estimados</p>
-        <p class="mt-0.5 text-xl font-bold font-secondary text-slate-900">{{ formatCurrency(stats.ingresos, currency) }}</p>
+        <p class="mt-0.5 text-xl font-bold font-secondary text-primitive-dark-500">{{ formatCurrency(stats.ingresos, currency) }}</p>
       </div>
     </div>
 
     <!-- States -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-building text-2xl text-neutral-400"></i>
+        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-slate-900">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-slate-500">Seleccioná un club desde el encabezado para ver los turnos.</p>
     </div>
 
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="pi pi-spin pi-spinner text-3xl text-neutral-400"></i>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
       <p class="mt-4 text-sm text-slate-500">Cargando turnos...</p>
     </div>
 
     <div v-else-if="courts.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="pi pi-objects-column text-2xl text-neutral-400"></i>
+        <i class="icon-[material-symbols--grid-view] text-2xl text-neutral-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-slate-900">No hay canchas</h3>
+      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">No hay canchas</h3>
       <p class="!mt-2 text-sm text-slate-500">Creá canchas para empezar a cargar turnos.</p>
     </div>
 
@@ -193,7 +198,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import ReservationCalendar from '@/components/turnos/ReservationCalendar.vue'
 import ReservationDrawer from '@/components/turnos/ReservationDrawer.vue'

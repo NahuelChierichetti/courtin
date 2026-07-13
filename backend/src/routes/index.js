@@ -6,6 +6,8 @@ const clubRoutes = require('./clubRoutes');
 const membershipRoutes = require('./membershipRoutes');
 const courtRoutes = require('./courtRoutes');
 const reservationRoutes = require('./reservationRoutes');
+const cashRoutes = require('./cashRoutes');
+const clientRoutes = require('./clientRoutes');
 const adminRoutes = require('./adminRoutes');
 const publicRoutes = require('./publicRoutes');
 
@@ -18,6 +20,8 @@ router.use('/clubs', clubRoutes);
 router.use('/memberships', membershipRoutes);
 router.use('/courts', courtRoutes);
 router.use('/reservations', reservationRoutes);
+router.use('/cash', cashRoutes);
+router.use('/clients', clientRoutes);
 router.use('/admin', adminRoutes);
 router.use('/public', publicRoutes);
 

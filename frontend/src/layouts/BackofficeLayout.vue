@@ -13,10 +13,10 @@ const handleLogout = () => {
 }
 
 const navItems = [
-  { label: 'Complejos', icon: 'pi pi-building', to: '/admin/complejos' },
-  { label: 'Usuarios', icon: 'pi pi-users', to: '/admin/usuarios' },
-  { label: 'Suscripciones', icon: 'pi pi-credit-card', to: '/admin/suscripciones' },
-  { label: 'Reportes', icon: 'pi pi-chart-bar', to: '/admin/reportes' },
+  { label: 'Complejos', icon: 'icon-[material-symbols--apartment]', to: '/admin/complejos' },
+  { label: 'Usuarios', icon: 'icon-[material-symbols--group]', to: '/admin/usuarios' },
+  { label: 'Suscripciones', icon: 'icon-[material-symbols--credit-card]', to: '/admin/suscripciones' },
+  { label: 'Reportes', icon: 'icon-[material-symbols--bar-chart]', to: '/admin/reportes' },
 ]
 
 const isActive = (to) => route.path === to || route.path.startsWith(to + '/')
@@ -89,10 +89,10 @@ const goToApp = () => {
       <!-- Back to app -->
       <div class="px-3 pb-2">
         <button
-          class="flex w-full items-center gap-3 rounded-md p-3 text-sm font-medium text-neutral-400 transition-colors hover:bg-white/5 hover:text-white cursor-pointer"
+          class="flex w-full items-center gap-3 rounded-full p-3 text-sm font-medium text-neutral-400 transition-colors hover:bg-white/5 hover:text-white cursor-pointer"
           @click="goToApp"
         >
-          <i class="pi pi-arrow-left text-base text-slate-500"></i>
+          <i class="icon-[material-symbols--arrow-back] text-base text-slate-500"></i>
           <span>Volver a la app</span>
         </button>
       </div>
@@ -110,10 +110,10 @@ const goToApp = () => {
             <p class="text-xs text-slate-500">Superadmin</p>
           </div>
           <button
-            class="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-white/10 hover:text-red-400 cursor-pointer"
+            class="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white/10 hover:text-red-400 cursor-pointer"
             @click="handleLogout"
           >
-            <i class="pi pi-sign-out text-sm"></i>
+            <i class="icon-[material-symbols--logout] text-sm"></i>
           </button>
         </div>
       </div>
@@ -125,7 +125,7 @@ const goToApp = () => {
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6">
         <div class="flex items-center gap-2 text-sm text-slate-500">
           <span class="font-medium text-slate-700">Backoffice</span>
-          <i class="pi pi-chevron-right text-[10px] text-slate-300"></i>
+          <i class="icon-[material-symbols--chevron-right] text-[10px] text-slate-300"></i>
           <span>{{ currentPageTitle }}</span>
         </div>
       </header>

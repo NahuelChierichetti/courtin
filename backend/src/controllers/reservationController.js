@@ -3,6 +3,7 @@ const Court = require('../models/Court');
 const User = require('../models/User');
 const Club = require('../models/Club');
 const { validateReservationSlot, isReservationInProgress, canCancelReservation } = require('../utils/reservationRules');
+const { upsertClientFromReservation } = require('../utils/clients');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -68,7 +69,7 @@ const findOverlappingReservation = async ({ clubId, courtId, inicio, fin, exclud
 const createReservation = async (req, res, next) => {
   try {
     const { clubId } = req.params;
-    const { courtId, customerId, guestName, guestPhone, inicio, fin, estado, precioFinal, notas } = req.body;
+    const { courtId, customerId, guestName, guestPhone, guestEmail, inicio, fin, estado, precioFinal, notas } = req.body;
 
     if (!isValidInstantRange(inicio, fin)) {
       return res.status(400).json({ ok: false, message: 'El inicio debe ser anterior al fin' });
@@ -107,6 +108,7 @@ const createReservation = async (req, res, next) => {
         customer: customerId || null,
         guestName: customerId ? null : guestName,
         guestPhone: customerId ? null : guestPhone,
+        guestEmail: customerId ? null : (guestEmail || null),
         inicio: new Date(inicio),
         fin: new Date(fin),
         estado,
@@ -120,6 +122,22 @@ const createReservation = async (req, res, next) => {
         return res.status(409).json({ ok: false, message: 'Ese horario acaba de ser reservado. Probá con otro.' });
       }
       throw error;
+    }
+
+    // Registra/actualiza el cliente del club (clave: email). Para un cliente
+    // registrado, tomamos su email de la cuenta; para invitado, el guestEmail.
+    // Best-effort: no bloquea la reserva.
+    if (customerId) {
+      const customer = await User.findById(customerId).select('email nombre');
+      if (customer?.email) {
+        await upsertClientFromReservation(reservation, {
+          email: customer.email,
+          name: customer.nombre,
+          userId: customerId
+        });
+      }
+    } else {
+      await upsertClientFromReservation(reservation, { email: guestEmail, name: guestName, phone: guestPhone });
     }
 
     const populated = await populateReservation(Reservation.findById(reservation._id));

@@ -20,7 +20,7 @@
     <!-- Filters -->
     <div class="mb-6 flex flex-wrap items-center gap-4">
       <div class="relative">
-        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
+        <i class="icon-[material-symbols--search] absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
         <input
           v-model="search"
           type="text"
@@ -34,7 +34,7 @@
         <button
           v-for="f in roleFilters"
           :key="f.value"
-          class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
+          class="rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activeRole === f.value
               ? 'bg-slate-900 text-white'
@@ -55,7 +55,7 @@
           <option :value="null">Todos los complejos</option>
           <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
         </select>
-        <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[10px] text-neutral-400"></i>
+        <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[10px] text-neutral-400"></i>
       </div>
     </div>
 
@@ -70,11 +70,11 @@
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-16">
-        <i class="pi pi-spin pi-spinner text-2xl text-slate-300"></i>
+        <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i>
       </div>
 
       <div v-else-if="users.length === 0" class="py-16 text-center">
-        <i class="pi pi-users text-4xl text-slate-200"></i>
+        <i class="icon-[material-symbols--group] text-4xl text-slate-200"></i>
         <p class="mt-3 text-sm text-neutral-400">No se encontraron usuarios</p>
       </div>
 
@@ -128,10 +128,10 @@
         <!-- Actions -->
         <div class="relative flex justify-end">
           <button
-            class="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 cursor-pointer"
+            class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 cursor-pointer"
             @click.stop="openDetailDrawer(user)"
           >
-            <i class="pi pi-chevron-right text-sm"></i>
+            <i class="icon-[material-symbols--chevron-right] text-sm"></i>
           </button>
         </div>
       </div>
@@ -165,10 +165,10 @@
                 </p>
               </div>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
                 @click="closeDrawer"
               >
-                <i class="pi pi-times text-sm"></i>
+                <i class="icon-[material-symbols--close] text-sm"></i>
               </button>
             </div>
 
@@ -179,21 +179,21 @@
                 <!-- Actions -->
                 <div class="flex flex-col gap-2">
                   <button
-                    class="flex w-full items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                     @click="drawerMode = 'edit'"
                   >
-                    <i class="pi pi-pencil text-sm text-neutral-400"></i>
+                    <i class="icon-[material-symbols--edit] text-sm text-neutral-400"></i>
                     Editar usuario
                   </button>
                   <button
-                    class="flex w-full items-center gap-3 rounded-lg border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                     @click="drawerMode = 'assign'"
                   >
-                    <i class="pi pi-link text-sm text-neutral-400"></i>
+                    <i class="icon-[material-symbols--link] text-sm text-neutral-400"></i>
                     Asignar a complejo
                   </button>
                   <button
-                    class="flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer"
                     :class="
                       selectedUser?.estado === 'activo'
                         ? 'border-red-200 text-red-600 hover:bg-red-50'
@@ -201,7 +201,7 @@
                     "
                     @click="toggleUserStatus"
                   >
-                    <i class="pi pi-power-off text-sm"></i>
+                    <i class="icon-[material-symbols--power-settings-new] text-sm"></i>
                     {{ selectedUser?.estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario' }}
                   </button>
                 </div>
@@ -325,7 +325,7 @@
                         <option :value="null">Sin asignar</option>
                         <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
                       </select>
-                      <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                      <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
                     </div>
                   </div>
 
@@ -335,7 +335,7 @@
                       <button
                         v-for="r in clubRoleOptions"
                         :key="r.value"
-                        class="rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
+                        class="rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
                         :class="
                           form.role === r.value
                             ? 'border-primitive-orange-300 bg-primitive-orange-50 text-primitive-orange-700'
@@ -412,7 +412,7 @@
                       <option :value="null" disabled>Seleccionar complejo</option>
                       <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
                     </select>
-                    <i class="pi pi-chevron-down pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
                   </div>
                 </div>
 
@@ -422,7 +422,7 @@
                     <button
                       v-for="r in clubRoleOptions"
                       :key="r.value"
-                      class="rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
+                      class="rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
                       :class="
                         assignRole === r.value
                           ? 'border-primitive-orange-300 bg-primitive-orange-50 text-primitive-orange-700'
@@ -441,17 +441,17 @@
             <!-- Footer -->
             <div v-if="drawerMode !== 'detail'" class="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
               <button
-                class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                class="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                 @click="drawerMode === 'assign' || drawerMode === 'edit' ? drawerMode = 'detail' : closeDrawer()"
               >
                 {{ drawerMode === 'assign' || drawerMode === 'edit' ? 'Volver' : 'Cancelar' }}
               </button>
               <button
-                class="flex items-center gap-2 rounded-lg bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="saving || !canSave"
                 @click="handleSave"
               >
-                <i v-if="saving" class="pi pi-spin pi-spinner text-xs"></i>
+                <i v-if="saving" class="icon-[material-symbols--progress-activity] animate-spin text-xs"></i>
                 {{ saving ? 'Guardando...' : saveLabel }}
               </button>
             </div>

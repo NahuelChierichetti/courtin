@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Íconos de la plataforma: Material Symbols vía Iconify.
+   Uso: class="icon-[material-symbols--search]" (tamaño por text-*, color por currentColor). */
+@plugin "@iconify/tailwind4";
+
 @theme {
   --color-primitive-dark-50: #f3f5f8;
   --color-primitive-dark-100: #e7ebf1;
@@ -91,6 +95,11 @@ select {
   font-family: inherit;
 }
 
+/* Alineación de íconos Material Symbols cuando van inline junto a texto. */
+:where([class^="icon-["], [class*=" icon-["]) {
+  vertical-align: -0.125em;
+}
+
 body {
   margin: 0;
 }
@@ -104,13 +113,44 @@ p {
 .p-password .p-inputtext {
   background: #ffffff !important;
   color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .p-inputtext::placeholder,
 .p-password-input::placeholder,
 .p-password .p-inputtext::placeholder {
   color: #94a3b8;
+}
+
+/* --- Armonización PrimeVue con el rebranding (radios suaves, foco naranja) --- */
+.p-inputtext,
+.p-password-input,
+.p-select,
+.p-datepicker-input,
+.p-inputnumber-input {
+  border-radius: 0.75rem !important;
+}
+
+.p-select {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.p-inputtext:enabled:focus,
+.p-password-input:enabled:focus,
+.p-select:not(.p-disabled).p-focus,
+.p-datepicker-input:enabled:focus {
+  border-color: #ff8b33 !important;
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.12) !important;
+}
+
+.p-button {
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+}
+
+/* ToggleSwitch encendido en naranja de marca */
+.p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider {
+  background: #ff6a00 !important;
 }
 
 .p-checkbox .p-checkbox-box {
