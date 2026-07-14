@@ -100,6 +100,27 @@ select {
   vertical-align: -0.125em;
 }
 
+/* Impresión / Exportar a PDF (usado en Reportes). */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  html,
+  body,
+  #app {
+    background: #ffffff !important;
+  }
+  /* Las tarjetas no se cortan entre páginas y sin sombra. */
+  .shadow-sm {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  @page {
+    margin: 12mm;
+  }
+}
+
 body {
   margin: 0;
 }

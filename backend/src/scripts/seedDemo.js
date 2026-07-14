@@ -28,6 +28,7 @@ const Court = require('../models/Court');
 const Reservation = require('../models/Reservation');
 const CashMovement = require('../models/CashMovement');
 const Client = require('../models/Client');
+const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Membership = require('../models/Membership');
 const ROLES = require('../config/roles');
@@ -71,6 +72,7 @@ const run = async () => {
     await Reservation.deleteMany({ club: existing._id });
     await CashMovement.deleteMany({ club: existing._id });
     await Client.deleteMany({ club: existing._id });
+    await Notification.deleteMany({ club: existing._id });
     await Court.deleteMany({ club: existing._id });
     await Membership.deleteMany({ club: existing._id });
     await Club.deleteOne({ _id: existing._id });
@@ -195,6 +197,17 @@ const run = async () => {
       fecha: cashAt(c.d, c.t),
       createdBy: owner._id
     });
+  }
+
+  // --- Notificaciones de ejemplo ---
+  const notifData = [
+    { tipo: 'reserva', titulo: 'Nueva reserva', mensaje: 'Juan Pérez reservó Pádel 1 · 20:00', leida: false },
+    { tipo: 'cliente', titulo: 'Nuevo cliente', mensaje: 'Ana Gómez hizo su primera reserva', leida: false },
+    { tipo: 'pago', titulo: 'Pago recibido', mensaje: 'Ingreso de $16.000 por MercadoPago', leida: false },
+    { tipo: 'cancelacion', titulo: 'Reserva cancelada', mensaje: 'Carlos Ruiz canceló Tenis Central', leida: true }
+  ];
+  for (const n of notifData) {
+    await Notification.create({ club: club._id, ...n });
   }
 
   console.log(`\n✅ Seed OK`);

@@ -171,7 +171,7 @@ const inputBase =
             <div>
               <label class="mb-1.5 block text-sm font-medium text-primitive-dark-500" for="slug">Identificador (URL)</label>
               <input id="slug" v-model="form.slug" placeholder="club-central-padel" required :class="inputBase" class="px-4" @input="onSlugInput" />
-              <p class="mt-2.5 text-xs text-slate-400">courtin.com/club/{{ form.slug || 'tu-complejo' }}</p>
+              <p class="mt-2.5 text-xs text-slate-400">courtinapp.com/club/{{ form.slug || 'tu-complejo' }}</p>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">

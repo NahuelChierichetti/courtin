@@ -99,7 +99,7 @@ const router = createRouter({
         {
           path: 'reportes',
           name: 'reportes',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/ReportesView.vue'),
           meta: { title: 'Reportes' },
         },
         {
@@ -111,7 +111,7 @@ const router = createRouter({
         {
           path: 'notificaciones',
           name: 'notificaciones',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/NotificacionesView.vue'),
           meta: { title: 'Notificaciones' },
         },
       ],

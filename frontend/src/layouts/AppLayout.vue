@@ -1,8 +1,9 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import clubService from '@/services/clubService'
+import notificationService from '@/services/notificationService'
 
 const route = useRoute()
 const router = useRouter()
@@ -52,8 +53,27 @@ const closeSelector = (e) => {
   }
 }
 
+// --- Notificaciones sin leer (campanita + sidebar) ---
+const unreadCount = ref(0)
+const fetchUnread = async () => {
+  if (!currentClubId.value) {
+    unreadCount.value = 0
+    return
+  }
+  try {
+    const data = await notificationService.getNotifications(currentClubId.value)
+    unreadCount.value = data.unreadCount
+  } catch (err) {
+    console.error(err)
+  }
+}
+watch(currentClubId, fetchUnread)
+// Refresca el contador al navegar (p.ej. después de marcar leídas).
+watch(() => route.path, fetchUnread)
+
 onMounted(() => {
   fetchClubs()
+  fetchUnread()
   document.addEventListener('click', closeSelector)
 })
 
@@ -103,9 +123,9 @@ const userShortName = computed(() => {
 </script>
 
 <template>
-  <div class="flex h-screen bg-[#faf5ef]">
+  <div class="flex h-screen bg-[#faf5ef] print:block print:h-auto">
     <!-- Sidebar -->
-    <aside class="flex w-64 shrink-0 flex-col bg-primitive-dark-500">
+    <aside class="flex w-64 shrink-0 flex-col bg-primitive-dark-500 print:hidden">
       <!-- Logo -->
       <div class="flex items-center gap-2.5 px-5 pt-5 pb-4">
         <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primitive-orange-500">
@@ -142,7 +162,12 @@ const userShortName = computed(() => {
             class="text-lg"
           ></i>
           <span class="flex-1">{{ item.label }}</span>
-          <span v-if="item.dot" class="h-2 w-2 rounded-full bg-error-500"></span>
+          <span
+            v-if="item.to === '/panel/notificaciones' && unreadCount"
+            class="flex h-5 min-w-5 items-center justify-center rounded-full bg-error-500 px-1.5 text-[10px] font-bold text-white"
+          >
+            {{ unreadCount > 9 ? '9+' : unreadCount }}
+          </span>
         </RouterLink>
       </nav>
 
@@ -189,7 +214,7 @@ const userShortName = computed(() => {
     <!-- Main area -->
     <div class="flex flex-1 flex-col overflow-hidden">
       <!-- Header -->
-      <header class="flex h-[72px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#faf5ef]/90 px-6 backdrop-blur">
+      <header class="flex h-[72px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#faf5ef]/90 px-6 backdrop-blur print:hidden">
         <div class="flex items-center gap-2">
           <!-- Club selector -->
           <div class="relative">
@@ -232,12 +257,19 @@ const userShortName = computed(() => {
         </div>
 
         <div class="flex items-center gap-2.5">
-          <button
-            class="relative flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer"
+          <RouterLink
+            to="/panel/notificaciones"
+            class="relative flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-slate-500 no-underline shadow-sm transition-colors hover:bg-slate-50"
+            title="Notificaciones"
           >
             <i class="icon-[material-symbols--notifications] text-base"></i>
-            <span class="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-error-500"></span>
-          </button>
+            <span
+              v-if="unreadCount"
+              class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error-500 px-1 text-[10px] font-bold text-white"
+            >
+              {{ unreadCount > 9 ? '9+' : unreadCount }}
+            </span>
+          </RouterLink>
           <RouterLink
             to="/panel/turnos"
             class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white no-underline transition-colors hover:bg-primitive-orange-600"
@@ -248,7 +280,7 @@ const userShortName = computed(() => {
       </header>
 
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto p-6">
+      <main class="flex-1 overflow-y-auto p-6 print:overflow-visible print:p-0">
         <RouterView />
       </main>
     </div>
