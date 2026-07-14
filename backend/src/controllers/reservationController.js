@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Club = require('../models/Club');
 const { validateReservationSlot, isReservationInProgress, canCancelReservation } = require('../utils/reservationRules');
 const { upsertClientFromReservation } = require('../utils/clients');
+const { notify } = require('../utils/notifications');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -424,6 +425,13 @@ const cancelReservationByToken = async (req, res, next) => {
     await Reservation.findByIdAndUpdate(reservation._id, { estado: 'cancelada' });
     // Reflejamos el cambio en el DTO sin re-popular (el doc en memoria sigue poblado).
     reservation.estado = 'cancelada';
+
+    await notify(reservation.club?._id || reservation.club, {
+      tipo: 'cancelacion',
+      titulo: 'Reserva cancelada',
+      mensaje: `${reservation.guestName || 'Un cliente'} canceló ${reservation.court?.nombre || 'su turno'}`,
+      reservation: reservation._id
+    });
 
     res.status(200).json({ ok: true, reservation: toPublicReservation(reservation) });
   } catch (error) {

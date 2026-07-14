@@ -1,260 +1,15 @@
-<template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-start justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-primitive-dark-500">Configuración del complejo</h1>
-        <p class="mt-1 text-sm text-slate-500">
-          Datos generales, zona horaria y moneda del complejo.
-        </p>
-      </div>
-      <div v-if="currentClubId && !loading && !error">
-        <button
-          class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:opacity-60 cursor-pointer"
-          :disabled="saving"
-          @click="save"
-        >
-          <i v-if="saving" class="icon-[material-symbols--progress-activity] animate-spin"></i>
-          {{ saving ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- No club selected -->
-    <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
-      </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
-      <p class="!mt-2 text-sm text-slate-500">
-        Seleccioná un club desde el selector en el encabezado para configurarlo.
-      </p>
-    </div>
-
-    <!-- Loading -->
-    <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
-      <p class="mt-4 text-sm text-slate-500">Cargando configuración...</p>
-    </div>
-
-    <!-- Error -->
-    <div v-else-if="error" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-error-50">
-        <i class="icon-[material-symbols--warning] text-2xl text-error-500"></i>
-      </div>
-      <p class="mt-4 text-sm text-slate-500">{{ error }}</p>
-      <button class="mt-4 flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer" @click="fetchConfig">
-        <i class="icon-[material-symbols--refresh] text-base text-slate-400"></i> Reintentar
-      </button>
-    </div>
-
-    <!-- Content -->
-    <div v-else-if="form" class="space-y-6">
-      <!-- General info -->
-      <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="border-b border-black/[0.06] px-6 py-5">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Datos generales</h2>
-          <p class="mt-0.5 text-sm text-neutral-400">Información del complejo</p>
-        </div>
-        <div class="space-y-6 px-6 py-6">
-          <div>
-            <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre</label>
-            <input
-              v-model="form.nombre"
-              type="text"
-              placeholder="Ej: Club Garín Pádel"
-              class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-            />
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Teléfono</label>
-              <input
-                v-model="form.telefono"
-                type="text"
-                placeholder="Ej: +54 11 5555-5555"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-              />
-            </div>
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Dirección</label>
-              <input
-                v-model="form.direccion"
-                type="text"
-                placeholder="Ej: Av. Siempreviva 742"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-              />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
-              <div class="relative">
-                <select
-                  v-model="form.ciudad"
-                  class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-                >
-                  <option value="">Seleccionar ciudad</option>
-                  <option v-for="c in ciudadOptions" :key="c" :value="c">{{ c }}</option>
-                </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
-              </div>
-            </div>
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Provincia</label>
-              <input
-                v-model="form.provincia"
-                type="text"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-              />
-            </div>
-          </div>
-          <div class="mt-5 space-y-5">
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Zona horaria</label>
-              <div class="relative">
-                <select
-                  v-model="form.timezone"
-                  class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-                >
-                  <option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
-                </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
-              </div>
-              <p class="!mt-2.5 text-xs text-neutral-400">
-                Hora local actual: <span class="font-medium text-slate-600">{{ localTimePreview }}</span>
-              </p>
-            </div>
-
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Moneda</label>
-              <div class="relative">
-                <select
-                  v-model="form.moneda"
-                  class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-                >
-                  <option v-for="c in monedaOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
-                </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
-              </div>
-              <p class="!mt-2.5 text-xs text-neutral-400">
-                Ejemplo de precio: <span class="font-medium text-slate-600">{{ pricePreview }}</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Perfil público -->
-      <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="border-b border-black/[0.06] px-6 py-5">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Perfil público</h2>
-          <p class="mt-0.5 text-sm text-neutral-400">
-            Cómo se muestra tu complejo en la web pública de reservas.
-          </p>
-        </div>
-        <div class="space-y-6 px-6 py-6">
-          <!-- Publicado toggle -->
-          <div class="flex items-center justify-between rounded-xl border border-black/[0.06] p-4">
-            <div class="pr-4">
-              <p class="text-sm font-semibold text-slate-800">Publicar complejo</p>
-              <p class="text-xs text-neutral-400">
-                Si está activo, tu complejo aparece en la búsqueda pública y acepta reservas online.
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              :aria-checked="form.publicado"
-              class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer"
-              :class="form.publicado ? 'bg-primitive-orange-500' : 'bg-slate-300'"
-              @click="form.publicado = !form.publicado"
-            >
-              <span
-                class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
-                :class="form.publicado ? 'translate-x-5' : ''"
-              ></span>
-            </button>
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Descripción</label>
-            <textarea
-              v-model="form.descripcion"
-              rows="3"
-              placeholder="Contá qué hace especial a tu complejo (canchas, servicios, ambiente...)"
-              class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-            ></textarea>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">WhatsApp</label>
-              <input
-                v-model="form.whatsapp"
-                type="text"
-                placeholder="Ej: +54 11 5555-5555"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-              />
-            </div>
-            <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Email de contacto</label>
-              <input
-                v-model="form.email"
-                type="email"
-                placeholder="Ej: contacto@tucomplejo.com"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Servicios</label>
-            <div class="flex flex-wrap items-center gap-2 rounded-xl border border-black/[0.08] px-3 py-2 transition-colors focus-within:border-primitive-orange-400 focus-within:ring-2 focus-within:ring-primitive-orange-100">
-              <span
-                v-for="(s, i) in form.servicios"
-                :key="i"
-                class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 py-1 pl-3 pr-1.5 text-xs font-medium text-slate-700"
-              >
-                {{ s }}
-                <button
-                  type="button"
-                  class="flex h-4 w-4 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-200 hover:text-error-500 cursor-pointer"
-                  @click="removeServicio(i)"
-                >
-                  <i class="icon-[material-symbols--close] text-[9px]"></i>
-                </button>
-              </span>
-              <input
-                v-model="servicioDraft"
-                type="text"
-                :placeholder="form.servicios.length ? 'Agregar otro...' : 'Ej: Estacionamiento'"
-                class="min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm text-primitive-dark-500 outline-none placeholder:text-neutral-400"
-                @keydown.enter.prevent="addServicio"
-                @keydown.,.prevent="addServicio"
-                @keydown.delete="onServicioBackspace"
-                @blur="addServicio"
-              />
-            </div>
-            <p class="!mt-2.5 text-xs text-neutral-400">Escribí un servicio y presioná Enter para agregarlo.</p>
-          </div>
-
-          <p class="rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-neutral-400">
-            Las fotos, el logo y la ubicación en el mapa se cargarán cuando integremos el almacenamiento de imágenes.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import clubService from '@/services/clubService'
+import courtService from '@/services/courtService'
+import publicService from '@/services/publicService'
 import { useAuth } from '@/composables/useAuth'
 import { dayjs, formatCurrency } from '@/utils/datetime'
 import { CITIES } from '@/utils/cities'
+import ClubCard from '@/components/public/ClubCard.vue'
+import MercadoPagoDrawer from '@/components/config/MercadoPagoDrawer.vue'
+import ImageUpload from '@/components/config/ImageUpload.vue'
 
 const { currentClubId, patchCurrentClub } = useAuth()
 const toast = useToast()
@@ -264,72 +19,152 @@ const loading = ref(false)
 const saving = ref(false)
 const error = ref(null)
 
+const activeTab = ref('general')
+const tabs = [
+  { key: 'general', label: 'General', icon: 'icon-[material-symbols--settings]', desc: 'Datos, zona horaria y moneda' },
+  { key: 'link', label: 'Link de reservas', icon: 'icon-[material-symbols--link]', desc: 'Tu URL pública única' },
+  { key: 'landing', label: 'Landing pública', icon: 'icon-[material-symbols--imagesmode]', desc: 'Logo, fotos y servicios' },
+  { key: 'pagos', label: 'Pagos', icon: 'icon-[material-symbols--credit-card]', desc: 'Pasarelas de cobro' },
+]
+
 const timezoneOptions = [
   { value: 'America/Argentina/Buenos_Aires', label: 'Argentina (Buenos Aires)' },
   { value: 'America/Montevideo', label: 'Uruguay (Montevideo)' },
   { value: 'America/Santiago', label: 'Chile (Santiago)' },
   { value: 'America/Asuncion', label: 'Paraguay (Asunción)' },
   { value: 'America/Sao_Paulo', label: 'Brasil (São Paulo)' },
-  { value: 'America/La_Paz', label: 'Bolivia (La Paz)' },
-  { value: 'America/Lima', label: 'Perú (Lima)' },
   { value: 'America/Bogota', label: 'Colombia (Bogotá)' },
   { value: 'America/Mexico_City', label: 'México (Ciudad de México)' },
-  { value: 'America/New_York', label: 'EE.UU. (Nueva York)' },
   { value: 'Europe/Madrid', label: 'España (Madrid)' },
   { value: 'UTC', label: 'UTC' },
 ]
-
 const monedaOptions = [
   { value: 'ARS', label: 'Peso argentino (ARS)' },
   { value: 'UYU', label: 'Peso uruguayo (UYU)' },
   { value: 'CLP', label: 'Peso chileno (CLP)' },
-  { value: 'PYG', label: 'Guaraní (PYG)' },
   { value: 'BRL', label: 'Real brasileño (BRL)' },
-  { value: 'BOB', label: 'Boliviano (BOB)' },
-  { value: 'PEN', label: 'Sol peruano (PEN)' },
   { value: 'COP', label: 'Peso colombiano (COP)' },
   { value: 'MXN', label: 'Peso mexicano (MXN)' },
   { value: 'USD', label: 'Dólar (USD)' },
   { value: 'EUR', label: 'Euro (EUR)' },
 ]
 
-const now = ref(dayjs.utc())
-let clockTimer = null
-
-const localTimePreview = computed(() => {
-  if (!form.value?.timezone) return ''
-  return now.value.tz(form.value.timezone).format('dddd D [de] MMMM, HH:mm')
-})
-
-const pricePreview = computed(() => formatCurrency(15000, form.value?.moneda || 'ARS'))
-
-// Si el club ya tenía una ciudad fuera de la lista curada, la incluimos para no perderla.
 const ciudadOptions = computed(() => {
   const c = form.value?.ciudad
   return c && !CITIES.includes(c) ? [c, ...CITIES] : CITIES
 })
 
-// --- Servicios (input tipo chips) ---
-const servicioDraft = ref('')
+const now = ref(dayjs.utc())
+let clockTimer = null
+const localTimePreview = computed(() => (form.value?.timezone ? now.value.tz(form.value.timezone).format('dddd D [de] MMMM, HH:mm') : ''))
+const pricePreview = computed(() => formatCurrency(15000, form.value?.moneda || 'ARS'))
 
+// --- Deportes/precio para la preview de la card (de las canchas del club) ---
+const previewDeportes = ref([])
+const previewPrecio = ref(null)
+const fetchCourtsMeta = async () => {
+  if (!currentClubId.value) return
+  try {
+    const courts = await courtService.getCourts(currentClubId.value)
+    previewDeportes.value = [...new Set(courts.map((c) => c.tipo))]
+    const precios = courts.flatMap((c) => (c.tarifas || []).map((t) => t.precio)).filter((n) => typeof n === 'number')
+    previewPrecio.value = precios.length ? Math.min(...precios) : null
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+// --- Slug ---
+const slugify = (s) =>
+  (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+
+const originalSlug = ref('')
+const slugStatus = ref('idle') // idle | checking | available | taken | invalid
+let slugTimer = null
+
+const onSlugInput = () => {
+  form.value.slug = slugify(form.value.slug)
+}
+
+watch(
+  () => form.value?.slug,
+  (v) => {
+    clearTimeout(slugTimer)
+    if (v === undefined) return
+    if (!v) return (slugStatus.value = 'invalid')
+    if (v === originalSlug.value) return (slugStatus.value = 'available')
+    if (v.length < 3) return (slugStatus.value = 'invalid')
+    slugStatus.value = 'checking'
+    slugTimer = setTimeout(async () => {
+      try {
+        const r = await publicService.checkSlug(v, form.value._id)
+        slugStatus.value = r.available ? 'available' : r.reason === 'formato' ? 'invalid' : 'taken'
+      } catch {
+        slugStatus.value = 'idle'
+      }
+    }, 400)
+  },
+)
+
+const fullLink = computed(() => `courtinapp.com/club/${form.value?.slug || 'tu-complejo'}`)
+const copiedLink = ref(false)
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(`https://${fullLink.value}`)
+    copiedLink.value = true
+    setTimeout(() => (copiedLink.value = false), 1800)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+// --- Landing: imágenes ---
+const destacada = computed({
+  get: () => form.value?.fotos?.[0] || '',
+  set: (v) => {
+    if (!form.value.fotos) form.value.fotos = []
+    if (form.value.fotos.length === 0) form.value.fotos.push(v)
+    else form.value.fotos[0] = v
+  },
+})
+const galeria = computed(() => (form.value?.fotos || []).slice(1))
+// Al subir en el tile "Agregar", se anexa a la galería (índice 0 = destacada).
+const onGalleryAdd = (url) => {
+  if (!url) return
+  if (!form.value.fotos) form.value.fotos = []
+  if (form.value.fotos.length === 0) form.value.fotos.push('') // reservar la destacada
+  form.value.fotos.push(url)
+}
+const removeGaleria = (idx) => form.value.fotos.splice(idx + 1, 1)
+
+// --- Servicios (chips) ---
+const servicioDraft = ref('')
 const addServicio = () => {
   const value = servicioDraft.value.trim()
   if (!value) return
-  const exists = form.value.servicios.some((s) => s.toLowerCase() === value.toLowerCase())
-  if (!exists) form.value.servicios.push(value)
+  if (!form.value.servicios.some((s) => s.toLowerCase() === value.toLowerCase())) form.value.servicios.push(value)
   servicioDraft.value = ''
 }
-
-const removeServicio = (index) => {
-  form.value.servicios.splice(index, 1)
-}
-
-// Backspace con el input vacío elimina el último chip.
+const removeServicio = (i) => form.value.servicios.splice(i, 1)
 const onServicioBackspace = () => {
-  if (!servicioDraft.value && form.value.servicios.length) {
-    form.value.servicios.pop()
-  }
+  if (!servicioDraft.value && form.value.servicios.length) form.value.servicios.pop()
 }
+
+// --- Preview de la card ---
+const previewClub = computed(() => ({
+  _id: 'preview',
+  nombre: form.value?.nombre || 'Tu complejo',
+  direccion: form.value?.direccion,
+  ciudad: form.value?.ciudad,
+  fotos: (form.value?.fotos || []).filter(Boolean),
+  logo: form.value?.logo,
+  deportes: previewDeportes.value,
+  precioDesde: previewPrecio.value,
+  moneda: form.value?.moneda || 'ARS',
+}))
+
+// --- Pagos (maqueta) ---
+const mpOpen = ref(false)
 
 const fetchConfig = async () => {
   if (!currentClubId.value) return
@@ -340,23 +175,27 @@ const fetchConfig = async () => {
     form.value = {
       _id: club._id,
       nombre: club.nombre || '',
+      slug: club.slug || '',
       telefono: club.telefono || '',
       direccion: club.direccion || '',
       ciudad: club.ciudad || '',
       provincia: club.provincia || '',
       timezone: club.timezone || 'America/Argentina/Buenos_Aires',
       moneda: club.moneda || 'ARS',
-      // Perfil público
       publicado: club.publicado === true,
       descripcion: club.descripcion || '',
       whatsapp: club.whatsapp || '',
       email: club.email || '',
+      logo: club.logo || '',
+      fotos: Array.isArray(club.fotos) ? [...club.fotos] : [],
       servicios: Array.isArray(club.servicios) ? [...club.servicios] : [],
     }
+    originalSlug.value = club.slug || ''
+    slugStatus.value = 'available'
+    fetchCourtsMeta()
   } catch (err) {
     error.value = 'Error al cargar la configuración'
     console.error(err)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar la configuración.', life: 4000 })
   } finally {
     loading.value = false
   }
@@ -364,26 +203,20 @@ const fetchConfig = async () => {
 
 onMounted(() => {
   fetchConfig()
-  clockTimer = setInterval(() => {
-    now.value = dayjs.utc()
-  }, 30000)
+  clockTimer = setInterval(() => (now.value = dayjs.utc()), 30000)
 })
+onUnmounted(() => clockTimer && clearInterval(clockTimer))
+watch(currentClubId, (id) => (id ? fetchConfig() : (form.value = null)))
 
-onUnmounted(() => {
-  if (clockTimer) clearInterval(clockTimer)
-})
-
-watch(currentClubId, (newId) => {
-  if (newId) fetchConfig()
-  else form.value = null
-})
+const canSave = computed(() => !['checking', 'taken', 'invalid'].includes(slugStatus.value))
 
 const save = async () => {
-  if (!currentClubId.value || !form.value) return
+  if (!currentClubId.value || !form.value || !canSave.value) return
   saving.value = true
   try {
     const updated = await clubService.updateConfig(currentClubId.value, {
       nombre: form.value.nombre,
+      slug: form.value.slug,
       telefono: form.value.telefono,
       direccion: form.value.direccion,
       ciudad: form.value.ciudad,
@@ -394,10 +227,13 @@ const save = async () => {
       descripcion: form.value.descripcion,
       whatsapp: form.value.whatsapp,
       email: form.value.email,
+      logo: form.value.logo,
+      fotos: form.value.fotos.filter(Boolean),
       servicios: form.value.servicios,
     })
     patchCurrentClub(updated)
-    toast.add({ severity: 'success', summary: 'Cambios guardados', detail: 'La configuración se actualizó correctamente.', life: 3000 })
+    originalSlug.value = updated.slug
+    toast.add({ severity: 'success', summary: 'Cambios guardados', detail: 'La configuración se actualizó.', life: 3000 })
   } catch (err) {
     console.error(err)
     const detail = err.response?.data?.message || 'No se pudo guardar la configuración.'
@@ -406,4 +242,302 @@ const save = async () => {
     saving.value = false
   }
 }
+
+const inputBase =
+  'w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100'
 </script>
+
+<template>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-primitive-dark-500">Configuración del complejo</h1>
+        <p class="mt-1 text-sm text-slate-500">Organizá los datos, el link público, la landing y los pagos.</p>
+      </div>
+      <button
+        v-if="currentClubId && form && activeTab !== 'pagos'"
+        class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+        :disabled="saving || !canSave"
+        @click="save"
+      >
+        <i v-if="saving" class="icon-[material-symbols--progress-activity] animate-spin"></i>
+        {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+
+    <!-- No club -->
+    <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      </div>
+      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
+    </div>
+
+    <div v-else-if="loading" class="flex items-center justify-center py-24">
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-slate-300"></i>
+    </div>
+
+    <div v-else-if="form" class="space-y-6">
+      <!-- Tabs (horizontales) -->
+      <nav class="flex w-full gap-1 overflow-x-auto rounded-full border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
+        <button
+          v-for="t in tabs"
+          :key="t.key"
+          class="flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+          :class="activeTab === t.key ? 'bg-primitive-dark-500 text-white' : 'text-slate-600 hover:bg-slate-50'"
+          @click="activeTab = t.key"
+        >
+          <i :class="t.icon" class="text-base"></i>
+          {{ t.label }}
+        </button>
+      </nav>
+
+      <!-- Content -->
+      <div class="min-w-0">
+        <!-- GENERAL -->
+        <div v-show="activeTab === 'general'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+          <div class="border-b border-black/[0.06] px-6 py-5">
+            <h2 class="text-base font-semibold text-primitive-dark-500">Datos generales</h2>
+            <p class="mt-0.5 text-sm text-neutral-400">Información de contacto, zona horaria y moneda.</p>
+          </div>
+          <div class="space-y-5 px-6 py-6">
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre</label>
+              <input v-model="form.nombre" type="text" placeholder="Ej: Club Garín Pádel" :class="inputBase" />
+            </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Teléfono</label>
+                <input v-model="form.telefono" type="text" placeholder="Ej: +54 11 5555-5555" :class="inputBase" />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Dirección</label>
+                <input v-model="form.direccion" type="text" placeholder="Ej: Av. Siempreviva 742" :class="inputBase" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
+                <div class="relative">
+                  <select v-model="form.ciudad" :class="inputBase" class="appearance-none bg-white pr-8">
+                    <option value="">Seleccionar ciudad</option>
+                    <option v-for="c in ciudadOptions" :key="c" :value="c">{{ c }}</option>
+                  </select>
+                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                </div>
+              </div>
+              <div>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Provincia</label>
+                <input v-model="form.provincia" type="text" :class="inputBase" />
+              </div>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Zona horaria</label>
+              <div class="relative">
+                <select v-model="form.timezone" :class="inputBase" class="appearance-none bg-white pr-8">
+                  <option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
+                </select>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+              </div>
+              <p class="mt-2.5 text-xs text-neutral-400">Hora local actual: <span class="font-medium text-slate-600">{{ localTimePreview }}</span></p>
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Moneda</label>
+              <div class="relative">
+                <select v-model="form.moneda" :class="inputBase" class="appearance-none bg-white pr-8">
+                  <option v-for="c in monedaOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
+                </select>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+              </div>
+              <p class="mt-2.5 text-xs text-neutral-400">Ejemplo de precio: <span class="font-medium text-slate-600">{{ pricePreview }}</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- LINK DE RESERVAS -->
+        <div v-show="activeTab === 'link'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+          <div class="border-b border-black/[0.06] px-6 py-5">
+            <h2 class="text-base font-semibold text-primitive-dark-500">Link de reservas</h2>
+            <p class="mt-0.5 text-sm text-neutral-400">Tu dirección pública única. Compartila en tus redes para recibir reservas online.</p>
+          </div>
+          <div class="space-y-5 px-6 py-6">
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Identificador (slug)</label>
+              <div
+                class="flex items-stretch overflow-hidden rounded-xl border transition-colors"
+                :class="slugStatus === 'taken' || slugStatus === 'invalid' ? 'border-error-300' : slugStatus === 'available' ? 'border-success-300' : 'border-black/[0.08]'"
+              >
+                <span class="flex items-center whitespace-nowrap bg-slate-50 px-3 text-sm text-slate-400">courtinapp.com/club/</span>
+                <input v-model="form.slug" type="text" placeholder="tu-complejo" class="min-w-0 flex-1 bg-white px-3 py-2.5 text-sm text-primitive-dark-500 outline-none placeholder:text-neutral-400" @input="onSlugInput" />
+                <span class="flex items-center pr-3">
+                  <i v-if="slugStatus === 'checking'" class="icon-[material-symbols--progress-activity] animate-spin text-slate-300"></i>
+                  <i v-else-if="slugStatus === 'available'" class="icon-[material-symbols--check-circle] text-success-500"></i>
+                  <i v-else-if="slugStatus === 'taken' || slugStatus === 'invalid'" class="icon-[material-symbols--cancel] text-error-500"></i>
+                </span>
+              </div>
+              <p
+                class="mt-2 text-xs"
+                :class="slugStatus === 'available' ? 'text-success-600' : slugStatus === 'taken' ? 'text-error-600' : slugStatus === 'invalid' ? 'text-warning-600' : 'text-neutral-400'"
+              >
+                <template v-if="slugStatus === 'checking'">Verificando disponibilidad…</template>
+                <template v-else-if="slugStatus === 'available'">✓ Disponible</template>
+                <template v-else-if="slugStatus === 'taken'">Ese link ya está en uso, probá otro.</template>
+                <template v-else-if="slugStatus === 'invalid'">Mínimo 3 caracteres: letras, números o guiones.</template>
+                <template v-else>Solo letras, números y guiones.</template>
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-black/[0.06] bg-slate-50 p-4">
+              <p class="text-xs font-semibold tracking-wider text-neutral-400 uppercase">Tu link</p>
+              <div class="mt-2 flex items-center gap-2">
+                <code class="min-w-0 flex-1 truncate rounded-lg bg-white px-3 py-2 text-sm text-primitive-dark-500 ring-1 ring-black/[0.06]">https://{{ fullLink }}</code>
+                <button class="flex items-center gap-1.5 rounded-full bg-primitive-dark-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-primitive-dark-700 cursor-pointer" @click="copyLink">
+                  <i :class="copiedLink ? 'icon-[material-symbols--check]' : 'icon-[material-symbols--content-copy]'" class="text-sm"></i>
+                  {{ copiedLink ? 'Copiado' : 'Copiar' }}
+                </button>
+              </div>
+              <p class="mt-2 text-xs text-neutral-400">Al cambiar el link, los enlaces anteriores dejan de funcionar. Recordá actualizarlo en tus redes.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- LANDING -->
+        <div v-show="activeTab === 'landing'" class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div class="space-y-6">
+            <!-- Publicar -->
+            <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <p class="text-sm font-semibold text-slate-800">Publicar complejo</p>
+                  <p class="text-xs text-neutral-400">Si está activo, aparece en la búsqueda pública y acepta reservas online.</p>
+                </div>
+                <button type="button" role="switch" :aria-checked="form.publicado" class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer" :class="form.publicado ? 'bg-primitive-orange-500' : 'bg-slate-300'" @click="form.publicado = !form.publicado">
+                  <span class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform" :class="form.publicado ? 'translate-x-5' : ''"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Imágenes -->
+            <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+              <div class="border-b border-black/[0.06] px-6 py-5">
+                <h2 class="text-base font-semibold text-primitive-dark-500">Imágenes</h2>
+                <p class="mt-0.5 text-sm text-neutral-400">Subí el logo, una imagen destacada y fotos de tu complejo (hasta 5 MB c/u).</p>
+              </div>
+              <div class="space-y-5 px-6 py-6">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Logo</label>
+                  <ImageUpload v-model="form.logo" variant="logo" placeholder="Subir logo" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Imagen destacada (portada)</label>
+                  <ImageUpload v-model="destacada" variant="wide" placeholder="Subir imagen destacada" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Galería</label>
+                  <div class="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                    <div v-for="(g, i) in galeria" :key="i" class="relative">
+                      <ImageUpload v-model="form.fotos[i + 1]" variant="thumb" placeholder="Subir" />
+                      <button
+                        class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-error-500 shadow ring-1 ring-black/[0.06] transition-colors hover:bg-red-50 cursor-pointer"
+                        @click="removeGaleria(i)"
+                      >
+                        <i class="icon-[material-symbols--close] text-sm"></i>
+                      </button>
+                    </div>
+                    <ImageUpload :model-value="''" variant="thumb" placeholder="Agregar" @update:model-value="onGalleryAdd" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Descripción + servicios -->
+            <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+              <div class="border-b border-black/[0.06] px-6 py-5">
+                <h2 class="text-base font-semibold text-primitive-dark-500">Descripción y servicios</h2>
+              </div>
+              <div class="space-y-5 px-6 py-6">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Descripción</label>
+                  <textarea v-model="form.descripcion" rows="3" placeholder="Contá qué hace especial a tu complejo…" :class="inputBase"></textarea>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">WhatsApp</label>
+                    <input v-model="form.whatsapp" type="text" placeholder="Ej: +54 11 5555-5555" :class="inputBase" />
+                  </div>
+                  <div>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Email de contacto</label>
+                    <input v-model="form.email" type="email" placeholder="contacto@tucomplejo.com" :class="inputBase" />
+                  </div>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Servicios</label>
+                  <div class="flex flex-wrap items-center gap-2 rounded-xl border border-black/[0.08] px-3 py-2 transition-colors focus-within:border-primitive-orange-400 focus-within:ring-2 focus-within:ring-primitive-orange-100">
+                    <span v-for="(s, i) in form.servicios" :key="i" class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 py-1 pl-3 pr-1.5 text-xs font-medium text-slate-700">
+                      {{ s }}
+                      <button type="button" class="flex h-4 w-4 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-200 hover:text-error-500 cursor-pointer" @click="removeServicio(i)"><i class="icon-[material-symbols--close] text-[9px]"></i></button>
+                    </span>
+                    <input v-model="servicioDraft" type="text" :placeholder="form.servicios.length ? 'Agregar otro…' : 'Ej: Estacionamiento'" class="min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm text-primitive-dark-500 outline-none placeholder:text-neutral-400" @keydown.enter.prevent="addServicio" @keydown.,.prevent="addServicio" @keydown.delete="onServicioBackspace" @blur="addServicio" />
+                  </div>
+                  <p class="mt-2 text-xs text-neutral-400">Escribí un servicio y presioná Enter para agregarlo.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div class="lg:sticky lg:top-24 lg:self-start">
+            <p class="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+              <i class="icon-[material-symbols--visibility] text-sm"></i> Vista previa en la búsqueda
+            </p>
+            <ClubCard :club="previewClub" class="pointer-events-none" />
+            <p class="mt-3 text-xs text-neutral-400">Así se ve tu complejo cuando un jugador busca canchas.</p>
+          </div>
+        </div>
+
+        <!-- PAGOS -->
+        <div v-show="activeTab === 'pagos'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+          <div class="border-b border-black/[0.06] px-6 py-5">
+            <h2 class="text-base font-semibold text-primitive-dark-500">Pasarelas de pago</h2>
+            <p class="mt-0.5 text-sm text-neutral-400">Conectá tu cuenta para cobrar las reservas online.</p>
+          </div>
+          <div class="space-y-4 px-6 py-6">
+            <!-- MercadoPago -->
+            <div class="flex flex-wrap items-center gap-4 rounded-2xl border border-black/[0.06] p-5">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#009ee3]/10 text-[#009ee3]">
+                <i class="icon-[material-symbols--account-balance-wallet] text-2xl"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold text-primitive-dark-500">MercadoPago</p>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span> No conectado
+                  </span>
+                </div>
+                <p class="mt-0.5 text-xs text-neutral-400">Tarjetas, dinero en cuenta y QR. Los pagos caen en tu cuenta.</p>
+              </div>
+              <button class="rounded-full bg-primitive-orange-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer" @click="mpOpen = true">
+                Configurar
+              </button>
+            </div>
+
+            <!-- Próximamente -->
+            <div class="flex items-center gap-4 rounded-2xl border border-dashed border-black/[0.1] p-5 opacity-70">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                <i class="icon-[material-symbols--add-card] text-2xl"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-semibold text-slate-500">Más pasarelas</p>
+                <p class="mt-0.5 text-xs text-neutral-400">Stripe, transferencia y otras — próximamente.</p>
+              </div>
+              <span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-400">Pronto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <MercadoPagoDrawer :visible="mpOpen" @close="mpOpen = false" />
+  </div>
+</template>

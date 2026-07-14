@@ -8,6 +8,9 @@ const courtRoutes = require('./courtRoutes');
 const reservationRoutes = require('./reservationRoutes');
 const cashRoutes = require('./cashRoutes');
 const clientRoutes = require('./clientRoutes');
+const statsRoutes = require('./statsRoutes');
+const notificationRoutes = require('./notificationRoutes');
+const uploadRoutes = require('./uploadRoutes');
 const adminRoutes = require('./adminRoutes');
 const publicRoutes = require('./publicRoutes');
 
@@ -22,6 +25,9 @@ router.use('/courts', courtRoutes);
 router.use('/reservations', reservationRoutes);
 router.use('/cash', cashRoutes);
 router.use('/clients', clientRoutes);
+router.use('/stats', statsRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/uploads', uploadRoutes);
 router.use('/admin', adminRoutes);
 router.use('/public', publicRoutes);
 

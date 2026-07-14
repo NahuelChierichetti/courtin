@@ -168,7 +168,7 @@ const getClubConfig = async (req, res, next) => {
 const updateClubConfig = async (req, res, next) => {
     try {
         const {
-            nombre, direccion, ciudad, provincia, telefono, timezone, moneda,
+            nombre, slug, direccion, ciudad, provincia, telefono, timezone, moneda,
             whatsapp, email, descripcion, logo, fotos, ubicacion, servicios, publicado
         } = req.body;
 
@@ -182,6 +182,19 @@ const updateClubConfig = async (req, res, next) => {
             timezone,
             moneda
         };
+
+        // Slug (link público): único, valida formato y disponibilidad.
+        if (slug !== undefined) {
+            const norm = (slug || '').toLowerCase().trim();
+            if (!norm || norm.length < 3 || !/^[a-z0-9-]+$/.test(norm)) {
+                return res.status(400).json({ ok: false, message: 'El link debe tener al menos 3 caracteres (letras, números o guiones).' });
+            }
+            const clash = await Club.findOne({ slug: norm, _id: { $ne: req.params.clubId } });
+            if (clash) {
+                return res.status(400).json({ ok: false, message: 'Ese link ya está en uso por otro complejo.' });
+            }
+            updateData.slug = norm;
+        }
 
         if (whatsapp !== undefined) updateData.whatsapp = whatsapp;
         if (email !== undefined) updateData.email = email;
