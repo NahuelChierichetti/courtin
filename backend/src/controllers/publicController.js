@@ -16,6 +16,7 @@ const { priceForDuration } = require('../utils/pricing');
 const { horariosToLocal, DEFAULT_TZ } = require('../utils/timezone');
 const { recordReservationPayment } = require('../utils/cashLedger');
 const { upsertClientFromReservation } = require('../utils/clients');
+const { notify } = require('../utils/notifications');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -303,6 +304,26 @@ const getPublicCities = async (req, res, next) => {
   }
 };
 
+// GET /public/slug-available?slug=&excludeId=
+// Chequea si un slug está libre (para el link público del complejo). excludeId
+// permite que el club, al editar, no choque con su propio slug.
+const checkSlugAvailable = async (req, res, next) => {
+  try {
+    const slug = (req.query.slug || '').toString().toLowerCase().trim();
+    const excludeId = req.query.excludeId;
+
+    if (!slug || slug.length < 3 || !/^[a-z0-9-]+$/.test(slug)) {
+      return res.status(200).json({ ok: true, available: false, reason: 'formato' });
+    }
+
+    const found = await Club.findOne({ slug });
+    const available = !found || (!!excludeId && found._id.toString() === excludeId);
+    res.status(200).json({ ok: true, available, reason: available ? null : 'en_uso' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // POST /public/clubs/:slug/reservations
 // Reserva como invitado (sin cuenta). Devuelve el manageToken para que el
 // frontend arme el link de gestión.
@@ -382,7 +403,23 @@ const createPublicReservation = async (req, res, next) => {
     await recordReservationPayment(reservation, metodoPago);
 
     // Registra/actualiza el cliente del club (clave: email). Best-effort.
-    await upsertClientFromReservation(reservation);
+    const clientResult = await upsertClientFromReservation(reservation);
+
+    // Notificaciones para el complejo (best-effort).
+    const cuando = dayjs(reservation.inicio).tz(tz).format('DD MMM HH:mm');
+    await notify(club._id, {
+      tipo: 'reserva',
+      titulo: 'Nueva reserva',
+      mensaje: `${guestName} reservó ${court.nombre} · ${cuando}`,
+      reservation: reservation._id
+    });
+    if (clientResult?.isNew) {
+      await notify(club._id, {
+        tipo: 'cliente',
+        titulo: 'Nuevo cliente',
+        mensaje: `${guestName} hizo su primera reserva`
+      });
+    }
 
     res.status(201).json({
       ok: true,
@@ -410,5 +447,6 @@ module.exports = {
   getCourtAvailability,
   getClubAvailability,
   createPublicReservation,
-  getPublicCities
+  getPublicCities,
+  checkSlugAvailable
 };

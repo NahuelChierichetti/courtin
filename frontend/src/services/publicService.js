@@ -21,6 +21,13 @@ const publicService = {
     return data.cities
   },
 
+  // Disponibilidad de un slug (link público del complejo). excludeId evita que
+  // el club choque con su propio slug al editar.
+  async checkSlug(slug, excludeId) {
+    const { data } = await api.get('/public/slug-available', { params: { slug, excludeId } })
+    return data // { available, reason }
+  },
+
   // Slots de una cancha para una fecha ("YYYY-MM-DD") y una duración (min).
   async getAvailability(slug, courtId, fecha, duracion) {
     const { data } = await api.get(`/public/clubs/${slug}/courts/${courtId}/availability`, {
