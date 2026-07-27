@@ -194,47 +194,47 @@ const onCloseModal = () => {
   <div class="mx-auto w-full max-w-7xl px-4 py-8">
     <!-- Loading -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-slate-300"></i>
-      <p class="mt-4 text-sm text-slate-500">Cargando complejo...</p>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-300"></i>
+      <p class="mt-4 text-sm text-stone-500">Cargando complejo...</p>
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="flex flex-col items-center justify-center py-24 text-center">
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
-        <i class="icon-[material-symbols--warning] text-2xl text-slate-300"></i>
+        <i class="icon-[material-symbols--warning] text-2xl text-stone-300"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">{{ error }}</h3>
-      <RouterLink :to="{ name: 'public-buscar' }" class="mt-3 text-sm font-semibold text-primitive-orange-500 no-underline">
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">{{ error }}</h3>
+      <RouterLink :to="{ name: 'public-buscar' }" class="mt-3 text-sm font-semibold text-brand-green-500 no-underline">
         ← Volver a la búsqueda
       </RouterLink>
     </div>
 
     <div v-else class="space-y-6">
       <!-- Breadcrumb -->
-      <nav class="flex items-center gap-2 text-sm text-slate-400">
-        <RouterLink :to="{ name: 'public-home' }" class="no-underline text-slate-400 hover:text-slate-600">Inicio</RouterLink>
+      <nav class="flex items-center gap-2 text-sm text-stone-400">
+        <RouterLink :to="{ name: 'public-home' }" class="no-underline text-stone-400 hover:text-stone-600">Inicio</RouterLink>
         <span>/</span>
         <RouterLink
           :to="{ name: 'public-buscar', query: primarySport ? { tipo: primarySport } : {} }"
-          class="no-underline text-slate-400 hover:text-slate-600"
+          class="no-underline text-stone-400 hover:text-stone-600"
         >
           {{ primarySport ? sportMeta(primarySport).label : 'Complejos' }}
         </RouterLink>
         <span>/</span>
-        <span class="font-medium text-primitive-dark-500">{{ club.nombre }}</span>
+        <span class="font-medium text-ink-500">{{ club.nombre }}</span>
       </nav>
 
       <!-- Header -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-primitive-dark-500 sm:text-4xl">{{ club.nombre }}</h1>
-          <div class="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-slate-500">
+          <h1 class="text-3xl font-bold text-ink-500 sm:text-4xl">{{ club.nombre }}</h1>
+          <div class="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-stone-500">
             <span v-if="club.direccion || club.ciudad" class="inline-flex items-center gap-1.5">
               <i class="icon-[material-symbols--location-on] text-xs"></i>{{ [club.direccion, club.ciudad].filter(Boolean).join(', ') }}
             </span>
             <span v-if="todayConfig && todayConfig.abierto !== false" class="inline-flex items-center gap-1.5">
               <i class="icon-[material-symbols--schedule] text-xs"></i>
-              <span :class="isOpenNow ? 'font-semibold text-success-600' : 'text-slate-500'">
+              <span :class="isOpenNow ? 'font-semibold text-success-600' : 'text-stone-500'">
                 {{ isOpenNow ? 'Abierto' : 'Cerrado' }}
               </span>
               · Cierra {{ todayConfig.horaFin }}
@@ -245,7 +245,7 @@ const onCloseModal = () => {
           <p class="flex items-center justify-end gap-1.5 text-2xl font-bold text-success-600">
             <i class="icon-[material-symbols--star] text-lg"></i>{{ Number(club.rating).toFixed(2) }}
           </p>
-          <p v-if="club.reseñas" class="text-sm text-slate-400">{{ club.reseñas }} reseñas</p>
+          <p v-if="club.reseñas" class="text-sm text-stone-400">{{ club.reseñas }} reseñas</p>
         </div>
       </div>
 
@@ -253,7 +253,7 @@ const onCloseModal = () => {
       <div>
         <div class="relative h-[280px] w-full overflow-hidden rounded-3xl sm:h-[420px]">
           <img v-if="mainPhoto" :src="mainPhoto" :alt="club.nombre" class="h-full w-full object-cover" />
-          <div v-else class="relative h-full w-full bg-gradient-to-br from-primitive-dark-500 to-primitive-blue-500">
+          <div v-else class="relative h-full w-full bg-gradient-to-br from-ink-500 to-brand-purple-500">
             <div class="absolute inset-8 rounded-xl border border-white/15">
               <div class="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-white/15"></div>
               <div class="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-white/15"></div>
@@ -277,18 +277,18 @@ const onCloseModal = () => {
         <div class="min-w-0 space-y-10">
           <!-- Sobre este complejo -->
           <section v-if="club.descripcion">
-            <h2 class="text-xl font-bold text-primitive-dark-500">Sobre este complejo</h2>
-            <p class="mt-3 text-[15px] leading-relaxed text-slate-500">{{ club.descripcion }}</p>
+            <h2 class="text-xl font-bold text-ink-500">Sobre este complejo</h2>
+            <p class="mt-3 text-[15px] leading-relaxed text-stone-500">{{ club.descripcion }}</p>
           </section>
 
           <!-- Instalaciones -->
           <section v-if="club.servicios && club.servicios.length">
             <div class="flex items-center justify-between">
-              <h2 class="text-xl font-bold text-primitive-dark-500">Instalaciones</h2>
+              <h2 class="text-xl font-bold text-ink-500">Instalaciones</h2>
               <button
                 v-if="club.servicios.length > 6"
                 type="button"
-                class="text-sm font-semibold text-primitive-orange-500 hover:text-primitive-orange-600 cursor-pointer"
+                class="text-sm font-semibold text-brand-green-500 hover:text-brand-green-600 cursor-pointer"
                 @click="showAllServices = !showAllServices"
               >
                 {{ showAllServices ? 'Ver menos' : 'Ver todas' }}
@@ -296,39 +296,39 @@ const onCloseModal = () => {
             </div>
             <div class="mt-5 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
               <div v-for="s in visibleServices" :key="s" class="flex items-center gap-3">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primitive-orange-50 text-primitive-orange-500">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500">
                   <i :class="serviceIcon(s)" class="text-sm"></i>
                 </span>
-                <span class="text-sm font-medium text-slate-600">{{ s }}</span>
+                <span class="text-sm font-medium text-stone-600">{{ s }}</span>
               </div>
             </div>
           </section>
 
           <!-- Lo que ofrece -->
           <section>
-            <h2 class="text-xl font-bold text-primitive-dark-500">Lo que ofrece</h2>
+            <h2 class="text-xl font-bold text-ink-500">Lo que ofrece</h2>
             <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div class="rounded-2xl border border-black/[0.06] bg-white p-5">
-                <i class="icon-[material-symbols--grid-view] text-primitive-orange-500"></i>
-                <p class="mt-3 text-lg font-bold text-primitive-dark-500">{{ courts.length }} canchas</p>
-                <p class="mt-0.5 text-sm text-slate-400">{{ indoorCount }} indoor · {{ outdoorCount }} outdoor</p>
+                <i class="icon-[material-symbols--grid-view] text-brand-green-500"></i>
+                <p class="mt-3 text-lg font-bold text-ink-500">{{ courts.length }} canchas</p>
+                <p class="mt-0.5 text-sm text-stone-400">{{ indoorCount }} indoor · {{ outdoorCount }} outdoor</p>
               </div>
               <div class="rounded-2xl border border-black/[0.06] bg-white p-5">
-                <i class="icon-[material-symbols--map] text-primitive-orange-500"></i>
-                <p class="mt-3 text-lg font-bold text-primitive-dark-500">{{ superficies.length }} superficies</p>
-                <p class="mt-0.5 text-sm text-slate-400">{{ superficies.join(', ') || 'Sin especificar' }}</p>
+                <i class="icon-[material-symbols--map] text-brand-green-500"></i>
+                <p class="mt-3 text-lg font-bold text-ink-500">{{ superficies.length }} superficies</p>
+                <p class="mt-0.5 text-sm text-stone-400">{{ superficies.join(', ') || 'Sin especificar' }}</p>
               </div>
               <div class="rounded-2xl border border-black/[0.06] bg-white p-5">
-                <i class="icon-[material-symbols--bolt] text-primitive-orange-500"></i>
-                <p class="mt-3 text-lg font-bold text-primitive-dark-500">Reserva online</p>
-                <p class="mt-0.5 text-sm text-slate-400">Disponibilidad en tiempo real</p>
+                <i class="icon-[material-symbols--bolt] text-brand-green-500"></i>
+                <p class="mt-3 text-lg font-bold text-ink-500">Reserva online</p>
+                <p class="mt-0.5 text-sm text-stone-400">Disponibilidad en tiempo real</p>
               </div>
             </div>
           </section>
 
           <!-- Deportes disponibles -->
           <section v-if="sports.length">
-            <h2 class="text-xl font-bold text-primitive-dark-500">Deportes disponibles</h2>
+            <h2 class="text-xl font-bold text-ink-500">Deportes disponibles</h2>
             <div class="mt-4 flex flex-wrap gap-2">
               <span
                 v-for="s in sports"
@@ -345,18 +345,18 @@ const onCloseModal = () => {
         <!-- Derecha: panel de reserva -->
         <div class="lg:sticky lg:top-24 lg:self-start">
           <div class="rounded-3xl border border-black/[0.06] bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-bold text-primitive-dark-500">Reservá esta cancha</h3>
-            <p class="mt-1 text-sm text-slate-400">Elegí cancha y horario</p>
+            <h3 class="text-xl font-bold text-ink-500">Reservá esta cancha</h3>
+            <p class="mt-1 text-sm text-stone-400">Elegí cancha y horario</p>
 
             <template v-if="!courts.length">
-              <p class="mt-6 rounded-2xl bg-slate-50 py-8 text-center text-sm text-slate-500">
+              <p class="mt-6 rounded-2xl bg-stone-50 py-8 text-center text-sm text-stone-500">
                 Este complejo todavía no tiene canchas para reservar online.
               </p>
             </template>
 
             <template v-else>
               <!-- Día -->
-              <p class="mt-6 text-xs font-bold tracking-wide text-slate-500 uppercase">Día</p>
+              <p class="mt-6 text-xs font-bold tracking-wide text-stone-500 uppercase">Día</p>
               <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
                 <button
                   v-for="d in dayPills"
@@ -364,17 +364,17 @@ const onCloseModal = () => {
                   type="button"
                   class="flex w-12 shrink-0 flex-col items-center rounded-full border py-2 transition-colors cursor-pointer"
                   :class="currentDate === d.key
-                    ? 'border-primitive-orange-500 bg-primitive-orange-500 text-white'
-                    : 'border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+                    ? 'border-brand-green-500 bg-brand-green-500 text-white'
+                    : 'border-black/[0.08] bg-white text-stone-600 hover:bg-stone-50'"
                   @click="currentDate = d.key"
                 >
-                  <span class="text-[10px] font-semibold" :class="currentDate === d.key ? 'text-white/75' : 'text-slate-400'">{{ d.dow }}</span>
+                  <span class="text-[10px] font-semibold" :class="currentDate === d.key ? 'text-white/75' : 'text-stone-400'">{{ d.dow }}</span>
                   <span class="text-base font-bold leading-tight">{{ d.day }}</span>
                 </button>
               </div>
 
               <!-- Seleccioná cancha -->
-              <p class="mt-6 text-xs font-bold tracking-wide text-slate-500 uppercase">Seleccioná cancha</p>
+              <p class="mt-6 text-xs font-bold tracking-wide text-stone-500 uppercase">Seleccioná cancha</p>
               <div class="mt-3 flex flex-wrap gap-2">
                 <button
                   v-for="c in courts"
@@ -382,8 +382,8 @@ const onCloseModal = () => {
                   type="button"
                   class="flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors cursor-pointer"
                   :class="selectedCourtId === c._id
-                    ? 'border-primitive-orange-500 bg-primitive-orange-50 text-primitive-orange-700'
-                    : 'border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+                    ? 'border-brand-green-500 bg-brand-green-50 text-brand-green-700'
+                    : 'border-black/[0.08] bg-white text-stone-600 hover:bg-stone-50'"
                   @click="selectCourt(c._id)"
                 >
                   <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(c.tipo).dot"></span>{{ c.nombre }}
@@ -392,15 +392,15 @@ const onCloseModal = () => {
 
               <!-- Horario disponible -->
               <div class="mt-6 flex items-center justify-between">
-                <p class="text-xs font-bold tracking-wide text-slate-500 uppercase">Horario disponible</p>
+                <p class="text-xs font-bold tracking-wide text-stone-500 uppercase">Horario disponible</p>
                 <span v-if="turnosTotal" class="text-xs font-semibold text-success-600">{{ turnosLibres }}/{{ turnosTotal }} turnos libres</span>
               </div>
 
               <div v-if="loadingSlots" class="flex items-center justify-center py-10">
-                <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i>
+                <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i>
               </div>
 
-              <div v-else-if="!selectedRow?.abierto || !availableSlots.length" class="mt-3 rounded-2xl bg-slate-50 py-8 text-center text-sm text-slate-500">
+              <div v-else-if="!selectedRow?.abierto || !availableSlots.length" class="mt-3 rounded-2xl bg-stone-50 py-8 text-center text-sm text-stone-500">
                 No hay turnos disponibles este día.
               </div>
 
@@ -412,13 +412,13 @@ const onCloseModal = () => {
                   :disabled="!slot.disponible"
                   class="flex items-center justify-center gap-1 rounded-full border py-2.5 text-sm font-semibold transition-colors"
                   :class="isSlotSelected(slot)
-                    ? 'border-primitive-orange-500 bg-primitive-orange-500 text-white cursor-pointer'
+                    ? 'border-brand-green-500 bg-brand-green-500 text-white cursor-pointer'
                     : slot.disponible
-                      ? 'border-black/[0.08] bg-white text-primitive-dark-500 hover:border-primitive-orange-400 hover:bg-primitive-orange-50 cursor-pointer'
-                      : 'border-transparent bg-slate-100 text-slate-300 cursor-not-allowed'"
+                      ? 'border-black/[0.08] bg-white text-ink-500 hover:border-brand-green-400 hover:bg-brand-green-50 cursor-pointer'
+                      : 'border-transparent bg-stone-100 text-stone-300 cursor-not-allowed'"
                   @click="selectSlot(slot)"
                 >
-                  <i class="icon-[material-symbols--schedule] text-[11px]" :class="isSlotSelected(slot) ? 'text-white' : 'text-slate-400'"></i>
+                  <i class="icon-[material-symbols--schedule] text-[11px]" :class="isSlotSelected(slot) ? 'text-white' : 'text-stone-400'"></i>
                   {{ slot.horaInicio }}
                 </button>
               </div>
@@ -428,26 +428,26 @@ const onCloseModal = () => {
 
               <div class="flex items-end justify-between">
                 <div>
-                  <p v-if="perHour" class="text-2xl font-bold text-primitive-orange-500">
-                    {{ formatCurrency(perHour, moneda) }}<span class="text-sm font-medium text-slate-400"> /hora</span>
+                  <p v-if="perHour" class="text-2xl font-bold text-brand-green-500">
+                    {{ formatCurrency(perHour, moneda) }}<span class="text-sm font-medium text-stone-400"> /hora</span>
                   </p>
-                  <p v-else class="text-lg font-bold text-slate-300">— /hora</p>
+                  <p v-else class="text-lg font-bold text-stone-300">— /hora</p>
                 </div>
-                <p v-if="selectedSlot" class="text-right text-sm text-slate-500">
+                <p v-if="selectedSlot" class="text-right text-sm text-stone-500">
                   {{ selectedSlot.horaInicio }}–{{ selectedSlot.horaFin }}<br />
-                  <span class="font-semibold text-primitive-dark-500">{{ formatCurrency(selectedSlot.precio, moneda) }}</span>
+                  <span class="font-semibold text-ink-500">{{ formatCurrency(selectedSlot.precio, moneda) }}</span>
                 </p>
               </div>
 
               <button
                 type="button"
-                class="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primitive-orange-500 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                class="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-lime-500 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                 :disabled="!selectedSlot"
                 @click="openBooking"
               >
                 Reservar cancha <i class="icon-[material-symbols--arrow-forward] text-xs"></i>
               </button>
-              <p class="mt-2 text-center text-xs text-slate-400">Elegí un horario libre para continuar.</p>
+              <p class="mt-2 text-center text-xs text-stone-400">Elegí un horario libre para continuar.</p>
             </template>
           </div>
         </div>

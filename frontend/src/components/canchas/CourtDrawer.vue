@@ -20,11 +20,11 @@
               <i :class="deporteIcons[form.tipo]" class="text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-primitive-dark-500">{{ drawerTitle }}</h2>
-              <p class="text-sm text-neutral-400">{{ drawerSubtitle }}</p>
+              <h2 class="text-lg font-semibold text-ink-500">{{ drawerTitle }}</h2>
+              <p class="text-sm text-stone-400">{{ drawerSubtitle }}</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer"
               @click="emit('close')"
             >
               <i class="icon-[material-symbols--close] text-sm"></i>
@@ -37,30 +37,30 @@
               <!-- Name & Sport -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Nombre
                   </label>
                   <input
                     v-model="form.nombre"
                     type="text"
                     placeholder="Ej: Cancha 1"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Deporte
                   </label>
                   <div class="relative">
                     <select
                       v-model="form.tipo"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100 bg-white"
+                      class="w-full appearance-none rounded-xl border border-black/[0.08] px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100 bg-white"
                     >
                       <option v-for="opt in deporteOptions" :key="opt.value" :value="opt.value">
                         {{ opt.label }}
                       </option>
                     </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                   </div>
                 </div>
               </div>
@@ -68,43 +68,43 @@
               <!-- Surface & Cover -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
-                    Superficie <span class="font-normal normal-case tracking-normal text-slate-300">(opcional)</span>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
+                    Superficie <span class="font-normal normal-case tracking-normal text-stone-300">(opcional)</span>
                   </label>
                   <div class="relative">
                     <select
                       v-model="surfaceSelect"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                     >
                       <option value="">Sin especificar</option>
                       <option v-for="s in surfaceOptions" :key="s" :value="s">{{ s }}</option>
                       <option value="__otra__">Otra…</option>
                     </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                   </div>
                   <input
                     v-if="surfaceSelect === '__otra__'"
                     v-model="form.superficie"
                     type="text"
                     placeholder="Especificá la superficie"
-                    class="mt-2 w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                    class="mt-2 w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Cubierta
                   </label>
                   <div class="flex overflow-hidden rounded-full border border-black/[0.08]">
                     <button
                       class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                      :class="form.cubierta ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                      :class="form.cubierta ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                       @click="form.cubierta = true"
                     >
                       Cubierta
                     </button>
                     <button
                       class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                      :class="!form.cubierta ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                      :class="!form.cubierta ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                       @click="form.cubierta = false"
                     >
                       Descubierta
@@ -116,7 +116,7 @@
               <!-- Players (futbol only) -->
               <div v-if="showJugadores" class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Jugadores por equipo
                   </label>
                   <input
@@ -125,14 +125,14 @@
                     min="3"
                     max="11"
                     placeholder="Ej: 5, 7, 11"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
               </div>
 
               <!-- Duración del turno -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                   Duración del turno
                 </label>
                 <div class="flex overflow-hidden rounded-full border border-black/[0.08]">
@@ -140,7 +140,7 @@
                     v-for="opt in duracionOptions"
                     :key="opt"
                     class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                    :class="form.duracionTurno === opt ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                    :class="form.duracionTurno === opt ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                     @click="form.duracionTurno = opt"
                   >
                     {{ opt }} min
@@ -151,8 +151,8 @@
               <!-- Reservable online -->
               <div class="flex items-center justify-between rounded-xl border border-black/[0.06] p-4">
                 <div class="pr-4">
-                  <p class="text-sm font-semibold text-slate-800">Reservable online</p>
-                  <p class="text-xs text-neutral-400">
+                  <p class="text-sm font-semibold text-stone-800">Reservable online</p>
+                  <p class="text-xs text-stone-400">
                     Permitir que los jugadores reserven esta cancha desde la web pública.
                   </p>
                 </div>
@@ -161,7 +161,7 @@
                   role="switch"
                   :aria-checked="form.visible"
                   class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer"
-                  :class="form.visible ? 'bg-primitive-orange-500' : 'bg-slate-300'"
+                  :class="form.visible ? 'bg-brand-green-500' : 'bg-stone-300'"
                   @click="form.visible = !form.visible"
                 >
                   <span
@@ -173,25 +173,25 @@
 
               <!-- Tarifas -->
               <div>
-                <label class="mb-2 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                <label class="mb-2 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                   Tarifas
                 </label>
 
                 <!-- Precio único (simple) -->
                 <div v-if="!advanced">
-                  <label class="mb-1.5 block text-[11px] font-medium text-slate-500">Precio por hora</label>
+                  <label class="mb-1.5 block text-[11px] font-medium text-stone-500">Precio por hora</label>
                   <div class="relative max-w-[200px]">
-                    <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-neutral-400">$</span>
+                    <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-stone-400">$</span>
                     <input
                       v-model.number="precioHora"
                       type="number"
                       min="0"
                       step="500"
                       placeholder="0"
-                      class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                      class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                     />
                   </div>
-                  <p class="mt-2.5 text-xs text-neutral-400">
+                  <p class="mt-2.5 text-xs text-stone-400">
                     Se cobra por hora; el total del turno se calcula según la duración (1h 30 = 1.5×).
                   </p>
                 </div>
@@ -205,7 +205,7 @@
                   >
                     <div class="flex items-start justify-between gap-2">
                       <div class="min-w-0 flex-1">
-                        <label class="mb-1.5 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Días</label>
+                        <label class="mb-1.5 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Días</label>
                         <div class="flex flex-wrap gap-1.5">
                           <button
                             v-for="d in DAYS"
@@ -213,8 +213,8 @@
                             type="button"
                             class="h-8 w-9 rounded-full border text-xs font-semibold transition-colors cursor-pointer"
                             :class="band.diasSel.includes(d.code)
-                              ? 'border-primitive-orange-500 bg-primitive-orange-500 text-white'
-                              : 'border-black/[0.08] bg-white text-slate-500 hover:bg-slate-50'"
+                              ? 'border-brand-green-500 bg-brand-green-500 text-white'
+                              : 'border-black/[0.08] bg-white text-stone-500 hover:bg-stone-50'"
                             @click="toggleDay(band, d.code)"
                           >
                             {{ d.label }}
@@ -225,7 +225,7 @@
                             v-for="p in dayPresets"
                             :key="p.value"
                             type="button"
-                            class="rounded-full border border-black/[0.08] px-2.5 py-1 text-[11px] font-medium text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
+                            class="rounded-full border border-black/[0.08] px-2.5 py-1 text-[11px] font-medium text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
                             @click="applyPreset(band, p.value)"
                           >
                             {{ p.label }}
@@ -234,7 +234,7 @@
                       </div>
                       <button
                         v-if="form.tarifas.length > 1"
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-300 transition-colors hover:bg-red-50 hover:text-error-500 cursor-pointer"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-stone-300 transition-colors hover:bg-error-50 hover:text-error-500 cursor-pointer"
                         @click="removeBand(index)"
                       >
                         <i class="icon-[material-symbols--delete] text-sm"></i>
@@ -243,42 +243,42 @@
 
                     <div class="mt-3 grid grid-cols-[1fr_1fr_1.1fr] items-end gap-2.5">
                       <div>
-                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Desde</label>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Desde</label>
                         <div class="relative">
-                          <select v-model="band.horaInicio" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-7 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100">
+                          <select v-model="band.horaInicio" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-7 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100">
                             <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
                           </select>
-                          <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-neutral-400"></i>
+                          <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-stone-400"></i>
                         </div>
                       </div>
                       <div>
-                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Hasta</label>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Hasta</label>
                         <div class="relative">
-                          <select v-model="band.horaFin" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-7 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100">
+                          <select v-model="band.horaFin" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-7 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100">
                             <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
                           </select>
-                          <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-neutral-400"></i>
+                          <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-stone-400"></i>
                         </div>
                       </div>
                       <div>
-                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Precio /h</label>
+                        <label class="mb-1 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Precio /h</label>
                         <div class="relative">
-                          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-neutral-400">$</span>
-                          <input v-model.number="band.precio" type="number" min="0" step="500" class="w-full rounded-xl border border-black/[0.08] py-2 pr-3 pl-7 text-right text-sm font-medium font-secondary text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100" />
+                          <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-stone-400">$</span>
+                          <input v-model.number="band.precio" type="number" min="0" step="500" class="w-full rounded-xl border border-black/[0.08] py-2 pr-3 pl-7 text-right text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
                         </div>
                       </div>
                     </div>
 
                     <p
                       class="!mt-2 rounded-lg px-2.5 py-1.5 text-xs"
-                      :class="band.diasSel.length ? 'bg-primitive-orange-50 text-primitive-orange-700' : 'bg-slate-50 text-slate-400'"
+                      :class="band.diasSel.length ? 'bg-brand-green-50 text-brand-green-700' : 'bg-stone-50 text-stone-400'"
                     >
                       {{ bandSummary(band) }}
                     </p>
                   </div>
 
                   <button
-                    class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-black/[0.12] py-2.5 text-sm font-medium text-slate-500 transition-colors hover:border-primitive-orange-300 hover:text-primitive-orange-600 cursor-pointer"
+                    class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-black/[0.12] py-2.5 text-sm font-medium text-stone-500 transition-colors hover:border-brand-green-300 hover:text-brand-green-600 cursor-pointer"
                     @click="addBand"
                   >
                     <i class="icon-[material-symbols--add] text-base"></i> Agregar franja
@@ -293,15 +293,15 @@
                 <!-- Toggle diferenciar -->
                 <label class="mt-4 flex items-center justify-between rounded-xl border border-black/[0.06] p-4">
                   <div class="pr-4">
-                    <p class="text-sm font-semibold text-slate-800">Diferenciar por día/horario</p>
-                    <p class="text-xs text-neutral-400">Cobrá distinto en finde, noche, etc.</p>
+                    <p class="text-sm font-semibold text-stone-800">Diferenciar por día/horario</p>
+                    <p class="text-xs text-stone-400">Cobrá distinto en finde, noche, etc.</p>
                   </div>
                   <button
                     type="button"
                     role="switch"
                     :aria-checked="advanced"
                     class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer"
-                    :class="advanced ? 'bg-primitive-orange-500' : 'bg-slate-300'"
+                    :class="advanced ? 'bg-brand-green-500' : 'bg-stone-300'"
                     @click="advanced = !advanced"
                   >
                     <span
@@ -328,13 +328,13 @@
             <div v-else />
             <div class="flex items-center gap-3">
               <button
-                class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                 @click="emit('close')"
               >
                 Cancelar
               </button>
               <button
-                class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="saving"
                 @click="handleSave"
               >
@@ -550,8 +550,8 @@ const drawerSubtitle = computed(() => {
 })
 
 const deporteColors = {
-  padel: 'bg-primitive-blue-100 text-primitive-blue-600',
-  tenis: 'bg-primitive-orange-100 text-primitive-orange-600',
+  padel: 'bg-brand-purple-100 text-brand-purple-600',
+  tenis: 'bg-brand-green-100 text-brand-green-600',
   futbol: 'bg-success-100 text-success-600',
 }
 const deporteIcons = {

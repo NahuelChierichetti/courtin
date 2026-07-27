@@ -16,11 +16,11 @@
               <i class="icon-[material-symbols--calendar-month] text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-primitive-dark-500">{{ isEditing ? 'Editar turno' : 'Nuevo turno' }}</h2>
-              <p class="truncate text-sm text-neutral-400">{{ subtitle }}</p>
+              <h2 class="text-lg font-semibold text-ink-500">{{ isEditing ? 'Editar turno' : 'Nuevo turno' }}</h2>
+              <p class="truncate text-sm text-stone-400">{{ subtitle }}</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer"
               @click="emit('close')"
             >
               <i class="icon-[material-symbols--close] text-sm"></i>
@@ -41,62 +41,62 @@
 
               <!-- Cliente -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Cliente</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cliente</label>
                 <input
                   v-model="form.guestName"
                   type="text"
                   placeholder="Nombre y apellido"
-                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
 
               <!-- Teléfono + Email -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Teléfono</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Teléfono</label>
                   <input
                     v-model="form.guestPhone"
                     type="tel"
                     placeholder="Ej: 11 2345 6789"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
-                    Email <span class="font-normal normal-case tracking-normal text-slate-300">(cliente)</span>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
+                    Email <span class="font-normal normal-case tracking-normal text-stone-300">(cliente)</span>
                   </label>
                   <input
                     v-model="form.guestEmail"
                     type="email"
                     placeholder="cliente@mail.com"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
               </div>
 
               <!-- Cancha -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Cancha</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cancha</label>
                 <div class="relative">
                   <select
                     v-model="form.courtId"
-                    class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                    class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   >
                     <option v-for="c in courts" :key="c._id" :value="c._id">{{ c.nombre }} · {{ sportLabel(c.tipo) }}</option>
                   </select>
-                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                 </div>
               </div>
 
               <!-- Fecha -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Fecha</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Fecha</label>
                 <input
                   v-model="form.fecha"
                   type="date"
-                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
-                <p v-if="openRange" class="mt-2.5 text-xs text-neutral-400">
+                <p v-if="openRange" class="mt-2.5 text-xs text-stone-400">
                   Atención: {{ minutesToTime(openRange.startMin) }} a {{ minutesToTime(openRange.endMin) }}
                 </p>
               </div>
@@ -104,42 +104,42 @@
               <!-- Horario -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Desde</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Desde</label>
                   <div class="relative">
                     <select
                       v-model="form.horaInicio"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                     >
                       <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
                     </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                   </div>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Hasta</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Hasta</label>
                   <div class="relative">
                     <select
                       v-model="form.horaFin"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                     >
                       <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
                     </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                   </div>
                 </div>
               </div>
 
               <!-- Estado -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Estado</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Estado</label>
                 <div class="grid grid-cols-3 gap-2">
                   <button
                     v-for="opt in estadoOptions"
                     :key="opt.value"
                     class="rounded-full border px-2 py-2 text-xs font-medium transition-colors cursor-pointer"
                     :class="form.estado === opt.value
-                      ? 'border-primitive-dark-500 bg-primitive-dark-500 text-white'
-                      : 'border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+                      ? 'border-brand-purple-500 bg-brand-purple-500 text-white'
+                      : 'border-black/[0.08] bg-white text-stone-600 hover:bg-stone-50'"
                     @click="form.estado = opt.value"
                   >
                     {{ opt.label }}
@@ -150,23 +150,23 @@
               <!-- Precio -->
               <div>
                 <div class="mb-1.5 flex items-center justify-between">
-                  <label class="text-xs font-semibold tracking-wider text-neutral-400 uppercase">Precio</label>
+                  <label class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Precio</label>
                   <button
                     v-if="suggested != null && suggested !== form.precioFinal"
-                    class="text-xs font-medium text-primitive-orange-500 transition-colors hover:text-primitive-orange-600 cursor-pointer"
+                    class="text-xs font-medium text-brand-green-500 transition-colors hover:text-brand-green-600 cursor-pointer"
                     @click="applySuggested"
                   >
                     Usar sugerido: {{ formatCurrency(suggested, currency) }}
                   </button>
                 </div>
                 <div class="relative">
-                  <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-neutral-400">$</span>
+                  <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-stone-400">$</span>
                   <input
                     v-model.number="form.precioFinal"
                     type="number"
                     min="0"
                     step="500"
-                    class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-right text-sm font-medium font-secondary text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                    class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-right text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                     @input="priceTouched = true"
                   />
                 </div>
@@ -174,12 +174,12 @@
 
               <!-- Notas -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Notas</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Notas</label>
                 <textarea
                   v-model="form.notas"
                   rows="2"
                   placeholder="Observaciones (opcional)"
-                  class="w-full resize-none rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                  class="w-full resize-none rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 ></textarea>
               </div>
             </div>
@@ -199,13 +199,13 @@
             <div v-else />
             <div class="flex items-center gap-3">
               <button
-                class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                 @click="emit('close')"
               >
                 Cerrar
               </button>
               <button
-                class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                 :disabled="saving"
                 @click="handleSave"
               >

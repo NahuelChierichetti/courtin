@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="mb-6 flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Usuarios</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <h1 class="text-2xl font-bold text-stone-900">Usuarios</h1>
+        <p class="mt-1 text-sm text-stone-500">
           {{ stats.total }} usuarios registrados
         </p>
       </div>
@@ -20,25 +20,25 @@
     <!-- Filters -->
     <div class="mb-6 flex flex-wrap items-center gap-4">
       <div class="relative">
-        <i class="icon-[material-symbols--search] absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
+        <i class="icon-[material-symbols--search] absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400"></i>
         <input
           v-model="search"
           type="text"
           placeholder="Buscar por nombre o email"
-          class="h-10 w-80 rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-700 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-300 focus:ring-2 focus:ring-primitive-orange-100"
+          class="h-10 w-80 rounded-lg border border-stone-200 bg-white pl-9 pr-4 text-sm text-stone-700 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-300 focus:ring-2 focus:ring-brand-green-100"
         />
       </div>
 
       <!-- Role filter -->
-      <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+      <div class="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1">
         <button
           v-for="f in roleFilters"
           :key="f.value"
           class="rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activeRole === f.value
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-600 hover:bg-slate-50'
+              ? 'bg-stone-900 text-white'
+              : 'text-stone-600 hover:bg-stone-50'
           "
           @click="activeRole = f.value"
         >
@@ -50,39 +50,39 @@
       <div v-if="allClubs.length > 0" class="relative">
         <select
           v-model="activeClubId"
-          class="h-10 appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-8 text-xs font-medium text-slate-600 outline-none cursor-pointer"
+          class="h-10 appearance-none rounded-lg border border-stone-200 bg-white pl-3 pr-8 text-xs font-medium text-stone-600 outline-none cursor-pointer"
         >
           <option :value="null">Todos los complejos</option>
           <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
         </select>
-        <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[10px] text-neutral-400"></i>
+        <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[10px] text-stone-400"></i>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="rounded-xl border border-slate-200 bg-white">
-      <div class="grid items-center gap-4 border-b border-slate-100 px-6 py-3" style="grid-template-columns: 2fr 2fr 1.5fr 1fr 40px">
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Usuario</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Email</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Complejos</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Estado</span>
+    <div class="rounded-xl border border-stone-200 bg-white">
+      <div class="grid items-center gap-4 border-b border-stone-100 px-6 py-3" style="grid-template-columns: 2fr 2fr 1.5fr 1fr 40px">
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Usuario</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Email</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Complejos</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Estado</span>
         <span></span>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-16">
-        <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i>
+        <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i>
       </div>
 
       <div v-else-if="users.length === 0" class="py-16 text-center">
-        <i class="icon-[material-symbols--group] text-4xl text-slate-200"></i>
-        <p class="mt-3 text-sm text-neutral-400">No se encontraron usuarios</p>
+        <i class="icon-[material-symbols--group] text-4xl text-stone-200"></i>
+        <p class="mt-3 text-sm text-stone-400">No se encontraron usuarios</p>
       </div>
 
       <div
         v-else
         v-for="user in users"
         :key="user._id"
-        class="group grid items-center gap-4 border-b border-slate-50 px-6 py-4 transition-colors hover:bg-slate-50/50 last:border-0" style="grid-template-columns: 2fr 2fr 1.5fr 1fr 40px"
+        class="group grid items-center gap-4 border-b border-stone-50 px-6 py-4 transition-colors hover:bg-stone-50/50 last:border-0" style="grid-template-columns: 2fr 2fr 1.5fr 1fr 40px"
       >
         <!-- Name -->
         <div class="flex items-center gap-3">
@@ -93,34 +93,34 @@
             {{ initials(user.nombre) }}
           </div>
           <div class="min-w-0">
-            <p class="truncate text-sm font-semibold text-slate-900">{{ user.nombre }}</p>
-            <p v-if="user.globalRole === 'superadmin'" class="text-[10px] font-semibold uppercase tracking-wider text-primitive-orange-500">Superadmin</p>
+            <p class="truncate text-sm font-semibold text-stone-900">{{ user.nombre }}</p>
+            <p v-if="user.globalRole === 'superadmin'" class="text-[10px] font-semibold uppercase tracking-wider text-brand-green-500">Superadmin</p>
           </div>
         </div>
 
         <!-- Email -->
-        <span class="truncate text-sm text-slate-500">{{ user.email }}</span>
+        <span class="truncate text-sm text-stone-500">{{ user.email }}</span>
 
         <!-- Clubs -->
         <div class="flex flex-wrap gap-1">
           <span
             v-for="m in user.memberships.filter(mb => mb.estado === 'activo')"
             :key="m._id"
-            class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600"
+            class="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600"
           >
             {{ m.club?.nombre }}
-            <span class="text-[10px] text-neutral-400">· {{ roleLabel(m.role) }}</span>
+            <span class="text-[10px] text-stone-400">· {{ roleLabel(m.role) }}</span>
           </span>
-          <span v-if="user.memberships.filter(mb => mb.estado === 'activo').length === 0" class="text-xs text-neutral-400">Sin complejo</span>
+          <span v-if="user.memberships.filter(mb => mb.estado === 'activo').length === 0" class="text-xs text-stone-400">Sin complejo</span>
         </div>
 
         <!-- Estado -->
         <div>
           <span
             class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-            :class="user.estado === 'activo' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'"
+            :class="user.estado === 'activo' ? 'bg-success-50 text-success-700' : 'bg-stone-100 text-stone-600'"
           >
-            <span class="h-1.5 w-1.5 rounded-full" :class="user.estado === 'activo' ? 'bg-green-500' : 'bg-slate-400'"></span>
+            <span class="h-1.5 w-1.5 rounded-full" :class="user.estado === 'activo' ? 'bg-success-500' : 'bg-stone-400'"></span>
             {{ user.estado === 'activo' ? 'Activo' : 'Inactivo' }}
           </span>
         </div>
@@ -128,7 +128,7 @@
         <!-- Actions -->
         <div class="relative flex justify-end">
           <button
-            class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 cursor-pointer"
+            class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 opacity-0 transition-all hover:bg-stone-100 hover:text-stone-600 group-hover:opacity-100 cursor-pointer"
             @click.stop="openDetailDrawer(user)"
           >
             <i class="icon-[material-symbols--chevron-right] text-sm"></i>
@@ -149,23 +149,23 @@
 
           <div class="relative flex w-full max-w-lg flex-col bg-white shadow-2xl">
             <!-- Header -->
-            <div class="flex items-center gap-4 border-b border-slate-200 px-6 py-5">
+            <div class="flex items-center gap-4 border-b border-stone-200 px-6 py-5">
               <div
                 class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                :class="selectedUser ? avatarColor(selectedUser._id) : 'bg-primitive-orange-500'"
+                :class="selectedUser ? avatarColor(selectedUser._id) : 'bg-brand-green-500'"
               >
                 {{ selectedUser ? initials(selectedUser.nombre) : '+' }}
               </div>
               <div class="min-w-0 flex-1">
-                <h2 class="text-lg font-semibold text-slate-900">
+                <h2 class="text-lg font-semibold text-stone-900">
                   {{ drawerMode === 'create' ? 'Nuevo usuario' : form.nombre || 'Usuario' }}
                 </h2>
-                <p class="text-sm text-neutral-400">
+                <p class="text-sm text-stone-400">
                   {{ drawerMode === 'create' ? 'Crear cuenta y asignar a un complejo' : form.email }}
                 </p>
               </div>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer"
                 @click="closeDrawer"
               >
                 <i class="icon-[material-symbols--close] text-sm"></i>
@@ -179,25 +179,25 @@
                 <!-- Actions -->
                 <div class="flex flex-col gap-2">
                   <button
-                    class="flex w-full items-center gap-3 rounded-full border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-stone-200 px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                     @click="drawerMode = 'edit'"
                   >
-                    <i class="icon-[material-symbols--edit] text-sm text-neutral-400"></i>
+                    <i class="icon-[material-symbols--edit] text-sm text-stone-400"></i>
                     Editar usuario
                   </button>
                   <button
-                    class="flex w-full items-center gap-3 rounded-full border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-stone-200 px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                     @click="drawerMode = 'assign'"
                   >
-                    <i class="icon-[material-symbols--link] text-sm text-neutral-400"></i>
+                    <i class="icon-[material-symbols--link] text-sm text-stone-400"></i>
                     Asignar a complejo
                   </button>
                   <button
                     class="flex w-full items-center gap-3 rounded-full border px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer"
                     :class="
                       selectedUser?.estado === 'activo'
-                        ? 'border-red-200 text-red-600 hover:bg-red-50'
-                        : 'border-green-200 text-green-700 hover:bg-green-50'
+                        ? 'border-error-200 text-error-600 hover:bg-error-50'
+                        : 'border-success-200 text-success-700 hover:bg-success-50'
                     "
                     @click="toggleUserStatus"
                   >
@@ -208,52 +208,52 @@
 
                 <!-- Info -->
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Información</h3>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-400">Información</h3>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs text-neutral-400">Nombre</p>
-                      <p class="text-sm font-medium text-slate-700">{{ selectedUser?.nombre }}</p>
+                      <p class="text-xs text-stone-400">Nombre</p>
+                      <p class="text-sm font-medium text-stone-700">{{ selectedUser?.nombre }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Email</p>
-                      <p class="text-sm font-medium text-slate-700">{{ selectedUser?.email }}</p>
+                      <p class="text-xs text-stone-400">Email</p>
+                      <p class="text-sm font-medium text-stone-700">{{ selectedUser?.email }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Estado</p>
+                      <p class="text-xs text-stone-400">Estado</p>
                       <span
                         class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-                        :class="selectedUser?.estado === 'activo' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'"
+                        :class="selectedUser?.estado === 'activo' ? 'bg-success-50 text-success-700' : 'bg-stone-100 text-stone-600'"
                       >
-                        <span class="h-1.5 w-1.5 rounded-full" :class="selectedUser?.estado === 'activo' ? 'bg-green-500' : 'bg-slate-400'"></span>
+                        <span class="h-1.5 w-1.5 rounded-full" :class="selectedUser?.estado === 'activo' ? 'bg-success-500' : 'bg-stone-400'"></span>
                         {{ selectedUser?.estado === 'activo' ? 'Activo' : 'Inactivo' }}
                       </span>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Registrado</p>
-                      <p class="text-sm font-medium text-slate-700">{{ formatDate(selectedUser?.createdAt) }}</p>
+                      <p class="text-xs text-stone-400">Registrado</p>
+                      <p class="text-sm font-medium text-stone-700">{{ formatDate(selectedUser?.createdAt) }}</p>
                     </div>
                   </div>
                 </div>
 
                 <!-- Memberships -->
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Complejos asignados</h3>
-                  <div v-if="selectedUser?.memberships?.length === 0" class="rounded-lg border border-dashed border-slate-200 py-6 text-center">
-                    <p class="text-sm text-neutral-400">Sin complejos asignados</p>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-400">Complejos asignados</h3>
+                  <div v-if="selectedUser?.memberships?.length === 0" class="rounded-lg border border-dashed border-stone-200 py-6 text-center">
+                    <p class="text-sm text-stone-400">Sin complejos asignados</p>
                   </div>
                   <div v-else class="space-y-2">
                     <div
                       v-for="m in selectedUser?.memberships"
                       :key="m._id"
-                      class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3"
+                      class="flex items-center justify-between rounded-lg border border-stone-200 px-4 py-3"
                     >
                       <div>
-                        <p class="text-sm font-medium text-slate-700">{{ m.club?.nombre }}</p>
-                        <p class="text-xs text-neutral-400">{{ roleLabel(m.role) }} · {{ m.estado === 'activo' ? 'Activo' : 'Inactivo' }}</p>
+                        <p class="text-sm font-medium text-stone-700">{{ m.club?.nombre }}</p>
+                        <p class="text-xs text-stone-400">{{ roleLabel(m.role) }} · {{ m.estado === 'activo' ? 'Activo' : 'Inactivo' }}</p>
                       </div>
                       <button
                         v-if="m.estado === 'activo'"
-                        class="text-xs font-medium text-red-500 transition-colors hover:text-red-600 cursor-pointer"
+                        class="text-xs font-medium text-error-500 transition-colors hover:text-error-600 cursor-pointer"
                         @click="handleRemoveFromClub(m._id)"
                       >
                         Remover
@@ -266,44 +266,44 @@
               <!-- Create mode -->
               <div v-else-if="drawerMode === 'create'" class="space-y-6">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre completo</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Nombre completo</label>
                   <input
                     v-model="form.nombre"
                     type="text"
                     placeholder="Juan Pérez"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Email</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email</label>
                   <input
                     v-model="form.email"
                     type="email"
                     placeholder="juan@ejemplo.com"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Contraseña</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Contraseña</label>
                   <input
                     v-model="form.password"
                     :type="showPassword ? 'text' : 'password'"
                     placeholder="Mínimo 6 caracteres"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                   <div class="!mt-2 flex items-center justify-between">
-                    <p class="text-[11px] text-neutral-400">El usuario podrá cambiarla después</p>
+                    <p class="text-[11px] text-stone-400">El usuario podrá cambiarla después</p>
                     <div class="flex gap-2">
                       <button
-                        class="text-[11px] font-medium text-neutral-400 transition-colors hover:text-slate-600 cursor-pointer"
+                        class="text-[11px] font-medium text-stone-400 transition-colors hover:text-stone-600 cursor-pointer"
                         @click="showPassword = !showPassword"
                       >
                         {{ showPassword ? 'Ocultar' : 'Mostrar' }}
                       </button>
                       <button
-                        class="text-[11px] font-medium text-primitive-orange-500 transition-colors hover:text-primitive-orange-600 cursor-pointer"
+                        class="text-[11px] font-medium text-brand-green-500 transition-colors hover:text-brand-green-600 cursor-pointer"
                         @click="generatePassword"
                       >
                         Generar
@@ -312,25 +312,25 @@
                   </div>
                 </div>
 
-                <div class="border-t border-slate-100 pt-6">
-                  <h3 class="mb-4 text-xs font-semibold uppercase tracking-wider text-neutral-400">Asignar a complejo (opcional)</h3>
+                <div class="border-t border-stone-100 pt-6">
+                  <h3 class="mb-4 text-xs font-semibold uppercase tracking-wider text-stone-400">Asignar a complejo (opcional)</h3>
 
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Complejo</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Complejo</label>
                     <div class="relative">
                       <select
                         v-model="form.clubId"
-                        class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                        class="w-full appearance-none rounded-lg border border-stone-300 bg-white px-3 py-2.5 pr-8 text-sm text-stone-900 outline-none transition-colors focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                       >
                         <option :value="null">Sin asignar</option>
                         <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
                       </select>
-                      <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                      <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                     </div>
                   </div>
 
                   <div v-if="form.clubId" class="mt-4">
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Rol en el complejo</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Rol en el complejo</label>
                     <div class="flex gap-2">
                       <button
                         v-for="r in clubRoleOptions"
@@ -338,15 +338,15 @@
                         class="rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
                         :class="
                           form.role === r.value
-                            ? 'border-primitive-orange-300 bg-primitive-orange-50 text-primitive-orange-700'
-                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            ? 'border-brand-green-300 bg-brand-green-50 text-brand-green-700'
+                            : 'border-stone-200 text-stone-600 hover:bg-stone-50'
                         "
                         @click="form.role = r.value"
                       >
                         {{ r.label }}
                       </button>
                     </div>
-                    <p class="!mt-2 text-[11px] text-neutral-400">{{ roleDescription(form.role) }}</p>
+                    <p class="!mt-2 text-[11px] text-stone-400">{{ roleDescription(form.role) }}</p>
                   </div>
                 </div>
               </div>
@@ -354,40 +354,40 @@
               <!-- Edit mode -->
               <div v-else-if="drawerMode === 'edit'" class="space-y-6">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre completo</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Nombre completo</label>
                   <input
                     v-model="form.nombre"
                     type="text"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Email</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email</label>
                   <input
                     v-model="form.email"
                     type="email"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nueva contraseña</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Nueva contraseña</label>
                   <input
                     v-model="form.password"
                     :type="showPassword ? 'text' : 'password'"
                     placeholder="Dejar vacío para no cambiar"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                   <div class="!mt-2 flex items-center justify-end gap-2">
                     <button
-                      class="text-[11px] font-medium text-neutral-400 transition-colors hover:text-slate-600 cursor-pointer"
+                      class="text-[11px] font-medium text-stone-400 transition-colors hover:text-stone-600 cursor-pointer"
                       @click="showPassword = !showPassword"
                     >
                       {{ showPassword ? 'Ocultar' : 'Mostrar' }}
                     </button>
                     <button
-                      class="text-[11px] font-medium text-primitive-orange-500 transition-colors hover:text-primitive-orange-600 cursor-pointer"
+                      class="text-[11px] font-medium text-brand-green-500 transition-colors hover:text-brand-green-600 cursor-pointer"
                       @click="generatePassword"
                     >
                       Generar
@@ -398,26 +398,26 @@
 
               <!-- Assign mode -->
               <div v-else-if="drawerMode === 'assign'" class="space-y-6">
-                <p class="text-sm text-slate-500">
-                  Asignar <span class="font-medium text-slate-700">{{ selectedUser?.nombre }}</span> a un complejo con un rol específico.
+                <p class="text-sm text-stone-500">
+                  Asignar <span class="font-medium text-stone-700">{{ selectedUser?.nombre }}</span> a un complejo con un rol específico.
                 </p>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Complejo</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Complejo</label>
                   <div class="relative">
                     <select
                       v-model="assignClubId"
-                      class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-8 text-sm text-slate-900 outline-none transition-colors focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                      class="w-full appearance-none rounded-lg border border-stone-300 bg-white px-3 py-2.5 pr-8 text-sm text-stone-900 outline-none transition-colors focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                     >
                       <option :value="null" disabled>Seleccionar complejo</option>
                       <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
                     </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                   </div>
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Rol</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Rol</label>
                   <div class="flex gap-2">
                     <button
                       v-for="r in clubRoleOptions"
@@ -425,29 +425,29 @@
                       class="rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
                       :class="
                         assignRole === r.value
-                          ? 'border-primitive-orange-300 bg-primitive-orange-50 text-primitive-orange-700'
-                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                          ? 'border-brand-green-300 bg-brand-green-50 text-brand-green-700'
+                          : 'border-stone-200 text-stone-600 hover:bg-stone-50'
                       "
                       @click="assignRole = r.value"
                     >
                       {{ r.label }}
                     </button>
                   </div>
-                  <p class="!mt-2 text-[11px] text-neutral-400">{{ roleDescription(assignRole) }}</p>
+                  <p class="!mt-2 text-[11px] text-stone-400">{{ roleDescription(assignRole) }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Footer -->
-            <div v-if="drawerMode !== 'detail'" class="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
+            <div v-if="drawerMode !== 'detail'" class="flex items-center justify-end gap-3 border-t border-stone-200 px-6 py-4">
               <button
-                class="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                class="rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                 @click="drawerMode === 'assign' || drawerMode === 'edit' ? drawerMode = 'detail' : closeDrawer()"
               >
                 {{ drawerMode === 'assign' || drawerMode === 'edit' ? 'Volver' : 'Cancelar' }}
               </button>
               <button
-                class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="saving || !canSave"
                 @click="handleSave"
               >
@@ -673,14 +673,12 @@ const initials = (nombre) => {
 }
 
 const avatarColors = [
-  'bg-blue-500',
-  'bg-purple-500',
-  'bg-emerald-500',
-  'bg-pink-500',
-  'bg-amber-500',
-  'bg-cyan-500',
-  'bg-indigo-500',
-  'bg-rose-500',
+  'bg-brand-green-500',
+  'bg-brand-purple-500',
+  'bg-brand-lime-800',
+  'bg-brand-sand-900',
+  'bg-brand-green-700',
+  'bg-brand-purple-700',
 ]
 
 const avatarColor = (id) => {

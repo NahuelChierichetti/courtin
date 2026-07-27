@@ -63,27 +63,27 @@ const remove = () => emit('update:modelValue', '')
 <template>
   <div>
     <div
-      class="group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed bg-slate-50 transition-colors"
-      :class="[frameClass, dragOver ? 'border-primitive-orange-400 bg-primitive-orange-50' : 'border-black/[0.14] hover:border-primitive-orange-300']"
+      class="group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed bg-stone-50 transition-colors"
+      :class="[frameClass, dragOver ? 'border-brand-green-400 bg-brand-green-50' : 'border-black/[0.14] hover:border-brand-green-300']"
       @click="pick"
       @dragover.prevent="dragOver = true"
       @dragleave.prevent="dragOver = false"
       @drop.prevent="onDrop"
     >
       <img v-if="modelValue" :src="modelValue" alt="" class="h-full w-full object-cover" />
-      <div v-else class="flex flex-col items-center gap-1 px-2 text-center text-slate-400">
+      <div v-else class="flex flex-col items-center gap-1 px-2 text-center text-stone-400">
         <i class="icon-[material-symbols--add-photo-alternate] text-2xl"></i>
         <span class="text-[11px] leading-tight">{{ placeholder }}</span>
       </div>
 
       <!-- Subiendo -->
       <div v-if="uploading" class="absolute inset-0 flex items-center justify-center bg-white/70">
-        <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-primitive-orange-500"></i>
+        <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-brand-green-500"></i>
       </div>
 
       <!-- Acciones al hover (con imagen) -->
       <div v-else-if="modelValue" class="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-        <span class="rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700">Cambiar</span>
+        <span class="rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-stone-700">Cambiar</span>
         <button class="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-error-500 transition-colors hover:bg-white" @click.stop="remove">
           <i class="icon-[material-symbols--delete] text-sm"></i>
         </button>

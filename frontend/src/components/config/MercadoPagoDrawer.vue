@@ -11,10 +11,10 @@
               <i class="icon-[material-symbols--account-balance-wallet] text-lg"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-primitive-dark-500">Configurar MercadoPago</h2>
-              <p class="text-sm text-neutral-400">Cobrá las reservas online</p>
+              <h2 class="text-lg font-semibold text-ink-500">Configurar MercadoPago</h2>
+              <p class="text-sm text-stone-400">Cobrá las reservas online</p>
             </div>
-            <button class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer" @click="emit('close')">
+            <button class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer" @click="emit('close')">
               <i class="icon-[material-symbols--close] text-sm"></i>
             </button>
           </div>
@@ -28,13 +28,13 @@
 
             <template v-if="!conectado">
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Entorno</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Entorno</label>
                 <div class="flex overflow-hidden rounded-full border border-black/[0.08]">
                   <button
                     v-for="m in modos"
                     :key="m.value"
                     class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                    :class="modo === m.value ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                    :class="modo === m.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                     @click="modo = m.value"
                   >
                     {{ m.label }}
@@ -43,24 +43,24 @@
               </div>
 
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Public Key</label>
-                <input v-model="publicKey" type="text" placeholder="APP_USR-xxxxxxxx-xxxx-xxxx" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100" />
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Public Key</label>
+                <input v-model="publicKey" type="text" placeholder="APP_USR-xxxxxxxx-xxxx-xxxx" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
               </div>
 
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Access Token</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Access Token</label>
                 <div class="relative">
-                  <input v-model="accessToken" :type="showToken ? 'text' : 'password'" placeholder="••••••••••••••••" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 pr-10 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100" />
-                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer" @click="showToken = !showToken">
+                  <input v-model="accessToken" :type="showToken ? 'text' : 'password'" placeholder="••••••••••••••••" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 pr-10 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
+                  <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer" @click="showToken = !showToken">
                     <i :class="showToken ? 'icon-[material-symbols--visibility-off]' : 'icon-[material-symbols--visibility]'"></i>
                   </button>
                 </div>
-                <p class="mt-2.5 text-xs text-neutral-400">
+                <p class="mt-2.5 text-xs text-stone-400">
                   Las encontrás en tu cuenta de MercadoPago → Desarrolladores → Credenciales.
                 </p>
               </div>
 
-              <div class="rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-500">
+              <div class="rounded-xl bg-stone-50 px-4 py-3 text-xs text-stone-500">
                 Con la integración activa, los pagos de las reservas online caen directo en tu cuenta de MercadoPago y se registran automáticamente en el Control de caja.
               </div>
             </template>
@@ -70,9 +70,9 @@
               <div class="flex h-16 w-16 items-center justify-center rounded-full bg-success-50">
                 <i class="icon-[material-symbols--check] text-3xl text-success-500"></i>
               </div>
-              <h3 class="mt-4 text-lg font-bold text-primitive-dark-500">Cuenta conectada</h3>
-              <p class="mt-1 text-sm text-slate-500">MercadoPago quedó vinculado (demo). Entorno: {{ modo === 'prod' ? 'Producción' : 'Sandbox' }}.</p>
-              <button class="mt-5 rounded-full border border-black/[0.08] px-4 py-2 text-sm font-medium text-error-500 transition-colors hover:bg-red-50 cursor-pointer" @click="conectado = false">
+              <h3 class="mt-4 text-lg font-bold text-ink-500">Cuenta conectada</h3>
+              <p class="mt-1 text-sm text-stone-500">MercadoPago quedó vinculado (demo). Entorno: {{ modo === 'prod' ? 'Producción' : 'Sandbox' }}.</p>
+              <button class="mt-5 rounded-full border border-black/[0.08] px-4 py-2 text-sm font-medium text-error-500 transition-colors hover:bg-error-50 cursor-pointer" @click="conectado = false">
                 Desvincular
               </button>
             </div>
@@ -80,7 +80,7 @@
 
           <!-- Footer -->
           <div v-if="!conectado" class="flex items-center justify-end gap-3 border-t border-black/[0.06] px-6 py-4">
-            <button class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer" @click="emit('close')">
+            <button class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer" @click="emit('close')">
               Cancelar
             </button>
             <button class="flex items-center gap-2 rounded-full bg-[#009ee3] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:brightness-95 cursor-pointer" @click="conectado = true">

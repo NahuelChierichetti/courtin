@@ -92,42 +92,42 @@ const onUpdated = (updated) => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-primitive-dark-500">Clientes</h1>
-        <p class="mt-1 text-sm text-slate-500">Se registran automáticamente al reservar (identificados por email).</p>
+        <h1 class="text-2xl font-bold text-ink-500">Clientes</h1>
+        <p class="mt-1 text-sm text-stone-500">Se registran automáticamente al reservar (identificados por email).</p>
       </div>
     </div>
 
     <!-- No club -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
-      <p class="!mt-2 text-sm text-slate-500">Seleccioná un club desde el encabezado para ver los clientes.</p>
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <p class="!mt-2 text-sm text-stone-500">Seleccioná un club desde el encabezado para ver los clientes.</p>
     </div>
 
     <template v-else>
       <!-- Tiles -->
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primitive-orange-50 text-primitive-orange-500"><i class="icon-[material-symbols--group] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-slate-500">Total clientes</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-primitive-dark-500">{{ resumen.total }}</p>
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--group] text-xl"></i></span>
+          <p class="mt-4 text-sm font-medium text-stone-500">Total clientes</p>
+          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.total }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
           <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-success-50 text-success-600"><i class="icon-[material-symbols--person-add] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-slate-500">Nuevos este mes</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-primitive-dark-500">{{ nuevosMes }}</p>
+          <p class="mt-4 text-sm font-medium text-stone-500">Nuevos este mes</p>
+          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ nuevosMes }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primitive-blue-50 text-primitive-blue-500"><i class="icon-[material-symbols--repeat] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-slate-500">Recurrentes</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-primitive-dark-500">{{ resumen.recurrentes }}</p>
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--repeat] text-xl"></i></span>
+          <p class="mt-4 text-sm font-medium text-stone-500">Recurrentes</p>
+          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.recurrentes }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primitive-orange-50 text-primitive-orange-500"><i class="icon-[material-symbols--calendar-month] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-slate-500">Reservas totales</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-primitive-dark-500">{{ resumen.reservasTotales }}</p>
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--calendar-month] text-xl"></i></span>
+          <p class="mt-4 text-sm font-medium text-stone-500">Reservas totales</p>
+          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.reservasTotales }}</p>
         </div>
       </div>
 
@@ -135,12 +135,12 @@ const onUpdated = (updated) => {
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-6 py-4">
           <div class="relative w-full max-w-xs">
-            <i class="icon-[material-symbols--search] absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
+            <i class="icon-[material-symbols--search] absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-stone-400"></i>
             <input
               v-model="search"
               type="text"
               placeholder="Buscar por nombre, email o teléfono"
-              class="h-10 w-full rounded-full border border-black/[0.08] bg-white pl-10 pr-4 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+              class="h-10 w-full rounded-full border border-black/[0.08] bg-white pl-10 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
             />
           </div>
           <div class="flex overflow-hidden rounded-full border border-black/[0.06]">
@@ -148,7 +148,7 @@ const onUpdated = (updated) => {
               v-for="s in sortChips"
               :key="s.value"
               class="px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer"
-              :class="sortBy === s.value ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+              :class="sortBy === s.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
               @click="sortBy = s.value"
             >
               {{ s.label }}
@@ -158,22 +158,22 @@ const onUpdated = (updated) => {
 
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center py-16">
-          <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i>
+          <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i>
         </div>
 
         <!-- Empty -->
         <div v-else-if="!visibleClients.length" class="flex flex-col items-center justify-center py-16 text-center">
-          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-            <i class="icon-[material-symbols--group] text-xl text-neutral-400"></i>
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
+            <i class="icon-[material-symbols--group] text-xl text-stone-400"></i>
           </div>
-          <h3 class="mt-4 text-sm font-semibold text-primitive-dark-500">{{ search ? 'Sin resultados' : 'Todavía no hay clientes' }}</h3>
-          <p class="mt-1 text-xs text-slate-500">{{ search ? 'Probá con otro término.' : 'Se registran automáticamente cuando alguien reserva.' }}</p>
+          <h3 class="mt-4 text-sm font-semibold text-ink-500">{{ search ? 'Sin resultados' : 'Todavía no hay clientes' }}</h3>
+          <p class="mt-1 text-xs text-stone-500">{{ search ? 'Probá con otro término.' : 'Se registran automáticamente cuando alguien reserva.' }}</p>
         </div>
 
         <!-- Rows -->
         <div v-else>
           <!-- Encabezado (desktop) -->
-          <div class="hidden grid-cols-[1fr_110px_130px_130px] gap-4 border-b border-black/[0.05] px-6 py-2.5 text-xs font-semibold tracking-wide text-neutral-400 uppercase sm:grid">
+          <div class="hidden grid-cols-[1fr_110px_130px_130px] gap-4 border-b border-black/[0.05] px-6 py-2.5 text-xs font-semibold tracking-wide text-stone-400 uppercase sm:grid">
             <span>Cliente</span>
             <span class="text-center">Reservas</span>
             <span class="text-right">Total gastado</span>
@@ -183,20 +183,20 @@ const onUpdated = (updated) => {
             <button
               v-for="c in visibleClients"
               :key="c._id"
-              class="grid w-full grid-cols-[1fr_auto] items-center gap-4 px-6 py-3.5 text-left transition-colors hover:bg-slate-50 cursor-pointer sm:grid-cols-[1fr_110px_130px_130px]"
+              class="grid w-full grid-cols-[1fr_auto] items-center gap-4 px-6 py-3.5 text-left transition-colors hover:bg-stone-50 cursor-pointer sm:grid-cols-[1fr_110px_130px_130px]"
               @click="openClient(c)"
             >
               <div class="flex min-w-0 items-center gap-3">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primitive-orange-100 text-xs font-bold text-primitive-orange-600">{{ initials(c) }}</span>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-green-100 text-xs font-bold text-brand-green-600">{{ initials(c) }}</span>
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-medium text-primitive-dark-500">{{ c.nombre || 'Sin nombre' }}</p>
-                  <p class="truncate text-xs text-neutral-400">{{ c.email }}</p>
+                  <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre || 'Sin nombre' }}</p>
+                  <p class="truncate text-xs text-stone-400">{{ c.email }}</p>
                 </div>
               </div>
-              <span class="hidden text-center text-sm font-semibold font-secondary text-slate-700 sm:block">{{ c.reservasCount }}</span>
-              <span class="hidden text-right text-sm font-semibold font-secondary text-slate-700 sm:block">{{ money(c.totalGastado) }}</span>
-              <span class="hidden text-right text-xs text-slate-500 sm:block">{{ fmtDate(c.ultimaReserva) }}</span>
-              <i class="icon-[material-symbols--chevron-right] text-slate-300 sm:hidden"></i>
+              <span class="hidden text-center text-sm font-semibold font-secondary text-stone-700 sm:block">{{ c.reservasCount }}</span>
+              <span class="hidden text-right text-sm font-semibold font-secondary text-stone-700 sm:block">{{ money(c.totalGastado) }}</span>
+              <span class="hidden text-right text-xs text-stone-500 sm:block">{{ fmtDate(c.ultimaReserva) }}</span>
+              <i class="icon-[material-symbols--chevron-right] text-stone-300 sm:hidden"></i>
             </button>
           </div>
         </div>
