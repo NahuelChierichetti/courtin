@@ -9,7 +9,7 @@
      #347048  verde    -> color primario: sidebar, acentos, iconos, estados activos
      #B9CF32  amarillo -> acento/CTA: logo, botones primarios (con texto verde oscuro)
      #926699  violeta  -> secundario: botones de jerarquía menor, series de datos
-     #EBE1D8  arena    -> fondo de la app (las tarjetas van en blanco)
+     #F6EDE5  arena    -> fondo de la app (las tarjetas van en blanco)
    El neutro oscuro (`ink`) y las superficies (`surface`) están teñidos en cálido
    para acompañar al arena. No se usa azul ni naranja en la marca.
 --------------------------------------------------------------------------- */
@@ -53,7 +53,7 @@
   --color-brand-sand-200: #f4ede6;
   --color-brand-sand-300: #f0e7de;
   --color-brand-sand-400: #ede4da;
-  --color-brand-sand-500: #ebe1d8;
+  --color-brand-sand-500: #F6EDE5;
   --color-brand-sand-600: #d4c2b2;
   --color-brand-sand-700: #b8a08b;
   --color-brand-sand-800: #8f7a67;
@@ -75,7 +75,7 @@
   --color-surface-200: #faf8f4;
   --color-surface-300: #f7f3ed;
   --color-surface-400: #f2ece4;
-  --color-surface-500: #ebe1d8;
+  --color-surface-500: #F6EDE5;
   --color-surface-600: #d9cbbc;
   --color-surface-700: #bda992;
 
