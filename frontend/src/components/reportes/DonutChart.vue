@@ -66,8 +66,8 @@ const center = computed(() => {
         />
       </svg>
       <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <p class="text-xl font-bold font-secondary text-primitive-dark-500">{{ fmtCenter(center.value) }}</p>
-        <p class="text-xs text-neutral-400">{{ center.label }}</p>
+        <p class="text-xl font-bold font-secondary text-ink-500">{{ fmtCenter(center.value) }}</p>
+        <p class="text-xs text-stone-400">{{ center.label }}</p>
       </div>
     </div>
 
@@ -81,9 +81,9 @@ const center = computed(() => {
         @mouseleave="active = -1"
       >
         <span class="h-3 w-3 shrink-0 rounded-[4px]" :style="{ background: a.color }"></span>
-        <span class="flex-1 text-sm text-slate-600">{{ a.label }}</span>
-        <span class="text-sm font-semibold font-secondary text-slate-700">{{ format(a.value) }}</span>
-        <span class="w-10 text-right text-xs text-neutral-400">{{ a.pct }}%</span>
+        <span class="flex-1 text-sm text-stone-600">{{ a.label }}</span>
+        <span class="text-sm font-semibold font-secondary text-stone-700">{{ format(a.value) }}</span>
+        <span class="w-10 text-right text-xs text-stone-400">{{ a.pct }}%</span>
       </div>
     </div>
   </div>

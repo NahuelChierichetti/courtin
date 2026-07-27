@@ -13,11 +13,11 @@ const unreadCount = ref(0)
 const loading = ref(false)
 
 const TIPO_META = {
-  reserva: { icon: 'icon-[material-symbols--event-available]', color: 'text-primitive-blue-500 bg-primitive-blue-50' },
-  cancelacion: { icon: 'icon-[material-symbols--cancel]', color: 'text-primitive-orange-500 bg-primitive-orange-50' },
-  cliente: { icon: 'icon-[material-symbols--person-add]', color: 'text-purple-500 bg-purple-50' },
+  reserva: { icon: 'icon-[material-symbols--event-available]', color: 'text-brand-purple-500 bg-brand-purple-50' },
+  cancelacion: { icon: 'icon-[material-symbols--cancel]', color: 'text-brand-green-500 bg-brand-green-50' },
+  cliente: { icon: 'icon-[material-symbols--person-add]', color: 'text-brand-purple-500 bg-brand-purple-50' },
   pago: { icon: 'icon-[material-symbols--payments]', color: 'text-success-500 bg-success-50' },
-  sistema: { icon: 'icon-[material-symbols--info]', color: 'text-slate-500 bg-slate-100' },
+  sistema: { icon: 'icon-[material-symbols--info]', color: 'text-stone-500 bg-stone-100' },
 }
 const meta = (t) => TIPO_META[t] || TIPO_META.sistema
 
@@ -77,44 +77,44 @@ const markAll = async () => {
   <div class="space-y-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-primitive-dark-500">Notificaciones</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <h1 class="text-2xl font-bold text-ink-500">Notificaciones</h1>
+        <p class="mt-1 text-sm text-stone-500">
           {{ unreadCount ? `${unreadCount} sin leer` : 'Todo al día' }}
         </p>
       </div>
       <button
         v-if="unreadCount"
-        class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer"
+        class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer"
         @click="markAll"
       >
-        <i class="icon-[material-symbols--done-all] text-base text-primitive-orange-500"></i> Marcar todas como leídas
+        <i class="icon-[material-symbols--done-all] text-base text-brand-green-500"></i> Marcar todas como leídas
       </button>
     </div>
 
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
     </div>
 
     <div v-else class="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-      <div v-if="loading" class="flex items-center justify-center py-16"><i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i></div>
+      <div v-if="loading" class="flex items-center justify-center py-16"><i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i></div>
 
       <div v-else-if="!notifications.length" class="flex flex-col items-center justify-center py-16 text-center">
-        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-          <i class="icon-[material-symbols--notifications] text-xl text-neutral-400"></i>
+        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
+          <i class="icon-[material-symbols--notifications] text-xl text-stone-400"></i>
         </div>
-        <h3 class="mt-4 text-sm font-semibold text-primitive-dark-500">Sin notificaciones</h3>
-        <p class="mt-1 text-xs text-slate-500">Acá vas a ver reservas, cancelaciones y nuevos clientes.</p>
+        <h3 class="mt-4 text-sm font-semibold text-ink-500">Sin notificaciones</h3>
+        <p class="mt-1 text-xs text-stone-500">Acá vas a ver reservas, cancelaciones y nuevos clientes.</p>
       </div>
 
       <div v-else class="divide-y divide-black/[0.05]">
         <button
           v-for="n in notifications"
           :key="n._id"
-          class="flex w-full items-start gap-4 px-6 py-4 text-left transition-colors hover:bg-slate-50 cursor-pointer"
-          :class="{ 'bg-primitive-orange-50/40': !n.leida }"
+          class="flex w-full items-start gap-4 px-6 py-4 text-left transition-colors hover:bg-stone-50 cursor-pointer"
+          :class="{ 'bg-brand-green-50/40': !n.leida }"
           @click="markRead(n)"
         >
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" :class="meta(n.tipo).color">
@@ -122,12 +122,12 @@ const markAll = async () => {
           </span>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <p class="text-sm font-semibold text-primitive-dark-500">{{ n.titulo }}</p>
-              <span v-if="!n.leida" class="h-2 w-2 shrink-0 rounded-full bg-primitive-orange-500"></span>
+              <p class="text-sm font-semibold text-ink-500">{{ n.titulo }}</p>
+              <span v-if="!n.leida" class="h-2 w-2 shrink-0 rounded-full bg-brand-green-500"></span>
             </div>
-            <p class="mt-0.5 text-sm text-slate-500">{{ n.mensaje }}</p>
+            <p class="mt-0.5 text-sm text-stone-500">{{ n.mensaje }}</p>
           </div>
-          <span class="shrink-0 text-xs text-neutral-400">{{ hace(n.createdAt) }}</span>
+          <span class="shrink-0 text-xs text-stone-400">{{ hace(n.createdAt) }}</span>
         </button>
       </div>
     </div>

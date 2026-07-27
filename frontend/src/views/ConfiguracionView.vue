@@ -244,7 +244,7 @@ const save = async () => {
 }
 
 const inputBase =
-  'w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100'
+  'w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100'
 </script>
 
 <template>
@@ -252,12 +252,12 @@ const inputBase =
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-primitive-dark-500">Configuración del complejo</h1>
-        <p class="mt-1 text-sm text-slate-500">Organizá los datos, el link público, la landing y los pagos.</p>
+        <h1 class="text-2xl font-bold text-ink-500">Configuración del complejo</h1>
+        <p class="mt-1 text-sm text-stone-500">Organizá los datos, el link público, la landing y los pagos.</p>
       </div>
       <button
         v-if="currentClubId && form && activeTab !== 'pagos'"
-        class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+        class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         :disabled="saving || !canSave"
         @click="save"
       >
@@ -268,14 +268,14 @@ const inputBase =
 
     <!-- No club -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
     </div>
 
     <div v-else-if="loading" class="flex items-center justify-center py-24">
-      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-slate-300"></i>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-300"></i>
     </div>
 
     <div v-else-if="form" class="space-y-6">
@@ -285,7 +285,7 @@ const inputBase =
           v-for="t in tabs"
           :key="t.key"
           class="flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
-          :class="activeTab === t.key ? 'bg-primitive-dark-500 text-white' : 'text-slate-600 hover:bg-slate-50'"
+          :class="activeTab === t.key ? 'bg-brand-purple-500 text-white' : 'text-stone-600 hover:bg-stone-50'"
           @click="activeTab = t.key"
         >
           <i :class="t.icon" class="text-base"></i>
@@ -298,59 +298,59 @@ const inputBase =
         <!-- GENERAL -->
         <div v-show="activeTab === 'general'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
           <div class="border-b border-black/[0.06] px-6 py-5">
-            <h2 class="text-base font-semibold text-primitive-dark-500">Datos generales</h2>
-            <p class="mt-0.5 text-sm text-neutral-400">Información de contacto, zona horaria y moneda.</p>
+            <h2 class="text-base font-semibold text-ink-500">Datos generales</h2>
+            <p class="mt-0.5 text-sm text-stone-400">Información de contacto, zona horaria y moneda.</p>
           </div>
           <div class="space-y-5 px-6 py-6">
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Nombre</label>
               <input v-model="form.nombre" type="text" placeholder="Ej: Club Garín Pádel" :class="inputBase" />
             </div>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Teléfono</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Teléfono</label>
                 <input v-model="form.telefono" type="text" placeholder="Ej: +54 11 5555-5555" :class="inputBase" />
               </div>
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Dirección</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Dirección</label>
                 <input v-model="form.direccion" type="text" placeholder="Ej: Av. Siempreviva 742" :class="inputBase" />
               </div>
             </div>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Ciudad</label>
                 <div class="relative">
                   <select v-model="form.ciudad" :class="inputBase" class="appearance-none bg-white pr-8">
                     <option value="">Seleccionar ciudad</option>
                     <option v-for="c in ciudadOptions" :key="c" :value="c">{{ c }}</option>
                   </select>
-                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                 </div>
               </div>
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Provincia</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Provincia</label>
                 <input v-model="form.provincia" type="text" :class="inputBase" />
               </div>
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Zona horaria</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Zona horaria</label>
               <div class="relative">
                 <select v-model="form.timezone" :class="inputBase" class="appearance-none bg-white pr-8">
                   <option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
                 </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
               </div>
-              <p class="mt-2.5 text-xs text-neutral-400">Hora local actual: <span class="font-medium text-slate-600">{{ localTimePreview }}</span></p>
+              <p class="mt-2.5 text-xs text-stone-400">Hora local actual: <span class="font-medium text-stone-600">{{ localTimePreview }}</span></p>
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Moneda</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Moneda</label>
               <div class="relative">
                 <select v-model="form.moneda" :class="inputBase" class="appearance-none bg-white pr-8">
                   <option v-for="c in monedaOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
                 </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
               </div>
-              <p class="mt-2.5 text-xs text-neutral-400">Ejemplo de precio: <span class="font-medium text-slate-600">{{ pricePreview }}</span></p>
+              <p class="mt-2.5 text-xs text-stone-400">Ejemplo de precio: <span class="font-medium text-stone-600">{{ pricePreview }}</span></p>
             </div>
           </div>
         </div>
@@ -358,27 +358,27 @@ const inputBase =
         <!-- LINK DE RESERVAS -->
         <div v-show="activeTab === 'link'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
           <div class="border-b border-black/[0.06] px-6 py-5">
-            <h2 class="text-base font-semibold text-primitive-dark-500">Link de reservas</h2>
-            <p class="mt-0.5 text-sm text-neutral-400">Tu dirección pública única. Compartila en tus redes para recibir reservas online.</p>
+            <h2 class="text-base font-semibold text-ink-500">Link de reservas</h2>
+            <p class="mt-0.5 text-sm text-stone-400">Tu dirección pública única. Compartila en tus redes para recibir reservas online.</p>
           </div>
           <div class="space-y-5 px-6 py-6">
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Identificador (slug)</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Identificador (slug)</label>
               <div
                 class="flex items-stretch overflow-hidden rounded-xl border transition-colors"
                 :class="slugStatus === 'taken' || slugStatus === 'invalid' ? 'border-error-300' : slugStatus === 'available' ? 'border-success-300' : 'border-black/[0.08]'"
               >
-                <span class="flex items-center whitespace-nowrap bg-slate-50 px-3 text-sm text-slate-400">courtinapp.com/club/</span>
-                <input v-model="form.slug" type="text" placeholder="tu-complejo" class="min-w-0 flex-1 bg-white px-3 py-2.5 text-sm text-primitive-dark-500 outline-none placeholder:text-neutral-400" @input="onSlugInput" />
+                <span class="flex items-center whitespace-nowrap bg-stone-50 px-3 text-sm text-stone-400">courtinapp.com/club/</span>
+                <input v-model="form.slug" type="text" placeholder="tu-complejo" class="min-w-0 flex-1 bg-white px-3 py-2.5 text-sm text-ink-500 outline-none placeholder:text-stone-400" @input="onSlugInput" />
                 <span class="flex items-center pr-3">
-                  <i v-if="slugStatus === 'checking'" class="icon-[material-symbols--progress-activity] animate-spin text-slate-300"></i>
+                  <i v-if="slugStatus === 'checking'" class="icon-[material-symbols--progress-activity] animate-spin text-stone-300"></i>
                   <i v-else-if="slugStatus === 'available'" class="icon-[material-symbols--check-circle] text-success-500"></i>
                   <i v-else-if="slugStatus === 'taken' || slugStatus === 'invalid'" class="icon-[material-symbols--cancel] text-error-500"></i>
                 </span>
               </div>
               <p
                 class="mt-2 text-xs"
-                :class="slugStatus === 'available' ? 'text-success-600' : slugStatus === 'taken' ? 'text-error-600' : slugStatus === 'invalid' ? 'text-warning-600' : 'text-neutral-400'"
+                :class="slugStatus === 'available' ? 'text-success-600' : slugStatus === 'taken' ? 'text-error-600' : slugStatus === 'invalid' ? 'text-warning-600' : 'text-stone-400'"
               >
                 <template v-if="slugStatus === 'checking'">Verificando disponibilidad…</template>
                 <template v-else-if="slugStatus === 'available'">✓ Disponible</template>
@@ -388,16 +388,16 @@ const inputBase =
               </p>
             </div>
 
-            <div class="rounded-xl border border-black/[0.06] bg-slate-50 p-4">
-              <p class="text-xs font-semibold tracking-wider text-neutral-400 uppercase">Tu link</p>
+            <div class="rounded-xl border border-black/[0.06] bg-stone-50 p-4">
+              <p class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Tu link</p>
               <div class="mt-2 flex items-center gap-2">
-                <code class="min-w-0 flex-1 truncate rounded-lg bg-white px-3 py-2 text-sm text-primitive-dark-500 ring-1 ring-black/[0.06]">https://{{ fullLink }}</code>
-                <button class="flex items-center gap-1.5 rounded-full bg-primitive-dark-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-primitive-dark-700 cursor-pointer" @click="copyLink">
+                <code class="min-w-0 flex-1 truncate rounded-lg bg-white px-3 py-2 text-sm text-ink-500 ring-1 ring-black/[0.06]">https://{{ fullLink }}</code>
+                <button class="flex items-center gap-1.5 rounded-full bg-ink-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-ink-700 cursor-pointer" @click="copyLink">
                   <i :class="copiedLink ? 'icon-[material-symbols--check]' : 'icon-[material-symbols--content-copy]'" class="text-sm"></i>
                   {{ copiedLink ? 'Copiado' : 'Copiar' }}
                 </button>
               </div>
-              <p class="mt-2 text-xs text-neutral-400">Al cambiar el link, los enlaces anteriores dejan de funcionar. Recordá actualizarlo en tus redes.</p>
+              <p class="mt-2 text-xs text-stone-400">Al cambiar el link, los enlaces anteriores dejan de funcionar. Recordá actualizarlo en tus redes.</p>
             </div>
           </div>
         </div>
@@ -409,10 +409,10 @@ const inputBase =
             <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <p class="text-sm font-semibold text-slate-800">Publicar complejo</p>
-                  <p class="text-xs text-neutral-400">Si está activo, aparece en la búsqueda pública y acepta reservas online.</p>
+                  <p class="text-sm font-semibold text-stone-800">Publicar complejo</p>
+                  <p class="text-xs text-stone-400">Si está activo, aparece en la búsqueda pública y acepta reservas online.</p>
                 </div>
-                <button type="button" role="switch" :aria-checked="form.publicado" class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer" :class="form.publicado ? 'bg-primitive-orange-500' : 'bg-slate-300'" @click="form.publicado = !form.publicado">
+                <button type="button" role="switch" :aria-checked="form.publicado" class="relative h-6 w-11 shrink-0 rounded-full transition-colors cursor-pointer" :class="form.publicado ? 'bg-brand-green-500' : 'bg-stone-300'" @click="form.publicado = !form.publicado">
                   <span class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform" :class="form.publicado ? 'translate-x-5' : ''"></span>
                 </button>
               </div>
@@ -421,25 +421,25 @@ const inputBase =
             <!-- Imágenes -->
             <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
               <div class="border-b border-black/[0.06] px-6 py-5">
-                <h2 class="text-base font-semibold text-primitive-dark-500">Imágenes</h2>
-                <p class="mt-0.5 text-sm text-neutral-400">Subí el logo, una imagen destacada y fotos de tu complejo (hasta 5 MB c/u).</p>
+                <h2 class="text-base font-semibold text-ink-500">Imágenes</h2>
+                <p class="mt-0.5 text-sm text-stone-400">Subí el logo, una imagen destacada y fotos de tu complejo (hasta 5 MB c/u).</p>
               </div>
               <div class="space-y-5 px-6 py-6">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Logo</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Logo</label>
                   <ImageUpload v-model="form.logo" variant="logo" placeholder="Subir logo" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Imagen destacada (portada)</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Imagen destacada (portada)</label>
                   <ImageUpload v-model="destacada" variant="wide" placeholder="Subir imagen destacada" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Galería</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Galería</label>
                   <div class="grid grid-cols-3 gap-3 sm:grid-cols-4">
                     <div v-for="(g, i) in galeria" :key="i" class="relative">
                       <ImageUpload v-model="form.fotos[i + 1]" variant="thumb" placeholder="Subir" />
                       <button
-                        class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-error-500 shadow ring-1 ring-black/[0.06] transition-colors hover:bg-red-50 cursor-pointer"
+                        class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-error-500 shadow ring-1 ring-black/[0.06] transition-colors hover:bg-error-50 cursor-pointer"
                         @click="removeGaleria(i)"
                       >
                         <i class="icon-[material-symbols--close] text-sm"></i>
@@ -454,33 +454,33 @@ const inputBase =
             <!-- Descripción + servicios -->
             <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
               <div class="border-b border-black/[0.06] px-6 py-5">
-                <h2 class="text-base font-semibold text-primitive-dark-500">Descripción y servicios</h2>
+                <h2 class="text-base font-semibold text-ink-500">Descripción y servicios</h2>
               </div>
               <div class="space-y-5 px-6 py-6">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Descripción</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Descripción</label>
                   <textarea v-model="form.descripcion" rows="3" placeholder="Contá qué hace especial a tu complejo…" :class="inputBase"></textarea>
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">WhatsApp</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">WhatsApp</label>
                     <input v-model="form.whatsapp" type="text" placeholder="Ej: +54 11 5555-5555" :class="inputBase" />
                   </div>
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Email de contacto</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email de contacto</label>
                     <input v-model="form.email" type="email" placeholder="contacto@tucomplejo.com" :class="inputBase" />
                   </div>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Servicios</label>
-                  <div class="flex flex-wrap items-center gap-2 rounded-xl border border-black/[0.08] px-3 py-2 transition-colors focus-within:border-primitive-orange-400 focus-within:ring-2 focus-within:ring-primitive-orange-100">
-                    <span v-for="(s, i) in form.servicios" :key="i" class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 py-1 pl-3 pr-1.5 text-xs font-medium text-slate-700">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Servicios</label>
+                  <div class="flex flex-wrap items-center gap-2 rounded-xl border border-black/[0.08] px-3 py-2 transition-colors focus-within:border-brand-green-400 focus-within:ring-2 focus-within:ring-brand-green-100">
+                    <span v-for="(s, i) in form.servicios" :key="i" class="inline-flex items-center gap-1.5 rounded-full bg-stone-100 py-1 pl-3 pr-1.5 text-xs font-medium text-stone-700">
                       {{ s }}
-                      <button type="button" class="flex h-4 w-4 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-200 hover:text-error-500 cursor-pointer" @click="removeServicio(i)"><i class="icon-[material-symbols--close] text-[9px]"></i></button>
+                      <button type="button" class="flex h-4 w-4 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-200 hover:text-error-500 cursor-pointer" @click="removeServicio(i)"><i class="icon-[material-symbols--close] text-[9px]"></i></button>
                     </span>
-                    <input v-model="servicioDraft" type="text" :placeholder="form.servicios.length ? 'Agregar otro…' : 'Ej: Estacionamiento'" class="min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm text-primitive-dark-500 outline-none placeholder:text-neutral-400" @keydown.enter.prevent="addServicio" @keydown.,.prevent="addServicio" @keydown.delete="onServicioBackspace" @blur="addServicio" />
+                    <input v-model="servicioDraft" type="text" :placeholder="form.servicios.length ? 'Agregar otro…' : 'Ej: Estacionamiento'" class="min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm text-ink-500 outline-none placeholder:text-stone-400" @keydown.enter.prevent="addServicio" @keydown.,.prevent="addServicio" @keydown.delete="onServicioBackspace" @blur="addServicio" />
                   </div>
-                  <p class="mt-2 text-xs text-neutral-400">Escribí un servicio y presioná Enter para agregarlo.</p>
+                  <p class="mt-2 text-xs text-stone-400">Escribí un servicio y presioná Enter para agregarlo.</p>
                 </div>
               </div>
             </div>
@@ -488,19 +488,19 @@ const inputBase =
 
           <!-- Preview -->
           <div class="lg:sticky lg:top-24 lg:self-start">
-            <p class="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+            <p class="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-stone-400 uppercase">
               <i class="icon-[material-symbols--visibility] text-sm"></i> Vista previa en la búsqueda
             </p>
             <ClubCard :club="previewClub" class="pointer-events-none" />
-            <p class="mt-3 text-xs text-neutral-400">Así se ve tu complejo cuando un jugador busca canchas.</p>
+            <p class="mt-3 text-xs text-stone-400">Así se ve tu complejo cuando un jugador busca canchas.</p>
           </div>
         </div>
 
         <!-- PAGOS -->
         <div v-show="activeTab === 'pagos'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
           <div class="border-b border-black/[0.06] px-6 py-5">
-            <h2 class="text-base font-semibold text-primitive-dark-500">Pasarelas de pago</h2>
-            <p class="mt-0.5 text-sm text-neutral-400">Conectá tu cuenta para cobrar las reservas online.</p>
+            <h2 class="text-base font-semibold text-ink-500">Pasarelas de pago</h2>
+            <p class="mt-0.5 text-sm text-stone-400">Conectá tu cuenta para cobrar las reservas online.</p>
           </div>
           <div class="space-y-4 px-6 py-6">
             <!-- MercadoPago -->
@@ -510,28 +510,28 @@ const inputBase =
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
-                  <p class="text-sm font-semibold text-primitive-dark-500">MercadoPago</p>
-                  <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span> No conectado
+                  <p class="text-sm font-semibold text-ink-500">MercadoPago</p>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-500">
+                    <span class="h-1.5 w-1.5 rounded-full bg-stone-400"></span> No conectado
                   </span>
                 </div>
-                <p class="mt-0.5 text-xs text-neutral-400">Tarjetas, dinero en cuenta y QR. Los pagos caen en tu cuenta.</p>
+                <p class="mt-0.5 text-xs text-stone-400">Tarjetas, dinero en cuenta y QR. Los pagos caen en tu cuenta.</p>
               </div>
-              <button class="rounded-full bg-primitive-orange-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer" @click="mpOpen = true">
+              <button class="rounded-full bg-brand-lime-500 px-4 py-2 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer" @click="mpOpen = true">
                 Configurar
               </button>
             </div>
 
             <!-- Próximamente -->
             <div class="flex items-center gap-4 rounded-2xl border border-dashed border-black/[0.1] p-5 opacity-70">
-              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-400">
                 <i class="icon-[material-symbols--add-card] text-2xl"></i>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-semibold text-slate-500">Más pasarelas</p>
-                <p class="mt-0.5 text-xs text-neutral-400">Stripe, transferencia y otras — próximamente.</p>
+                <p class="text-sm font-semibold text-stone-500">Más pasarelas</p>
+                <p class="mt-0.5 text-xs text-stone-400">Stripe, transferencia y otras — próximamente.</p>
               </div>
-              <span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-400">Pronto</span>
+              <span class="rounded-full bg-stone-100 px-3 py-1.5 text-xs font-medium text-stone-400">Pronto</span>
             </div>
           </div>
         </div>

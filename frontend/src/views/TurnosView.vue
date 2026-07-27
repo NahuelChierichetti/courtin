@@ -6,16 +6,16 @@
         <!-- Date nav -->
         <div class="flex items-center rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
-            class="flex h-9 w-9 items-center justify-center rounded-l-full text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
+            class="flex h-9 w-9 items-center justify-center rounded-l-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
             @click="shiftDate(-1)"
           >
             <i class="icon-[material-symbols--chevron-left] text-xs"></i>
           </button>
-          <span class="min-w-[180px] px-3 text-center text-sm font-semibold text-primitive-dark-500">
+          <span class="min-w-[180px] px-3 text-center text-sm font-semibold text-ink-500">
             {{ dateLabel }}
           </span>
           <button
-            class="flex h-9 w-9 items-center justify-center rounded-r-full text-slate-500 transition-colors hover:bg-slate-50 cursor-pointer"
+            class="flex h-9 w-9 items-center justify-center rounded-r-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
             @click="shiftDate(1)"
           >
             <i class="icon-[material-symbols--chevron-right] text-xs"></i>
@@ -23,7 +23,7 @@
         </div>
 
         <button
-          class="h-9 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
+          class="h-9 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50 cursor-pointer"
           @click="goToday"
         >
           Hoy
@@ -35,7 +35,7 @@
             v-for="opt in viewOptions"
             :key="opt.value"
             class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
-            :class="viewMode === opt.value ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+            :class="viewMode === opt.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
             @click="setViewMode(opt.value)"
           >
             {{ opt.label }}
@@ -45,36 +45,36 @@
         <!-- Court filter -->
         <div class="relative" @click.stop>
           <button
-            class="flex h-9 items-center gap-2 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+            class="flex h-9 items-center gap-2 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
             @click="courtMenuOpen = !courtMenuOpen"
           >
-            <i class="icon-[material-symbols--filter-alt] text-xs text-neutral-400"></i>
+            <i class="icon-[material-symbols--filter-alt] text-xs text-stone-400"></i>
             {{ selectedCourt ? selectedCourt.nombre : 'Todas las canchas' }}
-            <i class="icon-[material-symbols--keyboard-arrow-down] text-[10px] text-neutral-400"></i>
+            <i class="icon-[material-symbols--keyboard-arrow-down] text-[10px] text-stone-400"></i>
           </button>
           <div
             v-if="courtMenuOpen"
             class="absolute left-0 top-full z-30 mt-1 w-56 rounded-lg border border-black/[0.06] bg-white shadow-sm py-1 shadow-lg"
           >
             <button
-              class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-slate-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-              :class="!selectedCourtId ? 'text-primitive-orange-600' : 'text-slate-700'"
+              class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+              :class="!selectedCourtId ? 'text-brand-green-600' : 'text-stone-700'"
               :disabled="viewMode === 'week'"
               @click="selectCourt(null)"
             >
               <span class="flex-1">Todas las canchas</span>
-              <i v-if="!selectedCourtId" class="icon-[material-symbols--check] text-xs text-primitive-orange-500"></i>
+              <i v-if="!selectedCourtId" class="icon-[material-symbols--check] text-xs text-brand-green-500"></i>
             </button>
             <button
               v-for="c in courts"
               :key="c._id"
-              class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-slate-50 cursor-pointer"
-              :class="selectedCourtId === c._id ? 'text-primitive-orange-600' : 'text-slate-700'"
+              class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer"
+              :class="selectedCourtId === c._id ? 'text-brand-green-600' : 'text-stone-700'"
               @click="selectCourt(c._id)"
             >
               <span class="h-2 w-2 shrink-0 rounded-sm" :class="sportMeta(c.tipo).bgStrong" />
               <span class="flex-1 truncate">{{ c.nombre }}</span>
-              <i v-if="selectedCourtId === c._id" class="icon-[material-symbols--check] text-xs text-primitive-orange-500"></i>
+              <i v-if="selectedCourtId === c._id" class="icon-[material-symbols--check] text-xs text-brand-green-500"></i>
             </button>
           </div>
         </div>
@@ -86,8 +86,8 @@
             :key="s.value"
             class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
             :class="sportFilter === s.value
-              ? 'border-slate-300 bg-slate-100 text-primitive-dark-500'
-              : 'border-transparent text-slate-500 hover:bg-slate-50'"
+              ? 'border-stone-300 bg-stone-100 text-ink-500'
+              : 'border-transparent text-stone-500 hover:bg-stone-50'"
             @click="toggleSport(s.value)"
           >
             <span v-if="s.dot" class="h-2 w-2 rounded-full" :class="s.dot" />
@@ -98,7 +98,7 @@
 
       <div class="flex items-center gap-2">
         <button
-          class="flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          class="flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           title="Exportar a CSV"
           :disabled="!calendarItems.length"
           @click="exportCsv"
@@ -106,7 +106,7 @@
           <i class="icon-[material-symbols--download] text-base"></i>
         </button>
         <button
-          class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer"
+          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
           @click="openNew"
         >
           <i class="icon-[material-symbols--add] text-base"></i> Nuevo turno
@@ -117,47 +117,47 @@
     <!-- Summary strip -->
     <div v-if="currentClubId && courts.length" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
-        <p class="text-xs text-neutral-400">Turnos {{ viewMode === 'day' ? 'del día' : 'de la semana' }}</p>
-        <p class="mt-0.5 text-xl font-bold font-secondary text-primitive-dark-500">{{ stats.total }}</p>
+        <p class="text-xs text-stone-400">Turnos {{ viewMode === 'day' ? 'del día' : 'de la semana' }}</p>
+        <p class="mt-0.5 text-xl font-bold font-secondary text-ink-500">{{ stats.total }}</p>
       </div>
       <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
-        <p class="text-xs text-neutral-400">Confirmados</p>
+        <p class="text-xs text-stone-400">Confirmados</p>
         <p class="mt-0.5 text-xl font-bold font-secondary text-success-600">{{ stats.confirmados }}</p>
       </div>
       <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
-        <p class="text-xs text-neutral-400">Pendientes</p>
+        <p class="text-xs text-stone-400">Pendientes</p>
         <p class="mt-0.5 text-xl font-bold font-secondary text-warning-600">{{ stats.pendientes }}</p>
       </div>
       <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
-        <p class="text-xs text-neutral-400">Ingresos estimados</p>
-        <p class="mt-0.5 text-xl font-bold font-secondary text-primitive-dark-500">{{ formatCurrency(stats.ingresos, currency) }}</p>
+        <p class="text-xs text-stone-400">Ingresos estimados</p>
+        <p class="mt-0.5 text-xl font-bold font-secondary text-ink-500">{{ formatCurrency(stats.ingresos, currency) }}</p>
       </div>
     </div>
 
     <!-- States -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
-      <p class="!mt-2 text-sm text-slate-500">Seleccioná un club desde el encabezado para ver los turnos.</p>
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <p class="!mt-2 text-sm text-stone-500">Seleccioná un club desde el encabezado para ver los turnos.</p>
     </div>
 
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
-      <p class="mt-4 text-sm text-slate-500">Cargando turnos...</p>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-400"></i>
+      <p class="mt-4 text-sm text-stone-500">Cargando turnos...</p>
     </div>
 
     <div v-else-if="courts.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--grid-view] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--grid-view] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">No hay canchas</h3>
-      <p class="!mt-2 text-sm text-slate-500">Creá canchas para empezar a cargar turnos.</p>
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">No hay canchas</h3>
+      <p class="!mt-2 text-sm text-stone-500">Creá canchas para empezar a cargar turnos.</p>
     </div>
 
     <div v-else-if="columns.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
-      <p class="text-sm text-slate-500">No hay canchas que coincidan con el filtro.</p>
+      <p class="text-sm text-stone-500">No hay canchas que coincidan con el filtro.</p>
     </div>
 
     <!-- Calendar -->
@@ -233,9 +233,9 @@ const viewOptions = [
 
 const sportChips = [
   { label: 'Todas', value: 'todas', dot: null },
-  { label: 'Pádel', value: 'padel', dot: 'bg-primitive-blue-500' },
-  { label: 'Tenis', value: 'tenis', dot: 'bg-primitive-orange-500' },
-  { label: 'Fútbol', value: 'futbol', dot: 'bg-success-500' },
+  { label: 'Pádel', value: 'padel', dot: 'bg-brand-purple-500' },
+  { label: 'Tenis', value: 'tenis', dot: 'bg-brand-lime-500' },
+  { label: 'Fútbol', value: 'futbol', dot: 'bg-brand-green-500' },
 ]
 
 const tz = computed(() => currentClub.value?.timezone || DEFAULT_TZ)

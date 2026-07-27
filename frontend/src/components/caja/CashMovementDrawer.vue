@@ -14,10 +14,10 @@
               <i :class="form.tipo === 'ingreso' ? 'icon-[material-symbols--south-west]' : 'icon-[material-symbols--north-east]'" class="text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-primitive-dark-500">Registrar movimiento</h2>
-              <p class="text-sm text-neutral-400">Cargá un ingreso o egreso de caja</p>
+              <h2 class="text-lg font-semibold text-ink-500">Registrar movimiento</h2>
+              <p class="text-sm text-stone-400">Cargá un ingreso o egreso de caja</p>
             </div>
-            <button class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer" @click="emit('close')">
+            <button class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer" @click="emit('close')">
               <i class="icon-[material-symbols--close] text-sm"></i>
             </button>
           </div>
@@ -26,18 +26,18 @@
           <div class="flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <!-- Tipo -->
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Tipo</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Tipo</label>
               <div class="flex overflow-hidden rounded-full border border-black/[0.08]">
                 <button
                   class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                  :class="form.tipo === 'ingreso' ? 'bg-success-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                  :class="form.tipo === 'ingreso' ? 'bg-success-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                   @click="setTipo('ingreso')"
                 >
                   Ingreso
                 </button>
                 <button
                   class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                  :class="form.tipo === 'egreso' ? 'bg-error-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                  :class="form.tipo === 'egreso' ? 'bg-error-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                   @click="setTipo('egreso')"
                 >
                   Egreso
@@ -47,7 +47,7 @@
 
             <!-- Categoría -->
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Categoría</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Categoría</label>
               <div class="grid grid-cols-2 gap-2">
                 <button
                   v-for="c in categorias"
@@ -55,8 +55,8 @@
                   type="button"
                   class="flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-colors cursor-pointer"
                   :class="form.categoria === c
-                    ? 'border-primitive-orange-500 bg-primitive-orange-50 text-primitive-orange-700'
-                    : 'border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+                    ? 'border-brand-green-500 bg-brand-green-50 text-brand-green-700'
+                    : 'border-black/[0.08] bg-white text-stone-600 hover:bg-stone-50'"
                   @click="form.categoria = c"
                 >
                   <i :class="categoriaMeta(c).icon" class="text-base"></i>
@@ -67,47 +67,47 @@
 
             <!-- Monto -->
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Monto</label>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Monto</label>
               <div class="relative">
-                <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-neutral-400">$</span>
+                <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-stone-400">$</span>
                 <input
                   v-model.number="form.monto"
                   type="number"
                   min="0"
                   step="500"
                   placeholder="0"
-                  class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                  class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
             </div>
 
             <!-- Concepto -->
             <div>
-              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
-                Concepto <span class="font-normal normal-case tracking-normal text-slate-300">(opcional)</span>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
+                Concepto <span class="font-normal normal-case tracking-normal text-stone-300">(opcional)</span>
               </label>
               <input
                 v-model="form.concepto"
                 type="text"
                 :placeholder="conceptoPlaceholder"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
               />
             </div>
 
             <!-- Método + Fecha -->
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Método</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Método</label>
                 <div class="relative">
-                  <select v-model="form.metodoPago" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100">
+                  <select v-model="form.metodoPago" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100">
                     <option v-for="m in METODOS" :key="m" :value="m">{{ metodoLabel(m) }}</option>
                   </select>
-                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
                 </div>
               </div>
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Fecha</label>
-                <input v-model="form.fecha" type="date" :max="today" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100" />
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Fecha</label>
+                <input v-model="form.fecha" type="date" :max="today" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
               </div>
             </div>
 
@@ -118,11 +118,11 @@
 
           <!-- Footer -->
           <div class="flex items-center justify-end gap-3 border-t border-black/[0.06] px-6 py-4">
-            <button class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer" @click="emit('close')">
+            <button class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer" @click="emit('close')">
               Cancelar
             </button>
             <button
-              class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="saving"
               @click="handleSave"
             >

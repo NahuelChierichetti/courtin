@@ -27,52 +27,53 @@ export const normalizeCloseMinutes = (hhmm) => {
 
 // --- Metadatos por deporte (colores plenos, sin gradientes) ---
 
+// Un color de marca por deporte: violeta (pádel), amarillo (tenis) y verde (fútbol).
 export const SPORT_META = {
   padel: {
     label: 'Pádel',
-    accent: 'bg-primitive-blue-500',
-    border: 'border-primitive-blue-500',
-    bg: 'bg-primitive-blue-50',
-    bgStrong: 'bg-primitive-blue-500',
-    text: 'text-primitive-blue-700',
-    textSoft: 'text-primitive-blue-600',
-    ring: 'ring-primitive-blue-200',
-    dot: 'bg-primitive-blue-500',
+    accent: 'bg-brand-purple-500',
+    border: 'border-brand-purple-500',
+    bg: 'bg-brand-purple-50',
+    bgStrong: 'bg-brand-purple-500',
+    text: 'text-brand-purple-700',
+    textSoft: 'text-brand-purple-600',
+    ring: 'ring-brand-purple-200',
+    dot: 'bg-brand-purple-500',
   },
   tenis: {
     label: 'Tenis',
-    accent: 'bg-primitive-orange-500',
-    border: 'border-primitive-orange-500',
-    bg: 'bg-primitive-orange-50',
-    bgStrong: 'bg-primitive-orange-500',
-    text: 'text-primitive-orange-700',
-    textSoft: 'text-primitive-orange-600',
-    ring: 'ring-primitive-orange-200',
-    dot: 'bg-primitive-orange-500',
+    accent: 'bg-brand-lime-500',
+    border: 'border-brand-lime-500',
+    bg: 'bg-brand-lime-50',
+    bgStrong: 'bg-brand-lime-500',
+    text: 'text-brand-lime-800',
+    textSoft: 'text-brand-lime-700',
+    ring: 'ring-brand-lime-200',
+    dot: 'bg-brand-lime-500',
   },
   futbol: {
     label: 'Fútbol',
-    accent: 'bg-success-500',
-    border: 'border-success-500',
-    bg: 'bg-success-50',
-    bgStrong: 'bg-success-500',
-    text: 'text-success-700',
-    textSoft: 'text-success-600',
-    ring: 'ring-success-200',
-    dot: 'bg-success-500',
+    accent: 'bg-brand-green-500',
+    border: 'border-brand-green-500',
+    bg: 'bg-brand-green-50',
+    bgStrong: 'bg-brand-green-500',
+    text: 'text-brand-green-700',
+    textSoft: 'text-brand-green-600',
+    ring: 'ring-brand-green-200',
+    dot: 'bg-brand-green-500',
   },
 }
 
 export const FALLBACK_SPORT = {
   label: 'Otro',
-  accent: 'bg-slate-400',
-  border: 'border-slate-400',
-  bg: 'bg-slate-50',
-  bgStrong: 'bg-slate-400',
-  text: 'text-slate-700',
-  textSoft: 'text-slate-600',
-  ring: 'ring-slate-200',
-  dot: 'bg-slate-400',
+  accent: 'bg-stone-400',
+  border: 'border-stone-400',
+  bg: 'bg-stone-50',
+  bgStrong: 'bg-stone-400',
+  text: 'text-stone-700',
+  textSoft: 'text-stone-600',
+  ring: 'ring-stone-200',
+  dot: 'bg-stone-400',
 }
 
 export const sportMeta = (tipo) => SPORT_META[tipo] || FALLBACK_SPORT
@@ -147,8 +148,8 @@ export const priceForDuration = (court, dow, horaInicio, durationMin) => {
 export const ESTADO_META = {
   pendiente: { label: 'Pendiente', dot: 'bg-warning-500', text: 'text-warning-600' },
   confirmada: { label: 'Confirmada', dot: 'bg-success-500', text: 'text-success-600' },
-  completada: { label: 'Completada', dot: 'bg-primitive-blue-500', text: 'text-primitive-blue-600' },
-  cancelada: { label: 'Cancelada', dot: 'bg-slate-400', text: 'text-neutral-400' },
+  completada: { label: 'Completada', dot: 'bg-brand-purple-500', text: 'text-brand-purple-600' },
+  cancelada: { label: 'Cancelada', dot: 'bg-stone-400', text: 'text-stone-400' },
 }
 
 export const reservationLabel = (r) =>

@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="mb-6 flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Complejos</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <h1 class="text-2xl font-bold text-stone-900">Complejos</h1>
+        <p class="mt-1 text-sm text-stone-500">
           {{ stats.total }} cuentas en total · {{ stats.activos }} activas
         </p>
       </div>
@@ -28,25 +28,25 @@
     <div class="mb-6 flex flex-wrap items-center gap-4">
       <!-- Search -->
       <div class="relative">
-        <i class="icon-[material-symbols--search] absolute left-3 top-1/2 -translate-y-1/2 text-sm text-neutral-400"></i>
+        <i class="icon-[material-symbols--search] absolute left-3 top-1/2 -translate-y-1/2 text-sm text-stone-400"></i>
         <input
           v-model="search"
           type="text"
           placeholder="Buscar por nombre, ciudad u owner"
-          class="h-10 w-80 rounded-lg border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-700 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-300 focus:ring-2 focus:ring-primitive-orange-100"
+          class="h-10 w-80 rounded-lg border border-stone-200 bg-white pl-9 pr-4 text-sm text-stone-700 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-300 focus:ring-2 focus:ring-brand-green-100"
         />
       </div>
 
       <!-- Plan filters -->
-      <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+      <div class="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1">
         <button
           v-for="f in planFilters"
           :key="f.value"
           class="rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activePlan === f.value
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-600 hover:bg-slate-50'
+              ? 'bg-stone-900 text-white'
+              : 'text-stone-600 hover:bg-stone-50'
           "
           @click="activePlan = f.value"
         >
@@ -55,15 +55,15 @@
       </div>
 
       <!-- Estado filters -->
-      <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+      <div class="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1">
         <button
           v-for="f in estadoFilters"
           :key="f.value"
           class="rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activeEstado === f.value
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-600 hover:bg-slate-50'
+              ? 'bg-stone-900 text-white'
+              : 'text-stone-600 hover:bg-stone-50'
           "
           @click="activeEstado = f.value"
         >
@@ -73,28 +73,28 @@
     </div>
 
     <!-- Table -->
-    <div class="rounded-xl border border-slate-200 bg-white">
+    <div class="rounded-xl border border-stone-200 bg-white">
       <!-- Table header -->
-      <div class="grid grid-cols-[2fr_1.2fr_1fr_0.8fr_0.8fr_1fr_1fr_40px] items-center gap-4 border-b border-slate-100 px-6 py-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Complejo</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Owner</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Plan</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400 text-right">MRR</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400 text-center">Canchas</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Última actividad</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Estado</span>
+      <div class="grid grid-cols-[2fr_1.2fr_1fr_0.8fr_0.8fr_1fr_1fr_40px] items-center gap-4 border-b border-stone-100 px-6 py-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Complejo</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Owner</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Plan</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400 text-right">MRR</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400 text-center">Canchas</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Última actividad</span>
+        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Estado</span>
         <span></span>
       </div>
 
       <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-16">
-        <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i>
+        <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i>
       </div>
 
       <!-- Empty -->
       <div v-else-if="clubs.length === 0" class="py-16 text-center">
-        <i class="icon-[material-symbols--apartment] text-4xl text-slate-200"></i>
-        <p class="mt-3 text-sm text-neutral-400">No se encontraron complejos</p>
+        <i class="icon-[material-symbols--apartment] text-4xl text-stone-200"></i>
+        <p class="mt-3 text-sm text-stone-400">No se encontraron complejos</p>
       </div>
 
       <!-- Rows -->
@@ -102,7 +102,7 @@
         v-else
         v-for="club in clubs"
         :key="club._id"
-        class="group grid grid-cols-[2fr_1.2fr_1fr_0.8fr_0.8fr_1fr_1fr_40px] items-center gap-4 border-b border-slate-50 px-6 py-4 transition-colors hover:bg-slate-50/50 last:border-0"
+        class="group grid grid-cols-[2fr_1.2fr_1fr_0.8fr_0.8fr_1fr_1fr_40px] items-center gap-4 border-b border-stone-50 px-6 py-4 transition-colors hover:bg-stone-50/50 last:border-0"
       >
         <!-- Club name -->
         <div class="flex items-center gap-3">
@@ -113,15 +113,15 @@
             {{ clubInitials(club.nombre) }}
           </div>
           <div class="min-w-0">
-            <p class="truncate text-sm font-semibold text-slate-900">{{ club.nombre }}</p>
-            <p class="truncate text-xs text-neutral-400">
+            <p class="truncate text-sm font-semibold text-stone-900">{{ club.nombre }}</p>
+            <p class="truncate text-xs text-stone-400">
               {{ [club.ciudad, club.provincia].filter(Boolean).join(', ') || club.direccion || '—' }}
             </p>
           </div>
         </div>
 
         <!-- Owner -->
-        <span class="truncate text-sm text-slate-600">
+        <span class="truncate text-sm text-stone-600">
           {{ ownerShortName(club.owner) }}
         </span>
 
@@ -136,17 +136,17 @@
         </div>
 
         <!-- MRR -->
-        <span class="text-right text-sm font-semibold text-slate-700">
+        <span class="text-right text-sm font-semibold text-stone-700">
           —
         </span>
 
         <!-- Canchas -->
-        <span class="text-center text-sm text-slate-600">
+        <span class="text-center text-sm text-stone-600">
           {{ club.canchas }}
         </span>
 
         <!-- Última actividad -->
-        <span class="text-sm text-slate-500">
+        <span class="text-sm text-stone-500">
           {{ formatTimeAgo(club.ultimaActividad) }}
         </span>
 
@@ -164,7 +164,7 @@
         <!-- Actions -->
         <div class="relative flex justify-end">
           <button
-            class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100 cursor-pointer"
+            class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 opacity-0 transition-all hover:bg-stone-100 hover:text-stone-600 group-hover:opacity-100 cursor-pointer"
             @click.stop="openDetailDrawer(club)"
           >
             <i class="icon-[material-symbols--chevron-right] text-sm"></i>
@@ -187,20 +187,20 @@
           <!-- Drawer panel -->
           <div class="relative flex w-full max-w-lg flex-col bg-white shadow-2xl">
             <!-- Header -->
-            <div class="flex items-center gap-4 border-b border-slate-200 px-6 py-5">
+            <div class="flex items-center gap-4 border-b border-stone-200 px-6 py-5">
               <div
                 class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                :class="selectedClub ? clubColor(selectedClub._id) : 'bg-primitive-orange-500'"
+                :class="selectedClub ? clubColor(selectedClub._id) : 'bg-brand-green-500'"
               >
                 {{ selectedClub ? clubInitials(selectedClub.nombre) : '+' }}
               </div>
               <div class="min-w-0 flex-1">
-                <h2 class="text-lg font-semibold text-slate-900">
+                <h2 class="text-lg font-semibold text-stone-900">
                   {{ drawerMode === 'create' ? 'Nuevo complejo' : form.nombre }}
                 </h2>
               </div>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer"
                 @click="closeDrawer"
               >
                 <i class="icon-[material-symbols--close] text-sm"></i>
@@ -214,25 +214,25 @@
                 <!-- Quick actions (complejo activo) -->
                 <div v-if="!isDeleted" class="flex flex-col gap-2">
                   <button
-                    class="flex w-full items-center gap-3 rounded-full border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-stone-200 px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                     @click="handleEnterAsAdmin(selectedClub)"
                   >
-                    <i class="icon-[material-symbols--login] text-sm text-neutral-400"></i>
+                    <i class="icon-[material-symbols--login] text-sm text-stone-400"></i>
                     Ingresar como admin
                   </button>
                   <button
-                    class="flex w-full items-center gap-3 rounded-full border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-stone-200 px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                     @click="drawerMode = 'edit'"
                   >
-                    <i class="icon-[material-symbols--edit] text-sm text-neutral-400"></i>
+                    <i class="icon-[material-symbols--edit] text-sm text-stone-400"></i>
                     Editar complejo
                   </button>
                   <button
                     class="flex w-full items-center gap-3 rounded-full border px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer"
                     :class="
                       selectedClub?.estado === 'suspendido'
-                        ? 'border-green-200 text-green-700 hover:bg-green-50'
-                        : 'border-red-200 text-red-600 hover:bg-red-50'
+                        ? 'border-success-200 text-success-700 hover:bg-success-50'
+                        : 'border-error-200 text-error-600 hover:bg-error-50'
                     "
                     @click="handleSuspend(selectedClub)"
                   >
@@ -240,7 +240,7 @@
                     {{ selectedClub?.estado === 'suspendido' ? 'Reactivar complejo' : 'Suspender complejo' }}
                   </button>
                   <button
-                    class="flex w-full items-center gap-3 rounded-full border border-red-200 px-4 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-error-200 px-4 py-3 text-left text-sm font-medium text-error-600 transition-colors hover:bg-error-50 cursor-pointer"
                     @click="handleDelete(selectedClub)"
                   >
                     <i class="icon-[material-symbols--delete] text-sm"></i>
@@ -250,12 +250,12 @@
 
                 <!-- Quick actions (complejo eliminado) -->
                 <div v-else class="flex flex-col gap-2">
-                  <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-500">
-                    <i class="icon-[material-symbols--delete] text-sm text-slate-400"></i>
+                  <div class="flex items-center gap-2 rounded-lg bg-stone-50 px-4 py-3 text-xs text-stone-500">
+                    <i class="icon-[material-symbols--delete] text-sm text-stone-400"></i>
                     Este complejo está eliminado. Reestablecelo para volver a operarlo.
                   </div>
                   <button
-                    class="flex w-full items-center gap-3 rounded-full border border-green-200 px-4 py-3 text-left text-sm font-medium text-green-700 transition-colors hover:bg-green-50 cursor-pointer"
+                    class="flex w-full items-center gap-3 rounded-full border border-success-200 px-4 py-3 text-left text-sm font-medium text-success-700 transition-colors hover:bg-success-50 cursor-pointer"
                     @click="handleRestore(selectedClub)"
                   >
                     <i class="icon-[material-symbols--history] text-sm"></i>
@@ -265,34 +265,34 @@
 
                 <!-- Info sections -->
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Información</h3>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-400">Información</h3>
 
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs text-neutral-400">Ciudad</p>
-                      <p class="text-sm font-medium text-slate-700">{{ selectedClub?.ciudad || '—' }}</p>
+                      <p class="text-xs text-stone-400">Ciudad</p>
+                      <p class="text-sm font-medium text-stone-700">{{ selectedClub?.ciudad || '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Provincia</p>
-                      <p class="text-sm font-medium text-slate-700">{{ selectedClub?.provincia || '—' }}</p>
+                      <p class="text-xs text-stone-400">Provincia</p>
+                      <p class="text-sm font-medium text-stone-700">{{ selectedClub?.provincia || '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Dirección</p>
-                      <p class="text-sm font-medium text-slate-700">{{ selectedClub?.direccion || '—' }}</p>
+                      <p class="text-xs text-stone-400">Dirección</p>
+                      <p class="text-sm font-medium text-stone-700">{{ selectedClub?.direccion || '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Teléfono</p>
-                      <p class="text-sm font-medium text-slate-700">{{ selectedClub?.telefono || '—' }}</p>
+                      <p class="text-xs text-stone-400">Teléfono</p>
+                      <p class="text-sm font-medium text-stone-700">{{ selectedClub?.telefono || '—' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Suscripción</h3>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-400">Suscripción</h3>
 
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs text-neutral-400">Plan</p>
+                      <p class="text-xs text-stone-400">Plan</p>
                       <span
                         class="inline-block rounded px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
                         :class="planStyle(selectedClub?.plan)"
@@ -301,7 +301,7 @@
                       </span>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Estado</p>
+                      <p class="text-xs text-stone-400">Estado</p>
                       <span
                         class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
                         :class="estadoConfig(isDeleted ? 'eliminado' : selectedClub?.estado).bg"
@@ -311,26 +311,26 @@
                       </span>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Canchas</p>
-                      <p class="text-sm font-medium text-slate-700">{{ selectedClub?.canchas ?? '—' }}</p>
+                      <p class="text-xs text-stone-400">Canchas</p>
+                      <p class="text-sm font-medium text-stone-700">{{ selectedClub?.canchas ?? '—' }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Owner</p>
-                      <p class="text-sm font-medium text-slate-700">{{ ownerShortName(selectedClub?.owner) }}</p>
+                      <p class="text-xs text-stone-400">Owner</p>
+                      <p class="text-sm font-medium text-stone-700">{{ ownerShortName(selectedClub?.owner) }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="space-y-4">
-                  <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Actividad</h3>
+                  <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-400">Actividad</h3>
                   <div class="grid grid-cols-2 gap-4">
                     <div>
-                      <p class="text-xs text-neutral-400">Última actividad</p>
-                      <p class="text-sm font-medium text-slate-700">{{ formatTimeAgo(selectedClub?.ultimaActividad) }}</p>
+                      <p class="text-xs text-stone-400">Última actividad</p>
+                      <p class="text-sm font-medium text-stone-700">{{ formatTimeAgo(selectedClub?.ultimaActividad) }}</p>
                     </div>
                     <div>
-                      <p class="text-xs text-neutral-400">Creado</p>
-                      <p class="text-sm font-medium text-slate-700">{{ formatDate(selectedClub?.createdAt) }}</p>
+                      <p class="text-xs text-stone-400">Creado</p>
+                      <p class="text-sm font-medium text-stone-700">{{ formatDate(selectedClub?.createdAt) }}</p>
                     </div>
                   </div>
                 </div>
@@ -339,69 +339,69 @@
               <!-- Create / Edit form -->
               <div v-else class="space-y-6">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Nombre</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Nombre</label>
                   <input
                     v-model="form.nombre"
                     type="text"
                     placeholder="Nombre del complejo"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                     @input="drawerMode === 'create' && autoSlug()"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Slug</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Slug</label>
                   <input
                     v-model="form.slug"
                     type="text"
                     placeholder="slug-del-complejo"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Ciudad</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Ciudad</label>
                     <input
                       v-model="form.ciudad"
                       type="text"
                       placeholder="Ciudad"
-                      class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                      class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                     />
                   </div>
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Provincia</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Provincia</label>
                     <input
                       v-model="form.provincia"
                       type="text"
                       placeholder="Provincia"
-                      class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                      class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Dirección</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Dirección</label>
                   <input
                     v-model="form.direccion"
                     type="text"
                     placeholder="Dirección completa"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Teléfono</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Teléfono</label>
                   <input
                     v-model="form.telefono"
                     type="text"
                     placeholder="+54 11 1234-5678"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-500 focus:ring-1 focus:ring-primitive-orange-500"
+                    class="w-full rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
                   />
                 </div>
 
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Plan</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Plan</label>
                   <div class="flex gap-2">
                     <button
                       v-for="p in planOptions"
@@ -409,8 +409,8 @@
                       class="rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
                       :class="
                         form.plan === p.value
-                          ? 'border-primitive-orange-300 bg-primitive-orange-50 text-primitive-orange-700'
-                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                          ? 'border-brand-green-300 bg-brand-green-50 text-brand-green-700'
+                          : 'border-stone-200 text-stone-600 hover:bg-stone-50'
                       "
                       @click="form.plan = p.value"
                     >
@@ -420,7 +420,7 @@
                 </div>
 
                 <div v-if="drawerMode === 'edit'">
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">Estado</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Estado</label>
                   <div class="flex gap-2">
                     <button
                       v-for="e in estadoOptions"
@@ -428,8 +428,8 @@
                       class="rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
                       :class="
                         form.estado === e.value
-                          ? 'border-primitive-orange-300 bg-primitive-orange-50 text-primitive-orange-700'
-                          : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                          ? 'border-brand-green-300 bg-brand-green-50 text-brand-green-700'
+                          : 'border-stone-200 text-stone-600 hover:bg-stone-50'
                       "
                       @click="form.estado = e.value"
                     >
@@ -441,15 +441,15 @@
             </div>
 
             <!-- Footer (only for create/edit modes) -->
-            <div v-if="drawerMode !== 'detail'" class="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
+            <div v-if="drawerMode !== 'detail'" class="flex items-center justify-end gap-3 border-t border-stone-200 px-6 py-4">
               <button
-                class="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                class="rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                 @click="closeDrawer"
               >
                 Cancelar
               </button>
               <button
-                class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="saving || !form.nombre || !form.slug"
                 @click="handleSave"
               >
@@ -720,23 +720,23 @@ const autoSlug = () => {
 
 const planStyle = (plan) => {
   const styles = {
-    starter: 'bg-slate-100 text-slate-700',
-    pro: 'bg-blue-50 text-blue-700',
-    business: 'bg-orange-50 text-orange-700',
-    enterprise: 'bg-purple-50 text-purple-700',
+    starter: 'bg-stone-100 text-stone-700',
+    pro: 'bg-brand-green-50 text-brand-green-700',
+    business: 'bg-brand-lime-100 text-brand-lime-900',
+    enterprise: 'bg-brand-purple-50 text-brand-purple-700',
   }
   return styles[plan] || styles.starter
 }
 
 const estadoConfig = (estado) => {
   const map = {
-    activo: { label: 'Activo', dot: 'bg-green-500', bg: 'bg-green-50 text-green-700' },
-    trial: { label: 'Trial', dot: 'bg-blue-500', bg: 'bg-blue-50 text-blue-700' },
-    suspendido: { label: 'Suspendido', dot: 'bg-red-500', bg: 'bg-red-50 text-red-700' },
-    cancelado: { label: 'Cancelado', dot: 'bg-slate-400', bg: 'bg-slate-100 text-slate-600' },
-    impago: { label: 'Impago', dot: 'bg-amber-500', bg: 'bg-amber-50 text-amber-700' },
-    inactivo: { label: 'Inactivo', dot: 'bg-slate-400', bg: 'bg-slate-100 text-slate-600' },
-    eliminado: { label: 'Eliminado', dot: 'bg-red-500', bg: 'bg-red-50 text-red-700' },
+    activo: { label: 'Activo', dot: 'bg-success-500', bg: 'bg-success-50 text-success-700' },
+    trial: { label: 'Trial', dot: 'bg-brand-purple-500', bg: 'bg-brand-purple-50 text-brand-purple-700' },
+    suspendido: { label: 'Suspendido', dot: 'bg-error-500', bg: 'bg-error-50 text-error-700' },
+    cancelado: { label: 'Cancelado', dot: 'bg-stone-400', bg: 'bg-stone-100 text-stone-600' },
+    impago: { label: 'Impago', dot: 'bg-warning-500', bg: 'bg-warning-50 text-warning-700' },
+    inactivo: { label: 'Inactivo', dot: 'bg-stone-400', bg: 'bg-stone-100 text-stone-600' },
+    eliminado: { label: 'Eliminado', dot: 'bg-error-500', bg: 'bg-error-50 text-error-700' },
   }
   return map[estado] || map.inactivo
 }
@@ -748,14 +748,12 @@ const clubInitials = (nombre) => {
 }
 
 const clubColors = [
-  'bg-blue-500',
-  'bg-purple-500',
-  'bg-emerald-500',
-  'bg-pink-500',
-  'bg-amber-500',
-  'bg-cyan-500',
-  'bg-indigo-500',
-  'bg-rose-500',
+  'bg-brand-green-500',
+  'bg-brand-purple-500',
+  'bg-brand-lime-800',
+  'bg-brand-sand-900',
+  'bg-brand-green-700',
+  'bg-brand-purple-700',
 ]
 
 const clubColor = (id) => {

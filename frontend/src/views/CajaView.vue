@@ -141,8 +141,8 @@ const onDelete = async (m) => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-primitive-dark-500">Control de caja</h1>
-        <p class="mt-1 text-sm text-slate-500">Ingresos y egresos del complejo · {{ periodSubtitle }}</p>
+        <h1 class="text-2xl font-bold text-ink-500">Control de caja</h1>
+        <p class="mt-1 text-sm text-stone-500">Ingresos y egresos del complejo · {{ periodSubtitle }}</p>
       </div>
       <div class="flex items-center gap-3">
         <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
@@ -150,14 +150,14 @@ const onDelete = async (m) => {
             v-for="p in periods"
             :key="p.value"
             class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
-            :class="selectedPeriod === p.value ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+            :class="selectedPeriod === p.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
             @click="selectedPeriod = p.value"
           >
             {{ p.label }}
           </button>
         </div>
         <button
-          class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer"
+          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
           @click="drawerOpen = true"
         >
           <i class="icon-[material-symbols--add] text-base"></i> Registrar movimiento
@@ -167,11 +167,11 @@ const onDelete = async (m) => {
 
     <!-- No club -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
-      <p class="!mt-2 text-sm text-slate-500">Seleccioná un club desde el encabezado para ver la caja.</p>
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <p class="!mt-2 text-sm text-stone-500">Seleccioná un club desde el encabezado para ver la caja.</p>
     </div>
 
     <template v-else>
@@ -183,7 +183,7 @@ const onDelete = async (m) => {
               <i class="icon-[material-symbols--south-west] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-slate-500">Ingresos</p>
+          <p class="mt-4 text-sm font-medium text-stone-500">Ingresos</p>
           <p class="mt-1 text-2xl font-bold font-secondary text-success-600">{{ money(resumen.ingresos) }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
@@ -192,58 +192,58 @@ const onDelete = async (m) => {
               <i class="icon-[material-symbols--north-east] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-slate-500">Egresos</p>
+          <p class="mt-4 text-sm font-medium text-stone-500">Egresos</p>
           <p class="mt-1 text-2xl font-bold font-secondary text-error-600">{{ money(resumen.egresos) }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primitive-orange-50 text-primitive-orange-500">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500">
               <i class="icon-[material-symbols--account-balance-wallet] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-slate-500">Balance neto</p>
-          <p class="mt-1 text-2xl font-bold font-secondary" :class="resumen.neto >= 0 ? 'text-primitive-dark-500' : 'text-error-600'">{{ money(resumen.neto) }}</p>
+          <p class="mt-4 text-sm font-medium text-stone-500">Balance neto</p>
+          <p class="mt-1 text-2xl font-bold font-secondary" :class="resumen.neto >= 0 ? 'text-ink-500' : 'text-error-600'">{{ money(resumen.neto) }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
           <div class="flex items-center justify-between">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-primitive-blue-50 text-primitive-blue-500">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500">
               <i class="icon-[material-symbols--receipt-long] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-slate-500">Movimientos</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-primitive-dark-500">{{ resumen.count }}</p>
+          <p class="mt-4 text-sm font-medium text-stone-500">Movimientos</p>
+          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.count }}</p>
         </div>
       </div>
 
       <!-- Breakdowns -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Ingresos por categoría</h2>
-          <div v-if="!categoriaBreakdown.length" class="py-6 text-center text-sm text-slate-400">Sin ingresos en el período.</div>
+          <h2 class="text-base font-semibold text-ink-500">Ingresos por categoría</h2>
+          <div v-if="!categoriaBreakdown.length" class="py-6 text-center text-sm text-stone-400">Sin ingresos en el período.</div>
           <div v-else class="mt-4 space-y-3">
             <div v-for="row in categoriaBreakdown" :key="row.cat" class="flex items-center gap-3">
-              <span class="flex w-36 items-center gap-2 text-sm text-slate-600">
-                <i :class="categoriaMeta(row.cat).icon" class="text-sm text-slate-400"></i>
+              <span class="flex w-36 items-center gap-2 text-sm text-stone-600">
+                <i :class="categoriaMeta(row.cat).icon" class="text-sm text-stone-400"></i>
                 <span class="truncate">{{ categoriaMeta(row.cat).label }}</span>
               </span>
-              <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+              <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-stone-100">
                 <div class="absolute inset-y-0 left-0 rounded-full bg-success-500" :style="{ width: row.pct + '%' }"></div>
               </div>
-              <span class="w-24 text-right text-sm font-semibold font-secondary text-slate-700">{{ money(row.monto) }}</span>
+              <span class="w-24 text-right text-sm font-semibold font-secondary text-stone-700">{{ money(row.monto) }}</span>
             </div>
           </div>
         </div>
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Ingresos por método</h2>
-          <div v-if="!metodoBreakdown.length" class="py-6 text-center text-sm text-slate-400">Sin ingresos en el período.</div>
+          <h2 class="text-base font-semibold text-ink-500">Ingresos por método</h2>
+          <div v-if="!metodoBreakdown.length" class="py-6 text-center text-sm text-stone-400">Sin ingresos en el período.</div>
           <div v-else class="mt-4 space-y-3">
             <div v-for="row in metodoBreakdown" :key="row.metodo" class="flex items-center gap-3">
-              <span class="w-36 truncate text-sm text-slate-600">{{ metodoLabel(row.metodo) }}</span>
-              <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                <div class="absolute inset-y-0 left-0 rounded-full bg-primitive-orange-500" :style="{ width: row.pct + '%' }"></div>
+              <span class="w-36 truncate text-sm text-stone-600">{{ metodoLabel(row.metodo) }}</span>
+              <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-stone-100">
+                <div class="absolute inset-y-0 left-0 rounded-full bg-brand-green-500" :style="{ width: row.pct + '%' }"></div>
               </div>
-              <span class="w-24 text-right text-sm font-semibold font-secondary text-slate-700">{{ money(row.monto) }}</span>
+              <span class="w-24 text-right text-sm font-semibold font-secondary text-stone-700">{{ money(row.monto) }}</span>
             </div>
           </div>
         </div>
@@ -252,13 +252,13 @@ const onDelete = async (m) => {
       <!-- Movements -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-6 py-4">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Movimientos</h2>
+          <h2 class="text-base font-semibold text-ink-500">Movimientos</h2>
           <div class="flex overflow-hidden rounded-full border border-black/[0.06]">
             <button
               v-for="t in tipoChips"
               :key="t.value"
               class="px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer"
-              :class="tipoFilter === t.value ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+              :class="tipoFilter === t.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
               @click="tipoFilter = t.value"
             >
               {{ t.label }}
@@ -268,16 +268,16 @@ const onDelete = async (m) => {
 
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center py-16">
-          <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i>
+          <i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i>
         </div>
 
         <!-- Empty -->
         <div v-else-if="!visibleMovements.length" class="flex flex-col items-center justify-center py-16 text-center">
-          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-            <i class="icon-[material-symbols--point-of-sale] text-xl text-neutral-400"></i>
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
+            <i class="icon-[material-symbols--point-of-sale] text-xl text-stone-400"></i>
           </div>
-          <h3 class="mt-4 text-sm font-semibold text-primitive-dark-500">Sin movimientos</h3>
-          <p class="mt-1 text-xs text-slate-500">Registrá ingresos y egresos para llevar el control de caja.</p>
+          <h3 class="mt-4 text-sm font-semibold text-ink-500">Sin movimientos</h3>
+          <p class="mt-1 text-xs text-stone-500">Registrá ingresos y egresos para llevar el control de caja.</p>
         </div>
 
         <!-- List -->
@@ -291,14 +291,14 @@ const onDelete = async (m) => {
             </span>
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <p class="truncate text-sm font-medium text-primitive-dark-500">
+                <p class="truncate text-sm font-medium text-ink-500">
                   {{ m.concepto || categoriaMeta(m.categoria).label }}
                 </p>
-                <span v-if="m.origen === 'online'" class="inline-flex shrink-0 items-center gap-1 rounded-full bg-primitive-blue-50 px-2 py-0.5 text-[10px] font-semibold text-primitive-blue-600">
+                <span v-if="m.origen === 'online'" class="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-purple-50 px-2 py-0.5 text-[10px] font-semibold text-brand-purple-600">
                   <i class="icon-[material-symbols--bolt] text-[10px]"></i> Online
                 </span>
               </div>
-              <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-neutral-400">
+              <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-stone-400">
                 <span>{{ categoriaMeta(m.categoria).label }}</span>
                 <span>·</span>
                 <span>{{ metodoLabel(m.metodoPago) }}</span>
@@ -314,7 +314,7 @@ const onDelete = async (m) => {
             </span>
             <button
               v-if="m.origen !== 'online'"
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-error-500 cursor-pointer group-hover:opacity-100 disabled:opacity-50"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-stone-300 opacity-0 transition-all hover:bg-error-50 hover:text-error-500 cursor-pointer group-hover:opacity-100 disabled:opacity-50"
               :disabled="deletingId === m._id"
               title="Eliminar"
               @click="onDelete(m)"

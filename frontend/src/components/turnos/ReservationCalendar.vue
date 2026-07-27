@@ -8,7 +8,7 @@
           class="sticky top-0 z-20 flex border-b border-black/[0.06] bg-white"
         >
           <div class="w-16 text-center shrink-0 border-r border-black/[0.06] px-2 py-3">
-            <span class="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">Hora</span>
+            <span class="text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Hora</span>
           </div>
           <div
             v-for="col in columns"
@@ -18,9 +18,9 @@
           >
             <div class="flex items-center gap-2">
               <span class="h-2.5 w-2.5 shrink-0 rounded-sm" :class="sportMeta(col.tipo).bgStrong" v-if="col.tipo" />
-              <span class="text-sm font-semibold text-primitive-dark-500">{{ col.label }}</span>
+              <span class="text-sm font-semibold text-ink-500">{{ col.label }}</span>
             </div>
-            <p v-if="col.sublabel" class="mt-0.5 truncate text-xs text-neutral-400">{{ col.sublabel }}</p>
+            <p v-if="col.sublabel" class="mt-0.5 truncate text-xs text-stone-400">{{ col.sublabel }}</p>
           </div>
         </div>
 
@@ -34,7 +34,7 @@
               class="relative border-b border-black/[0.06] flex items-center justify-center"
               :style="{ height: hourHeight + 'px' }"
             >
-              <span class="-top-2 right-2 text-xs font-medium text-neutral-400 font-secondary">
+              <span class="-top-2 right-2 text-xs font-medium text-stone-400 font-secondary">
                 {{ h.label }}
               </span>
             </div>
@@ -53,7 +53,7 @@
             <div
               v-for="(band, bi) in closedBands(col.key)"
               :key="'cb' + bi"
-              class="pointer-events-none absolute inset-x-0 bg-slate-100/80 bg-[repeating-linear-gradient(45deg,transparent,transparent_6px,rgba(148,163,184,0.08)_6px,rgba(148,163,184,0.08)_12px)]"
+              class="pointer-events-none absolute inset-x-0 bg-stone-100/80 bg-[repeating-linear-gradient(45deg,transparent,transparent_6px,rgba(148,163,184,0.08)_6px,rgba(148,163,184,0.08)_12px)]"
               :style="{ top: band.top + 'px', height: band.height + 'px' }"
             />
 
@@ -71,8 +71,8 @@
               class="pointer-events-none absolute inset-x-0 z-10 flex items-center"
               :style="{ top: yFor(nowMin) + 'px' }"
             >
-              <span class="-ml-1 h-2 w-2 rounded-full bg-primitive-orange-500" />
-              <span class="h-px flex-1 bg-primitive-orange-500" />
+              <span class="-ml-1 h-2 w-2 rounded-full bg-brand-green-500" />
+              <span class="h-px flex-1 bg-brand-green-500" />
             </div>
 
             <!-- Reservations -->
@@ -105,7 +105,7 @@
               </p>
               <p v-if="r.precioFinal != null" class="mt-0.5 truncate text-[11px]" :class="textColor(r, 'price')">
                 {{ formatCurrency(r.precioFinal, currency) }}
-                <span v-if="isInProgress(r)" class="ml-1 font-medium text-primitive-orange-500">· En curso</span>
+                <span v-if="isInProgress(r)" class="ml-1 font-medium text-brand-green-500">· En curso</span>
               </p>
             </div>
           </div>
@@ -222,19 +222,19 @@ const draggable = (r) => r.estado !== 'cancelada'
 const BADGE = {
   pendiente: { label: 'Pendiente', cls: 'bg-warning-100 text-warning-700' },
   confirmada: { label: 'Confirmada', cls: 'bg-success-100 text-success-700' },
-  completada: { label: 'Completada', cls: 'bg-slate-200 text-slate-600' },
-  cancelada: { label: 'Cancelada', cls: 'bg-slate-200 text-slate-500' },
+  completada: { label: 'Completada', cls: 'bg-stone-200 text-stone-600' },
+  cancelada: { label: 'Cancelada', cls: 'bg-stone-200 text-stone-500' },
 }
 const badgeLabel = (r) => BADGE[displayStatus(r)].label
 const badgeClasses = (r) => BADGE[displayStatus(r)].cls
 
 const textColor = (r, part) => {
   const st = displayStatus(r)
-  if (st === 'cancelada') return part === 'name' ? 'text-neutral-400 line-through' : 'text-neutral-400'
-  if (st === 'completada') return 'text-slate-500'
+  if (st === 'cancelada') return part === 'name' ? 'text-stone-400 line-through' : 'text-stone-400'
+  if (st === 'completada') return 'text-stone-500'
   if (part === 'time') return sportMeta(r.tipo).textSoft
-  if (part === 'name') return 'text-primitive-dark-500'
-  return 'text-slate-500'
+  if (part === 'name') return 'text-ink-500'
+  return 'text-stone-500'
 }
 
 // --- Refs de columnas (para drag entre columnas) ---
@@ -303,8 +303,8 @@ const cardStyle = (r) => {
 
 const cardClasses = (r) => {
   const st = displayStatus(r)
-  if (st === 'cancelada') return ['border-slate-300', 'bg-slate-50', 'opacity-70']
-  if (st === 'completada') return ['border-slate-300', 'bg-slate-100']
+  if (st === 'cancelada') return ['border-stone-300', 'bg-stone-50', 'opacity-70']
+  if (st === 'completada') return ['border-stone-300', 'bg-stone-100']
   const meta = sportMeta(r.tipo)
   if (r.estado === 'pendiente') return [meta.border, meta.bg, 'border-dashed', 'border']
   return [meta.border, meta.bg]

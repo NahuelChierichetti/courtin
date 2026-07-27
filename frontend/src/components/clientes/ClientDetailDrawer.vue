@@ -7,14 +7,14 @@
         <div class="relative flex w-full max-w-md flex-col bg-white shadow-2xl">
           <!-- Header -->
           <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primitive-orange-500 text-sm font-bold text-white">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-green-500 text-sm font-bold text-white">
               {{ initials }}
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="truncate text-lg font-semibold text-primitive-dark-500">{{ client?.nombre || 'Cliente' }}</h2>
-              <p class="truncate text-sm text-neutral-400">{{ client?.email }}</p>
+              <h2 class="truncate text-lg font-semibold text-ink-500">{{ client?.nombre || 'Cliente' }}</h2>
+              <p class="truncate text-sm text-stone-400">{{ client?.email }}</p>
             </div>
-            <button class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer" @click="emit('close')">
+            <button class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer" @click="emit('close')">
               <i class="icon-[material-symbols--close] text-sm"></i>
             </button>
           </div>
@@ -24,29 +24,29 @@
             <!-- Stats -->
             <div class="grid grid-cols-2 gap-3">
               <div class="rounded-2xl border border-black/[0.06] p-4">
-                <p class="text-xs text-neutral-400">Reservas</p>
-                <p class="mt-1 text-xl font-bold font-secondary text-primitive-dark-500">{{ client?.reservasCount ?? 0 }}</p>
+                <p class="text-xs text-stone-400">Reservas</p>
+                <p class="mt-1 text-xl font-bold font-secondary text-ink-500">{{ client?.reservasCount ?? 0 }}</p>
               </div>
               <div class="rounded-2xl border border-black/[0.06] p-4">
-                <p class="text-xs text-neutral-400">Total gastado</p>
+                <p class="text-xs text-stone-400">Total gastado</p>
                 <p class="mt-1 text-xl font-bold font-secondary text-success-600">{{ money(client?.totalGastado || 0) }}</p>
               </div>
             </div>
 
             <!-- Contacto -->
             <div>
-              <p class="mb-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">Contacto</p>
+              <p class="mb-2 text-xs font-semibold tracking-wider text-stone-400 uppercase">Contacto</p>
               <div class="space-y-2 rounded-2xl border border-black/[0.06] p-4 text-sm">
-                <p class="flex items-center gap-2 text-slate-600">
-                  <i class="icon-[material-symbols--mail-outline] text-slate-400"></i>{{ client?.email }}
+                <p class="flex items-center gap-2 text-stone-600">
+                  <i class="icon-[material-symbols--mail-outline] text-stone-400"></i>{{ client?.email }}
                 </p>
-                <p v-if="client?.telefono" class="flex items-center gap-2 text-slate-600">
-                  <i class="icon-[material-symbols--call] text-slate-400"></i>{{ client.telefono }}
+                <p v-if="client?.telefono" class="flex items-center gap-2 text-stone-600">
+                  <i class="icon-[material-symbols--call] text-stone-400"></i>{{ client.telefono }}
                 </p>
-                <p class="flex items-center gap-2 text-slate-500">
-                  <i class="icon-[material-symbols--calendar-month] text-slate-400"></i>
+                <p class="flex items-center gap-2 text-stone-500">
+                  <i class="icon-[material-symbols--calendar-month] text-stone-400"></i>
                   Cliente desde {{ fmtDate(client?.primeraReserva) }}
-                  <span v-if="client?.user" class="ml-1 inline-flex items-center gap-1 rounded-full bg-primitive-blue-50 px-2 py-0.5 text-[10px] font-semibold text-primitive-blue-600">
+                  <span v-if="client?.user" class="ml-1 inline-flex items-center gap-1 rounded-full bg-brand-purple-50 px-2 py-0.5 text-[10px] font-semibold text-brand-purple-600">
                     <i class="icon-[material-symbols--verified] text-[10px]"></i> Con cuenta
                   </span>
                 </p>
@@ -55,16 +55,16 @@
 
             <!-- Notas -->
             <div>
-              <p class="mb-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">Notas</p>
+              <p class="mb-2 text-xs font-semibold tracking-wider text-stone-400 uppercase">Notas</p>
               <textarea
                 v-model="notas"
                 rows="2"
                 placeholder="Notas internas del cliente (preferencias, observaciones...)"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
               ></textarea>
               <button
                 v-if="notas !== (client?.notas || '')"
-                class="mt-2 rounded-full bg-primitive-orange-500 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:opacity-60 cursor-pointer"
+                class="mt-2 rounded-full bg-brand-lime-500 px-4 py-1.5 text-xs font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:opacity-60 cursor-pointer"
                 :disabled="savingNotas"
                 @click="saveNotas"
               >
@@ -74,11 +74,11 @@
 
             <!-- Reservas -->
             <div>
-              <p class="mb-2 text-xs font-semibold tracking-wider text-neutral-400 uppercase">Historial de reservas</p>
+              <p class="mb-2 text-xs font-semibold tracking-wider text-stone-400 uppercase">Historial de reservas</p>
               <div v-if="loading" class="flex items-center justify-center py-8">
-                <i class="icon-[material-symbols--progress-activity] animate-spin text-xl text-slate-300"></i>
+                <i class="icon-[material-symbols--progress-activity] animate-spin text-xl text-stone-300"></i>
               </div>
-              <div v-else-if="!reservations.length" class="rounded-2xl bg-slate-50 py-6 text-center text-sm text-slate-400">
+              <div v-else-if="!reservations.length" class="rounded-2xl bg-stone-50 py-6 text-center text-sm text-stone-400">
                 Sin reservas registradas.
               </div>
               <div v-else class="space-y-2">
@@ -87,11 +87,11 @@
                     <span class="h-2 w-2 rounded-full" :class="sportMeta(r.court?.tipo).dot"></span>
                   </span>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-medium text-primitive-dark-500">{{ r.court?.nombre || 'Cancha' }}</p>
-                    <p class="text-xs text-neutral-400">{{ fmtDateTime(r.inicio) }}</p>
+                    <p class="truncate text-sm font-medium text-ink-500">{{ r.court?.nombre || 'Cancha' }}</p>
+                    <p class="text-xs text-stone-400">{{ fmtDateTime(r.inicio) }}</p>
                   </div>
                   <div class="text-right">
-                    <p class="text-sm font-semibold font-secondary text-slate-700">{{ money(r.precioFinal || 0) }}</p>
+                    <p class="text-sm font-semibold font-secondary text-stone-700">{{ money(r.precioFinal || 0) }}</p>
                     <span class="inline-flex items-center gap-1 text-[11px]" :class="estadoMeta(r.estado).text">
                       <span class="h-1.5 w-1.5 rounded-full" :class="estadoMeta(r.estado).dot"></span>{{ estadoMeta(r.estado).label }}
                     </span>

@@ -133,49 +133,49 @@ onMounted(fetchClubs)
       <aside class="lg:sticky lg:top-24 lg:self-start">
         <div class="rounded-3xl border border-black/[0.06] bg-white p-6 shadow-sm">
           <div class="flex items-center gap-2.5">
-            <i class="icon-[material-symbols--tune] text-primitive-orange-500"></i>
-            <h2 class="text-lg font-bold text-primitive-dark-500">Filtros</h2>
+            <i class="icon-[material-symbols--tune] text-brand-green-500"></i>
+            <h2 class="text-lg font-bold text-ink-500">Filtros</h2>
           </div>
 
           <!-- ¿Qué buscás? -->
           <div class="mt-6">
-            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
-              <i class="icon-[material-symbols--search] text-[11px] text-primitive-orange-500"></i> ¿Qué buscás?
+            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
+              <i class="icon-[material-symbols--search] text-[11px] text-brand-green-500"></i> ¿Qué buscás?
             </label>
             <input v-model="q" type="text" placeholder="Cancha o complejo"
-              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400" />
+              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400" />
           </div>
 
           <!-- Ubicación -->
           <div class="mt-5">
-            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
-              <i class="icon-[material-symbols--location-on] text-[11px] text-primitive-orange-500"></i> Ubicación
+            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
+              <i class="icon-[material-symbols--location-on] text-[11px] text-brand-green-500"></i> Ubicación
             </label>
             <input v-model="ciudad" type="text" placeholder="Barrio o ciudad"
-              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-slate-400 focus:border-primitive-orange-400" />
+              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400" />
           </div>
 
           <!-- Fecha + Hora -->
           <div class="mt-5 grid grid-cols-2 gap-3">
             <div>
-              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
-                <i class="icon-[material-symbols--calendar-month] text-[11px] text-primitive-orange-500"></i> Fecha
+              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
+                <i class="icon-[material-symbols--calendar-month] text-[11px] text-brand-green-500"></i> Fecha
               </label>
               <input v-model="fecha" type="date" :min="dayjs().format('YYYY-MM-DD')"
-                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none focus:border-primitive-orange-400" />
+                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none focus:border-brand-green-400" />
             </div>
             <div>
-              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
-                <i class="icon-[material-symbols--schedule] text-[11px] text-primitive-orange-500"></i> Hora
+              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
+                <i class="icon-[material-symbols--schedule] text-[11px] text-brand-green-500"></i> Hora
               </label>
               <input v-model="hora" type="time"
-                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-primitive-dark-500 outline-none focus:border-primitive-orange-400" />
+                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none focus:border-brand-green-400" />
             </div>
           </div>
 
           <!-- Deporte -->
           <div class="mt-5">
-            <label class="text-xs font-bold tracking-wide text-slate-500 uppercase">Deporte</label>
+            <label class="text-xs font-bold tracking-wide text-stone-500 uppercase">Deporte</label>
             <div class="mt-3 flex flex-wrap gap-2">
               <button
                 v-for="s in sportChips"
@@ -183,8 +183,8 @@ onMounted(fetchClubs)
                 type="button"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
                 :class="tipo === s.value
-                  ? 'bg-primitive-orange-500 text-white'
-                  : 'border border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+                  ? 'bg-brand-green-500 text-white'
+                  : 'border border-black/[0.08] bg-white text-stone-600 hover:bg-stone-50'"
                 @click="selectSport(s.value)"
               >
                 {{ s.label }}
@@ -198,10 +198,10 @@ onMounted(fetchClubs)
       <section>
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-primitive-dark-500">
+            <h1 class="text-2xl font-bold text-ink-500">
               {{ sortedClubs.length }} {{ sortedClubs.length === 1 ? 'resultado' : 'resultados' }}
             </h1>
-            <p class="mt-1 text-sm text-slate-500">{{ resultsMeta }}</p>
+            <p class="mt-1 text-sm text-stone-500">{{ resultsMeta }}</p>
           </div>
 
           <!-- Orden -->
@@ -212,8 +212,8 @@ onMounted(fetchClubs)
               type="button"
               class="rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
               :class="sortBy === s.value
-                ? 'bg-primitive-orange-500 text-white'
-                : 'border border-black/[0.08] bg-white text-slate-600 hover:bg-slate-50'"
+                ? 'bg-brand-green-500 text-white'
+                : 'border border-black/[0.08] bg-white text-stone-600 hover:bg-stone-50'"
               @click="sortBy = s.value"
             >
               {{ s.label }}
@@ -223,8 +223,8 @@ onMounted(fetchClubs)
 
         <!-- Loading -->
         <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-          <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-slate-300"></i>
-          <p class="mt-4 text-sm text-slate-500">Buscando complejos...</p>
+          <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-300"></i>
+          <p class="mt-4 text-sm text-stone-500">Buscando complejos...</p>
         </div>
 
         <!-- Error -->
@@ -235,10 +235,10 @@ onMounted(fetchClubs)
         <!-- Empty -->
         <div v-else-if="!sortedClubs.length" class="flex flex-col items-center justify-center py-24 text-center">
           <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
-            <i class="icon-[material-symbols--search] text-2xl text-slate-300"></i>
+            <i class="icon-[material-symbols--search] text-2xl text-stone-300"></i>
           </div>
-          <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">No encontramos complejos</h3>
-          <p class="mt-2 text-sm text-slate-500">Probá ajustar la zona, el deporte o la hora.</p>
+          <h3 class="mt-4 text-lg font-semibold text-ink-500">No encontramos complejos</h3>
+          <p class="mt-2 text-sm text-stone-500">Probá ajustar la zona, el deporte o la hora.</p>
         </div>
 
         <!-- Grid -->
