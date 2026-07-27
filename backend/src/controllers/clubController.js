@@ -1,4 +1,5 @@
 const Club = require('../models/Club');
+const Court = require('../models/Court');
 const { horariosToLocal, horariosToUtc, DEFAULT_TZ } = require('../utils/timezone');
 
 const createClub = async (req, res, next) => {
@@ -92,6 +93,32 @@ const updateClub = async (req, res, next) => {
         res.status(200).json({
             ok: true,
             message: 'Club actualizado con éxito',
+            club
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+const deleteClub = async (req, res, next) => {
+    try {
+        // Borrado lógico: se marca `deletedAt` y el complejo deja de aparecer,
+        // pero se conserva en la base. Se hace cascada sobre sus canchas para
+        // que tampoco queden visibles ni reservables.
+        const club = await Club.softDeleteById(req.params.id);
+
+        if (!club) {
+            return res.status(404).json({ ok: false, message: 'Club no encontrado' });
+        }
+
+        await Court.updateMany(
+            { club: club._id, deletedAt: null },
+            { deletedAt: new Date() }
+        );
+
+        res.status(200).json({
+            ok: true,
+            message: 'Club eliminado con éxito',
             club
         })
     } catch (error) {
@@ -233,6 +260,7 @@ module.exports = {
     getClubs,
     getClubById,
     updateClub,
+    deleteClub,
     getClubHorarios,
     updateClubHorarios,
     getClubConfig,

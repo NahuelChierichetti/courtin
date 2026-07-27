@@ -1,6 +1,6 @@
 const express = require('express')
 
-const  { createClub, getClubs, getClubById, updateClub, getClubHorarios, updateClubHorarios, getClubConfig, updateClubConfig } = require('../controllers/clubController')
+const  { createClub, getClubs, getClubById, updateClub, deleteClub, getClubHorarios, updateClubHorarios, getClubConfig, updateClubConfig } = require('../controllers/clubController')
 const { protect, authorizeSuperadmin, authorizeClubRoles } = require('../middlewares/authMiddleware')
 const ROLES = require('../config/roles')
 
@@ -19,5 +19,6 @@ router.put('/:clubId/config', authorizeClubRoles(ROLES.TENANT_ADMIN), updateClub
 
 router.get('/:id', authorizeSuperadmin, getClubById)
 router.put('/:id', authorizeSuperadmin, updateClub)
+router.delete('/:id', authorizeSuperadmin, deleteClub)
 
 module.exports = router

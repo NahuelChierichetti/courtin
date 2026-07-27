@@ -147,10 +147,9 @@ const updateCourt = async (req, res, next) => {
 
 const deleteCourt = async (req, res, next) => {
   try {
-    const court = await Court.findByIdAndDelete(req.params.id).populate(
-      'club',
-      'nombre slug estado'
-    );
+    // Borrado lógico: se marca `deletedAt` y deja de aparecer en las lecturas,
+    // pero el registro se conserva en la base (historial de reservas, caja, etc.).
+    const court = await Court.softDeleteById(req.params.id);
 
     if (!court) {
       return res.status(404).json({
@@ -158,6 +157,8 @@ const deleteCourt = async (req, res, next) => {
         message: 'Cancha no encontrada'
       });
     }
+
+    await court.populate('club', 'nombre slug estado');
 
     res.status(200).json({
       ok: true,
