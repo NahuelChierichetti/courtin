@@ -102,7 +102,6 @@ const inputBase =
           <p class="text-lg font-bold tracking-tight text-ink-500">
             Court<span class="text-brand-green-500">In</span>
           </p>
-          <p class="mt-0.5 text-[10px] font-semibold tracking-[0.22em] text-stone-400">SPORT COMPLEX</p>
         </div>
       </RouterLink>
 
