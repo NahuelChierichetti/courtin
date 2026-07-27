@@ -154,10 +154,10 @@
         <div>
           <span
             class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-            :class="estadoConfig(club.estado).bg"
+            :class="estadoConfig(club.deletedAt ? 'eliminado' : club.estado).bg"
           >
-            <span class="h-1.5 w-1.5 rounded-full" :class="estadoConfig(club.estado).dot"></span>
-            {{ estadoConfig(club.estado).label }}
+            <span class="h-1.5 w-1.5 rounded-full" :class="estadoConfig(club.deletedAt ? 'eliminado' : club.estado).dot"></span>
+            {{ estadoConfig(club.deletedAt ? 'eliminado' : club.estado).label }}
           </span>
         </div>
 
@@ -211,8 +211,8 @@
             <div class="flex-1 overflow-y-auto px-6 py-6">
               <!-- Detail view (read mode) -->
               <div v-if="drawerMode === 'detail'" class="space-y-6">
-                <!-- Quick actions -->
-                <div class="flex flex-col gap-2">
+                <!-- Quick actions (complejo activo) -->
+                <div v-if="!isDeleted" class="flex flex-col gap-2">
                   <button
                     class="flex w-full items-center gap-3 rounded-full border border-slate-200 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                     @click="handleEnterAsAdmin(selectedClub)"
@@ -238,6 +238,28 @@
                   >
                     <i class="icon-[material-symbols--power-settings-new] text-sm"></i>
                     {{ selectedClub?.estado === 'suspendido' ? 'Reactivar complejo' : 'Suspender complejo' }}
+                  </button>
+                  <button
+                    class="flex w-full items-center gap-3 rounded-full border border-red-200 px-4 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
+                    @click="handleDelete(selectedClub)"
+                  >
+                    <i class="icon-[material-symbols--delete] text-sm"></i>
+                    Eliminar complejo
+                  </button>
+                </div>
+
+                <!-- Quick actions (complejo eliminado) -->
+                <div v-else class="flex flex-col gap-2">
+                  <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-500">
+                    <i class="icon-[material-symbols--delete] text-sm text-slate-400"></i>
+                    Este complejo está eliminado. Reestablecelo para volver a operarlo.
+                  </div>
+                  <button
+                    class="flex w-full items-center gap-3 rounded-full border border-green-200 px-4 py-3 text-left text-sm font-medium text-green-700 transition-colors hover:bg-green-50 cursor-pointer"
+                    @click="handleRestore(selectedClub)"
+                  >
+                    <i class="icon-[material-symbols--history] text-sm"></i>
+                    Reestablecer complejo
                   </button>
                 </div>
 
@@ -282,10 +304,10 @@
                       <p class="text-xs text-neutral-400">Estado</p>
                       <span
                         class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-                        :class="estadoConfig(selectedClub?.estado).bg"
+                        :class="estadoConfig(isDeleted ? 'eliminado' : selectedClub?.estado).bg"
                       >
-                        <span class="h-1.5 w-1.5 rounded-full" :class="estadoConfig(selectedClub?.estado).dot"></span>
-                        {{ estadoConfig(selectedClub?.estado).label }}
+                        <span class="h-1.5 w-1.5 rounded-full" :class="estadoConfig(isDeleted ? 'eliminado' : selectedClub?.estado).dot"></span>
+                        {{ estadoConfig(isDeleted ? 'eliminado' : selectedClub?.estado).label }}
                       </span>
                     </div>
                     <div>
@@ -443,14 +465,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 import { useAuth } from '@/composables/useAuth'
 import adminService from '@/services/adminService'
 import Button from 'primevue/button'
 
 const router = useRouter()
+const confirm = useConfirm()
+const toast = useToast()
 const { setCurrentClubId } = useAuth()
+
+// Un complejo está "eliminado" (borrado lógico) si tiene deletedAt.
+const isDeleted = computed(() => !!selectedClub.value?.deletedAt)
 
 const clubs = ref([])
 const stats = ref({ total: 0, activos: 0 })
@@ -493,6 +522,7 @@ const estadoFilters = [
   { label: 'Trial', value: 'trial' },
   { label: 'Impagos', value: 'impago' },
   { label: 'Cancelados', value: 'cancelado' },
+  { label: 'Eliminados', value: 'eliminado' },
 ]
 
 const planOptions = [
@@ -515,13 +545,19 @@ const fetchClubs = async () => {
     const params = {}
     if (search.value) params.search = search.value
     if (activePlan.value) params.plan = activePlan.value
-    if (activeEstado.value) params.estado = activeEstado.value
+    if (activeEstado.value === 'eliminado') {
+      params.eliminados = true
+    } else if (activeEstado.value) {
+      params.estado = activeEstado.value
+    }
 
     const response = await adminService.getClubs(params)
     clubs.value = response.clubs
     stats.value = response.stats
   } catch (err) {
     console.error('Error fetching clubs:', err)
+    const detail = err.response?.data?.message || 'No se pudieron cargar los complejos.'
+    toast.add({ severity: 'error', summary: 'Error al cargar', detail, life: 5000 })
   } finally {
     loading.value = false
   }
@@ -576,15 +612,24 @@ const handleOverlayClick = (e) => {
 const handleSave = async () => {
   saving.value = true
   try {
-    if (drawerMode.value === 'create') {
+    const creating = drawerMode.value === 'create'
+    if (creating) {
       await adminService.createClub(form.value)
     } else {
       await adminService.updateClub(selectedClub.value._id, form.value)
     }
     closeDrawer()
     await fetchClubs()
+    toast.add({
+      severity: 'success',
+      summary: creating ? 'Complejo creado' : 'Complejo actualizado',
+      detail: `"${form.value.nombre}" se guardó correctamente.`,
+      life: 3000,
+    })
   } catch (err) {
     console.error('Error saving club:', err)
+    const detail = err.response?.data?.message || 'No se pudo guardar el complejo.'
+    toast.add({ severity: 'error', summary: 'Error al guardar', detail, life: 5000 })
   } finally {
     saving.value = false
   }
@@ -592,12 +637,73 @@ const handleSave = async () => {
 
 const handleSuspend = async (club) => {
   try {
-    await adminService.suspendClub(club._id)
+    const { message } = await adminService.suspendClub(club._id)
     closeDrawer()
     await fetchClubs()
+    toast.add({ severity: 'success', summary: message || 'Estado actualizado', life: 3000 })
   } catch (err) {
     console.error('Error suspending club:', err)
+    const detail = err.response?.data?.message || 'No se pudo cambiar el estado del complejo.'
+    toast.add({ severity: 'error', summary: 'Error', detail, life: 5000 })
   }
+}
+
+const handleDelete = (club) => {
+  confirm.require({
+    header: 'Eliminar complejo',
+    message: `¿Seguro que querés eliminar "${club.nombre}"? Se ocultará junto con sus canchas. Podés reestablecerlo más tarde desde el filtro "Eliminados".`,
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Eliminar',
+    rejectLabel: 'Cancelar',
+    acceptProps: { severity: 'danger' },
+    rejectProps: { severity: 'secondary', outlined: true },
+    accept: async () => {
+      try {
+        await adminService.deleteClub(club._id)
+        toast.add({
+          severity: 'success',
+          summary: 'Complejo eliminado',
+          detail: `"${club.nombre}" se eliminó correctamente.`,
+          life: 3000,
+        })
+        closeDrawer()
+        await fetchClubs()
+      } catch (err) {
+        console.error('Error deleting club:', err)
+        const detail = err.response?.data?.message || 'No se pudo eliminar el complejo.'
+        toast.add({ severity: 'error', summary: 'Error al eliminar', detail, life: 5000 })
+      }
+    },
+  })
+}
+
+const handleRestore = (club) => {
+  confirm.require({
+    header: 'Reestablecer complejo',
+    message: `¿Reestablecer "${club.nombre}"? Volverá a estar disponible junto con sus canchas.`,
+    icon: 'pi pi-history',
+    acceptLabel: 'Reestablecer',
+    rejectLabel: 'Cancelar',
+    acceptProps: { severity: 'success' },
+    rejectProps: { severity: 'secondary', outlined: true },
+    accept: async () => {
+      try {
+        await adminService.restoreClub(club._id)
+        toast.add({
+          severity: 'success',
+          summary: 'Complejo reestablecido',
+          detail: `"${club.nombre}" volvió a estar activo.`,
+          life: 3000,
+        })
+        closeDrawer()
+        await fetchClubs()
+      } catch (err) {
+        console.error('Error restoring club:', err)
+        const detail = err.response?.data?.message || 'No se pudo reestablecer el complejo.'
+        toast.add({ severity: 'error', summary: 'Error al reestablecer', detail, life: 5000 })
+      }
+    },
+  })
 }
 
 const handleEnterAsAdmin = (club) => {
@@ -630,6 +736,7 @@ const estadoConfig = (estado) => {
     cancelado: { label: 'Cancelado', dot: 'bg-slate-400', bg: 'bg-slate-100 text-slate-600' },
     impago: { label: 'Impago', dot: 'bg-amber-500', bg: 'bg-amber-50 text-amber-700' },
     inactivo: { label: 'Inactivo', dot: 'bg-slate-400', bg: 'bg-slate-100 text-slate-600' },
+    eliminado: { label: 'Eliminado', dot: 'bg-red-500', bg: 'bg-red-50 text-red-700' },
   }
   return map[estado] || map.inactivo
 }

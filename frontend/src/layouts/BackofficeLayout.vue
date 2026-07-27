@@ -50,15 +50,12 @@ const goToApp = () => {
     <aside class="flex w-64 shrink-0 flex-col bg-slate-900">
       <!-- Logo -->
       <div class="flex items-center gap-2.5 px-5 pt-5 pb-4">
-        <div class="flex h-8 w-8 items-center justify-center rounded-md bg-primitive-orange-500">
-          <svg class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
-        </div>
-        <div>
-          <span class="text-lg font-bold text-white">CourtIn</span>
-          <span class="ml-1.5 rounded bg-primitive-orange-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primitive-orange-400">Admin</span>
+        <img src="/images/logo-blancosvg.svg" alt="CourtIn" class="h-12 w-auto" />
+        <div class="flex flex-col text-start">
+          <p class="text-2xl font-normal text-white">
+            Court<span class="text-primitive-orange-500">In</span>
+          </p>
+          <span class="max-w-[50px] rounded bg-primitive-orange-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primitive-orange-400">Admin</span>
         </div>
       </div>
 

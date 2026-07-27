@@ -128,16 +128,11 @@ const userShortName = computed(() => {
     <aside class="flex w-64 shrink-0 flex-col bg-primitive-dark-500 print:hidden">
       <!-- Logo -->
       <div class="flex items-center gap-2.5 px-5 pt-5 pb-4">
-        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primitive-orange-500">
-          <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 4.5 3.5 19h17L12 4.5Zm0 4.8 3.1 5.3-1.6.9-1.5-1-1.5 1-1.6-.9L12 9.3Z" />
-          </svg>
-        </div>
+        <img src="/images/logo-blancosvg.svg" alt="CourtIn" class="h-12 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-bold tracking-tight text-white">
+          <p class="text-2xl font-normal text-white">
             Court<span class="text-primitive-orange-500">In</span>
           </p>
-          <p class="mt-0.5 text-[10px] font-semibold tracking-[0.22em] text-slate-500">SPORT COMPLEX</p>
         </div>
       </div>
 

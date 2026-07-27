@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDelete = require('../utils/softDelete');
 
 const HORA_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -178,5 +179,7 @@ const clubSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+clubSchema.plugin(softDelete);
 
 module.exports = mongoose.model('Club', clubSchema);

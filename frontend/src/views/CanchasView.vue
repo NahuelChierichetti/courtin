@@ -119,15 +119,6 @@
             <rect x="10" y="50" width="15" height="40" rx="1" stroke="#475569" stroke-width="1" fill="none" />
             <rect x="155" y="50" width="15" height="40" rx="1" stroke="#475569" stroke-width="1" fill="none" />
           </svg>
-
-          <!-- Outdoor badge -->
-          <div
-            v-if="!court.cubierta"
-            class="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 backdrop-blur-sm"
-          >
-            <i class="icon-[material-symbols--light-mode] text-[10px] text-amber-300"></i>
-            <span class="text-[10px] font-semibold tracking-wider text-white/80 uppercase">Al aire</span>
-          </div>
         </div>
 
         <!-- Court info -->
@@ -160,23 +151,24 @@
           </div>
 
           <div class="mt-4 flex items-end justify-between">
-            <div>
-              <p class="text-xl font-bold font-secondary text-primitive-dark-500">
+            <div class="flex items-center gap-1">
+              <p class="text-lg font-bold font-secondary text-primitive-dark-500">
                 {{ formatPrice(getBasePrice(court)) }}
               </p>
-              <p class="text-xs text-neutral-400">por hora &middot; tarifa base</p>
+              <p class="text-xs !mt-1 text-neutral-400"> / hora</p>
             </div>
             <div class="flex items-center gap-1">
               <button
                 class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
                 @click="openEditCourt(court)"
               >
-                <i class="icon-[material-symbols--edit] text-sm"></i>
+                <i class="icon-[material-symbols--edit] text-md"></i>
               </button>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-red-600 transition-colors hover:bg-red-100 hover:text-red-700 cursor-pointer"
+                @click="handleDelete(court)"
               >
-                <i class="icon-[material-symbols--more-horiz] text-sm"></i>
+                <i class="icon-[material-symbols--delete] text-md"></i>
               </button>
             </div>
           </div>
@@ -200,6 +192,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
 import CourtDrawer from '@/components/canchas/CourtDrawer.vue'
 import courtService from '@/services/courtService'
 import { useAuth } from '@/composables/useAuth'
@@ -207,6 +200,7 @@ import { formatCurrency } from '@/utils/datetime'
 
 const { currentClubId, currentClub } = useAuth()
 const toast = useToast()
+const confirm = useConfirm()
 
 watch(currentClubId, (newId) => {
   if (newId) fetchCourts()
@@ -288,6 +282,39 @@ const openEditCourt = (court) => {
   editingCourt.value = { ...court, tarifas: court.tarifas.map((t) => ({ ...t })) }
   showDrawer.value = true
 }
+
+const handleDelete = (court) => {
+  if (!currentClubId.value) return
+  confirm.require({
+    header: 'Eliminar cancha',
+    message: `¿Seguro que querés eliminar "${court.nombre}"? Esta acción no se puede deshacer.`,
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Eliminar',
+    rejectLabel: 'Cancelar',
+    acceptProps: { severity: 'danger' },
+    rejectProps: { severity: 'secondary', outlined: true },
+    accept: () => performDelete(court),
+  })
+}
+
+const performDelete = async (court) => {
+  try {
+    await courtService.deleteCourt(court._id, currentClubId.value)
+    toast.add({
+      severity: 'success',
+      summary: 'Cancha eliminada',
+      detail: `"${court.nombre}" se eliminó correctamente.`,
+      life: 3000,
+    })
+    await fetchCourts()
+  } catch (err) {
+    console.error('Error al eliminar cancha:', err)
+    const detail = err.response?.data?.message || 'No se pudo eliminar la cancha.'
+    toast.add({ severity: 'error', summary: 'Error al eliminar', detail, life: 5000 })
+  }
+}
+
+
 
 const saving = ref(false)
 const deactivating = ref(false)
