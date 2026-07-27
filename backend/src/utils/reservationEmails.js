@@ -1,0 +1,177 @@
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+require('dayjs/locale/es');
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const { sendEmail } = require('./email');
+const { buildReservationICS } = require('./calendar');
+const { DEFAULT_TZ } = require('./timezone');
+const reservationConfirmedEmail = require('../emails/templates/reservationConfirmed');
+const reservationReminderEmail = require('../emails/templates/reservationReminder');
+
+// Emails ligados a una reserva. Todo lo de acá es best-effort: si el envío
+// falla, la reserva ya existe y el flujo sigue igual.
+
+const formatMoney = (amount, moneda = 'ARS') => {
+  if (amount === null || amount === undefined) return null;
+  try {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: moneda,
+      maximumFractionDigits: 0
+    }).format(amount);
+  } catch {
+    return `${moneda} ${amount}`;
+  }
+};
+
+// Datos del turno ya formateados en la zona horaria y la moneda del club.
+// Compartido por la confirmación y el recordatorio para que ambos emails
+// muestren exactamente lo mismo.
+const buildContext = (reservation, club, court) => {
+  const tz = club.timezone || DEFAULT_TZ;
+  const inicio = dayjs(reservation.inicio).tz(tz).locale('es');
+  const fin = dayjs(reservation.fin).tz(tz).locale('es');
+  const minutos = fin.diff(inicio, 'minute');
+
+  const baseUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+
+  return {
+    fecha: inicio.format('dddd D [de] MMMM'),
+    hora: `${inicio.format('HH:mm')} a ${fin.format('HH:mm')}`,
+    duracion: minutos >= 60 ? `${minutos / 60} h` : `${minutos} min`,
+    manageUrl: `${baseUrl}/reserva/${reservation.manageToken}`,
+    direccion: [club.direccion, club.ciudad].filter(Boolean).join(', '),
+    canchaNombre: court?.nombre || 'Cancha',
+    telefono: club.telefono || club.whatsapp,
+    toleranciaCancelacionHoras: club.horarios?.reservas?.toleranciaCancelacionHoras ?? 0
+  };
+};
+
+/**
+ * Confirmación de reserva al jugador, con el turno adjunto como .ics.
+ *
+ * @param {object} reservation Documento de la reserva (necesita `manageToken`).
+ * @param {object} club        Club poblado (nombre, timezone, moneda, email...).
+ * @param {object} court       Cancha poblada (nombre).
+ * @param {string} to          Email destino. Si no viene, se usa el de la reserva.
+ * @param {string} nombre      Nombre del jugador. Para reservas de un cliente
+ *                             registrado hay que pasarlo: `guestName` va vacío.
+ */
+const sendReservationConfirmation = async ({ reservation, club, court, to, nombre } = {}) => {
+  try {
+    const email = to || reservation?.guestEmail;
+
+    // Sin email no hay nada que hacer: una reserva cargada por teléfono en el
+    // backoffice puede no tenerlo, y es un caso normal.
+    if (!email || !reservation || !club) {
+      return { ok: false, skipped: 'sin email o datos incompletos' };
+    }
+
+    const { fecha, hora, duracion, manageUrl, direccion, canchaNombre } = buildContext(
+      reservation,
+      club,
+      court
+    );
+
+    const { subject, html } = reservationConfirmedEmail({
+      nombre: nombre || reservation.guestName,
+      clubNombre: club.nombre,
+      canchaNombre,
+      fecha,
+      hora,
+      duracion,
+      precio: formatMoney(reservation.precioFinal, club.moneda),
+      estado: reservation.estado,
+      manageUrl,
+      direccion,
+      telefono: club.telefono || club.whatsapp,
+      toleranciaCancelacionHoras: club.horarios?.reservas?.toleranciaCancelacionHoras ?? 0
+    });
+
+    const ics = buildReservationICS({
+      uid: String(reservation._id),
+      inicio: reservation.inicio,
+      fin: reservation.fin,
+      titulo: `${canchaNombre} · ${club.nombre}`,
+      descripcion: `Turno reservado por CourtIn.\nGestionalo en: ${manageUrl}`,
+      ubicacion: direccion,
+      url: manageUrl,
+      confirmado: reservation.estado === 'confirmada'
+    });
+
+    return await sendEmail({
+      to: email,
+      subject,
+      html,
+      template: 'reservation-confirmed',
+      // Una reserva se confirma una sola vez: si el endpoint se llamara dos
+      // veces, el jugador igual recibe un único email.
+      dedupeKey: `reservation-confirmed:${reservation._id}`,
+      refId: reservation._id,
+      club: club._id,
+      // El jugador responde y le llega al complejo, no a CourtIn.
+      replyTo: club.email || undefined,
+      attachments: [
+        {
+          filename: 'turno.ics',
+          content: Buffer.from(ics).toString('base64')
+        }
+      ]
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('No se pudo enviar la confirmación de reserva:', err.message);
+    return { ok: false, error: err.message };
+  }
+};
+
+/**
+ * Recordatorio del turno, 24 h antes. Lo dispara el cron de `jobs/`.
+ *
+ * `dedupeKey` fijo por reserva: aunque la tarea corra varias veces mientras el
+ * turno está dentro de la ventana, el jugador recibe un solo email.
+ */
+const sendReservationReminder = async ({ reservation, club, court, to, nombre } = {}) => {
+  try {
+    const email = to || reservation?.guestEmail;
+
+    if (!email || !reservation || !club) {
+      return { ok: false, skipped: 'sin email o datos incompletos' };
+    }
+
+    const ctx = buildContext(reservation, club, court);
+
+    const { subject, html } = reservationReminderEmail({
+      nombre: nombre || reservation.guestName,
+      clubNombre: club.nombre,
+      canchaNombre: ctx.canchaNombre,
+      fecha: ctx.fecha,
+      hora: ctx.hora,
+      manageUrl: ctx.manageUrl,
+      direccion: ctx.direccion,
+      telefono: ctx.telefono,
+      toleranciaCancelacionHoras: ctx.toleranciaCancelacionHoras
+    });
+
+    return await sendEmail({
+      to: email,
+      subject,
+      html,
+      template: 'reservation-reminder-24h',
+      dedupeKey: `reservation-reminder-24h:${reservation._id}`,
+      refId: reservation._id,
+      club: club._id,
+      replyTo: club.email || undefined
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('No se pudo enviar el recordatorio:', err.message);
+    return { ok: false, error: err.message };
+  }
+};
+
+module.exports = { sendReservationConfirmation, sendReservationReminder };
