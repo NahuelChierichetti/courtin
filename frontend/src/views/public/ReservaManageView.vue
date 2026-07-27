@@ -72,26 +72,26 @@ onMounted(fetchReservation)
   <div class="mx-auto max-w-lg">
     <!-- Loading -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
-      <p class="mt-4 text-sm text-slate-500">Cargando reserva...</p>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-400"></i>
+      <p class="mt-4 text-sm text-stone-500">Cargando reserva...</p>
     </div>
 
     <!-- Error -->
     <div v-else-if="error" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--warning] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--warning] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-slate-900">{{ error }}</h3>
-      <RouterLink :to="{ name: 'public-buscar' }" class="!mt-3 text-sm font-medium text-primitive-orange-500 no-underline">
+      <h3 class="mt-4 text-lg font-semibold text-stone-900">{{ error }}</h3>
+      <RouterLink :to="{ name: 'public-buscar' }" class="!mt-3 text-sm font-medium text-brand-green-500 no-underline">
         Buscar canchas
       </RouterLink>
     </div>
 
     <!-- Reservation -->
-    <div v-else class="rounded-2xl border border-slate-200 bg-white">
-      <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-        <h1 class="text-base font-semibold text-slate-900">Tu reserva</h1>
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-medium" :class="estadoMeta.text">
+    <div v-else class="rounded-2xl border border-stone-200 bg-white">
+      <div class="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+        <h1 class="text-base font-semibold text-stone-900">Tu reserva</h1>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-50 px-2.5 py-1 text-xs font-medium" :class="estadoMeta.text">
           <span class="h-1.5 w-1.5 rounded-full" :class="estadoMeta.dot"></span>
           {{ estadoMeta.label }}
         </span>
@@ -99,64 +99,64 @@ onMounted(fetchReservation)
 
       <div class="space-y-4 px-6 py-5">
         <div>
-          <p class="text-xs text-neutral-400">Complejo</p>
-          <p class="text-sm font-semibold text-slate-800">{{ reservation.club?.nombre }}</p>
-          <p v-if="reservation.club?.direccion" class="text-xs text-slate-500">{{ reservation.club.direccion }}</p>
+          <p class="text-xs text-stone-400">Complejo</p>
+          <p class="text-sm font-semibold text-stone-800">{{ reservation.club?.nombre }}</p>
+          <p v-if="reservation.club?.direccion" class="text-xs text-stone-500">{{ reservation.club.direccion }}</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <p class="text-xs text-neutral-400">Cancha</p>
-            <p class="text-sm font-semibold text-slate-800">{{ reservation.court?.nombre }}</p>
+            <p class="text-xs text-stone-400">Cancha</p>
+            <p class="text-sm font-semibold text-stone-800">{{ reservation.court?.nombre }}</p>
           </div>
           <div>
-            <p class="text-xs text-neutral-400">Precio</p>
-            <p class="text-sm font-semibold text-slate-800">{{ formatCurrency(reservation.precioFinal, moneda) }}</p>
+            <p class="text-xs text-stone-400">Precio</p>
+            <p class="text-sm font-semibold text-stone-800">{{ formatCurrency(reservation.precioFinal, moneda) }}</p>
           </div>
         </div>
 
         <div>
-          <p class="text-xs text-neutral-400">Fecha</p>
-          <p class="text-sm font-semibold text-slate-800">{{ fecha }}</p>
+          <p class="text-xs text-stone-400">Fecha</p>
+          <p class="text-sm font-semibold text-stone-800">{{ fecha }}</p>
         </div>
         <div>
-          <p class="text-xs text-neutral-400">Horario</p>
-          <p class="text-sm font-semibold text-slate-800">{{ horario }} hs</p>
+          <p class="text-xs text-stone-400">Horario</p>
+          <p class="text-sm font-semibold text-stone-800">{{ horario }} hs</p>
         </div>
         <div v-if="reservation.guestName">
-          <p class="text-xs text-neutral-400">A nombre de</p>
-          <p class="text-sm font-semibold text-slate-800">{{ reservation.guestName }}</p>
+          <p class="text-xs text-stone-400">A nombre de</p>
+          <p class="text-sm font-semibold text-stone-800">{{ reservation.guestName }}</p>
         </div>
       </div>
 
       <!-- Cancel -->
-      <div v-if="canCancel" class="border-t border-slate-100 px-6 py-4">
+      <div v-if="canCancel" class="border-t border-stone-100 px-6 py-4">
         <template v-if="!confirmingCancel">
-          <button class="text-sm font-medium text-red-500 hover:text-red-600 cursor-pointer" @click="confirmingCancel = true">
+          <button class="text-sm font-medium text-error-500 hover:text-error-600 cursor-pointer" @click="confirmingCancel = true">
             Cancelar reserva
           </button>
         </template>
         <template v-else>
-          <p class="text-sm text-slate-700">¿Seguro que querés cancelar esta reserva?</p>
-          <p v-if="cancelError" class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ cancelError }}</p>
+          <p class="text-sm text-stone-700">¿Seguro que querés cancelar esta reserva?</p>
+          <p v-if="cancelError" class="mt-2 rounded-lg bg-error-50 px-3 py-2 text-xs text-error-600">{{ cancelError }}</p>
           <div class="mt-3 flex gap-2">
             <button
-              class="h-9 rounded-full bg-red-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-60 cursor-pointer"
+              class="h-9 rounded-full bg-error-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-error-600 disabled:opacity-60 cursor-pointer"
               :disabled="cancelling"
               @click="confirmCancel"
             >
               <i v-if="cancelling" class="icon-[material-symbols--progress-activity] animate-spin mr-1.5"></i>
               {{ cancelling ? 'Cancelando...' : 'Sí, cancelar' }}
             </button>
-            <button class="h-9 rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer" :disabled="cancelling" @click="confirmingCancel = false">
+            <button class="h-9 rounded-full border border-stone-200 px-4 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50 cursor-pointer" :disabled="cancelling" @click="confirmingCancel = false">
               No
             </button>
           </div>
         </template>
       </div>
 
-      <div v-else-if="reservation.estado === 'cancelada'" class="border-t border-slate-100 px-6 py-4">
-        <p class="text-sm text-slate-500">Esta reserva fue cancelada.</p>
+      <div v-else-if="reservation.estado === 'cancelada'" class="border-t border-stone-100 px-6 py-4">
+        <p class="text-sm text-stone-500">Esta reserva fue cancelada.</p>
       </div>
     </div>
   </div>

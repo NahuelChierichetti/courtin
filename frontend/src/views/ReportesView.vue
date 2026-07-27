@@ -106,17 +106,17 @@ const totalIngresosDia = computed(() => ingresosPorDia.value.reduce((a, d) => a 
 const reservasPorDeporte = computed(() => data.value?.reservasPorDeporte || [])
 
 // Paleta categórica de deportes (validada: CVD ΔE 27, con etiquetas directas).
-const SPORT_HEX = { padel: '#1565e6', tenis: '#ff6a00', futbol: '#12b76a' }
-const sportColor = (t) => SPORT_HEX[t] || '#94a3b8'
+const SPORT_HEX = { padel: '#926699', tenis: '#b9cf32', futbol: '#347048' }
+const sportColor = (t) => SPORT_HEX[t] || '#b8a08b'
 const linePoints = computed(() => ingresosPorDia.value.map((d) => ({ label: dayjs(d.dia).format('DD/MM'), value: d.monto })))
 const deporteSegments = computed(() =>
   reservasPorDeporte.value.map((d) => ({ label: sportMeta(d.tipo).label, value: d.count, color: sportColor(d.tipo) })),
 )
 
 const ingresosPorMetodo = computed(() => data.value?.ingresosPorMetodo || [])
-const METODO_HEX = { efectivo: '#12b76a', mercadopago: '#1565e6', tarjeta: '#ff6a00', transferencia: '#7c3aed', otro: '#94a3b8' }
+const METODO_HEX = { efectivo: '#347048', mercadopago: '#926699', tarjeta: '#b9cf32', transferencia: '#7fb997', otro: '#b8a08b' }
 const metodoSegments = computed(() =>
-  ingresosPorMetodo.value.map((d) => ({ label: metodoLabel(d.metodo), value: d.monto, color: METODO_HEX[d.metodo] || '#94a3b8' })),
+  ingresosPorMetodo.value.map((d) => ({ label: metodoLabel(d.metodo), value: d.monto, color: METODO_HEX[d.metodo] || '#b8a08b' })),
 )
 
 const topCanchas = computed(() => data.value?.topCanchas || [])
@@ -183,16 +183,16 @@ const exportCsv = () => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-primitive-dark-500">Reportes</h1>
-        <p class="mt-1 text-sm text-slate-500 print:hidden">Métricas reales de ingresos, reservas y ocupación.</p>
-        <p class="mt-1 hidden text-sm text-slate-500 print:block">{{ currentClub?.nombre }} · {{ printSubtitle }}</p>
+        <h1 class="text-2xl font-bold text-ink-500">Reportes</h1>
+        <p class="mt-1 text-sm text-stone-500 print:hidden">Métricas reales de ingresos, reservas y ocupación.</p>
+        <p class="mt-1 hidden text-sm text-stone-500 print:block">{{ currentClub?.nombre }} · {{ printSubtitle }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-2 print:hidden">
         <!-- Rango personalizado -->
         <div class="flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white px-3 py-1.5 shadow-sm">
-          <input v-model="customDesde" type="date" :max="customHasta" class="bg-transparent text-xs text-primitive-dark-500 outline-none [color-scheme:light]" @change="onCustomDate" />
-          <i class="icon-[material-symbols--arrow-forward] text-xs text-slate-300"></i>
-          <input v-model="customHasta" type="date" :min="customDesde" class="bg-transparent text-xs text-primitive-dark-500 outline-none [color-scheme:light]" @change="onCustomDate" />
+          <input v-model="customDesde" type="date" :max="customHasta" class="bg-transparent text-xs text-ink-500 outline-none [color-scheme:light]" @change="onCustomDate" />
+          <i class="icon-[material-symbols--arrow-forward] text-xs text-stone-300"></i>
+          <input v-model="customHasta" type="date" :min="customDesde" class="bg-transparent text-xs text-ink-500 outline-none [color-scheme:light]" @change="onCustomDate" />
         </div>
         <!-- Presets -->
         <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
@@ -200,7 +200,7 @@ const exportCsv = () => {
             v-for="p in periods"
             :key="p.value"
             class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
-            :class="period === p.value ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+            :class="period === p.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
             @click="selectPreset(p.value)"
           >
             {{ p.label }}
@@ -208,30 +208,30 @@ const exportCsv = () => {
         </div>
         <!-- Exportar -->
         <button
-          class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer disabled:opacity-50"
+          class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:opacity-50"
           :disabled="!data"
           @click="exportCsv"
         >
-          <i class="icon-[material-symbols--download] text-base text-primitive-orange-500"></i> CSV
+          <i class="icon-[material-symbols--download] text-base text-brand-green-500"></i> CSV
         </button>
         <button
-          class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer disabled:opacity-50"
+          class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:opacity-50"
           :disabled="!data"
           @click="exportPdf"
         >
-          <i class="icon-[material-symbols--picture-as-pdf] text-base text-primitive-orange-500"></i> PDF
+          <i class="icon-[material-symbols--picture-as-pdf] text-base text-brand-green-500"></i> PDF
         </button>
       </div>
     </div>
 
     <!-- Filtro por deporte -->
     <div v-if="currentClubId" class="flex flex-wrap items-center gap-2 print:hidden">
-      <span class="mr-1 text-sm font-medium text-slate-500">Deporte:</span>
+      <span class="mr-1 text-sm font-medium text-stone-500">Deporte:</span>
       <button
         v-for="c in deporteChips"
         :key="c.value"
         class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-        :class="deporte === c.value ? 'bg-primitive-orange-500 text-white' : 'border border-black/[0.06] bg-white text-slate-600 hover:bg-slate-50'"
+        :class="deporte === c.value ? 'bg-brand-green-500 text-white' : 'border border-black/[0.06] bg-white text-stone-600 hover:bg-stone-50'"
         @click="deporte = c.value"
       >
         {{ c.label }}
@@ -240,10 +240,10 @@ const exportCsv = () => {
 
     <!-- No club -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
     </div>
 
     <template v-else>
@@ -251,39 +251,39 @@ const exportCsv = () => {
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-success-50 text-success-600"><i class="icon-[material-symbols--payments] text-lg"></i></span>
-          <p class="mt-3 text-xs font-medium text-slate-500">Ingresos</p>
+          <p class="mt-3 text-xs font-medium text-stone-500">Ingresos</p>
           <p class="mt-0.5 text-2xl font-bold font-secondary text-success-600">{{ money(kpis.ingresos) }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primitive-blue-50 text-primitive-blue-500"><i class="icon-[material-symbols--calendar-month] text-lg"></i></span>
-          <p class="mt-3 text-xs font-medium text-slate-500">Reservas</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-primitive-dark-500">{{ kpis.reservas }}</p>
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--calendar-month] text-lg"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500">Reservas</p>
+          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ kpis.reservas }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primitive-orange-50 text-primitive-orange-500"><i class="icon-[material-symbols--pie-chart] text-lg"></i></span>
-          <p class="mt-3 text-xs font-medium text-slate-500">Ocupación</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-primitive-dark-500">{{ kpis.ocupacion }}%</p>
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--pie-chart] text-lg"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500">Ocupación</p>
+          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ kpis.ocupacion }}%</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primitive-orange-50 text-primitive-orange-500"><i class="icon-[material-symbols--receipt-long] text-lg"></i></span>
-          <p class="mt-3 text-xs font-medium text-slate-500">Ticket promedio</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-primitive-dark-500">{{ money(kpis.ticketPromedio) }}</p>
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--receipt-long] text-lg"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500">Ticket promedio</p>
+          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ money(kpis.ticketPromedio) }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-500"><i class="icon-[material-symbols--person-add] text-lg"></i></span>
-          <p class="mt-3 text-xs font-medium text-slate-500">Clientes nuevos</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-primitive-dark-500">{{ kpis.clientesNuevos }}</p>
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--person-add] text-lg"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500">Clientes nuevos</p>
+          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ kpis.clientesNuevos }}</p>
         </div>
       </div>
 
       <!-- Ingresos por día -->
       <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Ingresos por día</h2>
-          <span class="text-sm text-slate-500">Total: <span class="font-semibold text-slate-700">{{ money(totalIngresosDia) }}</span></span>
+          <h2 class="text-base font-semibold text-ink-500">Ingresos por día</h2>
+          <span class="text-sm text-stone-500">Total: <span class="font-semibold text-stone-700">{{ money(totalIngresosDia) }}</span></span>
         </div>
-        <div v-if="loading" class="flex items-center justify-center py-16"><i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-slate-300"></i></div>
-        <div v-else-if="!ingresosPorDia.length" class="py-12 text-center text-sm text-slate-400">Sin datos en el período.</div>
+        <div v-if="loading" class="flex items-center justify-center py-16"><i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i></div>
+        <div v-else-if="!ingresosPorDia.length" class="py-12 text-center text-sm text-stone-400">Sin datos en el período.</div>
         <div v-else class="mt-4">
           <AreaLineChart :points="linePoints" :format="money" :label-step="diaLabelStep" />
         </div>
@@ -292,16 +292,16 @@ const exportCsv = () => {
       <!-- Deporte + Método -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div v-if="!deporte" class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Reservas por deporte</h2>
-          <div v-if="!reservasPorDeporte.length" class="py-8 text-center text-sm text-slate-400">Sin reservas.</div>
+          <h2 class="text-base font-semibold text-ink-500">Reservas por deporte</h2>
+          <div v-if="!reservasPorDeporte.length" class="py-8 text-center text-sm text-stone-400">Sin reservas.</div>
           <div v-else class="mt-5">
             <DonutChart :segments="deporteSegments" center-label="reservas" />
           </div>
         </div>
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Ingresos por método</h2>
-          <div v-if="!ingresosPorMetodo.length" class="py-8 text-center text-sm text-slate-400">Sin ingresos.</div>
+          <h2 class="text-base font-semibold text-ink-500">Ingresos por método</h2>
+          <div v-if="!ingresosPorMetodo.length" class="py-8 text-center text-sm text-stone-400">Sin ingresos.</div>
           <div v-else class="mt-5">
             <DonutChart :segments="metodoSegments" center-label="ingresos" :format="money" :center-format="moneyShort" />
           </div>
@@ -311,31 +311,31 @@ const exportCsv = () => {
       <!-- Top canchas + Top clientes -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Canchas más reservadas</h2>
-          <div v-if="!topCanchas.length" class="py-8 text-center text-sm text-slate-400">Sin datos.</div>
+          <h2 class="text-base font-semibold text-ink-500">Canchas más reservadas</h2>
+          <div v-if="!topCanchas.length" class="py-8 text-center text-sm text-stone-400">Sin datos.</div>
           <div v-else class="mt-4 space-y-1">
             <div v-for="(c, i) in topCanchas" :key="i" class="flex items-center gap-3 py-2">
-              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500">{{ i + 1 }}</span>
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-xs font-bold text-stone-500">{{ i + 1 }}</span>
               <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" :class="sportMeta(c.tipo).bg"><span class="h-2 w-2 rounded-full" :class="sportMeta(c.tipo).dot"></span></span>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-primitive-dark-500">{{ c.nombre }}</p>
-                <p class="text-xs text-neutral-400">{{ c.reservas }} reservas</p>
+                <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre }}</p>
+                <p class="text-xs text-stone-400">{{ c.reservas }} reservas</p>
               </div>
-              <span class="text-sm font-semibold font-secondary text-slate-700">{{ money(c.ingresos) }}</span>
+              <span class="text-sm font-semibold font-secondary text-stone-700">{{ money(c.ingresos) }}</span>
             </div>
           </div>
         </div>
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Mejores clientes</h2>
-          <div v-if="!topClientes.length" class="py-8 text-center text-sm text-slate-400">Sin datos.</div>
+          <h2 class="text-base font-semibold text-ink-500">Mejores clientes</h2>
+          <div v-if="!topClientes.length" class="py-8 text-center text-sm text-stone-400">Sin datos.</div>
           <div v-else class="mt-4 space-y-1">
             <div v-for="(c, i) in topClientes" :key="i" class="flex items-center gap-3 py-2">
-              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500">{{ i + 1 }}</span>
-              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primitive-orange-100 text-xs font-bold text-primitive-orange-600">{{ initials(c.nombre) }}</span>
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-xs font-bold text-stone-500">{{ i + 1 }}</span>
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green-100 text-xs font-bold text-brand-green-600">{{ initials(c.nombre) }}</span>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-primitive-dark-500">{{ c.nombre }}</p>
-                <p class="text-xs text-neutral-400">{{ c.reservas }} reservas</p>
+                <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre }}</p>
+                <p class="text-xs text-stone-400">{{ c.reservas }} reservas</p>
               </div>
               <span class="text-sm font-semibold font-secondary text-success-600">{{ money(c.gastado) }}</span>
             </div>

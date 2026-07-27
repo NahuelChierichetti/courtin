@@ -15,16 +15,16 @@
           <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-              :class="form.tipo === 'especial' ? 'bg-primitive-orange-100 text-primitive-orange-600' : 'bg-slate-100 text-slate-500'"
+              :class="form.tipo === 'especial' ? 'bg-brand-green-100 text-brand-green-600' : 'bg-stone-100 text-stone-500'"
             >
               <i :class="form.tipo === 'especial' ? 'icon-[material-symbols--star]' : 'icon-[material-symbols--power-settings-new]'" class="text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-primitive-dark-500">{{ drawerTitle }}</h2>
-              <p class="text-sm text-neutral-400">Feriados y excepciones de horario</p>
+              <h2 class="text-lg font-semibold text-ink-500">{{ drawerTitle }}</h2>
+              <p class="text-sm text-stone-400">Feriados y excepciones de horario</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer"
               @click="emit('close')"
             >
               <i class="icon-[material-symbols--close] text-sm"></i>
@@ -36,20 +36,20 @@
             <div class="space-y-6">
               <!-- Nombre -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                   Nombre
                 </label>
                 <input
                   v-model="form.nombre"
                   type="text"
                   placeholder="Ej: Día de la Independencia"
-                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-primitive-dark-500 outline-none transition-colors placeholder:text-neutral-400 focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
 
               <!-- Fecha -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                   Fecha
                 </label>
                 <DatePicker
@@ -65,20 +65,20 @@
 
               <!-- Tipo -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                   Tipo
                 </label>
                 <div class="flex overflow-hidden rounded-full border border-black/[0.08]">
                   <button
                     class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                    :class="form.tipo === 'cerrado' ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                    :class="form.tipo === 'cerrado' ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                     @click="form.tipo = 'cerrado'"
                   >
                     Cerrado
                   </button>
                   <button
                     class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-                    :class="form.tipo === 'especial' ? 'bg-primitive-dark-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'"
+                    :class="form.tipo === 'especial' ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                     @click="form.tipo = 'especial'"
                   >
                     Horario especial
@@ -89,20 +89,20 @@
               <!-- Horario (solo especial) -->
               <div v-if="form.tipo === 'especial'" class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Desde
                   </label>
                   <TimePicker v-model="form.horaInicio" />
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Hasta
                   </label>
                   <TimePicker v-model="form.horaFin" />
                 </div>
               </div>
 
-              <p v-else class="rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-500">
+              <p v-else class="rounded-lg bg-stone-50 px-4 py-3 text-xs text-stone-500">
                 El complejo permanecerá cerrado durante todo el día. No se podrán generar reservas.
               </p>
             </div>
@@ -120,13 +120,13 @@
             <div v-else />
             <div class="flex items-center gap-3">
               <button
-                class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                 @click="emit('close')"
               >
                 Cancelar
               </button>
               <button
-                class="rounded-full bg-primitive-orange-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primitive-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                class="rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="!canSave"
                 @click="handleSave"
               >

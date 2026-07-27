@@ -103,6 +103,12 @@ const router = createRouter({
           meta: { title: 'Reportes' },
         },
         {
+          path: 'equipo',
+          name: 'equipo',
+          component: () => import('@/views/EquipoView.vue'),
+          meta: { title: 'Equipo' },
+        },
+        {
           path: 'configuracion',
           name: 'configuracion',
           component: () => import('@/views/ConfiguracionView.vue'),
@@ -162,6 +168,20 @@ const router = createRouter({
       component: RegisterView,
       meta: { guestOnly: true },
     },
+    {
+      path: '/recuperar',
+      name: 'recuperar',
+      component: () => import('@/views/auth/ForgotPassword.vue'),
+      meta: { guestOnly: true, variant: 'customer' },
+    },
+    {
+      // Destino del link del email. Sin `guestOnly`: si alguien ya tiene sesión
+      // abierta en el navegador y hace clic en el link, igual tiene que poder
+      // cambiar la contraseña en vez de que lo rebote a su panel.
+      path: '/restablecer',
+      name: 'restablecer',
+      component: () => import('@/views/auth/ResetPassword.vue'),
+    },
     // --- Acceso del complejo ---
     {
       path: '/panel/login',
@@ -174,6 +194,26 @@ const router = createRouter({
       name: 'panel-registro',
       component: RegisterClubView,
       meta: { guestOnly: true },
+    },
+    {
+      // Destino del link de confirmación de email. Sin `guestOnly`: el link
+      // suele abrirse en el mismo navegador donde ya hay sesión iniciada.
+      path: '/verificar',
+      name: 'verificar',
+      component: () => import('@/views/auth/VerifyEmail.vue'),
+    },
+    {
+      // Destino del link de invitación. Sin `guestOnly`: alguien con sesión
+      // abierta igual tiene que poder aceptar una invitación a otro complejo.
+      path: '/invitacion/:token',
+      name: 'invitacion',
+      component: () => import('@/views/auth/AcceptInvitation.vue'),
+    },
+    {
+      path: '/panel/recuperar',
+      name: 'panel-recuperar',
+      component: () => import('@/views/auth/ForgotPassword.vue'),
+      meta: { guestOnly: true, variant: 'club' },
     },
     // --- Redirects de compatibilidad (estructura anterior) ---
     {

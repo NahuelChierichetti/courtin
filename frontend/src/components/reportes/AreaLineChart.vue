@@ -4,7 +4,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 const props = defineProps({
   points: { type: Array, default: () => [] }, // [{ label, value }]
   format: { type: Function, default: (v) => v },
-  color: { type: String, default: '#ff6a00' },
+  color: { type: String, default: '#347048' },
   height: { type: Number, default: 220 },
   labelStep: { type: Number, default: 1 },
 })
@@ -124,8 +124,8 @@ const tooltipStyle = computed(() => {
           :x2="width - pad.r"
           :y1="g.y"
           :y2="g.y"
-          stroke="#0f172a"
-          stroke-opacity="0.06"
+          stroke="#16241b"
+          stroke-opacity="0.08"
           stroke-width="1"
         />
         <text
@@ -134,7 +134,7 @@ const tooltipStyle = computed(() => {
           :x="pad.l - 8"
           :y="g.y + 3"
           text-anchor="end"
-          class="fill-slate-400"
+          class="fill-stone-400"
           style="font-size: 10px"
         >${{ compact(g.v) }}</text>
       </g>
@@ -150,7 +150,7 @@ const tooltipStyle = computed(() => {
 
       <!-- Hover: crosshair + marcador -->
       <template v-if="activePoint">
-        <line :x1="activePoint.x" :x2="activePoint.x" :y1="pad.t" :y2="pad.t + plotH" stroke="#0f172a" stroke-opacity="0.15" stroke-width="1" />
+        <line :x1="activePoint.x" :x2="activePoint.x" :y1="pad.t" :y2="pad.t + plotH" stroke="#16241b" stroke-opacity="0.18" stroke-width="1" />
         <circle :cx="activePoint.x" :cy="activePoint.y" r="5" fill="white" :stroke="color" stroke-width="2.5" />
       </template>
 
@@ -161,7 +161,7 @@ const tooltipStyle = computed(() => {
         :x="p.x"
         :y="height - 6"
         text-anchor="middle"
-        class="fill-slate-400"
+        class="fill-stone-400"
         style="font-size: 10px"
       >{{ i % labelStep === 0 ? p.label : '' }}</text>
     </svg>
@@ -172,8 +172,8 @@ const tooltipStyle = computed(() => {
       class="pointer-events-none absolute z-10 -translate-x-1/2 rounded-lg border border-black/[0.06] bg-white px-2.5 py-1.5 text-center shadow-md"
       :style="tooltipStyle"
     >
-      <p class="text-[10px] text-neutral-400">{{ activePoint.label }}</p>
-      <p class="text-xs font-bold font-secondary text-primitive-dark-500">{{ format(activePoint.value) }}</p>
+      <p class="text-[10px] text-stone-400">{{ activePoint.label }}</p>
+      <p class="text-xs font-bold font-secondary text-ink-500">{{ format(activePoint.value) }}</p>
     </div>
   </div>
 </template>

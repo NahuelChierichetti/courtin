@@ -3,14 +3,14 @@
     <!-- Header -->
     <div class="flex items-start justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-primitive-dark-500">Horarios de apertura</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <h1 class="text-2xl font-bold text-ink-500">Horarios de apertura</h1>
+        <p class="mt-1 text-sm text-stone-500">
           Definí los días y horas en que el complejo acepta reservas.
         </p>
       </div>
       <div v-if="currentClubId && !loading && !error" class="flex items-center gap-3">
         <button
-          class="flex items-center gap-2 rounded-full bg-primitive-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primitive-orange-600 disabled:opacity-60 cursor-pointer"
+          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:opacity-60 cursor-pointer"
           :disabled="saving"
           @click="save"
         >
@@ -22,19 +22,19 @@
 
     <!-- No club selected -->
     <div v-if="!currentClubId" class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-        <i class="icon-[material-symbols--apartment] text-2xl text-neutral-400"></i>
+      <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
+        <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-primitive-dark-500">Sin club seleccionado</h3>
-      <p class="!mt-2 text-sm text-slate-500">
+      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <p class="!mt-2 text-sm text-stone-500">
         Seleccioná un club desde el selector en el encabezado para configurar los horarios.
       </p>
     </div>
 
     <!-- Loading -->
     <div v-else-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
-      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-neutral-400"></i>
-      <p class="mt-4 text-sm text-slate-500">Cargando horarios...</p>
+      <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-400"></i>
+      <p class="mt-4 text-sm text-stone-500">Cargando horarios...</p>
     </div>
 
     <!-- Error -->
@@ -42,9 +42,9 @@
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-error-50">
         <i class="icon-[material-symbols--warning] text-2xl text-error-500"></i>
       </div>
-      <p class="mt-4 text-sm text-slate-500">{{ error }}</p>
-      <button class="mt-4 flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer" @click="fetchHorarios">
-        <i class="icon-[material-symbols--refresh] text-base text-slate-400"></i> Reintentar
+      <p class="mt-4 text-sm text-stone-500">{{ error }}</p>
+      <button class="mt-4 flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer" @click="fetchHorarios">
+        <i class="icon-[material-symbols--refresh] text-base text-stone-400"></i> Reintentar
       </button>
     </div>
 
@@ -54,24 +54,24 @@
       <div class="lg:col-span-2 rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-black/[0.06] px-6 py-5">
           <div>
-            <h2 class="text-base font-semibold text-primitive-dark-500">Horario semanal regular</h2>
-            <p class="mt-0.5 text-sm text-neutral-400">Aplica a todas las canchas salvo excepciones puntuales</p>
+            <h2 class="text-base font-semibold text-ink-500">Horario semanal regular</h2>
+            <p class="mt-0.5 text-sm text-stone-400">Aplica a todas las canchas salvo excepciones puntuales</p>
           </div>
           <button
-            class="text-sm font-medium text-primitive-orange-500 transition-colors hover:text-primitive-orange-600 cursor-pointer"
+            class="text-sm font-medium text-brand-green-500 transition-colors hover:text-brand-green-600 cursor-pointer"
             @click="copyToAll"
           >
             Copiar a todas
           </button>
         </div>
 
-        <div class="divide-y divide-slate-100">
+        <div class="divide-y divide-stone-100">
           <div
             v-for="dia in diasSemana"
             :key="dia.key"
             class="flex items-center gap-4 px-6 py-4"
           >
-            <span class="w-24 shrink-0 text-sm font-medium text-primitive-dark-500">{{ dia.label }}</span>
+            <span class="w-24 shrink-0 text-sm font-medium text-ink-500">{{ dia.label }}</span>
 
             <div class="flex items-center gap-2" :class="{ 'opacity-40': !horarios.semanal[dia.key].abierto }">
               <TimePicker
@@ -79,7 +79,7 @@
                 :disabled="!horarios.semanal[dia.key].abierto"
                 class="w-28"
               />
-              <span class="text-slate-300">&mdash;</span>
+              <span class="text-stone-300">&mdash;</span>
               <TimePicker
                 v-model="horarios.semanal[dia.key].horaFin"
                 :disabled="!horarios.semanal[dia.key].abierto"
@@ -87,20 +87,20 @@
               />
             </div>
 
-            <span class="hidden flex-1 text-xs text-neutral-400 sm:block">
+            <span class="hidden flex-1 text-xs text-stone-400 sm:block">
               <template v-if="horarios.semanal[dia.key].abierto">
                 ~{{ slotsCount(horarios.semanal[dia.key]) }} turnos de 1h
               </template>
             </span>
 
             <div class="ml-auto flex items-center gap-3">
-              <span class="text-sm" :class="horarios.semanal[dia.key].abierto ? 'text-slate-600' : 'text-neutral-400'">
+              <span class="text-sm" :class="horarios.semanal[dia.key].abierto ? 'text-stone-600' : 'text-stone-400'">
                 {{ horarios.semanal[dia.key].abierto ? 'Abierto' : 'Cerrado' }}
               </span>
               <button
                 type="button"
                 class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors"
-                :class="horarios.semanal[dia.key].abierto ? 'bg-primitive-orange-500' : 'bg-slate-300'"
+                :class="horarios.semanal[dia.key].abierto ? 'bg-brand-green-500' : 'bg-stone-300'"
                 @click="horarios.semanal[dia.key].abierto = !horarios.semanal[dia.key].abierto"
               >
                 <span
@@ -119,22 +119,22 @@
         <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
           <div class="flex items-center justify-between border-b border-black/[0.06] px-6 py-5">
             <div>
-              <h2 class="text-base font-semibold text-primitive-dark-500">Días especiales</h2>
-              <p class="mt-0.5 text-sm text-neutral-400">Feriados y excepciones</p>
+              <h2 class="text-base font-semibold text-ink-500">Días especiales</h2>
+              <p class="mt-0.5 text-sm text-stone-400">Feriados y excepciones</p>
             </div>
             <button
-              class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+              class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer"
               @click="openNewSpecialDay"
             >
               <i class="icon-[material-symbols--add] text-sm"></i>
             </button>
           </div>
 
-          <div v-if="horarios.diasEspeciales.length === 0" class="px-6 py-8 text-center text-sm text-neutral-400">
+          <div v-if="horarios.diasEspeciales.length === 0" class="px-6 py-8 text-center text-sm text-stone-400">
             No hay días especiales cargados.
           </div>
 
-          <div v-else class="divide-y divide-slate-100">
+          <div v-else class="divide-y divide-stone-100">
             <div
               v-for="(dia, idx) in horarios.diasEspeciales"
               :key="dia._id || idx"
@@ -142,19 +142,19 @@
             >
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                :class="dia.tipo === 'especial' ? 'bg-primitive-orange-100 text-primitive-orange-500' : 'bg-slate-100 text-neutral-400'"
+                :class="dia.tipo === 'especial' ? 'bg-brand-green-100 text-brand-green-500' : 'bg-stone-100 text-stone-400'"
               >
                 <i :class="dia.tipo === 'especial' ? 'icon-[material-symbols--star]' : 'icon-[material-symbols--power-settings-new]'" class="text-sm"></i>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-primitive-dark-500">{{ dia.nombre }}</p>
-                <p class="text-xs text-neutral-400">
+                <p class="truncate text-sm font-medium text-ink-500">{{ dia.nombre }}</p>
+                <p class="text-xs text-stone-400">
                   {{ formatDate(dia.fecha) }} &middot;
                   {{ dia.tipo === 'especial' ? `Extendido ${dia.horaInicio} – ${dia.horaFin}` : 'Cerrado' }}
                 </p>
               </div>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 cursor-pointer group-hover:opacity-100"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 opacity-0 transition-all hover:bg-stone-100 hover:text-stone-600 cursor-pointer group-hover:opacity-100"
                 @click="openEditSpecialDay(dia, idx)"
               >
                 <i class="icon-[material-symbols--edit] text-sm"></i>
@@ -165,44 +165,44 @@
 
         <!-- Booking settings -->
         <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm p-6">
-          <h2 class="text-base font-semibold text-primitive-dark-500">Ajustes de reserva</h2>
+          <h2 class="text-base font-semibold text-ink-500">Ajustes de reserva</h2>
 
-          <div class="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-xs text-slate-500">
+          <div class="mt-4 rounded-lg bg-stone-50 px-4 py-3 text-xs text-stone-500">
             La duración del turno se configura por cancha (60, 90 o 120 min) desde la sección
-            <RouterLink to="/panel/canchas" class="font-medium text-primitive-orange-500 hover:text-primitive-orange-600">Canchas</RouterLink>,
+            <RouterLink to="/panel/canchas" class="font-medium text-brand-green-500 hover:text-brand-green-600">Canchas</RouterLink>,
             para contemplar deportes con duraciones distintas.
           </div>
 
           <div class="mt-5 space-y-5">
             <div class="flex items-center justify-between gap-4">
               <div class="min-w-0">
-                <p class="text-sm font-medium text-slate-700">Tolerancia para cancelar</p>
-                <p class="text-xs text-neutral-400">Tiempo antes del turno para cancelar sin costo</p>
+                <p class="text-sm font-medium text-stone-700">Tolerancia para cancelar</p>
+                <p class="text-xs text-stone-400">Tiempo antes del turno para cancelar sin costo</p>
               </div>
               <div class="relative shrink-0">
                 <select
                   v-model.number="horarios.reservas.toleranciaCancelacionHoras"
-                  class="w-32 appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                  class="w-32 appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 >
                   <option v-for="opt in toleranciaOptions" :key="opt" :value="opt">{{ opt }} horas</option>
                 </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
               </div>
             </div>
 
             <div class="flex items-center justify-between gap-4">
               <div class="min-w-0">
-                <p class="text-sm font-medium text-slate-700">Reserva anticipada máx.</p>
-                <p class="text-xs text-neutral-400">Cuánto se puede reservar con antelación</p>
+                <p class="text-sm font-medium text-stone-700">Reserva anticipada máx.</p>
+                <p class="text-xs text-stone-400">Cuánto se puede reservar con antelación</p>
               </div>
               <div class="relative shrink-0">
                 <select
                   v-model.number="horarios.reservas.anticipacionMaximaDias"
-                  class="w-32 appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-8 text-sm text-primitive-dark-500 outline-none transition-colors focus:border-primitive-orange-400 focus:ring-2 focus:ring-primitive-orange-100"
+                  class="w-32 appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 >
                   <option v-for="opt in anticipacionOptions" :key="opt" :value="opt">{{ opt }} días</option>
                 </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-neutral-400"></i>
+                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
               </div>
             </div>
           </div>
