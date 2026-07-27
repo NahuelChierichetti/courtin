@@ -6,6 +6,8 @@ const {
   createAdminClub,
   updateAdminClub,
   suspendAdminClub,
+  deleteAdminClub,
+  restoreAdminClub,
   getAdminUsers,
   createAdminUser,
   updateAdminUser,
@@ -22,6 +24,8 @@ router.post('/clubs', createAdminClub);
 router.get('/clubs/:id', getAdminClubById);
 router.put('/clubs/:id', updateAdminClub);
 router.patch('/clubs/:id/suspend', suspendAdminClub);
+router.patch('/clubs/:id/restore', restoreAdminClub);
+router.delete('/clubs/:id', deleteAdminClub);
 
 router.get('/users', getAdminUsers);
 router.post('/users', createAdminUser);

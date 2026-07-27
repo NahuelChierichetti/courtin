@@ -7,7 +7,11 @@ const User = require('../models/User');
 
 const getAdminClubs = async (req, res, next) => {
   try {
-    const { search, plan, estado, page = 1, limit = 20 } = req.query;
+    const { search, plan, estado, eliminados, page = 1, limit = 20 } = req.query;
+
+    // Vista "papelera": lista los complejos borrados lógicamente para poder
+    // reestablecerlos. Requiere withDeleted porque el plugin los oculta por defecto.
+    const showDeleted = eliminados === 'true' || eliminados === true;
 
     const filter = {};
 
@@ -24,23 +28,35 @@ const getAdminClubs = async (req, res, next) => {
       filter.plan = plan;
     }
 
-    if (estado) {
+    if (showDeleted) {
+      filter.deletedAt = { $ne: null };
+    } else if (estado) {
       filter.estado = estado;
     }
 
     const skip = (Number(page) - 1) * Number(limit);
-    const [clubs, total] = await Promise.all([
-      Club.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
-      Club.countDocuments(filter),
-    ]);
+
+    const clubsQuery = Club.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean();
+    const countQuery = Club.countDocuments(filter);
+    if (showDeleted) {
+      clubsQuery.setOptions({ withDeleted: true });
+      countQuery.setOptions({ withDeleted: true });
+    }
+
+    const [clubs, total] = await Promise.all([clubsQuery, countQuery]);
 
     const clubIds = clubs.map((c) => c._id);
 
+    // En la papelera las canchas también están borradas (cascada), así que las
+    // incluimos en el conteo para que la fila muestre cuántas tenía.
+    const courtCountAgg = Court.aggregate([
+      { $match: { club: { $in: clubIds } } },
+      { $group: { _id: '$club', count: { $sum: 1 } } },
+    ]);
+    if (showDeleted) courtCountAgg.option({ withDeleted: true });
+
     const [courtCounts, owners, lastReservations] = await Promise.all([
-      Court.aggregate([
-        { $match: { club: { $in: clubIds } } },
-        { $group: { _id: '$club', count: { $sum: 1 } } },
-      ]),
+      courtCountAgg,
       Membership.find({
         club: { $in: clubIds },
         role: 'tenant_admin',
@@ -196,6 +212,61 @@ const suspendAdminClub = async (req, res, next) => {
     res.status(200).json({
       ok: true,
       message: club.estado === 'suspendido' ? 'Complejo suspendido' : 'Complejo reactivado',
+      club,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteAdminClub = async (req, res, next) => {
+  try {
+    // Borrado lógico + cascada: el complejo y sus canchas se marcan como
+    // borrados pero permanecen en la base (se pueden reestablecer).
+    const club = await Club.softDeleteById(req.params.id);
+
+    if (!club) {
+      return res.status(404).json({ ok: false, message: 'Club no encontrado' });
+    }
+
+    await Court.updateMany(
+      { club: club._id, deletedAt: null },
+      { deletedAt: new Date() }
+    );
+
+    res.status(200).json({
+      ok: true,
+      message: 'Complejo eliminado con éxito',
+      club,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const restoreAdminClub = async (req, res, next) => {
+  try {
+    // Se busca incluyendo borrados (el plugin los oculta por defecto).
+    const club = await Club.findOne({ _id: req.params.id }).setOptions({ withDeleted: true });
+
+    if (!club) {
+      return res.status(404).json({ ok: false, message: 'Club no encontrado' });
+    }
+
+    if (!club.deletedAt) {
+      return res.status(400).json({ ok: false, message: 'El complejo no está eliminado' });
+    }
+
+    club.deletedAt = null;
+    await club.save();
+
+    // Reestablece las canchas del complejo (updateMany no pasa por el filtro
+    // de borrado, así que alcanza a las que estaban marcadas).
+    await Court.updateMany({ club: club._id }, { deletedAt: null });
+
+    res.status(200).json({
+      ok: true,
+      message: 'Complejo reestablecido con éxito',
       club,
     });
   } catch (error) {
@@ -425,6 +496,8 @@ module.exports = {
   createAdminClub,
   updateAdminClub,
   suspendAdminClub,
+  deleteAdminClub,
+  restoreAdminClub,
   getAdminUsers,
   createAdminUser,
   updateAdminUser,

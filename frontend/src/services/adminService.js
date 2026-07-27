@@ -26,6 +26,16 @@ const adminService = {
     return data
   },
 
+  async deleteClub(id) {
+    const { data } = await api.delete(`/admin/clubs/${id}`)
+    return data
+  },
+
+  async restoreClub(id) {
+    const { data } = await api.patch(`/admin/clubs/${id}/restore`)
+    return data
+  },
+
   async getUsers(params = {}) {
     const { data } = await api.get('/admin/users', { params })
     return data

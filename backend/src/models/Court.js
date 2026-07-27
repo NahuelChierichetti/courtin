@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const softDelete = require('../utils/softDelete');
 
 const tarifaSchema = new mongoose.Schema(
   {
@@ -96,5 +97,7 @@ const courtSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+courtSchema.plugin(softDelete);
 
 module.exports = mongoose.model('Court', courtSchema);

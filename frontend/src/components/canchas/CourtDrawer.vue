@@ -146,9 +146,6 @@
                     {{ opt }} min
                   </button>
                 </div>
-                <p class="mt-2.5 text-xs text-neutral-400">
-                  Fútbol suele ser 60 min; pádel y tenis, 90 min.
-                </p>
               </div>
 
               <!-- Reservable online -->
@@ -201,10 +198,6 @@
 
                 <!-- Franjas (avanzado) -->
                 <div v-else class="space-y-3">
-                  <p class="text-xs text-neutral-400">
-                    Cada franja aplica a ciertos días y un rango horario. El precio es por hora.
-                  </p>
-
                   <div
                     v-for="(band, index) in form.tarifas"
                     :key="index"
@@ -277,7 +270,7 @@
                     </div>
 
                     <p
-                      class="mt-3 rounded-lg px-2.5 py-1.5 text-xs"
+                      class="!mt-2 rounded-lg px-2.5 py-1.5 text-xs"
                       :class="band.diasSel.length ? 'bg-primitive-orange-50 text-primitive-orange-700' : 'bg-slate-50 text-slate-400'"
                     >
                       {{ bandSummary(band) }}
