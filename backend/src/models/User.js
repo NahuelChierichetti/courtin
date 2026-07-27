@@ -25,6 +25,16 @@ const userSchema = new mongoose.Schema(
       enum: ['activo', 'inactivo'],
       default: 'activo'
     },
+    // Cuándo confirmó su email. Null = todavía no lo hizo.
+    //
+    // La verificación es blanda a propósito: no bloquea el login ni el uso de
+    // la plataforma, sólo muestra un aviso. Cortarle el acceso a un complejo
+    // que se está dando de alta por un email que quedó en spam cuesta más de lo
+    // que protege.
+    emailVerifiedAt: {
+      type: Date,
+      default: null
+    },
     globalRole: {
       type: String,
       enum: ['superadmin'],

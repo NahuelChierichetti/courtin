@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "Sistema de reservas de canchas",
   "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed": "node src/scripts/seedDemo.js"
+    "seed": "node src/scripts/seedDemo.js",
+    "mail:test": "node src/scripts/sendTestEmail.js",
+    "jobs:reminders": "node src/scripts/sendReminders.js",
+    "users:grandfather": "node src/scripts/verifyExistingUsers.js"
   },
   "repository": {
     "type": "git",
@@ -28,9 +34,12 @@
     "dayjs": "^1.11.21",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.6.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.2",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "node-cron": "^4.6.0",
+    "resend": "^6.18.0"
   },
   "bugs": {
     "url": "https://github.com/NahuelChierichetti/courtin/issues"

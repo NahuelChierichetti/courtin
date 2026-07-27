@@ -17,6 +17,7 @@ const subtitle = computed(() =>
     : 'Entrá para ver y gestionar tus reservas.',
 )
 const registerTo = computed(() => (isClub.value ? '/panel/registro' : '/registro'))
+const forgotTo = computed(() => (isClub.value ? '/panel/recuperar' : '/recuperar'))
 const registerLabel = computed(() =>
   isClub.value ? '¿Querés sumar tu complejo?' : '¿Todavía no tenés cuenta?',
 )
@@ -106,7 +107,7 @@ const handleSubmit = async () => {
                 <input type="checkbox" class="h-4 w-4 shrink-0 rounded border border-stone-300 bg-white accent-brand-green-500 [color-scheme:light]" />
                 Recordarme
               </label>
-              <a href="#" class="text-sm font-medium text-brand-green-500 hover:underline">¿Olvidaste tu contraseña?</a>
+              <RouterLink :to="forgotTo" class="text-sm font-medium text-brand-green-500 hover:underline">¿Olvidaste tu contraseña?</RouterLink>
             </div>
 
             <button

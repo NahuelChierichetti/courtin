@@ -5,8 +5,13 @@ const Club = require('../models/Club');
 const { validateReservationSlot, isReservationInProgress, canCancelReservation } = require('../utils/reservationRules');
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify } = require('../utils/notifications');
+const { sendReservationConfirmation } = require('../utils/reservationEmails');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
+
+// El club poblado por defecto no trae los datos de contacto que necesita el
+// email (dirección, teléfono, política de cancelación).
+const CLUB_EMAIL_FIELDS = 'nombre direccion ciudad telefono whatsapp email timezone moneda horarios';
 
 const POPULATE = [
   ['club', 'nombre slug estado timezone moneda'],
@@ -142,6 +147,20 @@ const createReservation = async (req, res, next) => {
     }
 
     const populated = await populateReservation(Reservation.findById(reservation._id));
+
+    // Confirmación al jugador. Una reserva cargada por teléfono puede no tener
+    // email, y es un caso normal: en ese caso no se manda nada.
+    const emailTo = populated.customer?.email || populated.guestEmail;
+    if (emailTo) {
+      const clubForEmail = await Club.findById(clubId).select(CLUB_EMAIL_FIELDS);
+      await sendReservationConfirmation({
+        reservation: populated,
+        club: clubForEmail,
+        court: populated.court,
+        to: emailTo,
+        nombre: populated.customer?.nombre || populated.guestName
+      });
+    }
 
     res.status(201).json({ ok: true, reservation: populated });
   } catch (error) {

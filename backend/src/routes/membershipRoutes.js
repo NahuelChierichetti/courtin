@@ -4,7 +4,8 @@ const {
   createMembership,
   getClubMemberships,
   getMyMemberships,
-  updateMembership
+  updateMembership,
+  updateClubMembership
 } = require('../controllers/membershipController');
 const {
   protect,
@@ -20,6 +21,9 @@ router.use(protect);
 router.get('/me', getMyMemberships);
 router.post('/', authorizeClubRoles(ROLES.TENANT_ADMIN), createMembership);
 router.get('/club/:clubId', authorizeClubRoles(ROLES.TENANT_ADMIN), getClubMemberships);
+// Gestión del equipo por el dueño del complejo (acotada a su club).
+router.put('/club/:clubId/:id', authorizeClubRoles(ROLES.TENANT_ADMIN), updateClubMembership);
+// Versión sin restricciones, para el backoffice de superadmin.
 router.put('/:id', authorizeSuperadmin, updateMembership);
 
 module.exports = router;

@@ -5,6 +5,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useSidebar, useSidebarShortcut } from '@/composables/useSidebar'
 import clubService from '@/services/clubService'
 import notificationService from '@/services/notificationService'
+import VerifyEmailBanner from '@/components/common/VerifyEmailBanner.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -89,7 +90,9 @@ const handleLogout = () => {
   router.push({ name: 'panel-login' })
 }
 
-const navItems = [
+// `adminOnly`: sólo para el dueño del complejo. Un empleado no gestiona el
+// equipo, y el backend igual le respondería 403.
+const ALL_NAV_ITEMS = [
   { label: 'Dashboard', icon: 'icon-[material-symbols--home]', to: '/panel/dashboard' },
   { label: 'Turnos', icon: 'icon-[material-symbols--calendar-month]', to: '/panel/turnos' },
   { label: 'Clientes', icon: 'icon-[material-symbols--group]', to: '/panel/clientes' },
@@ -97,13 +100,30 @@ const navItems = [
   { label: 'Canchas', icon: 'icon-[material-symbols--grid-view]', to: '/panel/canchas' },
   { label: 'Horarios', icon: 'icon-[material-symbols--schedule]', to: '/panel/horarios' },
   { label: 'Reportes', icon: 'icon-[material-symbols--bar-chart]', to: '/panel/reportes' },
+  { label: 'Equipo', icon: 'icon-[material-symbols--badge-outline]', to: '/panel/equipo', adminOnly: true },
   { label: 'Notificaciones', icon: 'icon-[material-symbols--notifications]', to: '/panel/notificaciones', dot: true },
 ]
+
+// El rol depende del club activo: la misma persona puede ser dueña de uno y
+// empleada de otro.
+const isClubAdmin = computed(() => {
+  if (isSuperadmin.value) return true
+  return memberships.value.some(
+    (m) =>
+      (m.club?._id || m.club) === currentClubId.value &&
+      m.role === 'tenant_admin' &&
+      m.estado === 'activo',
+  )
+})
+
+const navItems = computed(() => ALL_NAV_ITEMS.filter((i) => !i.adminOnly || isClubAdmin.value))
 
 const isActive = (to) => route.path === to || route.path.startsWith(to + '/')
 
 const currentPageTitle = computed(() => {
-  const item = navItems.find((i) => isActive(i.to))
+  // Se busca sobre la lista completa: el título tiene que resolverse igual en
+  // una ruta que no esté en el menú visible.
+  const item = ALL_NAV_ITEMS.find((i) => isActive(i.to))
   return item?.label || ''
 })
 
@@ -314,6 +334,7 @@ const userShortName = computed(() => {
 
       <!-- Page content -->
       <main class="flex-1 overflow-y-auto p-6 print:overflow-visible print:p-0">
+        <VerifyEmailBanner class="mb-6 print:hidden" />
         <RouterView />
       </main>
     </div>

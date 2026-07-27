@@ -17,6 +17,7 @@ const { horariosToLocal, DEFAULT_TZ } = require('../utils/timezone');
 const { recordReservationPayment } = require('../utils/cashLedger');
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify } = require('../utils/notifications');
+const { sendReservationConfirmation } = require('../utils/reservationEmails');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -420,6 +421,10 @@ const createPublicReservation = async (req, res, next) => {
         mensaje: `${guestName} hizo su primera reserva`
       });
     }
+
+    // Confirmación por email al jugador, con el turno adjunto como .ics.
+    // Best-effort: la reserva ya está creada y la respuesta no depende de esto.
+    await sendReservationConfirmation({ reservation, club, court });
 
     res.status(201).json({
       ok: true,

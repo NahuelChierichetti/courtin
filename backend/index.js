@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
+const { startJobs } = require('./src/jobs');
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
@@ -11,6 +12,8 @@ const startServer = async () => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
+  // Después del listen: las tareas necesitan la base, no el servidor HTTP.
+  startJobs();
 };
 
 startServer();

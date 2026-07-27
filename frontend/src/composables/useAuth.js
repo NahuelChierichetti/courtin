@@ -1,5 +1,6 @@
 import { computed, readonly, ref } from 'vue'
 import authService from '@/services/authService'
+import invitationService from '@/services/invitationService'
 import { clearToken, getToken, setToken } from '@/utils/authStorage'
 
 const CLUB_ID_KEY = 'courtin_active_club'
@@ -152,6 +153,66 @@ const registerClub = async (payload) => {
   }
 }
 
+// Define la contraseña nueva desde el link del email y deja la sesión iniciada:
+// quien llegó hasta acá ya probó que controla la casilla.
+const resetPassword = async ({ token: resetToken, password }) => {
+  isLoading.value = true
+
+  try {
+    const data = await authService.resetPassword({ token: resetToken, password })
+    setToken(data.token)
+    token.value = data.token
+
+    const me = await authService.getMe()
+    setSession(data.token, me.user, me.memberships)
+    isInitialized.value = true
+
+    return {
+      ...data,
+      user: me.user,
+      memberships: me.memberships,
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Acepta una invitación de staff: crea o vincula la cuenta, suma la membresía y
+// deja la sesión iniciada con el complejo ya cargado.
+const acceptInvitation = async (inviteToken, payload) => {
+  isLoading.value = true
+
+  try {
+    const data = await invitationService.accept(inviteToken, payload)
+    setToken(data.token)
+    token.value = data.token
+
+    const me = await authService.getMe()
+    setSession(data.token, me.user, me.memberships)
+    isInitialized.value = true
+
+    return {
+      ...data,
+      user: me.user,
+      memberships: me.memberships,
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Recarga los datos del usuario en sesión. Se usa cuando algo cambió del lado
+// del servidor (p. ej. el email quedó verificado) y hay que reflejarlo sin
+// obligar a cerrar y volver a iniciar sesión.
+const refreshUser = async () => {
+  if (!token.value) return null
+
+  const me = await authService.getMe()
+  user.value = me.user
+  if (me.memberships) memberships.value = me.memberships
+  return me.user
+}
+
 const logout = () => {
   clearSession()
   isInitialized.value = true
@@ -230,6 +291,11 @@ export const useAuth = () => ({
   login,
   register,
   registerClub,
+  resetPassword,
+  acceptInvitation,
+  refreshUser,
+  // Verificación blanda: no bloquea el uso, sólo alimenta el aviso del panel.
+  isEmailVerified: computed(() => Boolean(user.value?.emailVerifiedAt)),
   logout,
   setCurrentClubId,
   setSuperadminClubs,
