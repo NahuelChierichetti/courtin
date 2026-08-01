@@ -14,6 +14,7 @@ const reservationReminderEmail = require('../emails/templates/reservationReminde
 const clubReservaAvisoEmail = require('../emails/templates/clubReservaAviso');
 const reservationRefundedEmail = require('../emails/templates/reservationRefunded');
 const { emailsDelClub } = require('./clubContact');
+const { appUrl } = require('./publicUrls');
 
 // Emails ligados a una reserva. Todo lo de acá es best-effort: si el envío
 // falla, la reserva ya existe y el flujo sigue igual.
@@ -40,7 +41,7 @@ const buildContext = (reservation, club, court) => {
   const fin = dayjs(reservation.fin).tz(tz).locale('es');
   const minutos = fin.diff(inicio, 'minute');
 
-  const baseUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+  const baseUrl = appUrl();
 
   return {
     fecha: inicio.format('dddd D [de] MMMM'),
@@ -219,7 +220,7 @@ const sendClubReservationNotice = async ({ tipo, reservation, club, court } = {}
     }
 
     const ctx = buildContext(reservation, club, court);
-    const baseUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+    const baseUrl = appUrl();
 
     const { subject, html } = clubReservaAvisoEmail({
       tipo,

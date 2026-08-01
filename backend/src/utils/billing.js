@@ -5,6 +5,7 @@ const { precioDe, MONEDA, TRIAL_DIAS, getPlan } = require('../config/plans');
 const { estadoPorSuscripcion, extenderVigencia } = require('./subscriptions');
 const { emailsDelClub } = require('./clubContact');
 const { sendEmail } = require('./email');
+const { appUrl } = require('./publicUrls');
 const invoiceIssuedEmail = require('../emails/templates/invoiceIssued');
 const trialAvisoEmail = require('../emails/templates/trialAviso');
 const deudaAvisoEmail = require('../emails/templates/deudaAviso');
@@ -197,7 +198,7 @@ const notificarFactura = async (club, invoice) => {
       );
     }
 
-    const baseUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+    const baseUrl = appUrl();
 
     const { subject, html } = invoiceIssuedEmail({
       clubNombre: club.nombre,
@@ -235,7 +236,7 @@ const datosSoporte = () => ({
   soporteWhatsapp: process.env.SOPORTE_WHATSAPP || null
 });
 
-const panelUrl = () => `${(process.env.APP_PUBLIC_URL || '').replace(/\/$/, '')}/panel/suscripcion`;
+const panelUrl = () => `${appUrl()}/panel/suscripcion`;
 
 // Envoltura común: resuelve el destinatario y manda. Devuelve el resultado de
 // `sendEmail` o un skip si el club no tiene a dónde recibir.

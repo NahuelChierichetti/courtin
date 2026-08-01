@@ -7,6 +7,7 @@ const Club = require('../models/Club');
 const ROLES = require('../config/roles');
 const { issueToken, findValidToken, consumeToken } = require('../utils/tokens');
 const { sendEmail } = require('../utils/email');
+const { appUrl } = require('../utils/publicUrls');
 const passwordResetEmail = require('../emails/templates/passwordReset');
 const verifyEmailTemplate = require('../emails/templates/verifyEmail');
 const { ensureSubscription } = require('../utils/billing');
@@ -17,7 +18,7 @@ const RESET_TTL_MINUTES = 60;
 // La verificación dura más: no bloquea nada, así que no hay apuro en usarla.
 const VERIFY_TTL_HOURS = 48;
 
-const publicBaseUrl = () => (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+const publicBaseUrl = () => appUrl();
 
 // Emite el token de verificación y manda el email. Best-effort: si falla, la
 // cuenta ya existe y la persona puede pedir el reenvío desde el panel.
@@ -271,7 +272,7 @@ const forgotPassword = async (req, res, next) => {
       ttlMinutes: RESET_TTL_MINUTES
     });
 
-    const baseUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+    const baseUrl = appUrl();
     const resetUrl = `${baseUrl}/restablecer?token=${raw}`;
 
     const { subject, html } = passwordResetEmail({

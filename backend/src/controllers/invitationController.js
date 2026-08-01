@@ -8,6 +8,7 @@ const Token = require('../models/Token');
 const ROLES = require('../config/roles');
 const { issueToken, findValidToken, consumeToken } = require('../utils/tokens');
 const { sendEmail } = require('../utils/email');
+const { appUrl } = require('../utils/publicUrls');
 const staffInviteEmail = require('../emails/templates/staffInvite');
 
 // Invitaciones al equipo de un complejo.
@@ -73,7 +74,7 @@ const createInvitation = async (req, res, next) => {
       }
     });
 
-    const baseUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+    const baseUrl = appUrl();
     const acceptUrl = `${baseUrl}/invitacion/${raw}`;
 
     const { subject, html } = staffInviteEmail({

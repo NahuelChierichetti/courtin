@@ -233,24 +233,34 @@ const handleOverlay = (e) => {
             <div v-if="form.modalidad === 'sena'">
               <label class="mb-2 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cuánto es la seña</label>
               <div class="flex gap-2">
-                <div class="flex overflow-hidden rounded-xl border border-black/[0.08]">
+                <!-- `shrink-0` es lo que impide que el input (que pide todo el
+                     ancho) le coma el espacio al selector y el `overflow-hidden`
+                     termine recortando la moneda. -->
+                <div class="flex shrink-0 overflow-hidden rounded-xl border border-black/[0.08]">
                   <button
                     v-for="t in [{ value: 'porcentaje', label: '%' }, { value: 'fijo', label: moneda }]"
                     :key="t.value"
-                    class="px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer"
+                    class="min-w-12 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors cursor-pointer"
                     :class="form.senaTipo === t.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
                     @click="form.senaTipo = t.value"
                   >
                     {{ t.label }}
                   </button>
                 </div>
-                <input
-                  v-model.number="form.senaValor"
-                  type="number"
-                  min="1"
-                  :max="form.senaTipo === 'porcentaje' ? 100 : undefined"
-                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
-                />
+                <div class="relative min-w-0 flex-1">
+                  <input
+                    v-model.number="form.senaValor"
+                    type="number"
+                    min="1"
+                    :max="form.senaTipo === 'porcentaje' ? 100 : undefined"
+                    class="w-full rounded-xl border border-black/[0.08] py-2.5 pl-3 pr-12 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  />
+                  <!-- La unidad repetida acá dentro evita tener que mirar el
+                       selector para saber si "50" son pesos o por ciento. -->
+                  <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400">
+                    {{ form.senaTipo === 'porcentaje' ? '%' : moneda }}
+                  </span>
+                </div>
               </div>
               <p v-if="senaInvalida" class="mt-2 text-xs text-error-500">
                 {{ form.senaTipo === 'porcentaje' ? 'El porcentaje tiene que estar entre 1 y 100.' : 'Ingresá un monto mayor a 0.' }}
