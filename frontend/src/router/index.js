@@ -109,6 +109,14 @@ const router = createRouter({
           meta: { title: 'Equipo' },
         },
         {
+          // Accesible aun con el complejo suspendido: es donde ve la deuda y
+          // paga. Su endpoint queda fuera del guard de suscripción en el backend.
+          path: 'suscripcion',
+          name: 'suscripcion',
+          component: () => import('@/views/SuscripcionView.vue'),
+          meta: { title: 'Suscripción' },
+        },
+        {
           path: 'configuracion',
           name: 'configuracion',
           component: () => import('@/views/ConfiguracionView.vue'),
@@ -144,7 +152,7 @@ const router = createRouter({
         {
           path: 'suscripciones',
           name: 'admin-suscripciones',
-          component: () => import('@/views/PlaceholderView.vue'),
+          component: () => import('@/views/admin/SuscripcionesView.vue'),
           meta: { title: 'Suscripciones' },
         },
         {

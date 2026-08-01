@@ -65,7 +65,7 @@ const previewPrecio = ref(null)
 const fetchCourtsMeta = async () => {
   if (!currentClubId.value) return
   try {
-    const courts = await courtService.getCourts(currentClubId.value)
+    const { courts } = await courtService.getCourts(currentClubId.value)
     previewDeportes.value = [...new Set(courts.map((c) => c.tipo))]
     const precios = courts.flatMap((c) => (c.tarifas || []).map((t) => t.precio)).filter((n) => typeof n === 'number')
     previewPrecio.value = precios.length ? Math.min(...precios) : null
@@ -467,8 +467,17 @@ const inputBase =
                     <input v-model="form.whatsapp" type="text" placeholder="Ej: +54 11 5555-5555" :class="inputBase" />
                   </div>
                   <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email de contacto</label>
+                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email del complejo</label>
                     <input v-model="form.email" type="email" placeholder="contacto@tucomplejo.com" :class="inputBase" />
+                    <p class="mt-1.5 text-xs leading-relaxed" :class="form.email ? 'text-stone-400' : 'text-warning-600'">
+                      <template v-if="form.email">
+                        Acá te llegan las facturas, los avisos de deuda y las notificaciones de
+                        reservas. Es también la dirección a la que responden tus clientes.
+                      </template>
+                      <template v-else>
+                        Sin este email no vas a recibir tus facturas ni los avisos de la plataforma.
+                      </template>
+                    </p>
                   </div>
                 </div>
                 <div>

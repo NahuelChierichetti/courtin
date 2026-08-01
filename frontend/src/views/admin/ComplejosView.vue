@@ -503,17 +503,16 @@ function getEmptyForm() {
     ciudad: '',
     provincia: '',
     telefono: '',
-    plan: 'starter',
+    plan: 'start',
     estado: 'trial',
   }
 }
 
 const planFilters = [
   { label: 'Todos los planes', value: null },
-  { label: 'Starter', value: 'starter' },
+  { label: 'Start', value: 'start' },
   { label: 'Pro', value: 'pro' },
-  { label: 'Business', value: 'business' },
-  { label: 'Enterprise', value: 'enterprise' },
+  { label: 'Elite', value: 'elite' },
 ]
 
 const estadoFilters = [
@@ -525,11 +524,11 @@ const estadoFilters = [
   { label: 'Eliminados', value: 'eliminado' },
 ]
 
+// Los planes se diferencian sólo por cantidad de canchas.
 const planOptions = [
-  { label: 'Starter', value: 'starter' },
-  { label: 'Pro', value: 'pro' },
-  { label: 'Business', value: 'business' },
-  { label: 'Enterprise', value: 'enterprise' },
+  { label: 'Start · hasta 3 canchas', value: 'start' },
+  { label: 'Pro · 4 a 6 canchas', value: 'pro' },
+  { label: 'Elite · 7 o más', value: 'elite' },
 ]
 
 const estadoOptions = [
@@ -590,7 +589,7 @@ const openDetailDrawer = (club) => {
     ciudad: club.ciudad || '',
     provincia: club.provincia || '',
     telefono: club.telefono || '',
-    plan: club.plan || 'starter',
+    plan: club.plan || 'start',
     estado: club.estado || 'activo',
   }
   drawerVisible.value = true
@@ -720,12 +719,11 @@ const autoSlug = () => {
 
 const planStyle = (plan) => {
   const styles = {
-    starter: 'bg-stone-100 text-stone-700',
+    start: 'bg-stone-100 text-stone-700',
     pro: 'bg-brand-green-50 text-brand-green-700',
-    business: 'bg-brand-lime-100 text-brand-lime-900',
-    enterprise: 'bg-brand-purple-50 text-brand-purple-700',
+    elite: 'bg-brand-purple-50 text-brand-purple-700',
   }
-  return styles[plan] || styles.starter
+  return styles[plan] || styles.start
 }
 
 const estadoConfig = (estado) => {

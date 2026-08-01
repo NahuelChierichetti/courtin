@@ -6,6 +6,7 @@ const { validateReservationSlot, isReservationInProgress, canCancelReservation }
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify } = require('../utils/notifications');
 const { sendReservationConfirmation } = require('../utils/reservationEmails');
+const { puedeCrearReservas } = require('../utils/subscriptions');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -96,6 +97,19 @@ const createReservation = async (req, res, next) => {
     }
 
     const club = await Club.findById(clubId);
+
+    // Nivel 1 de la degradación por impago: no se cargan turnos nuevos. Las
+    // cancelaciones y ediciones siguen habilitadas — un turno que se cae tiene
+    // que poder liberarse, y los ya reservados nunca se tocan.
+    if (!puedeCrearReservas(club)) {
+      return res.status(403).json({
+        ok: false,
+        code: 'SUSCRIPCION_IMPAGA',
+        message:
+          'Tu suscripción está impaga, así que no se pueden cargar turnos nuevos. Regularizá el pago para reactivar el complejo.'
+      });
+    }
+
     const scheduleCheck = validateReservationSlot(club, { inicio, fin, estado, isNew: true });
     if (!scheduleCheck.ok) {
       return res.status(400).json({ ok: false, message: scheduleCheck.message });
