@@ -189,6 +189,12 @@ const fetchConfig = async () => {
       logo: club.logo || '',
       fotos: Array.isArray(club.fotos) ? [...club.fotos] : [],
       servicios: Array.isArray(club.servicios) ? [...club.servicios] : [],
+      // Vienen activadas por defecto: un club sin el campo seteado (anterior a
+      // esta funcionalidad) igual recibe los avisos.
+      notificaciones: {
+        nuevaReserva: club.notificaciones?.nuevaReserva !== false,
+        cancelacion: club.notificaciones?.cancelacion !== false,
+      },
     }
     originalSlug.value = club.slug || ''
     slugStatus.value = 'available'
@@ -230,6 +236,7 @@ const save = async () => {
       logo: form.value.logo,
       fotos: form.value.fotos.filter(Boolean),
       servicios: form.value.servicios,
+      notificaciones: form.value.notificaciones,
     })
     patchCurrentClub(updated)
     originalSlug.value = updated.slug
@@ -316,6 +323,19 @@ const inputBase =
                 <input v-model="form.direccion" type="text" placeholder="Ej: Av. Siempreviva 742" :class="inputBase" />
               </div>
             </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email del complejo</label>
+              <input v-model="form.email" type="email" placeholder="contacto@tucomplejo.com" :class="inputBase" />
+              <p class="mt-1.5 text-xs leading-relaxed" :class="form.email ? 'text-stone-400' : 'text-warning-600'">
+                <template v-if="form.email">
+                  Acá te llegan las facturas, los avisos de deuda y las notificaciones de
+                  reservas. Es también la dirección a la que responden tus clientes.
+                </template>
+                <template v-else>
+                  Sin este email no vas a recibir tus facturas ni los avisos de la plataforma.
+                </template>
+              </p>
+            </div>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Ciudad</label>
@@ -351,6 +371,44 @@ const inputBase =
                 <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
               </div>
               <p class="mt-2.5 text-xs text-stone-400">Ejemplo de precio: <span class="font-medium text-stone-600">{{ pricePreview }}</span></p>
+            </div>
+            <!-- Avisos por email al complejo -->
+            <div class="rounded-xl border border-black/[0.08] p-4">
+              <p class="text-xs font-semibold tracking-wider text-stone-400 uppercase">
+                Avisos por email
+              </p>
+              <p class="mt-1 text-xs leading-relaxed text-stone-500">
+                Qué te avisamos a <span class="font-medium text-stone-600">{{ form.email || 'el email del complejo' }}</span>.
+                Las facturas y los avisos de deuda se envían siempre.
+              </p>
+
+              <label class="mt-4 flex cursor-pointer items-start gap-3">
+                <input
+                  v-model="form.notificaciones.nuevaReserva"
+                  type="checkbox"
+                  class="mt-0.5 h-4 w-4 shrink-0 rounded border border-stone-300 bg-white accent-brand-green-500 [color-scheme:light]"
+                />
+                <span class="min-w-0">
+                  <span class="block text-sm font-medium text-ink-500">Nueva reserva online</span>
+                  <span class="mt-0.5 block text-xs leading-relaxed text-stone-500">
+                    Cuando un jugador reserva desde tu página. No te avisamos de los turnos que cargás vos.
+                  </span>
+                </span>
+              </label>
+
+              <label class="mt-3 flex cursor-pointer items-start gap-3">
+                <input
+                  v-model="form.notificaciones.cancelacion"
+                  type="checkbox"
+                  class="mt-0.5 h-4 w-4 shrink-0 rounded border border-stone-300 bg-white accent-brand-green-500 [color-scheme:light]"
+                />
+                <span class="min-w-0">
+                  <span class="block text-sm font-medium text-ink-500">Cancelación de un jugador</span>
+                  <span class="mt-0.5 block text-xs leading-relaxed text-stone-500">
+                    Cuando alguien cancela su turno y queda libre ese horario.
+                  </span>
+                </span>
+              </label>
             </div>
           </div>
         </div>
@@ -465,21 +523,11 @@ const inputBase =
                   <div>
                     <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">WhatsApp</label>
                     <input v-model="form.whatsapp" type="text" placeholder="Ej: +54 11 5555-5555" :class="inputBase" />
-                  </div>
-                  <div>
-                    <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email del complejo</label>
-                    <input v-model="form.email" type="email" placeholder="contacto@tucomplejo.com" :class="inputBase" />
-                    <p class="mt-1.5 text-xs leading-relaxed" :class="form.email ? 'text-stone-400' : 'text-warning-600'">
-                      <template v-if="form.email">
-                        Acá te llegan las facturas, los avisos de deuda y las notificaciones de
-                        reservas. Es también la dirección a la que responden tus clientes.
-                      </template>
-                      <template v-else>
-                        Sin este email no vas a recibir tus facturas ni los avisos de la plataforma.
-                      </template>
-                    </p>
+                    <p class="mt-1.5 text-xs text-stone-400">Se muestra en tu página pública para que te contacten.</p>
                   </div>
                 </div>
+                
+
                 <div>
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Servicios</label>
                   <div class="flex flex-wrap items-center gap-2 rounded-xl border border-black/[0.08] px-3 py-2 transition-colors focus-within:border-brand-green-400 focus-within:ring-2 focus-within:ring-brand-green-100">
