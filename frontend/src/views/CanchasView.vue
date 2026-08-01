@@ -25,12 +25,35 @@
           </button>
         </div>
         <button
-          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
+          :disabled="sinCupo"
+          :title="sinCupo ? `Tu plan ${cupo.planLabel} permite hasta ${cupo.limite} canchas` : null"
+          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-brand-lime-500 cursor-pointer"
           @click="openNewCourt"
         >
           <i class="icon-[material-symbols--add] text-base"></i> Nueva cancha
         </button>
       </div>
+    </div>
+
+    <!-- Cupo del plan agotado -->
+    <div
+      v-if="sinCupo"
+      class="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-warning-200 bg-warning-50 px-5 py-3.5"
+    >
+      <i class="icon-[material-symbols--info-outline] shrink-0 text-xl text-warning-600"></i>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold text-ink-500">Llegaste al límite de tu plan</p>
+        <p class="mt-0.5 text-xs leading-relaxed text-stone-600">
+          El plan {{ cupo.planLabel }} incluye hasta {{ cupo.limite }} canchas y tenés
+          {{ cupo.usadas }}. Pasá al plan {{ cupo.planSugerido }} para sumar más.
+        </p>
+      </div>
+      <RouterLink
+        to="/panel/suscripcion"
+        class="flex h-9 items-center rounded-full bg-warning-600 px-4 text-xs font-semibold text-white transition-colors hover:bg-warning-700"
+      >
+        Ver planes
+      </RouterLink>
     </div>
 
     <!-- No club selected -->
@@ -73,7 +96,7 @@
         {{ activeFilter === 'todas' ? 'Creá tu primera cancha para empezar.' : 'Probá con otro filtro o creá una nueva.' }}
       </p>
       <button
-        v-if="activeFilter === 'todas'"
+        v-if="activeFilter === 'todas' && !sinCupo"
         class="mt-4 flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
         @click="openNewCourt"
       >
@@ -211,6 +234,9 @@ const showDrawer = ref(false)
 const editingCourt = ref(null)
 const activeFilter = ref('todas')
 const courts = ref([])
+// Cupo de canchas del plan. Null mientras no cargó o si el backend no lo mandó.
+const cupo = ref(null)
+const sinCupo = computed(() => cupo.value?.puedeCrear === false)
 const loading = ref(false)
 const error = ref(null)
 
@@ -261,7 +287,9 @@ const fetchCourts = async () => {
   loading.value = true
   error.value = null
   try {
-    courts.value = await courtService.getCourts(currentClubId.value)
+    const data = await courtService.getCourts(currentClubId.value)
+    courts.value = data.courts
+    cupo.value = data.cupo
   } catch (err) {
     error.value = 'Error al cargar las canchas'
     console.error(err)

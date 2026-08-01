@@ -18,6 +18,7 @@ const { recordReservationPayment } = require('../utils/cashLedger');
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify } = require('../utils/notifications');
 const { sendReservationConfirmation } = require('../utils/reservationEmails');
+const { filtroClubVisible, puedeCrearReservas } = require('../utils/subscriptions');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -46,7 +47,8 @@ const toPublicCourt = (c) => ({
 const getPublicClubs = async (req, res, next) => {
   try {
     const { ciudad, tipo, q, fecha, hora } = req.query;
-    const filter = { publicado: true };
+    // Incluye el estado de la suscripción: un club en mora nivel 1 sale del buscador.
+    const filter = filtroClubVisible();
 
     if (ciudad) filter.ciudad = new RegExp(escapeRegex(ciudad), 'i');
 
@@ -165,7 +167,7 @@ const getPublicClubs = async (req, res, next) => {
 // Detalle del club + sus canchas públicas + horarios (en hora local del club).
 const getPublicClubBySlug = async (req, res, next) => {
   try {
-    const club = await Club.findOne({ slug: req.params.slug, publicado: true });
+    const club = await Club.findOne(filtroClubVisible({ slug: req.params.slug }));
     if (!club) {
       return res.status(404).json({ ok: false, message: 'Club no encontrado' });
     }
@@ -193,7 +195,7 @@ const getPublicClubBySlug = async (req, res, next) => {
 
 // Busca y valida que la cancha sea pública y pertenezca al club publicado.
 const findPublicClubAndCourt = async (slug, courtId) => {
-  const club = await Club.findOne({ slug, publicado: true });
+  const club = await Club.findOne(filtroClubVisible({ slug }));
   if (!club) return { error: { status: 404, message: 'Club no encontrado' } };
 
   const court = await Court.findOne({ _id: courtId, club: club._id });
@@ -258,7 +260,7 @@ const getClubAvailability = async (req, res, next) => {
       return res.status(400).json({ ok: false, message: 'Indicá una fecha válida (YYYY-MM-DD)' });
     }
 
-    const club = await Club.findOne({ slug, publicado: true });
+    const club = await Club.findOne(filtroClubVisible({ slug }));
     if (!club) return res.status(404).json({ ok: false, message: 'Club no encontrado' });
 
     const courts = await Court.find({ club: club._id, visible: { $ne: false }, estado: 'activa' }).sort({ nombre: 1 });
@@ -297,7 +299,7 @@ const getClubAvailability = async (req, res, next) => {
 // Ciudades (distinct) con al menos un club publicado, para el filtro del buscador.
 const getPublicCities = async (req, res, next) => {
   try {
-    const cities = await Club.find({ publicado: true, ciudad: { $nin: [null, ''] } }).distinct('ciudad');
+    const cities = await Club.find(filtroClubVisible({ ciudad: { $nin: [null, ''] } })).distinct('ciudad');
     cities.sort((a, b) => a.localeCompare(b, 'es'));
     res.status(200).json({ ok: true, cities });
   } catch (error) {

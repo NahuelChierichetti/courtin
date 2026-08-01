@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 
 const { runReservationReminders } = require('./reservationReminders');
+const { runSubscriptionCycle } = require('./subscriptionDunning');
 
 // Tareas programadas del backend.
 //
@@ -17,16 +18,24 @@ const { runReservationReminders } = require('./reservationReminders');
 // reserva se evalúa 4 veces.
 const RESERVATION_REMINDERS_CRON = '*/30 * * * *';
 
+// Una vez por día, a las 9 de la mañana hora argentina. Nada del ciclo de
+// suscripciones depende de la hora exacta; se elige un horario razonable para
+// que los avisos de cobranza no lleguen de madrugada.
+const SUBSCRIPTION_CYCLE_CRON = '0 9 * * *';
+
 const registeredJobs = [];
 
 const logStats = (nombre, stats) => {
   // Sólo se loguea si hubo algo que hacer: con esta frecuencia, loguear cada
   // corrida vacía tapa el resto de los logs.
-  if (stats.candidatos === 0) return;
+  const hizoAlgo = Object.entries(stats).some(([k, v]) => k !== 'revisadas' && v > 0);
+  if (!hizoAlgo) return;
+
+  const detalle = Object.entries(stats)
+    .map(([k, v]) => `${v} ${k}`)
+    .join(' · ');
   // eslint-disable-next-line no-console
-  console.log(
-    `[jobs] ${nombre}: ${stats.candidatos} candidatos · ${stats.enviados} enviados · ${stats.omitidos} omitidos · ${stats.fallidos} fallidos`
-  );
+  console.log(`[jobs] ${nombre}: ${detalle}`);
 };
 
 // Envuelve la tarea para que un error nunca tumbe el proceso web.
@@ -58,8 +67,18 @@ const startJobs = () => {
 
   registeredJobs.push(reminders);
 
+  const suscripciones = cron.schedule(
+    SUBSCRIPTION_CYCLE_CRON,
+    safeRun('ciclo de suscripciones', runSubscriptionCycle),
+    { timezone: 'America/Argentina/Buenos_Aires' }
+  );
+
+  registeredJobs.push(suscripciones);
+
   // eslint-disable-next-line no-console
-  console.log(`[jobs] Recordatorios 24h programados (${RESERVATION_REMINDERS_CRON}).`);
+  console.log(
+    `[jobs] Recordatorios 24h (${RESERVATION_REMINDERS_CRON}) · Ciclo de suscripciones (${SUBSCRIPTION_CYCLE_CRON}).`
+  );
 };
 
 const stopJobs = () => {

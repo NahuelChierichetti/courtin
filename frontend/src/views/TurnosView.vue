@@ -369,7 +369,7 @@ const fetchCourtsAndHorarios = async () => {
       courtService.getCourts(currentClubId.value),
       scheduleService.getHorarios(currentClubId.value).catch(() => null),
     ])
-    courts.value = c
+    courts.value = c.courts
     horarios.value = h
   } catch (err) {
     console.error(err)

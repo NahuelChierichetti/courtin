@@ -9,6 +9,7 @@ const { issueToken, findValidToken, consumeToken } = require('../utils/tokens');
 const { sendEmail } = require('../utils/email');
 const passwordResetEmail = require('../emails/templates/passwordReset');
 const verifyEmailTemplate = require('../emails/templates/verifyEmail');
+const { ensureSubscription } = require('../utils/billing');
 
 // Ventana de validez del link de reset.
 const RESET_TTL_MINUTES = 60;
@@ -155,6 +156,15 @@ const registerClub = async (req, res, next) => {
       club: newClub._id,
       role: ROLES.TENANT_ADMIN
     });
+
+    // Arranca el trial. Best-effort: si fallara, `ensureSubscription` la crea la
+    // primera vez que entren a la pantalla de suscripción.
+    try {
+      await ensureSubscription(newClub);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('No se pudo crear la suscripción del club:', err.message);
+    }
 
     const token = generateToken(user._id);
 

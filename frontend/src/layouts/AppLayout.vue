@@ -101,6 +101,7 @@ const ALL_NAV_ITEMS = [
   { label: 'Horarios', icon: 'icon-[material-symbols--schedule]', to: '/panel/horarios' },
   { label: 'Reportes', icon: 'icon-[material-symbols--bar-chart]', to: '/panel/reportes' },
   { label: 'Equipo', icon: 'icon-[material-symbols--badge-outline]', to: '/panel/equipo', adminOnly: true },
+  { label: 'Suscripción', icon: 'icon-[material-symbols--credit-card-outline]', to: '/panel/suscripcion', adminOnly: true },
   { label: 'Notificaciones', icon: 'icon-[material-symbols--notifications]', to: '/panel/notificaciones', dot: true },
 ]
 
