@@ -186,6 +186,21 @@ const clubSchema = new mongoose.Schema(
     publicado: {
       type: Boolean,
       default: false
+    },
+    // Qué avisos por email quiere recibir el complejo en `Club.email`.
+    //
+    // Vienen activados: un complejo que empieza a recibir reservas online
+    // necesita enterarse. Se pueden apagar porque a cierto volumen un email por
+    // reserva deja de ser útil y pasa a ser ruido (y una marca de spam segura).
+    notificaciones: {
+      nuevaReserva: {
+        type: Boolean,
+        default: true
+      },
+      cancelacion: {
+        type: Boolean,
+        default: true
+      }
     }
   },
   {
