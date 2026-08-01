@@ -2,11 +2,18 @@ const Reservation = require('../models/Reservation');
 const Court = require('../models/Court');
 const User = require('../models/User');
 const Club = require('../models/Club');
+const Payment = require('../models/Payment');
 const { validateReservationSlot, isReservationInProgress, canCancelReservation } = require('../utils/reservationRules');
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify } = require('../utils/notifications');
-const { sendReservationConfirmation, sendClubReservationNotice } = require('../utils/reservationEmails');
+const {
+  sendReservationConfirmation,
+  sendClubReservationNotice,
+  sendRefundNotice
+} = require('../utils/reservationEmails');
 const { puedeCrearReservas } = require('../utils/subscriptions');
+const { registrarReembolso } = require('../utils/payments');
+const { getClubAccessToken, refundPayment } = require('../utils/mercadopago');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -407,6 +414,14 @@ const toPublicReservation = (r) => ({
   guestName: r.guestName,
   guestPhone: r.guestPhone,
   notas: r.notas,
+  pago: {
+    estado: r.pago?.estado || 'no_requerido',
+    tipo: r.pago?.tipo || null,
+    montoPagado: r.pago?.montoPagado || 0,
+    saldoPendiente: r.pago?.saldoPendiente || 0
+  },
+  // Cuánto le queda para pagar antes de que se libere el horario.
+  expiraEn: r.expiraEn || null,
   club: r.club
     ? {
         nombre: r.club.nombre,
@@ -500,6 +515,81 @@ const getMyReservations = async (req, res, next) => {
   }
 };
 
+// POST /reservations/club/:clubId/:id/refund
+//
+// Devolución del pago de una reserva. Es manual y a criterio del complejo: no
+// se dispara sola al cancelar porque la política de devolución de señas varía
+// entre complejos, y devolver de más no se puede deshacer.
+const refundReservationPayment = async (req, res, next) => {
+  try {
+    const { clubId, id } = req.params;
+
+    const reservation = await Reservation.findOne({ _id: id, club: clubId });
+    if (!reservation) {
+      return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
+    }
+
+    if (reservation.pago?.estado !== 'pagado') {
+      return res.status(400).json({ ok: false, message: 'Esta reserva no tiene un pago para devolver.' });
+    }
+
+    const payment = await Payment.findOne({
+      reservation: reservation._id,
+      estado: 'aprobado'
+    }).sort({ createdAt: -1 });
+
+    if (!payment?.paymentId) {
+      return res.status(400).json({
+        ok: false,
+        message: 'No encontramos el pago en MercadoPago. Revisá la devolución desde tu cuenta.'
+      });
+    }
+
+    const token = await getClubAccessToken(clubId);
+    if (!token) {
+      return res.status(400).json({
+        ok: false,
+        message: 'La cuenta de MercadoPago no está conectada. Volvé a vincularla para devolver pagos.'
+      });
+    }
+
+    try {
+      await refundPayment(token, payment.paymentId, undefined, String(payment._id));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('MercadoPago rechazó la devolución:', err.message);
+      return res.status(502).json({
+        ok: false,
+        message: 'MercadoPago rechazó la devolución. Puede que el pago sea muy antiguo o ya esté devuelto.'
+      });
+    }
+
+    // El estado local se actualiza recién cuando MercadoPago aceptó: marcarlo
+    // antes dejaría al complejo creyendo que devolvió plata que nunca salió.
+    await registrarReembolso({ payment, reservation });
+
+    const [club, court] = await Promise.all([
+      Club.findById(clubId).select(CLUB_EMAIL_FIELDS),
+      Court.findById(reservation.court).select('nombre tipo')
+    ]);
+
+    await notify(clubId, {
+      tipo: 'pago',
+      titulo: 'Pago devuelto',
+      mensaje: `Se devolvieron $${payment.monto.toLocaleString('es-AR')} a ${reservation.guestName || 'un cliente'}`,
+      reservation: reservation._id
+    });
+
+    await sendRefundNotice({ reservation, club, court, payment });
+
+    const updated = await populateReservation(Reservation.findById(reservation._id));
+
+    res.status(200).json({ ok: true, message: 'Devolución realizada', reservation: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createReservation,
   getReservationsByClub,
@@ -509,5 +599,6 @@ module.exports = {
   cancelReservation,
   getReservationByToken,
   cancelReservationByToken,
-  getMyReservations
+  getMyReservations,
+  refundReservationPayment
 };

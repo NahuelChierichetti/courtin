@@ -22,9 +22,13 @@ const clubReservaAviso = ({
   jugadorNombre,
   jugadorTelefono,
   jugadorEmail,
-  panelUrl
+  panelUrl,
+  // Cobro online. Vacíos cuando la reserva se paga en el complejo.
+  pagado,
+  saldoPendiente
 }) => {
   const esCancelacion = tipo === 'cancelacion';
+  const huboPago = Boolean(pagado);
 
   const contacto = [
     jugadorTelefono ? `Tel: ${jugadorTelefono}` : null,
@@ -41,9 +45,22 @@ const clubReservaAviso = ({
   // permite. `cancelReservationByToken` rechaza con un 400 cualquier
   // cancelación que no respete la tolerancia del club, así que si este email
   // salió es porque avisó a tiempo.
-  const contexto = esCancelacion
-    ? notice('El turno volvió a quedar disponible para que lo tome otro jugador.')
-    : notice('Ya le enviamos la confirmación al jugador. El turno está bloqueado en tu agenda.');
+  let contexto;
+  if (esCancelacion) {
+    contexto = notice('El turno volvió a quedar disponible para que lo tome otro jugador.');
+  } else if (saldoPendiente) {
+    contexto = notice(
+      `El jugador pagó la seña de ${pagado} por MercadoPago. <strong>Cobrale ${saldoPendiente} al llegar.</strong> Ya le enviamos la confirmación.`
+    );
+  } else if (huboPago) {
+    contexto = notice(
+      `El jugador ya pagó ${pagado} por MercadoPago: el dinero está en tu cuenta y no hay nada que cobrar en el mostrador.`
+    );
+  } else {
+    contexto = notice(
+      'Ya le enviamos la confirmación al jugador. El turno está bloqueado en tu agenda y se cobra en el complejo.'
+    );
+  }
 
   return {
     subject: esCancelacion
@@ -59,6 +76,8 @@ const clubReservaAviso = ({
           ${detailRow('Fecha', fecha)}
           ${detailRow('Hora', hora)}
           ${precio ? detailRow('Precio', precio) : ''}
+          ${huboPago ? detailRow(saldoPendiente ? 'Seña cobrada' : 'Cobrado online', pagado) : ''}
+          ${saldoPendiente ? detailRow('A cobrar en el complejo', saldoPendiente) : ''}
           ${jugadorNombre ? detailRow('Jugador', jugadorNombre) : ''}
           ${contacto ? detailRow('Contacto', contacto) : ''}
         </table>

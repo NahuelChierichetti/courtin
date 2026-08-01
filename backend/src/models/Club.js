@@ -83,6 +83,99 @@ const horariosSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// Cuenta de MercadoPago del complejo, vinculada por OAuth. Los pagos de las
+// reservas van directo a esta cuenta: CourtIn nunca toca la plata, sólo crea la
+// preferencia de cobro en nombre del club.
+const mpSchema = new mongoose.Schema(
+  {
+    conectado: {
+      type: Boolean,
+      default: false
+    },
+    // `user_id` de MercadoPago (el collector). Es quien cobra.
+    userId: {
+      type: String,
+      trim: true
+    },
+    publicKey: {
+      type: String,
+      trim: true
+    },
+    // Credenciales de cobro sobre una cuenta ajena: se guardan cifradas con
+    // AES-256-GCM (ver utils/secrets.js).
+    //
+    // `select: false` es la protección que de verdad importa: ninguna lectura
+    // casual —getClubConfig, un populate, un res.json(club) distraído— las
+    // puede filtrar. Para usarlas hay que pedirlas explícitamente, que es lo
+    // que hace utils/mercadopago.js y nadie más.
+    accessToken: {
+      type: String,
+      select: false
+    },
+    refreshToken: {
+      type: String,
+      select: false
+    },
+    expiresAt: {
+      type: Date
+    },
+    // Email de la cuenta vinculada, para que el complejo vea en el panel cuál
+    // conectó sin tener que entrar a MercadoPago.
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true
+    },
+    conectadoEn: {
+      type: Date
+    }
+  },
+  { _id: false }
+);
+
+const pagosSchema = new mongoose.Schema(
+  {
+    mp: {
+      type: mpSchema,
+      default: () => ({})
+    },
+    // Cuánto se cobra por adelantado: el turno completo o una seña.
+    modalidad: {
+      type: String,
+      enum: ['total', 'sena'],
+      default: 'total'
+    },
+    senaTipo: {
+      type: String,
+      enum: ['porcentaje', 'fijo'],
+      default: 'porcentaje'
+    },
+    senaValor: {
+      type: Number,
+      min: [0, 'La seña no puede ser negativa'],
+      default: 50
+    },
+    // Si el complejo acepta reservas sin pago online (se paga al llegar).
+    // Viene activado: obligar el pago frena los no-shows pero también espanta
+    // reservas, y esa decisión es de cada complejo.
+    permitePagoEnComplejo: {
+      type: Boolean,
+      default: true
+    },
+    // Comisión de CourtIn por transacción (`marketplace_fee` de MercadoPago).
+    // En 0: el modelo de negocio hoy es el abono fijo de la suscripción. Queda
+    // implementado para que activarlo sea cambiar un número y no rehacer la
+    // integración.
+    comisionPorcentaje: {
+      type: Number,
+      min: [0, 'La comisión no puede ser negativa'],
+      max: [100, 'La comisión no puede superar el 100%'],
+      default: 0
+    }
+  },
+  { _id: false }
+);
+
 const clubSchema = new mongoose.Schema(
   {
     nombre: {
@@ -201,6 +294,11 @@ const clubSchema = new mongoose.Schema(
         type: Boolean,
         default: true
       }
+    },
+    // Cobro online de las reservas. Ver pagosSchema arriba.
+    pagos: {
+      type: pagosSchema,
+      default: () => ({})
     }
   },
   {

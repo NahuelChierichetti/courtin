@@ -14,11 +14,13 @@ const { validateReservationSlot, dayConfigForDate } = require('../utils/reservat
 const { computeSlots } = require('../utils/availability');
 const { priceForDuration } = require('../utils/pricing');
 const { horariosToLocal, DEFAULT_TZ } = require('../utils/timezone');
-const { recordReservationPayment } = require('../utils/cashLedger');
+const Payment = require('../models/Payment');
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify } = require('../utils/notifications');
 const { sendReservationConfirmation, sendClubReservationNotice } = require('../utils/reservationEmails');
 const { filtroClubVisible, puedeCrearReservas } = require('../utils/subscriptions');
+const { montoACobrar, holdExpiresAt, cobraOnline, confirmarPagoDeReserva } = require('../utils/payments');
+const { getClubAccessToken, createPreference, searchPayments } = require('../utils/mercadopago');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -27,6 +29,25 @@ const PUBLIC_CLUB_FIELDS =
   'nombre slug descripcion direccion ciudad provincia telefono whatsapp email logo fotos ubicacion servicios timezone moneda';
 
 const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Config de cobro que el jugador necesita saber antes de reservar: si puede
+// pagar online, cuánto se le va a cobrar ahora y si le permiten pagar al llegar.
+// Nada de credenciales: los tokens de MercadoPago son `select: false` y ni
+// siquiera llegan hasta acá.
+const toPublicPagos = (club) => {
+  const pagos = club.pagos || {};
+  const online = pagos.mp?.conectado === true;
+
+  return {
+    online,
+    modalidad: pagos.modalidad || 'total',
+    senaTipo: pagos.senaTipo || 'porcentaje',
+    senaValor: pagos.senaValor ?? 0,
+    // Sin cuenta conectada no hay forma de cobrar online: el pago en el
+    // complejo es la única opción, sin importar cómo esté el switch.
+    permitePagoEnComplejo: !online || pagos.permitePagoEnComplejo !== false
+  };
+};
 
 const toPublicCourt = (c) => ({
   _id: c._id,
@@ -185,7 +206,7 @@ const getPublicClubBySlug = async (req, res, next) => {
 
     res.status(200).json({
       ok: true,
-      club: { ...publicClub, horarios },
+      club: { ...publicClub, horarios, pagos: toPublicPagos(club) },
       courts: courts.map(toPublicCourt)
     });
   } catch (error) {
@@ -327,6 +348,112 @@ const checkSlugAvailable = async (req, res, next) => {
   }
 };
 
+// Reserva tal como la ve el jugador que la acaba de crear.
+const reservationDTO = (reservation, club, court) => ({
+  _id: reservation._id,
+  inicio: reservation.inicio,
+  fin: reservation.fin,
+  estado: reservation.estado,
+  precioFinal: reservation.precioFinal,
+  guestName: reservation.guestName,
+  pago: reservation.pago,
+  expiraEn: reservation.expiraEn,
+  court: { nombre: court.nombre, tipo: court.tipo },
+  club: { nombre: club.nombre, slug: club.slug, timezone: club.timezone, moneda: club.moneda }
+});
+
+/**
+ * Crea el intento de cobro y la preferencia de MercadoPago del club.
+ *
+ * Compartido entre la reserva nueva y el reintento tras un rechazo; cada
+ * llamada genera un `Payment` propio, así queda el rastro de los intentos
+ * fallidos en vez de pisarlos.
+ */
+const crearPreferencia = async ({ reservation, club, court, cobro }) => {
+  const token = await getClubAccessToken(club._id);
+  if (!token) {
+    throw new Error('El complejo no tiene MercadoPago conectado');
+  }
+
+  const moneda = club.moneda || 'ARS';
+  const comisionPct = Number(club.pagos?.comisionPorcentaje) || 0;
+  const comision = comisionPct > 0 ? Math.round((cobro.monto * comisionPct) / 100) : 0;
+
+  const payment = await Payment.create({
+    club: club._id,
+    reservation: reservation._id,
+    externalReference: String(reservation._id),
+    estado: 'pendiente',
+    tipo: cobro.tipo,
+    monto: cobro.monto,
+    montoTotalTurno: reservation.precioFinal,
+    moneda,
+    comision,
+    payerEmail: reservation.guestEmail || undefined
+  });
+
+  const appUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+  const apiUrl = (process.env.API_PUBLIC_URL || '').replace(/\/$/, '');
+  const volverA = `${appUrl}/reserva/${reservation.manageToken}`;
+
+  const preference = await createPreference(
+    token,
+    {
+      items: [
+        {
+          id: String(court._id),
+          title: `${court.nombre} · ${club.nombre}`,
+          description:
+            cobro.tipo === 'sena'
+              ? `Seña del turno (resta ${cobro.saldo} en el complejo)`
+              : 'Turno completo',
+          quantity: 1,
+          currency_id: moneda,
+          unit_price: cobro.monto
+        }
+      ],
+      payer: {
+        name: reservation.guestName || undefined,
+        email: reservation.guestEmail || undefined
+      },
+      // Con esto reconocemos el pago cuando vuelve por el webhook.
+      external_reference: String(reservation._id),
+      metadata: { club_id: String(club._id), reservation_id: String(reservation._id) },
+      back_urls: {
+        success: `${volverA}?pago=success`,
+        pending: `${volverA}?pago=pending`,
+        failure: `${volverA}?pago=failure`
+      },
+      auto_return: 'approved',
+      // La confirmación real entra por acá, no por el back_url: el jugador
+      // puede cerrar la pestaña apenas paga y la reserva tiene que confirmarse
+      // igual.
+      notification_url: `${apiUrl}/api/public/mp/webhook`,
+      // Que MercadoPago cierre la preferencia junto con el hold, para que nadie
+      // pague un horario que ya se liberó.
+      expires: true,
+      // MercadoPago espera el formato `yyyy-MM-ddTHH:mm:ss.SSSXXX`, con el
+      // offset explícito. Un `toISOString()` (que termina en "Z") lo rechaza en
+      // algunos entornos, y ese rechazo tira abajo toda la creación de la
+      // preferencia.
+      expiration_date_to: reservation.expiraEn
+        ? dayjs(reservation.expiraEn).tz(club.timezone || DEFAULT_TZ).format('YYYY-MM-DDTHH:mm:ss.SSSZ')
+        : undefined,
+      ...(comision > 0 ? { marketplace_fee: comision } : {})
+    },
+    String(payment._id)
+  );
+
+  payment.preferenceId = preference.id;
+  await payment.save();
+
+  return {
+    payment,
+    preferenceId: preference.id,
+    initPoint: preference.init_point || preference.sandbox_init_point
+  };
+};
+
 // POST /public/clubs/:slug/reservations
 // Reserva como invitado (sin cuenta). Devuelve el manageToken para que el
 // frontend arme el link de gestión.
@@ -377,6 +504,21 @@ const createPublicReservation = async (req, res, next) => {
     const durationMin = (new Date(fin).getTime() - new Date(inicio).getTime()) / 60000;
     const precioFinal = priceForDuration(court, startLocal.day(), startLocal.format('HH:mm'), durationMin);
 
+    // ¿Esta reserva se cobra online? Sólo si el complejo tiene MercadoPago
+    // vinculado; si no lo tiene, cualquier método elegido cae en "pagar en el
+    // complejo" y la reserva entra como pendiente igual que siempre.
+    const onlineDisponible = cobraOnline(club);
+    const pagoOnline = onlineDisponible && metodoPago !== 'complejo';
+
+    if (!pagoOnline && onlineDisponible && club.pagos?.permitePagoEnComplejo === false) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Este complejo requiere el pago online para confirmar la reserva.'
+      });
+    }
+
+    const cobro = pagoOnline ? montoACobrar(club, precioFinal) : null;
+
     let reservation;
     try {
       reservation = await Reservation.create({
@@ -392,7 +534,13 @@ const createPublicReservation = async (req, res, next) => {
         precioFinal,
         notas,
         origen: 'publica',
-        creadaPor: null
+        creadaPor: null,
+        pago: pagoOnline
+          ? { estado: 'pendiente', tipo: cobro.tipo, montoPagado: 0, saldoPendiente: cobro.saldo }
+          : { estado: 'no_requerido' },
+        // El hold bloquea el horario mientras dura el checkout. Sin pago online
+        // no hay nada que esperar y la reserva no vence.
+        expiraEn: pagoOnline ? holdExpiresAt() : null
       });
     } catch (err) {
       if (err.code === 11000) {
@@ -401,9 +549,46 @@ const createPublicReservation = async (req, res, next) => {
       throw err;
     }
 
-    // Si el pago fue online (MP/tarjeta), registra el ingreso en la caja del
-    // club. Best-effort: no bloquea la reserva si falla.
-    await recordReservationPayment(reservation, metodoPago);
+    // --- Camino con pago online ---
+    //
+    // Acá NO se manda ningún email, ni se registra la caja, ni se avisa al
+    // complejo: la reserva todavía no está pagada. Todo eso lo dispara el
+    // webhook cuando MercadoPago confirma la acreditación. Decirle "reserva
+    // confirmada" a alguien que todavía no pagó es justo el problema que esta
+    // funcionalidad viene a resolver.
+    if (pagoOnline) {
+      try {
+        const checkout = await crearPreferencia({ reservation, club, court, cobro });
+
+        return res.status(201).json({
+          ok: true,
+          manageToken: reservation.manageToken,
+          reservation: reservationDTO(reservation, club, court),
+          pago: {
+            initPoint: checkout.initPoint,
+            preferenceId: checkout.preferenceId,
+            monto: cobro.monto,
+            tipo: cobro.tipo,
+            saldo: cobro.saldo,
+            expiraEn: reservation.expiraEn
+          }
+        });
+      } catch (err) {
+        // Sin link de pago el jugador no puede hacer nada con esta reserva, y
+        // dejarla viva bloquearía el horario 15 minutos por un error nuestro.
+        await Reservation.deleteOne({ _id: reservation._id });
+        await Payment.deleteMany({ reservation: reservation._id });
+
+        // eslint-disable-next-line no-console
+        console.error('No se pudo crear la preferencia de pago:', err.message);
+        return res.status(502).json({
+          ok: false,
+          message: 'No pudimos iniciar el pago. Probá de nuevo en unos minutos.'
+        });
+      }
+    }
+
+    // --- Camino sin pago online (se paga en el complejo) ---
 
     // Registra/actualiza el cliente del club (clave: email). Best-effort.
     const clientResult = await upsertClientFromReservation(reservation);
@@ -435,15 +620,135 @@ const createPublicReservation = async (req, res, next) => {
       ok: true,
       // El token es la prueba de propiedad para gestionar la reserva sin cuenta.
       manageToken: reservation.manageToken,
-      reservation: {
-        _id: reservation._id,
-        inicio: reservation.inicio,
-        fin: reservation.fin,
-        estado: reservation.estado,
-        precioFinal: reservation.precioFinal,
-        guestName: reservation.guestName,
-        court: { nombre: court.nombre, tipo: court.tipo },
-        club: { nombre: club.nombre, slug: club.slug, timezone: club.timezone, moneda: club.moneda }
+      reservation: reservationDTO(reservation, club, court)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Reserva + club + cancha a partir del token de gestión. Devuelve null si el
+// token no existe.
+const cargarPorToken = async (token) => {
+  const reservation = await Reservation.findOne({ manageToken: token });
+  if (!reservation) return null;
+
+  const [club, court] = await Promise.all([
+    Club.findById(reservation.club),
+    Court.findById(reservation.court)
+  ]);
+
+  return club ? { reservation, club, court } : null;
+};
+
+const pagoDTO = (reservation) => ({
+  estado: reservation.pago?.estado || 'no_requerido',
+  tipo: reservation.pago?.tipo || null,
+  montoPagado: reservation.pago?.montoPagado || 0,
+  saldoPendiente: reservation.pago?.saldoPendiente || 0,
+  expiraEn: reservation.expiraEn || null,
+  reservaEstado: reservation.estado
+});
+
+// GET /public/reservations/:token/pago
+//
+// Estado del cobro, para la pantalla a la que vuelve el jugador desde
+// MercadoPago. Además de leer nuestra base, reconcilia contra MercadoPago si el
+// pago sigue pendiente: el webhook es la vía normal, pero puede demorar unos
+// segundos o perderse, y el jugador no puede quedar mirando un "confirmando"
+// eterno cuando ya pagó.
+const getReservationPaymentStatus = async (req, res, next) => {
+  try {
+    const data = await cargarPorToken(req.params.token);
+    if (!data) return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
+
+    const { reservation, club, court } = data;
+
+    if (reservation.pago?.estado !== 'pendiente') {
+      return res.status(200).json({ ok: true, pago: pagoDTO(reservation) });
+    }
+
+    // Reconciliación best-effort: si falla, se devuelve lo que tenemos y el
+    // webhook sigue siendo el que va a confirmar.
+    try {
+      const token = await getClubAccessToken(club._id);
+      if (token) {
+        const busqueda = await searchPayments(token, String(reservation._id));
+        const aprobado = (busqueda?.results || []).find((p) => p.status === 'approved');
+
+        if (aprobado) {
+          const payment = await Payment.findOne({
+            reservation: reservation._id,
+            estado: 'pendiente'
+          }).sort({ createdAt: -1 });
+
+          if (payment) {
+            payment.paymentId = String(aprobado.id);
+            payment.estado = 'aprobado';
+            payment.aprobadoEn = new Date();
+            payment.metodoPago = aprobado.payment_method_id;
+            payment.rawStatus = aprobado.status;
+            payment.rawStatusDetail = aprobado.status_detail;
+            await payment.save();
+
+            await confirmarPagoDeReserva({ payment, reservation, club, court });
+          }
+        }
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('No se pudo reconciliar el pago con MercadoPago:', err.message);
+    }
+
+    res.status(200).json({ ok: true, pago: pagoDTO(reservation) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /public/reservations/:token/retry-payment
+//
+// Nuevo link de pago para una reserva a la que le rechazaron la tarjeta. El
+// horario sigue bloqueado hasta que vence el hold, así que el jugador no lo
+// pierde por probar con otro medio de pago.
+const retryReservationPayment = async (req, res, next) => {
+  try {
+    const data = await cargarPorToken(req.params.token);
+    if (!data) return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
+
+    const { reservation, club, court } = data;
+
+    if (reservation.pago?.estado === 'pagado') {
+      return res.status(400).json({ ok: false, message: 'Esta reserva ya está paga.' });
+    }
+
+    if (reservation.estado !== 'pendiente' || reservation.pago?.estado !== 'pendiente') {
+      return res.status(400).json({ ok: false, message: 'Esta reserva ya no se puede pagar.' });
+    }
+
+    if (reservation.expiraEn && reservation.expiraEn < new Date()) {
+      return res.status(410).json({
+        ok: false,
+        message: 'Se venció el tiempo para pagar y el horario se liberó. Buscá otro turno.'
+      });
+    }
+
+    if (!cobraOnline(club)) {
+      return res.status(400).json({ ok: false, message: 'Este complejo ya no cobra online.' });
+    }
+
+    const cobro = montoACobrar(club, reservation.precioFinal);
+    const checkout = await crearPreferencia({ reservation, club, court, cobro });
+
+    res.status(200).json({
+      ok: true,
+      pago: {
+        initPoint: checkout.initPoint,
+        preferenceId: checkout.preferenceId,
+        monto: cobro.monto,
+        tipo: cobro.tipo,
+        saldo: cobro.saldo,
+        expiraEn: reservation.expiraEn
       }
     });
   } catch (error) {
@@ -458,5 +763,7 @@ module.exports = {
   getClubAvailability,
   createPublicReservation,
   getPublicCities,
-  checkSlugAvailable
+  checkSlugAvailable,
+  getReservationPaymentStatus,
+  retryReservationPayment
 };

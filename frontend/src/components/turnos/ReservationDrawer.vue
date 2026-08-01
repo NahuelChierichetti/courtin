@@ -39,6 +39,56 @@
                 <span>{{ serverError }}</span>
               </div>
 
+              <!-- Cobro online. Sólo aparece en turnos que se pagan (o se
+                   pagaron) por la web: en los cargados a mano no hay nada que
+                   mostrar y el bloque sería ruido. -->
+              <div v-if="pago" class="rounded-xl border border-black/[0.08] p-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Cobro online</span>
+                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold" :class="pago.text">
+                    <span class="h-1.5 w-1.5 rounded-full" :class="pago.dot"></span>
+                    {{ pago.label }}
+                  </span>
+                </div>
+                <p class="mt-1 text-xs text-stone-400">{{ pago.detalle }}</p>
+
+                <p v-if="refundError" class="mt-3 rounded-lg bg-error-50 px-3 py-2 text-xs text-error-600">
+                  {{ refundError }}
+                </p>
+
+                <template v-if="puedeDevolver">
+                  <button
+                    v-if="!confirmandoRefund"
+                    class="mt-3 text-xs font-medium text-error-500 hover:underline cursor-pointer"
+                    @click="confirmandoRefund = true"
+                  >
+                    Devolver pago
+                  </button>
+                  <div v-else class="mt-3 rounded-lg border border-error-200 bg-error-50 p-3">
+                    <p class="text-xs text-stone-600">
+                      Se le devuelven {{ formatCurrency(reservation?.pago?.montoPagado, currency) }} al jugador por
+                      MercadoPago. No se puede deshacer.
+                    </p>
+                    <div class="mt-2.5 flex gap-2">
+                      <button
+                        class="flex-1 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 cursor-pointer"
+                        :disabled="refunding"
+                        @click="confirmandoRefund = false"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        class="flex-1 rounded-full bg-error-500 px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95 cursor-pointer disabled:opacity-60"
+                        :disabled="refunding"
+                        @click="emit('refund', form._id)"
+                      >
+                        {{ refunding ? 'Devolviendo...' : 'Sí, devolver' }}
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+
               <!-- Cliente -->
               <div>
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cliente</label>
@@ -223,7 +273,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { formatCurrency, dayjs, zonedToUtcISO, DEFAULT_TZ } from '@/utils/datetime'
-import { sportMeta, timeToMinutes, minutesToTime, priceForDuration, openRangeForDate } from '@/utils/turnos'
+import { sportMeta, timeToMinutes, minutesToTime, priceForDuration, openRangeForDate, pagoMeta } from '@/utils/turnos'
 
 const props = defineProps({
   visible: Boolean,
@@ -237,11 +287,15 @@ const props = defineProps({
   horarios: { type: Object, default: null },
   saving: Boolean,
   cancelling: Boolean,
+  refunding: Boolean,
+  // Sólo el dueño del complejo puede devolver un pago: mueve plata de su cuenta.
+  isAdmin: Boolean,
   // Mensaje de error devuelto por el backend al guardar.
   serverError: { type: String, default: '' },
+  refundError: { type: String, default: '' },
 })
 
-const emit = defineEmits(['close', 'save', 'cancel'])
+const emit = defineEmits(['close', 'save', 'cancel', 'refund'])
 
 const estadoOptions = [
   { label: 'Pendiente', value: 'pendiente' },
@@ -279,6 +333,22 @@ function emptyForm() {
 }
 
 const isEditing = computed(() => !!form.value._id)
+
+// --- Cobro online ---
+const confirmandoRefund = ref(false)
+const pago = computed(() => pagoMeta(props.reservation, (n) => formatCurrency(n, props.currency)))
+const puedeDevolver = computed(
+  () => props.isAdmin && props.reservation?.pago?.estado === 'pagado',
+)
+
+// Al abrir otro turno, la confirmación de devolución vuelve a cero: si quedara
+// abierta, un clic distraído devolvería el pago del turno equivocado.
+watch(
+  () => [props.visible, props.reservation?._id],
+  () => {
+    confirmandoRefund.value = false
+  },
+)
 
 const selectedCourt = computed(() => props.courts.find((c) => c._id === form.value.courtId))
 

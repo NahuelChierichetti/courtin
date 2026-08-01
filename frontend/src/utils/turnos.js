@@ -155,6 +155,39 @@ export const ESTADO_META = {
 export const reservationLabel = (r) =>
   r.customer?.nombre || r.guestName || 'Sin nombre'
 
+// --- Estado del cobro online ---
+
+// Resume el pago de una reserva para mostrarlo como chip. Devuelve null cuando
+// no hay nada que decir (turno cargado en el mostrador, que se cobra aparte):
+// un chip "sin pagar" en cada turno del backoffice sería ruido constante.
+export const pagoMeta = (r, formatMoney) => {
+  const pago = r?.pago
+  if (!pago || pago.estado === 'no_requerido') return null
+
+  if (pago.estado === 'pagado') {
+    const señado = pago.saldoPendiente > 0
+    return {
+      label: señado ? `Seña ${formatMoney(pago.montoPagado)}` : 'Pagado',
+      // Con seña queda plata por cobrar en el mostrador: se marca en ámbar para
+      // que no se confunda con un turno saldado.
+      dot: señado ? 'bg-warning-500' : 'bg-success-500',
+      text: señado ? 'text-warning-600' : 'text-success-600',
+      detalle: señado ? `Resta ${formatMoney(pago.saldoPendiente)}` : 'Cobrado online',
+    }
+  }
+
+  if (pago.estado === 'reembolsado') {
+    return { label: 'Devuelto', dot: 'bg-stone-400', text: 'text-stone-400', detalle: 'Pago devuelto' }
+  }
+
+  return {
+    label: 'Sin pagar',
+    dot: 'bg-error-500',
+    text: 'text-error-500',
+    detalle: 'Esperando el pago online',
+  }
+}
+
 // --- Reglas de horarios del club (semanal + días especiales + anticipación) ---
 
 // Devuelve la configuración efectiva de un día concreto ("YYYY-MM-DD"),

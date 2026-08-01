@@ -11,9 +11,14 @@ const detailRow = (label, value) => `
 /**
  * Confirmación de reserva para el jugador.
  *
- * Las reservas públicas nacen en estado `pendiente` (las confirma el complejo),
- * así que el copy cambia según el estado para no prometer algo que todavía no
- * pasó.
+ * Cubre los dos caminos con un solo email a propósito:
+ *
+ *  • Reserva sin pago online: nace `pendiente` y la confirma el complejo.
+ *  • Reserva pagada: llega ya `confirmada` y suma el detalle del cobro.
+ *
+ * Mandar un email de "turno confirmado" y otro de "pago acreditado" con un
+ * segundo de diferencia es ruido, y a la tercera vez el jugador lo marca como
+ * spam. La plata cobrada es un dato del turno, no una novedad aparte.
  */
 const reservationConfirmed = ({
   nombre,
@@ -27,14 +32,27 @@ const reservationConfirmed = ({
   manageUrl,
   direccion,
   telefono,
-  toleranciaCancelacionHoras
+  toleranciaCancelacionHoras,
+  // Datos del cobro online. Ausentes en las reservas que se pagan en el complejo.
+  pagado,
+  saldoPendiente
 }) => {
   const esConfirmada = estado === 'confirmada';
+  const huboPago = Boolean(pagado);
+  const esSena = huboPago && Boolean(saldoPendiente);
 
-  const title = esConfirmada ? '¡Turno confirmado!' : 'Recibimos tu reserva';
-  const intro = esConfirmada
-    ? `Tu turno en <strong>${clubNombre}</strong> quedó confirmado. Te esperamos.`
-    : `Tomamos tu pedido de turno en <strong>${clubNombre}</strong>. Queda <strong>pendiente de confirmación</strong> por el complejo; te avisamos apenas lo confirmen.`;
+  const title = huboPago ? '¡Turno pago y confirmado!' : esConfirmada ? '¡Turno confirmado!' : 'Recibimos tu reserva';
+
+  let intro;
+  if (esSena) {
+    intro = `Recibimos tu seña y tu turno en <strong>${clubNombre}</strong> quedó confirmado. Al llegar abonás el saldo.`;
+  } else if (huboPago) {
+    intro = `Recibimos tu pago y tu turno en <strong>${clubNombre}</strong> quedó confirmado. Te esperamos.`;
+  } else if (esConfirmada) {
+    intro = `Tu turno en <strong>${clubNombre}</strong> quedó confirmado. Te esperamos.`;
+  } else {
+    intro = `Tomamos tu pedido de turno en <strong>${clubNombre}</strong>. Queda <strong>pendiente de confirmación</strong> por el complejo; te avisamos apenas lo confirmen.`;
+  }
 
   const detalle = `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 8px 0 4px;">
@@ -42,7 +60,9 @@ const reservationConfirmed = ({
       ${detailRow('Fecha', fecha)}
       ${detailRow('Hora', hora)}
       ${duracion ? detailRow('Duración', duracion) : ''}
-      ${precio ? detailRow('Precio', precio) : ''}
+      ${precio ? detailRow(huboPago ? 'Total del turno' : 'Precio', precio) : ''}
+      ${huboPago ? detailRow(esSena ? 'Seña pagada' : 'Pagado', pagado) : ''}
+      ${esSena ? detailRow('Resta en el complejo', saldoPendiente) : ''}
       ${direccion ? detailRow('Dónde', direccion) : ''}
       ${telefono ? detailRow('Teléfono', telefono) : ''}
     </table>
@@ -57,8 +77,10 @@ const reservationConfirmed = ({
   // solo la hora de inicio y no el rango completo.
   const horaInicio = String(hora).split(' a ')[0];
 
+  const asunto = huboPago ? 'Turno pago' : esConfirmada ? 'Turno confirmado' : 'Reserva recibida';
+
   return {
-    subject: `${esConfirmada ? 'Turno confirmado' : 'Reserva recibida'} · ${clubNombre} · ${fecha}, ${horaInicio}`,
+    subject: `${asunto} · ${clubNombre} · ${fecha}, ${horaInicio}`,
     html: layout({
       title,
       preheader: `${canchaNombre} · ${fecha} a las ${hora}`,
