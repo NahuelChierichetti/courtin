@@ -14,6 +14,7 @@ const {
   getPayment
 } = require('../utils/mercadopago');
 const { secretsReady } = require('../utils/secrets');
+const { appUrl } = require('../utils/publicUrls');
 const {
   findPaymentForMpNotification,
   confirmarPagoDeReserva,
@@ -27,7 +28,7 @@ const {
 // reservas cae directo en su cuenta y nunca pasa por nosotros.
 
 const panelUrl = (query) => {
-  const base = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+  const base = appUrl();
   return `${base}/panel/configuracion?tab=pagos&${query}`;
 };
 
