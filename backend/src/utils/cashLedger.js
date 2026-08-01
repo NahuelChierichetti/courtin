@@ -5,20 +5,29 @@ const CashMovement = require('../models/CashMovement');
 // genera ingreso: se registra en persona cuando se cobra.
 const ONLINE_METHODS = { mercadopago: 'mercadopago', tarjeta: 'tarjeta' };
 
-// Registra el ingreso de una reserva pagada online. Es best-effort: si algo
-// falla, NO debe romper la creación de la reserva (se loguea y sigue).
-const recordReservationPayment = async (reservation, metodoPago) => {
+/**
+ * Registra el ingreso de una reserva pagada online. Es best-effort: si algo
+ * falla, NO debe romper la confirmación de la reserva (se loguea y sigue).
+ *
+ * @param {number} [monto] Lo efectivamente cobrado. Se pasa explícito porque
+ *        con seña entra menos plata que el precio del turno, y anotar el total
+ *        inflaría la caja con un saldo que todavía no cobró nadie. Sin este
+ *        parámetro se asume que se pagó el turno completo.
+ */
+const recordReservationPayment = async (reservation, metodoPago, monto) => {
   try {
     const metodo = ONLINE_METHODS[metodoPago];
     if (!metodo) return null; // pago en el complejo / método no online
-    if (!reservation?.precioFinal) return null;
+
+    const importe = monto ?? reservation?.precioFinal;
+    if (!importe) return null;
 
     return await CashMovement.create({
       club: reservation.club,
       tipo: 'ingreso',
       categoria: 'reserva',
       concepto: `Reserva ${reservation.guestName || ''}`.trim(),
-      monto: reservation.precioFinal,
+      monto: importe,
       metodoPago: metodo,
       origen: 'online',
       reservation: reservation._id,

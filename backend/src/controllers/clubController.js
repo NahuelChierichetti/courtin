@@ -197,7 +197,7 @@ const updateClubConfig = async (req, res, next) => {
         const {
             nombre, slug, direccion, ciudad, provincia, telefono, timezone, moneda,
             whatsapp, email, descripcion, logo, fotos, ubicacion, servicios, publicado,
-            notificaciones
+            notificaciones, pagos
         } = req.body;
 
         // Sólo seteamos los campos presentes en el body (update parcial).
@@ -244,6 +244,52 @@ const updateClubConfig = async (req, res, next) => {
             }
             if (notificaciones.cancelacion !== undefined) {
                 updateData['notificaciones.cancelacion'] = Boolean(notificaciones.cancelacion);
+            }
+        }
+
+        // Configuración de cobro. Igual que notificaciones: campo por campo para
+        // que mandar uno solo no borre el resto.
+        //
+        // `pagos.mp` NO se acepta desde acá bajo ninguna forma: las credenciales
+        // de MercadoPago las escribe únicamente el callback de OAuth. Si se
+        // aceptaran, un tenant_admin podría pegar el token de otra cuenta y
+        // desviarse los cobros.
+        if (pagos && typeof pagos === 'object') {
+            if (pagos.modalidad !== undefined) {
+                if (!['total', 'sena'].includes(pagos.modalidad)) {
+                    return res.status(400).json({ ok: false, message: 'Modalidad de cobro inválida.' });
+                }
+                updateData['pagos.modalidad'] = pagos.modalidad;
+            }
+
+            if (pagos.senaTipo !== undefined) {
+                if (!['porcentaje', 'fijo'].includes(pagos.senaTipo)) {
+                    return res.status(400).json({ ok: false, message: 'Tipo de seña inválido.' });
+                }
+                updateData['pagos.senaTipo'] = pagos.senaTipo;
+            }
+
+            if (pagos.senaValor !== undefined) {
+                const valor = Number(pagos.senaValor);
+                if (!Number.isFinite(valor) || valor <= 0) {
+                    return res.status(400).json({ ok: false, message: 'El valor de la seña debe ser mayor a 0.' });
+                }
+                // El tipo puede venir en el mismo body o ya estar guardado; sin
+                // resolverlo, un porcentaje de 300 pasaría y cobraría el triple
+                // del turno.
+                let tipo = pagos.senaTipo;
+                if (tipo === undefined) {
+                    const actual = await Club.findById(req.params.clubId).select('pagos.senaTipo');
+                    tipo = actual?.pagos?.senaTipo || 'porcentaje';
+                }
+                if (tipo === 'porcentaje' && valor > 100) {
+                    return res.status(400).json({ ok: false, message: 'La seña no puede superar el 100% del turno.' });
+                }
+                updateData['pagos.senaValor'] = valor;
+            }
+
+            if (pagos.permitePagoEnComplejo !== undefined) {
+                updateData['pagos.permitePagoEnComplejo'] = Boolean(pagos.permitePagoEnComplejo);
             }
         }
 

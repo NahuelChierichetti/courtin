@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import publicService from '@/services/publicService'
 import { dayjs, formatCurrency, DEFAULT_TZ } from '@/utils/datetime'
 import { ESTADO_META } from '@/utils/turnos'
 
 const route = useRoute()
+const router = useRouter()
 const token = route.params.token
 
 const reservation = ref(null)
@@ -15,6 +16,24 @@ const error = ref('')
 const cancelling = ref(false)
 const cancelError = ref('')
 const confirmingCancel = ref(false)
+
+// --- Vuelta desde MercadoPago ---
+//
+// `?pago=` lo pone MercadoPago al redirigir y es sólo un indicio: quien
+// confirma de verdad es el webhook. Por eso, ante un "success", la pantalla
+// sondea el estado real en vez de dar por hecho que ya está pagada.
+const pagoRetorno = ref(route.query.pago || null)
+const verificandoPago = ref(false)
+const reintentando = ref(false)
+const reintentoError = ref('')
+
+const POLL_INTERVALO_MS = 2000
+const POLL_MAX_MS = 40000
+let pollTimer = null
+
+const pago = computed(() => reservation.value?.pago || { estado: 'no_requerido' })
+const esperandoPago = computed(() => pago.value.estado === 'pendiente')
+const pagada = computed(() => pago.value.estado === 'pagado')
 
 const tz = computed(() => reservation.value?.club?.timezone || DEFAULT_TZ)
 const moneda = computed(() => reservation.value?.club?.moneda || 'ARS')
@@ -65,7 +84,67 @@ const confirmCancel = async () => {
   }
 }
 
-onMounted(fetchReservation)
+/**
+ * Sondea hasta que el pago se acredite.
+ *
+ * El backend, además de leer su base, le pregunta a MercadoPago: si el webhook
+ * se demoró o se perdió, esta consulta igual termina confirmando la reserva.
+ * Se corta a los 40 s para no dejar la pantalla girando: a esa altura, o el
+ * pago quedó "en proceso" (débito, transferencia) o algo falló, y en los dos
+ * casos el jugador va a recibir el email cuando se acredite.
+ */
+const esperarAcreditacion = async () => {
+  verificandoPago.value = true
+  const limite = Date.now() + POLL_MAX_MS
+
+  const tick = async () => {
+    try {
+      const estado = await publicService.getPaymentStatus(token)
+      if (estado.estado !== 'pendiente') {
+        await fetchReservation()
+        verificandoPago.value = false
+        return
+      }
+    } catch (err) {
+      console.error(err)
+    }
+
+    if (Date.now() >= limite) {
+      verificandoPago.value = false
+      return
+    }
+    pollTimer = setTimeout(tick, POLL_INTERVALO_MS)
+  }
+
+  await tick()
+}
+
+const reintentarPago = async () => {
+  reintentando.value = true
+  reintentoError.value = ''
+  try {
+    const nuevo = await publicService.retryPayment(token)
+    window.location.href = nuevo.initPoint
+  } catch (err) {
+    console.error(err)
+    reintentoError.value = err.response?.data?.message || 'No se pudo reiniciar el pago.'
+    reintentando.value = false
+  }
+}
+
+onMounted(async () => {
+  await fetchReservation()
+
+  // Se limpia la query: un refresh no tiene por qué volver a mostrar el cartel
+  // de "pago exitoso" cuando la reserva ya está resuelta.
+  if (route.query.pago) router.replace({ query: {} })
+
+  if (pagoRetorno.value === 'success' && esperandoPago.value) {
+    await esperarAcreditacion()
+  }
+})
+
+onUnmounted(() => clearTimeout(pollTimer))
 </script>
 
 <template>
@@ -95,6 +174,66 @@ onMounted(fetchReservation)
           <span class="h-1.5 w-1.5 rounded-full" :class="estadoMeta.dot"></span>
           {{ estadoMeta.label }}
         </span>
+      </div>
+
+      <!-- Estado del pago (sólo para reservas que se cobran online) -->
+      <div v-if="verificandoPago" class="flex items-start gap-3 border-b border-stone-100 bg-brand-green-50 px-6 py-4">
+        <i class="icon-[material-symbols--progress-activity] mt-0.5 animate-spin text-lg text-brand-green-600"></i>
+        <div>
+          <p class="text-sm font-semibold text-stone-800">Confirmando tu pago...</p>
+          <p class="text-xs text-stone-500">Puede tardar unos segundos. No cierres esta página.</p>
+        </div>
+      </div>
+
+      <div v-else-if="pagada" class="flex items-start gap-3 border-b border-stone-100 bg-success-50 px-6 py-4">
+        <i class="icon-[material-symbols--check-circle] mt-0.5 text-lg text-success-600"></i>
+        <div>
+          <p class="text-sm font-semibold text-stone-800">
+            Pago acreditado · {{ formatCurrency(pago.montoPagado, moneda) }}
+          </p>
+          <p v-if="pago.saldoPendiente > 0" class="text-xs text-stone-500">
+            Pagaste la seña. Al llegar abonás los {{ formatCurrency(pago.saldoPendiente, moneda) }} restantes.
+          </p>
+          <p v-else class="text-xs text-stone-500">El turno está pago en su totalidad.</p>
+        </div>
+      </div>
+
+      <div v-else-if="pago.estado === 'reembolsado'" class="flex items-start gap-3 border-b border-stone-100 bg-stone-50 px-6 py-4">
+        <i class="icon-[material-symbols--undo] mt-0.5 text-lg text-stone-500"></i>
+        <div>
+          <p class="text-sm font-semibold text-stone-800">Pago devuelto</p>
+          <p class="text-xs text-stone-500">El complejo te devolvió el dinero de esta reserva.</p>
+        </div>
+      </div>
+
+      <div v-else-if="esperandoPago" class="border-b border-stone-100 bg-warning-50 px-6 py-4">
+        <div class="flex items-start gap-3">
+          <i class="icon-[material-symbols--schedule] mt-0.5 text-lg text-warning-600"></i>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-stone-800">
+              {{ pagoRetorno === 'pending' ? 'Tu pago está en proceso' : 'Falta pagar' }}
+            </p>
+            <p class="text-xs text-stone-500">
+              {{
+                pagoRetorno === 'pending'
+                  ? 'Algunos medios de pago tardan en acreditarse. Te avisamos por email en cuanto se confirme.'
+                  : 'El horario queda reservado hasta que venza el tiempo de pago.'
+              }}
+            </p>
+          </div>
+        </div>
+
+        <p v-if="reintentoError" class="mt-3 rounded-lg bg-error-50 px-3 py-2 text-xs text-error-600">{{ reintentoError }}</p>
+
+        <button
+          v-if="pagoRetorno !== 'pending'"
+          class="mt-3 h-9 rounded-full bg-brand-lime-500 px-4 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:opacity-60 cursor-pointer"
+          :disabled="reintentando"
+          @click="reintentarPago"
+        >
+          <i v-if="reintentando" class="icon-[material-symbols--progress-activity] animate-spin mr-1.5"></i>
+          {{ reintentando ? 'Abriendo...' : 'Pagar ahora' }}
+        </button>
       </div>
 
       <div class="space-y-4 px-6 py-5">

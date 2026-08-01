@@ -2,6 +2,7 @@ const cron = require('node-cron');
 
 const { runReservationReminders } = require('./reservationReminders');
 const { runSubscriptionCycle } = require('./subscriptionDunning');
+const { runReservationHolds } = require('./reservationHolds');
 
 // Tareas programadas del backend.
 //
@@ -22,6 +23,12 @@ const RESERVATION_REMINDERS_CRON = '*/30 * * * *';
 // suscripciones depende de la hora exacta; se elige un horario razonable para
 // que los avisos de cobranza no lleguen de madrugada.
 const SUBSCRIPTION_CYCLE_CRON = '0 9 * * *';
+
+// Cada 2 minutos. Acá sí importa la frecuencia y no una ventana ancha: lo que
+// se libera es un horario que alguien más puede querer reservar YA, y el hold
+// dura 15 minutos. Correr cada 2 min hace que el turno vuelva a estar
+// disponible a lo sumo dos minutos tarde.
+const RESERVATION_HOLDS_CRON = '*/2 * * * *';
 
 const registeredJobs = [];
 
@@ -75,9 +82,17 @@ const startJobs = () => {
 
   registeredJobs.push(suscripciones);
 
+  const holds = cron.schedule(
+    RESERVATION_HOLDS_CRON,
+    safeRun('holds vencidos', runReservationHolds),
+    { timezone: 'America/Argentina/Buenos_Aires' }
+  );
+
+  registeredJobs.push(holds);
+
   // eslint-disable-next-line no-console
   console.log(
-    `[jobs] Recordatorios 24h (${RESERVATION_REMINDERS_CRON}) · Ciclo de suscripciones (${SUBSCRIPTION_CYCLE_CRON}).`
+    `[jobs] Recordatorios 24h (${RESERVATION_REMINDERS_CRON}) · Ciclo de suscripciones (${SUBSCRIPTION_CYCLE_CRON}) · Holds de pago (${RESERVATION_HOLDS_CRON}).`
   );
 };
 

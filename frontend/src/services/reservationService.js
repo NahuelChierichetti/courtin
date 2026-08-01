@@ -44,6 +44,16 @@ const reservationService = {
     return data.reservation
   },
 
+  // Devuelve el pago de una reserva por MercadoPago. Sólo tenant_admin.
+  async refundReservation(clubId, id) {
+    const { data } = await api.post(
+      `/reservations/club/${clubId}/${id}/refund`,
+      {},
+      { headers: { 'x-club-id': clubId } },
+    )
+    return data.reservation
+  },
+
   // Reservas del cliente logueado (las que hizo con su cuenta). Scope por token,
   // sin clubId. Alimenta la vista "Mis reservas" del sitio del cliente.
   async getMyReservations() {
