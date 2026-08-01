@@ -21,6 +21,7 @@ const { sendReservationConfirmation, sendClubReservationNotice } = require('../u
 const { filtroClubVisible, puedeCrearReservas } = require('../utils/subscriptions');
 const { montoACobrar, holdExpiresAt, cobraOnline, confirmarPagoDeReserva } = require('../utils/payments');
 const { getClubAccessToken, createPreference, searchPayments } = require('../utils/mercadopago');
+const { appUrl, apiUrl } = require('../utils/publicUrls');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -392,9 +393,9 @@ const crearPreferencia = async ({ reservation, club, court, cobro }) => {
     payerEmail: reservation.guestEmail || undefined
   });
 
-  const appUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
-  const apiUrl = (process.env.API_PUBLIC_URL || '').replace(/\/$/, '');
-  const volverA = `${appUrl}/reserva/${reservation.manageToken}`;
+  const baseApp = appUrl();
+  const baseApi = apiUrl();
+  const volverA = `${baseApp}/reserva/${reservation.manageToken}`;
 
   const preference = await createPreference(
     token,
@@ -428,7 +429,7 @@ const crearPreferencia = async ({ reservation, club, court, cobro }) => {
       // La confirmación real entra por acá, no por el back_url: el jugador
       // puede cerrar la pestaña apenas paga y la reserva tiene que confirmarse
       // igual.
-      notification_url: `${apiUrl}/api/public/mp/webhook`,
+      notification_url: `${baseApi}/api/public/mp/webhook`,
       // Que MercadoPago cierre la preferencia junto con el hold, para que nadie
       // pague un horario que ya se liberó.
       expires: true,
