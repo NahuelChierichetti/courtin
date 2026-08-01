@@ -235,7 +235,10 @@ const updateClubConfig = async (req, res, next) => {
 
         // Sub-documento: se setea campo por campo para que mandar sólo uno de
         // los dos switches no borre el otro.
-        if (notificaciones !== undefined) {
+        //
+        // Se chequea que sea un objeto y no `!== undefined`: un `null` pasaba
+        // esa validación y reventaba al leerle las propiedades.
+        if (notificaciones && typeof notificaciones === 'object') {
             if (notificaciones.nuevaReserva !== undefined) {
                 updateData['notificaciones.nuevaReserva'] = Boolean(notificaciones.nuevaReserva);
             }

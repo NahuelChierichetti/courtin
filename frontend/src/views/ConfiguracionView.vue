@@ -150,6 +150,23 @@ const onServicioBackspace = () => {
   if (!servicioDraft.value && form.value.servicios.length) form.value.servicios.pop()
 }
 
+// --- Avisos por email ---
+// Los switches escriben acá y no directamente sobre `form`. Es una red de
+// seguridad: si `form` se armó sin el objeto `notificaciones` (una config vieja,
+// o un hot-reload que conservó el estado anterior), el v-model escribiría sobre
+// undefined y rompería la vista.
+const notificaciones = computed({
+  get: () => {
+    if (form.value && !form.value.notificaciones) {
+      form.value.notificaciones = { nuevaReserva: true, cancelacion: true }
+    }
+    return form.value?.notificaciones || { nuevaReserva: true, cancelacion: true }
+  },
+  set: (v) => {
+    if (form.value) form.value.notificaciones = v
+  },
+})
+
 // --- Preview de la card ---
 const previewClub = computed(() => ({
   _id: 'preview',
@@ -384,7 +401,7 @@ const inputBase =
 
               <label class="mt-4 flex cursor-pointer items-start gap-3">
                 <input
-                  v-model="form.notificaciones.nuevaReserva"
+                  v-model="notificaciones.nuevaReserva"
                   type="checkbox"
                   class="mt-0.5 h-4 w-4 shrink-0 rounded border border-stone-300 bg-white accent-brand-green-500 [color-scheme:light]"
                 />
@@ -398,7 +415,7 @@ const inputBase =
 
               <label class="mt-3 flex cursor-pointer items-start gap-3">
                 <input
-                  v-model="form.notificaciones.cancelacion"
+                  v-model="notificaciones.cancelacion"
                   type="checkbox"
                   class="mt-0.5 h-4 w-4 shrink-0 rounded border border-stone-300 bg-white accent-brand-green-500 [color-scheme:light]"
                 />
