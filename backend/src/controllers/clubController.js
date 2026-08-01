@@ -196,7 +196,8 @@ const updateClubConfig = async (req, res, next) => {
     try {
         const {
             nombre, slug, direccion, ciudad, provincia, telefono, timezone, moneda,
-            whatsapp, email, descripcion, logo, fotos, ubicacion, servicios, publicado
+            whatsapp, email, descripcion, logo, fotos, ubicacion, servicios, publicado,
+            notificaciones
         } = req.body;
 
         // Sólo seteamos los campos presentes en el body (update parcial).
@@ -231,6 +232,17 @@ const updateClubConfig = async (req, res, next) => {
         if (ubicacion !== undefined) updateData.ubicacion = ubicacion;
         if (servicios !== undefined) updateData.servicios = servicios;
         if (publicado !== undefined) updateData.publicado = publicado;
+
+        // Sub-documento: se setea campo por campo para que mandar sólo uno de
+        // los dos switches no borre el otro.
+        if (notificaciones !== undefined) {
+            if (notificaciones.nuevaReserva !== undefined) {
+                updateData['notificaciones.nuevaReserva'] = Boolean(notificaciones.nuevaReserva);
+            }
+            if (notificaciones.cancelacion !== undefined) {
+                updateData['notificaciones.cancelacion'] = Boolean(notificaciones.cancelacion);
+            }
+        }
 
         const club = await Club.findByIdAndUpdate(
             req.params.clubId,

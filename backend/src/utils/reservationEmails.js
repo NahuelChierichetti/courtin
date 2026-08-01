@@ -11,6 +11,8 @@ const { buildReservationICS } = require('./calendar');
 const { DEFAULT_TZ } = require('./timezone');
 const reservationConfirmedEmail = require('../emails/templates/reservationConfirmed');
 const reservationReminderEmail = require('../emails/templates/reservationReminder');
+const clubReservaAvisoEmail = require('../emails/templates/clubReservaAviso');
+const { emailsDelClub } = require('./clubContact');
 
 // Emails ligados a una reserva. Todo lo de acá es best-effort: si el envío
 // falla, la reserva ya existe y el flujo sigue igual.
@@ -174,4 +176,72 @@ const sendReservationReminder = async ({ reservation, club, court, to, nombre } 
   }
 };
 
-module.exports = { sendReservationConfirmation, sendReservationReminder };
+/**
+ * Aviso al complejo sobre el movimiento de un turno.
+ *
+ * Sólo se dispara por lo que el complejo NO hizo: una reserva que entró por la
+ * web o una cancelación del jugador. Avisarle de lo que él mismo acaba de cargar
+ * en el backoffice sería ruido, y a las diez veces lo marca como spam.
+ *
+ * @param {'nueva'|'cancelacion'} tipo
+ */
+const sendClubReservationNotice = async ({ tipo, reservation, club, court } = {}) => {
+  try {
+    if (!reservation || !club) {
+      return { ok: false, skipped: 'datos incompletos' };
+    }
+
+    // Cada aviso se puede apagar por separado desde la configuración del club.
+    const preferencia = tipo === 'cancelacion'
+      ? club.notificaciones?.cancelacion
+      : club.notificaciones?.nuevaReserva;
+
+    // `undefined` en un club anterior a esta funcionalidad cuenta como activado,
+    // que es el default del modelo.
+    if (preferencia === false) {
+      return { ok: false, skipped: 'desactivado por el complejo' };
+    }
+
+    const { to } = await emailsDelClub(club);
+    if (to.length === 0) {
+      return { ok: false, skipped: 'sin destinatario' };
+    }
+
+    const ctx = buildContext(reservation, club, court);
+    const baseUrl = (process.env.APP_PUBLIC_URL || '').replace(/\/$/, '');
+
+    const { subject, html } = clubReservaAvisoEmail({
+      tipo,
+      clubNombre: club.nombre,
+      canchaNombre: ctx.canchaNombre,
+      fecha: ctx.fecha,
+      hora: ctx.hora,
+      precio: formatMoney(reservation.precioFinal, club.moneda),
+      jugadorNombre: reservation.guestName,
+      jugadorTelefono: reservation.guestPhone,
+      jugadorEmail: reservation.guestEmail,
+      panelUrl: `${baseUrl}/panel/turnos`
+    });
+
+    return await sendEmail({
+      to,
+      subject,
+      html,
+      template: `club-reserva-${tipo}`,
+      // Un turno genera un aviso de cada tipo, no más.
+      dedupeKey: `club-reserva-${tipo}:${reservation._id}`,
+      refId: reservation._id,
+      club: club._id
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('No se pudo avisar al complejo:', err.message);
+    return { ok: false, error: err.message };
+  }
+};
+
+module.exports = {
+  sendReservationConfirmation,
+  sendReservationReminder,
+  sendClubReservationNotice
+};

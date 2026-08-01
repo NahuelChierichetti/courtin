@@ -5,14 +5,15 @@ const Club = require('../models/Club');
 const { validateReservationSlot, isReservationInProgress, canCancelReservation } = require('../utils/reservationRules');
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify } = require('../utils/notifications');
-const { sendReservationConfirmation } = require('../utils/reservationEmails');
+const { sendReservationConfirmation, sendClubReservationNotice } = require('../utils/reservationEmails');
 const { puedeCrearReservas } = require('../utils/subscriptions');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
 // El club poblado por defecto no trae los datos de contacto que necesita el
 // email (dirección, teléfono, política de cancelación).
-const CLUB_EMAIL_FIELDS = 'nombre direccion ciudad telefono whatsapp email timezone moneda horarios';
+const CLUB_EMAIL_FIELDS =
+  'nombre direccion ciudad telefono whatsapp email timezone moneda horarios notificaciones';
 
 const POPULATE = [
   ['club', 'nombre slug estado timezone moneda'],
@@ -459,11 +460,26 @@ const cancelReservationByToken = async (req, res, next) => {
     // Reflejamos el cambio en el DTO sin re-popular (el doc en memoria sigue poblado).
     reservation.estado = 'cancelada';
 
-    await notify(reservation.club?._id || reservation.club, {
+    const clubId = reservation.club?._id || reservation.club;
+
+    await notify(clubId, {
       tipo: 'cancelacion',
       titulo: 'Reserva cancelada',
       mensaje: `${reservation.guestName || 'Un cliente'} canceló ${reservation.court?.nombre || 'su turno'}`,
       reservation: reservation._id
+    });
+
+    // Aviso por email al complejo: canceló el jugador, no ellos.
+    //
+    // El club se busca aparte en vez de ampliar `TOKEN_POPULATE`: ese populate
+    // alimenta una respuesta pública y no corresponde traer ahí el email del
+    // complejo ni sus preferencias de notificación.
+    const clubParaEmail = await Club.findById(clubId).select(CLUB_EMAIL_FIELDS);
+    await sendClubReservationNotice({
+      tipo: 'cancelacion',
+      reservation,
+      club: clubParaEmail,
+      court: reservation.court
     });
 
     res.status(200).json({ ok: true, reservation: toPublicReservation(reservation) });
