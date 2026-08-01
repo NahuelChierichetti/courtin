@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import clubService from '@/services/clubService'
 import courtService from '@/services/courtService'
@@ -13,6 +14,8 @@ import ImageUpload from '@/components/config/ImageUpload.vue'
 
 const { currentClubId, patchCurrentClub } = useAuth()
 const toast = useToast()
+const route = useRoute()
+const router = useRouter()
 
 const form = ref(null)
 const loading = ref(false)
@@ -180,8 +183,51 @@ const previewClub = computed(() => ({
   moneda: form.value?.moneda || 'ARS',
 }))
 
-// --- Pagos (maqueta) ---
+// --- Pagos ---
+// La config de cobros no viaja con el botón "Guardar cambios" de la vista (que
+// está oculto en esta pestaña): la guarda el propio drawer y devuelve el club
+// actualizado por `updated`.
 const mpOpen = ref(false)
+const pagos = ref({})
+const mpConectado = computed(() => pagos.value?.mp?.conectado === true)
+
+const onPagosUpdated = (club) => {
+  pagos.value = club?.pagos || {}
+}
+
+// Vuelta del OAuth de MercadoPago: el callback del backend redirige acá con
+// ?mp=ok|cancelado|error. Se avisa y se limpia la query para que un refresh no
+// vuelva a mostrar el mismo toast.
+const handleMpReturn = () => {
+  const { mp, motivo } = route.query
+  if (!mp) return
+
+  if (mp === 'ok') {
+    toast.add({
+      severity: 'success',
+      summary: 'MercadoPago conectado',
+      detail: 'Ya podés cobrar las reservas online.',
+      life: 5000,
+    })
+    activeTab.value = 'pagos'
+  } else if (mp === 'cancelado') {
+    toast.add({ severity: 'info', summary: 'Conexión cancelada', life: 4000 })
+  } else {
+    const detalles = {
+      state: 'El link de conexión venció. Probá de nuevo desde el panel.',
+      oauth: 'MercadoPago rechazó la autorización. Volvé a intentarlo.',
+      club: 'No se encontró el complejo a vincular.',
+    }
+    toast.add({
+      severity: 'error',
+      summary: 'No se pudo conectar',
+      detail: detalles[motivo] || 'Ocurrió un error al vincular la cuenta.',
+      life: 6000,
+    })
+  }
+
+  router.replace({ query: {} })
+}
 
 const fetchConfig = async () => {
   if (!currentClubId.value) return
@@ -213,6 +259,7 @@ const fetchConfig = async () => {
         cancelacion: club.notificaciones?.cancelacion !== false,
       },
     }
+    pagos.value = club.pagos || {}
     originalSlug.value = club.slug || ''
     slugStatus.value = 'available'
     fetchCourtsMeta()
@@ -225,7 +272,9 @@ const fetchConfig = async () => {
 }
 
 onMounted(() => {
+  if (route.query.tab) activeTab.value = String(route.query.tab)
   fetchConfig()
+  handleMpReturn()
   clockTimer = setInterval(() => (now.value = dayjs.utc()), 30000)
 })
 onUnmounted(() => clockTimer && clearInterval(clockTimer))
@@ -580,19 +629,28 @@ const inputBase =
             <!-- MercadoPago -->
             <div class="flex flex-wrap items-center gap-4 rounded-2xl border border-black/[0.06] p-5">
               <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#009ee3]/10 text-[#009ee3]">
-                <i class="icon-[material-symbols--account-balance-wallet] text-2xl"></i>
+                <img src="/Users/nahue/Documents/courtin/frontend/public/images/mercado-pago.png" alt="MercadoPago" class="h-8 w-auto" />
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
                   <p class="text-sm font-semibold text-ink-500">MercadoPago</p>
-                  <span class="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-500">
-                    <span class="h-1.5 w-1.5 rounded-full bg-stone-400"></span> No conectado
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                    :class="mpConectado ? 'bg-success-50 text-success-600' : 'bg-stone-100 text-stone-500'"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full" :class="mpConectado ? 'bg-success-500' : 'bg-stone-400'"></span>
+                    {{ mpConectado ? 'Conectado' : 'No conectado' }}
                   </span>
                 </div>
-                <p class="mt-0.5 text-xs text-stone-400">Tarjetas, dinero en cuenta y QR. Los pagos caen en tu cuenta.</p>
+                <p v-if="mpConectado" class="mt-0.5 text-xs text-stone-400">
+                  {{ pagos.modalidad === 'sena'
+                    ? `Cobrás una seña de ${pagos.senaTipo === 'porcentaje' ? `${pagos.senaValor}%` : formatCurrency(pagos.senaValor, form?.moneda)} por reserva.`
+                    : 'Cobrás el turno completo por adelantado.' }}
+                </p>
+                <p v-else class="mt-0.5 text-xs text-stone-400">Tarjetas, dinero en cuenta y QR. Los pagos caen en tu cuenta.</p>
               </div>
               <button class="rounded-full bg-brand-lime-500 px-4 py-2 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer" @click="mpOpen = true">
-                Configurar
+                {{ mpConectado ? 'Configurar' : 'Conectar' }}
               </button>
             </div>
 
@@ -612,6 +670,13 @@ const inputBase =
       </div>
     </div>
 
-    <MercadoPagoDrawer :visible="mpOpen" @close="mpOpen = false" />
+    <MercadoPagoDrawer
+      :visible="mpOpen"
+      :club-id="currentClubId"
+      :pagos="pagos"
+      :moneda="form?.moneda || 'ARS'"
+      @close="mpOpen = false"
+      @updated="onPagosUpdated"
+    />
   </div>
 </template>

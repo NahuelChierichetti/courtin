@@ -12,6 +12,7 @@ const { DEFAULT_TZ } = require('./timezone');
 const reservationConfirmedEmail = require('../emails/templates/reservationConfirmed');
 const reservationReminderEmail = require('../emails/templates/reservationReminder');
 const clubReservaAvisoEmail = require('../emails/templates/clubReservaAviso');
+const reservationRefundedEmail = require('../emails/templates/reservationRefunded');
 const { emailsDelClub } = require('./clubContact');
 
 // Emails ligados a una reserva. Todo lo de acá es best-effort: si el envío
@@ -91,7 +92,17 @@ const sendReservationConfirmation = async ({ reservation, club, court, to, nombr
       manageUrl,
       direccion,
       telefono: club.telefono || club.whatsapp,
-      toleranciaCancelacionHoras: club.horarios?.reservas?.toleranciaCancelacionHoras ?? 0
+      toleranciaCancelacionHoras: club.horarios?.reservas?.toleranciaCancelacionHoras ?? 0,
+      // Sólo para las reservas cobradas online; en las que se pagan en el
+      // complejo estos campos quedan vacíos y el email no menciona el cobro.
+      pagado:
+        reservation.pago?.estado === 'pagado'
+          ? formatMoney(reservation.pago.montoPagado, club.moneda)
+          : null,
+      saldoPendiente:
+        reservation.pago?.saldoPendiente > 0
+          ? formatMoney(reservation.pago.saldoPendiente, club.moneda)
+          : null
     });
 
     const ics = buildReservationICS({
@@ -220,7 +231,17 @@ const sendClubReservationNotice = async ({ tipo, reservation, club, court } = {}
       jugadorNombre: reservation.guestName,
       jugadorTelefono: reservation.guestPhone,
       jugadorEmail: reservation.guestEmail,
-      panelUrl: `${baseUrl}/panel/turnos`
+      panelUrl: `${baseUrl}/panel/turnos`,
+      // Lo primero que necesita saber el complejo de una reserva online: si hay
+      // algo que cobrar cuando el jugador llegue, o si ya está todo pago.
+      pagado:
+        reservation.pago?.estado === 'pagado'
+          ? formatMoney(reservation.pago.montoPagado, club.moneda)
+          : null,
+      saldoPendiente:
+        reservation.pago?.saldoPendiente > 0
+          ? formatMoney(reservation.pago.saldoPendiente, club.moneda)
+          : null
     });
 
     return await sendEmail({
@@ -240,8 +261,52 @@ const sendClubReservationNotice = async ({ tipo, reservation, club, court } = {}
   }
 };
 
+/**
+ * Aviso de devolución al jugador. Lo dispara el complejo desde el panel.
+ *
+ * El `dedupeKey` incluye el id del pago y no sólo el de la reserva: si alguna
+ * vez hubiera dos cobros devueltos sobre el mismo turno, cada devolución tiene
+ * que avisarse.
+ */
+const sendRefundNotice = async ({ reservation, club, court, payment, to, nombre } = {}) => {
+  try {
+    const email = to || reservation?.guestEmail;
+
+    if (!email || !reservation || !club || !payment) {
+      return { ok: false, skipped: 'sin email o datos incompletos' };
+    }
+
+    const ctx = buildContext(reservation, club, court);
+
+    const { subject, html } = reservationRefundedEmail({
+      nombre: nombre || reservation.guestName,
+      clubNombre: club.nombre,
+      canchaNombre: ctx.canchaNombre,
+      fecha: ctx.fecha,
+      hora: ctx.hora,
+      monto: formatMoney(payment.monto, club.moneda)
+    });
+
+    return await sendEmail({
+      to: email,
+      subject,
+      html,
+      template: 'reservation-refunded',
+      dedupeKey: `reservation-refunded:${payment._id}`,
+      refId: reservation._id,
+      club: club._id,
+      replyTo: club.email || undefined
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('No se pudo avisar la devolución:', err.message);
+    return { ok: false, error: err.message };
+  }
+};
+
 module.exports = {
   sendReservationConfirmation,
   sendReservationReminder,
-  sendClubReservationNotice
+  sendClubReservationNotice,
+  sendRefundNotice
 };

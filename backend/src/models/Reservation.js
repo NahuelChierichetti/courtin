@@ -76,6 +76,43 @@ const reservationSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
       default: () => crypto.randomBytes(24).toString('hex')
+    },
+    // Estado del cobro online. El detalle de cada intento vive en `Payment`;
+    // acá queda el resumen, que es lo que necesitan el panel y los emails.
+    //
+    // `no_requerido` por defecto: las reservas del backoffice y las anteriores
+    // a los pagos online no se cobran por acá y quedan bien sin migración.
+    pago: {
+      estado: {
+        type: String,
+        enum: ['no_requerido', 'pendiente', 'pagado', 'reembolsado'],
+        default: 'no_requerido'
+      },
+      tipo: {
+        type: String,
+        enum: ['sena', 'total'],
+        default: null
+      },
+      montoPagado: {
+        type: Number,
+        default: 0
+      },
+      // Lo que el jugador todavía debe pagar en el complejo (seña).
+      saldoPendiente: {
+        type: Number,
+        default: 0
+      }
+    },
+    // Vencimiento del bloqueo del horario mientras el jugador está pagando.
+    //
+    // La reserva nace `pendiente` para que el índice único de abajo le reserve
+    // el slot, pero si nadie paga hay que soltarlo: sin esto, cada checkout
+    // abandonado dejaría un horario muerto para siempre. Lo limpia el job de
+    // `jobs/reservationHolds.js`.
+    expiraEn: {
+      type: Date,
+      default: null,
+      index: true
     }
   },
   {

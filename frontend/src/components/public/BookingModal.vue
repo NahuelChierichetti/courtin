@@ -24,11 +24,44 @@ const submitting = ref(false)
 const submitError = ref('')
 const result = ref(null)
 
-const metodos = [
-  { value: 'mercadopago', label: 'MercadoPago', desc: 'Tarjeta, dinero en cuenta o QR', icon: 'icon-[material-symbols--account-balance-wallet]' },
-  { value: 'tarjeta', label: 'Tarjeta de crédito / débito', desc: 'Visa, Mastercard, Amex', icon: 'icon-[material-symbols--credit-card]' },
-  { value: 'complejo', label: 'Pagar en el complejo', desc: 'Reservás ahora, pagás al llegar', icon: 'icon-[material-symbols--apartment]' },
-]
+// Config de cobro del complejo (viene de /public/clubs/:slug).
+const pagos = computed(() => props.club?.pagos || {})
+const cobraOnline = computed(() => pagos.value.online === true)
+const total = computed(() => props.slot?.precio || 0)
+
+// Cuánto se cobra ahora. El backend lo recalcula igual (nunca se confía en el
+// cliente para fijar un precio); acá es sólo para mostrarlo antes de pagar.
+const aPagarAhora = computed(() => {
+  if (!cobraOnline.value || pagos.value.modalidad !== 'sena') return total.value
+  const valor = Number(pagos.value.senaValor) || 0
+  const monto = pagos.value.senaTipo === 'fijo' ? valor : (total.value * valor) / 100
+  return Math.min(Math.round(monto), total.value)
+})
+const saldo = computed(() => Math.max(total.value - aPagarAhora.value, 0))
+const esSena = computed(() => cobraOnline.value && saldo.value > 0)
+
+// Los métodos disponibles dependen del complejo: sin cuenta de MercadoPago
+// conectada, la única opción posible es pagar al llegar.
+const metodos = computed(() => {
+  const opciones = []
+  if (cobraOnline.value) {
+    opciones.push({
+      value: 'mercadopago',
+      label: 'MercadoPago',
+      desc: 'Tarjeta, dinero en cuenta o QR',
+      icon: 'icon-[material-symbols--account-balance-wallet]',
+    })
+  }
+  if (pagos.value.permitePagoEnComplejo !== false) {
+    opciones.push({
+      value: 'complejo',
+      label: 'Pagar en el complejo',
+      desc: 'Reservás ahora, pagás al llegar',
+      icon: 'icon-[material-symbols--apartment]',
+    })
+  }
+  return opciones
+})
 
 const dateLabel = computed(() => {
   if (!props.date) return ''
@@ -39,7 +72,6 @@ const dateLabel = computed(() => {
 })
 
 const horario = computed(() => (props.slot ? `${props.slot.horaInicio} – ${props.slot.horaFin}` : ''))
-const total = computed(() => props.slot?.precio || 0)
 
 const codigo = computed(() =>
   result.value ? `CI-${String(result.value.reservation._id).slice(-4).toUpperCase()}` : '',
@@ -53,7 +85,7 @@ watch(
       step.value = 1
       submitError.value = ''
       result.value = null
-      metodo.value = 'mercadopago'
+      metodo.value = metodos.value[0]?.value || 'complejo'
       form.value = {
         nombre: props.prefill.nombre || '',
         telefono: '',
@@ -77,8 +109,6 @@ const confirmar = async () => {
   submitting.value = true
   submitError.value = ''
   try {
-    // El pago real con MercadoPago se integra en una etapa posterior; por ahora
-    // la reserva se crea como pendiente sin importar el método elegido.
     const res = await publicService.createReservation(props.slug, {
       courtId: props.court._id,
       inicio: props.slot.inicio,
@@ -89,6 +119,15 @@ const confirmar = async () => {
       notas: form.value.notas.trim() || undefined,
       metodoPago: metodo.value,
     })
+
+    // Con pago online la reserva todavía NO está confirmada: queda el horario
+    // bloqueado unos minutos y se va a MercadoPago. La confirmación la da el
+    // webhook cuando el pago se acredita, y al volver aterriza en /reserva/:token.
+    if (res.pago?.initPoint) {
+      window.location.href = res.pago.initPoint
+      return
+    }
+
     result.value = res
     step.value = 3
     emit('confirmed', res)
@@ -196,11 +235,24 @@ const confirmar = async () => {
               <span>{{ court?.nombre }} · {{ court?.duracionTurno }} min</span>
               <span>{{ formatCurrency(total, moneda) }}</span>
             </div>
+            <div v-if="esSena && metodo === 'mercadopago'" class="mt-1 flex items-center justify-between text-stone-500">
+              <span>Resta en el complejo</span>
+              <span>{{ formatCurrency(saldo, moneda) }}</span>
+            </div>
             <div class="mt-1 flex items-center justify-between">
-              <span class="font-semibold text-stone-800">Total a pagar</span>
-              <span class="text-lg font-bold font-secondary text-stone-900">{{ formatCurrency(total, moneda) }}</span>
+              <span class="font-semibold text-stone-800">
+                {{ metodo === 'complejo' ? 'Total a pagar al llegar' : esSena ? 'Seña a pagar ahora' : 'Total a pagar' }}
+              </span>
+              <span class="text-lg font-bold font-secondary text-stone-900">
+                {{ formatCurrency(metodo === 'complejo' ? total : aPagarAhora, moneda) }}
+              </span>
             </div>
           </div>
+
+          <p v-if="metodo === 'mercadopago'" class="flex items-start gap-1.5 px-1 text-xs text-stone-400">
+            <i class="icon-[material-symbols--lock] mt-0.5 shrink-0"></i>
+            <span>Te llevamos a MercadoPago. El horario queda reservado 15 minutos mientras pagás.</span>
+          </p>
 
           <p v-if="submitError" class="rounded-lg bg-error-50 px-3 py-2 text-xs text-error-600">{{ submitError }}</p>
 
@@ -210,7 +262,7 @@ const confirmar = async () => {
             </button>
             <button class="flex h-11 flex-[1.4] items-center justify-center gap-1.5 rounded-full bg-brand-lime-500 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:opacity-60" :disabled="submitting" @click="confirmar">
               <i v-if="submitting" class="icon-[material-symbols--progress-activity] animate-spin"></i>
-              {{ submitting ? 'Procesando...' : (metodo === 'complejo' ? 'Confirmar reserva' : `Pagar ${formatCurrency(total, moneda)}`) }}
+              {{ submitting ? 'Procesando...' : (metodo === 'complejo' ? 'Confirmar reserva' : `Pagar ${formatCurrency(aPagarAhora, moneda)}`) }}
             </button>
           </div>
         </div>
@@ -220,7 +272,7 @@ const confirmar = async () => {
           <div class="mx-auto mt-2 flex h-16 w-16 items-center justify-center rounded-full bg-success-50">
             <i class="icon-[material-symbols--check] text-3xl text-success-500"></i>
           </div>
-          <h3 class="mt-4 text-xl font-bold text-stone-900">¡Reserva confirmada!</h3>
+          <h3 class="mt-4 text-xl font-bold text-stone-900">¡Reserva registrada!</h3>
           <p class="mt-1 text-sm text-stone-500">{{ court?.nombre }} en {{ club?.nombre }}</p>
           <p class="text-sm text-stone-500">{{ dateLabel }} · {{ horario }}</p>
 
@@ -230,7 +282,7 @@ const confirmar = async () => {
           </div>
 
           <p class="mt-3 text-xs text-stone-500">
-            Te enviamos los detalles por WhatsApp y email.<br />Tu reserva quedó registrada como pendiente de confirmación.
+            Te enviamos los detalles por email.<br />Pagás al llegar al complejo.
           </p>
 
           <button class="mt-5 h-11 w-full rounded-full bg-brand-lime-500 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer" @click="emit('close')">

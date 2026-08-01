@@ -125,9 +125,24 @@ const invitationLimiter = rateLimit({
   keyGenerator: (req) => (req.user ? String(req.user._id) : ipKeyGenerator(req.ip))
 });
 
+// Reintento de pago de una reserva. Cada llamada crea una preferencia en
+// MercadoPago, así que sin límite alguien podría usar el endpoint para
+// martillar la API del complejo con el token del complejo. La clave es el token
+// de gestión: el límite es por reserva, no por IP, porque reintentar dos
+// reservas distintas desde la misma casa es normal.
+const retryPaymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: mensaje('Demasiados intentos de pago. Esperá unos minutos.'),
+  keyGenerator: (req) => req.params.token || ipKeyGenerator(req.ip)
+});
+
 module.exports = {
   forgotPasswordLimiters,
   loginLimiters,
   resendVerificationLimiter,
-  invitationLimiter
+  invitationLimiter,
+  retryPaymentLimiter
 };

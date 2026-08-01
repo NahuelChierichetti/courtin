@@ -54,6 +54,19 @@ const publicService = {
     return data.reservation
   },
 
+  // Estado del cobro. Además de leer la base, el backend reconcilia contra
+  // MercadoPago, así que sirve para sondear mientras llega el webhook.
+  async getPaymentStatus(token) {
+    const { data } = await api.get(`/public/reservations/${token}/pago`)
+    return data.pago
+  },
+
+  // Nuevo link de pago tras un rechazo. Devuelve { initPoint, monto, ... }.
+  async retryPayment(token) {
+    const { data } = await api.post(`/public/reservations/${token}/retry-payment`)
+    return data.pago
+  },
+
   async cancelReservationByToken(token) {
     const { data } = await api.patch(`/reservations/manage/${token}/cancel`)
     return data.reservation

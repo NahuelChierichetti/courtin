@@ -9,7 +9,8 @@ const {
   cancelReservation,
   getReservationByToken,
   cancelReservationByToken,
-  getMyReservations
+  getMyReservations,
+  refundReservationPayment
 } = require('../controllers/reservationController');
 const { protect, authorizeClubRoles } = require('../middlewares/authMiddleware');
 const { requiereSuscripcionActiva } = require('../middlewares/subscriptionGuard');
@@ -63,6 +64,14 @@ router.patch(
   '/club/:clubId/:id/cancel',
   authorizeClubRoles(ROLES.TENANT_ADMIN, ROLES.EMPLOYEE),
   cancelReservation
+);
+
+// Devolver un pago mueve plata de la cuenta del complejo: sólo el dueño, no
+// los empleados.
+router.post(
+  '/club/:clubId/:id/refund',
+  authorizeClubRoles(ROLES.TENANT_ADMIN),
+  refundReservationPayment
 );
 
 module.exports = router;

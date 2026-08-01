@@ -188,10 +188,14 @@
       :timezone="tz"
       :saving="saving"
       :cancelling="cancelling"
+      :refunding="refunding"
+      :is-admin="isClubAdmin"
       :server-error="saveError"
+      :refund-error="refundError"
       @close="drawerOpen = false"
       @save="handleSave"
       @cancel="handleCancel"
+      @refund="handleRefund"
     />
   </div>
 </template>
@@ -212,7 +216,19 @@ import {
   openRangeForDate,
 } from '@/utils/turnos'
 
-const { currentClubId, currentClub } = useAuth()
+const { currentClubId, currentClub, memberships, isSuperadmin } = useAuth()
+
+// El rol depende del club activo: la misma persona puede ser dueña de uno y
+// empleada de otro. Devolver un pago mueve plata, así que es sólo del dueño.
+const isClubAdmin = computed(() => {
+  if (isSuperadmin.value) return true
+  return memberships.value.some(
+    (m) =>
+      (m.club?._id || m.club) === currentClubId.value &&
+      m.role === 'tenant_admin' &&
+      m.estado === 'activo',
+  )
+})
 const toast = useToast()
 
 const courts = ref([])
@@ -470,11 +486,14 @@ const drawerOpen = ref(false)
 const drawerReservation = ref(null)
 const saving = ref(false)
 const cancelling = ref(false)
+const refunding = ref(false)
+const refundError = ref('')
 // Error del backend a mostrar dentro del drawer.
 const saveError = ref('')
 
 const openDrawer = (reservation) => {
   saveError.value = ''
+  refundError.value = ''
   drawerReservation.value = reservation
   drawerOpen.value = true
 }
@@ -581,6 +600,30 @@ const handleCancel = async (id) => {
     toast.add({ severity: 'error', summary: 'Error', detail, life: 5000 })
   } finally {
     cancelling.value = false
+  }
+}
+
+const handleRefund = async (id) => {
+  if (!currentClubId.value) return
+  refunding.value = true
+  refundError.value = ''
+  try {
+    const updated = await reservationService.refundReservation(currentClubId.value, id)
+    // El drawer queda abierto a propósito: el complejo ve el estado cambiar a
+    // "Devuelto" sin tener que volver a buscar el turno.
+    drawerReservation.value = updated
+    await fetchReservations()
+    toast.add({
+      severity: 'success',
+      summary: 'Pago devuelto',
+      detail: 'MercadoPago está procesando la devolución.',
+      life: 4000,
+    })
+  } catch (err) {
+    console.error(err)
+    refundError.value = err.response?.data?.message || 'No se pudo devolver el pago.'
+  } finally {
+    refunding.value = false
   }
 }
 
