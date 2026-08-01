@@ -629,7 +629,7 @@ const inputBase =
             <!-- MercadoPago -->
             <div class="flex flex-wrap items-center gap-4 rounded-2xl border border-black/[0.06] p-5">
               <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#009ee3]/10 text-[#009ee3]">
-                <img src="/Users/nahue/Documents/courtin/frontend/public/images/mercado-pago.png" alt="MercadoPago" class="h-8 w-auto" />
+                <img src="/images/mercado-pago.png" alt="MercadoPago" class="h-8 w-auto" />
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">

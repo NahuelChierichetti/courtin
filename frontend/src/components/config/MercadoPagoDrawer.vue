@@ -137,7 +137,7 @@ const handleOverlay = (e) => {
           <!-- Header -->
           <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#009ee3]/10 text-[#009ee3]">
-              <img src="/Users/nahue/Documents/courtin/frontend/public/images/mercado-pago.png" alt="MercadoPago" class="h-6 w-auto" />
+              <img src="/images/mercado-pago.png" alt="MercadoPago" class="h-6 w-auto" />
             </div>
             <div class="min-w-0 flex-1">
               <h2 class="text-lg font-semibold text-ink-500">Cobros con MercadoPago</h2>
@@ -153,7 +153,7 @@ const handleOverlay = (e) => {
             <!-- Estado de la cuenta -->
             <div v-if="!conectado" class="rounded-2xl border border-black/[0.08] p-5 text-center">
               <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#009ee3]/10">
-                <img src="/Users/nahue/Documents/courtin/frontend/public/images/mercado-pago.png" alt="MercadoPago" class="h-8 w-auto" />
+                <img src="/images/mercado-pago.png" alt="MercadoPago" class="h-8 w-auto" />
               </div>
               <h3 class="mt-3 text-base font-semibold text-ink-500">Conectá tu cuenta</h3>
               <p class="mt-1 text-sm text-stone-500">
