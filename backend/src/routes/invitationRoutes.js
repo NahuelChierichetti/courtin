@@ -8,6 +8,7 @@ const {
   acceptInvitation
 } = require('../controllers/invitationController');
 const { protect, authorizeClubRoles } = require('../middlewares/authMiddleware');
+const { requiereSuscripcionActiva } = require('../middlewares/subscriptionGuard');
 const { invitationLimiter } = require('../middlewares/rateLimit');
 const ROLES = require('../config/roles');
 
@@ -19,6 +20,8 @@ router.get('/:token', getInvitation);
 router.post('/:token/accept', acceptInvitation);
 
 router.use(protect);
+// Nivel 2: un complejo suspendido no accede al panel.
+router.use(requiereSuscripcionActiva);
 
 // Sólo el dueño del complejo suma gente a su equipo.
 router.post('/', authorizeClubRoles(ROLES.TENANT_ADMIN), invitationLimiter, createInvitation);

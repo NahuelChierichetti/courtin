@@ -1,12 +1,14 @@
 import api from './api'
 
 const courtService = {
+  // Devuelve { courts, cupo }. `cupo` trae el límite de canchas del plan, para
+  // poder deshabilitar el alta antes de intentarla.
   async getCourts(clubId) {
     const { data } = await api.get('/courts', {
       params: { clubId },
       headers: { 'x-club-id': clubId },
     })
-    return data.courts
+    return { courts: data.courts, cupo: data.cupo || null }
   },
 
   async getCourtById(id, clubId) {

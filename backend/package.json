@@ -13,7 +13,9 @@
     "seed": "node src/scripts/seedDemo.js",
     "mail:test": "node src/scripts/sendTestEmail.js",
     "jobs:reminders": "node src/scripts/sendReminders.js",
-    "users:grandfather": "node src/scripts/verifyExistingUsers.js"
+    "jobs:dunning": "node src/scripts/runDunning.js",
+    "users:grandfather": "node src/scripts/verifyExistingUsers.js",
+    "migrate:planes": "node src/scripts/migratePlanes.js"
   },
   "repository": {
     "type": "git",

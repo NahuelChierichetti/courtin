@@ -30,6 +30,17 @@ api.interceptors.response.use(
     const AUTH_PAGES = ['/login', '/registro', '/panel/login', '/panel/registro']
     const isAuthPage = AUTH_PAGES.includes(pathname)
 
+    // Complejo suspendido por falta de pago: en vez de dejar el panel lleno de
+    // errores sueltos, se manda a la pantalla de suscripción, que es la única
+    // que sigue habilitada y desde donde puede regularizar.
+    const code = error.response?.data?.code
+    if (status === 403 && code === 'SUSCRIPCION_SUSPENDIDA') {
+      if (pathname !== '/panel/suscripcion') {
+        window.location.href = '/panel/suscripcion'
+      }
+      return Promise.reject(error)
+    }
+
     if (status === 401 && !isAuthRequest) {
       clearToken()
 

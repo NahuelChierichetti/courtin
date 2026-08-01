@@ -160,7 +160,7 @@ const createAdminClub = async (req, res, next) => {
       ciudad,
       provincia,
       telefono,
-      plan: plan || 'starter',
+      plan: plan || 'start',
       estado: estado || 'trial',
     });
 

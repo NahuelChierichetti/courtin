@@ -3,6 +3,7 @@ const multer = require('multer');
 
 const { uploadImage } = require('../controllers/uploadController');
 const { protect, authorizeClubRoles } = require('../middlewares/authMiddleware');
+const { requiereSuscripcionActiva } = require('../middlewares/subscriptionGuard');
 const ROLES = require('../config/roles');
 
 const upload = multer({
@@ -27,6 +28,8 @@ const uploadSingle = (req, res, next) =>
 const router = express.Router();
 
 router.use(protect);
+// Nivel 2: un complejo suspendido no accede al panel.
+router.use(requiereSuscripcionActiva);
 router.post('/', authorizeClubRoles(ROLES.TENANT_ADMIN), uploadSingle, uploadImage);
 
 module.exports = router;

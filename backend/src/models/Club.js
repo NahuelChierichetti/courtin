@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const softDelete = require('../utils/softDelete');
+const { PLAN_KEYS } = require('../config/plans');
 
 const HORA_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -132,11 +133,23 @@ const clubSchema = new mongoose.Schema(
       uppercase: true,
       default: 'ARS'
     },
+    // El detalle de la suscripción (precio, ciclo, vigencia) vive en el modelo
+    // Subscription. Acá queda sólo el plan contratado, que es lo que define el
+    // límite de canchas y se consulta en todas las validaciones.
     plan: {
       type: String,
-      enum: ['starter', 'pro', 'business', 'enterprise'],
-      default: 'starter'
+      enum: PLAN_KEYS,
+      default: 'start'
     },
+    // Estado de acceso efectivo. Lo escribe el cron de dunning a partir de la
+    // suscripción (ver utils/subscriptions.js); las lecturas lo consultan tal
+    // cual, sin recalcular.
+    //
+    //   trial/activo → todo habilitado
+    //   impago       → nivel 1: despublicado y sin cargar turnos nuevos
+    //   suspendido   → nivel 2: sin acceso al panel
+    //   cancelado    → baja definitiva
+    //   inactivo     → apagado manual por un superadmin
     estado: {
       type: String,
       enum: ['activo', 'inactivo', 'trial', 'suspendido', 'cancelado', 'impago'],
