@@ -413,9 +413,17 @@ const crearPreferencia = async ({ reservation, club, court, cobro }) => {
           unit_price: cobro.monto
         }
       ],
+      // Se manda el nombre para precargar el checkout, pero NO el email.
+      //
+      // MercadoPago valida el `payer.email` contra la cuenta que está pagando:
+      // si ese email pertenece a una cuenta distinta de la que inicia sesión
+      // —o si una parte es de prueba y la otra real— rechaza el pago con un
+      // error genérico que no dice nada. El email que carga el jugador en la
+      // reserva es para NUESTRA confirmación, no tiene por qué coincidir con su
+      // cuenta de MercadoPago, y precargarlo cambia un ahorro de tipeo por una
+      // familia entera de pagos que fallan sin explicación.
       payer: {
-        name: reservation.guestName || undefined,
-        email: reservation.guestEmail || undefined
+        name: reservation.guestName || undefined
       },
       // Con esto reconocemos el pago cuando vuelve por el webhook.
       external_reference: String(reservation._id),
