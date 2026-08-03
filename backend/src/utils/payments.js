@@ -74,10 +74,17 @@ const confirmarPagoDeReserva = async ({ payment, reservation, club, court }) => 
   const total = payment.montoTotalTurno ?? reservation.precioFinal ?? monto;
   const saldo = Math.max(total - monto, 0);
 
-  // Update condicional: si otro llamado ya la confirmó, `modifiedCount` es 0 y
-  // salimos sin repetir los efectos.
+  // Update condicional, por dos motivos distintos:
+  //
+  //  • `pago.estado: 'pendiente'` da la idempotencia: si otro llamado ya la
+  //    confirmó, `modifiedCount` es 0 y salimos sin repetir los efectos.
+  //  • `estado: 'pendiente'` impide RESUCITAR una reserva cancelada. Si el hold
+  //    venció y el job la canceló, el horario volvió a estar disponible y otra
+  //    persona pudo tomarlo; confirmarla acá dejaría dos reservas sobre el
+  //    mismo turno. Es preferible que quede un pago acreditado sin reserva —el
+  //    complejo lo ve y lo devuelve— antes que una cancha vendida dos veces.
   const result = await Reservation.updateOne(
-    { _id: reservation._id, 'pago.estado': 'pendiente' },
+    { _id: reservation._id, estado: 'pendiente', 'pago.estado': 'pendiente' },
     {
       $set: {
         estado: 'confirmada',
@@ -90,7 +97,20 @@ const confirmarPagoDeReserva = async ({ payment, reservation, club, court }) => 
     }
   );
 
-  if (result.modifiedCount !== 1) return false;
+  if (result.modifiedCount !== 1) {
+    // Un pago acreditado sobre una reserva que ya no está pendiente necesita
+    // intervención humana: o es un reintento del webhook (inofensivo) o el
+    // jugador pagó después de que se le venció el hold (hay que devolverle).
+    // Se loguea fuerte porque desde afuera las dos situaciones se ven iguales.
+    const actual = await Reservation.findById(reservation._id).select('estado pago.estado');
+    if (actual && actual.estado !== 'confirmada') {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[pagos] Pago ${payment._id} acreditado sobre la reserva ${reservation._id}, que está "${actual.estado}". Revisar si corresponde devolver.`
+      );
+    }
+    return false;
+  }
 
   // El documento en memoria se usa abajo para los emails y la caja.
   reservation.estado = 'confirmada';

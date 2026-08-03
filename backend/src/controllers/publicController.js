@@ -397,61 +397,45 @@ const crearPreferencia = async ({ reservation, club, court, cobro }) => {
   const baseApi = apiUrl();
   const volverA = `${baseApp}/reserva/${reservation.manageToken}`;
 
-  const preference = await createPreference(
-    token,
-    {
-      items: [
-        {
-          id: String(court._id),
-          title: `${court.nombre} · ${club.nombre}`,
-          description:
-            cobro.tipo === 'sena'
-              ? `Seña del turno (resta ${cobro.saldo} en el complejo)`
-              : 'Turno completo',
-          quantity: 1,
-          currency_id: moneda,
-          unit_price: cobro.monto
-        }
-      ],
-      // Se manda el nombre para precargar el checkout, pero NO el email.
-      //
-      // MercadoPago valida el `payer.email` contra la cuenta que está pagando:
-      // si ese email pertenece a una cuenta distinta de la que inicia sesión
-      // —o si una parte es de prueba y la otra real— rechaza el pago con un
-      // error genérico que no dice nada. El email que carga el jugador en la
-      // reserva es para NUESTRA confirmación, no tiene por qué coincidir con su
-      // cuenta de MercadoPago, y precargarlo cambia un ahorro de tipeo por una
-      // familia entera de pagos que fallan sin explicación.
-      payer: {
-        name: reservation.guestName || undefined
-      },
-      // Con esto reconocemos el pago cuando vuelve por el webhook.
-      external_reference: String(reservation._id),
-      metadata: { club_id: String(club._id), reservation_id: String(reservation._id) },
-      back_urls: {
-        success: `${volverA}?pago=success`,
-        pending: `${volverA}?pago=pending`,
-        failure: `${volverA}?pago=failure`
-      },
-      auto_return: 'approved',
-      // La confirmación real entra por acá, no por el back_url: el jugador
-      // puede cerrar la pestaña apenas paga y la reserva tiene que confirmarse
-      // igual.
-      notification_url: `${baseApi}/api/public/mp/webhook`,
-      // Que MercadoPago cierre la preferencia junto con el hold, para que nadie
-      // pague un horario que ya se liberó.
-      expires: true,
-      // MercadoPago espera el formato `yyyy-MM-ddTHH:mm:ss.SSSXXX`, con el
-      // offset explícito. Un `toISOString()` (que termina en "Z") lo rechaza en
-      // algunos entornos, y ese rechazo tira abajo toda la creación de la
-      // preferencia.
-      expiration_date_to: reservation.expiraEn
-        ? dayjs(reservation.expiraEn).tz(club.timezone || DEFAULT_TZ).format('YYYY-MM-DDTHH:mm:ss.SSSZ')
-        : undefined,
-      ...(comision > 0 ? { marketplace_fee: comision } : {})
+  // --- Preferencia mínima, a propósito ---
+  //
+  // Sólo van los campos sin los cuales el cobro no funciona: el ítem,
+  // `external_reference` (con el que el webhook reconoce la reserva),
+  // `notification_url` (por donde entra la confirmación) y las `back_urls`.
+  //
+  // Todo lo demás quedó afuera después de que el checkout fallara con un
+  // "algo salió mal" que no identifica el campo culpable. Cuando el pago
+  // funcione se pueden ir sumando de a uno y verificando: `payer`, `metadata`,
+  // `auto_return`, `expires`/`expiration_date_to` y `items[].id/description`.
+  // Ninguno es necesario para cobrar:
+  //
+  //  • el vencimiento del hold ya lo resuelve `jobs/reservationHolds.js`
+  //    server-side, la expiración de la preferencia era defensa en profundidad;
+  //  • sin `auto_return` el jugador vuelve con el botón "Volver al sitio" en
+  //    vez de automáticamente, y la página de la reserva funciona igual.
+  const preferencia = {
+    items: [
+      {
+        title: `${court.nombre} · ${club.nombre}`,
+        quantity: 1,
+        currency_id: moneda,
+        unit_price: cobro.monto
+      }
+    ],
+    // Con esto reconocemos el pago cuando vuelve por el webhook.
+    external_reference: String(reservation._id),
+    back_urls: {
+      success: `${volverA}?pago=success`,
+      pending: `${volverA}?pago=pending`,
+      failure: `${volverA}?pago=failure`
     },
-    String(payment._id)
-  );
+    // La confirmación real entra por acá, no por el back_url: el jugador puede
+    // cerrar la pestaña apenas paga y la reserva tiene que confirmarse igual.
+    notification_url: `${baseApi}/api/public/mp/webhook`,
+    ...(comision > 0 ? { marketplace_fee: comision } : {})
+  };
+
+  const preference = await createPreference(token, preferencia, String(payment._id));
 
   payment.preferenceId = preference.id;
   await payment.save();
