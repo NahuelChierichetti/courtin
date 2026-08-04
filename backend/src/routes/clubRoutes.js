@@ -1,7 +1,7 @@
 const express = require('express')
 
 const  { createClub, getClubs, getClubById, updateClub, deleteClub, getClubHorarios, updateClubHorarios, getClubConfig, updateClubConfig } = require('../controllers/clubController')
-const { getMpConnectUrl, disconnectMp } = require('../controllers/mercadopagoController')
+const { getMpConnectUrl, disconnectMp, getMpResumen } = require('../controllers/mercadopagoController')
 const { protect, authorizeSuperadmin, authorizeClubRoles } = require('../middlewares/authMiddleware')
 const { requiereSuscripcionActiva } = require('../middlewares/subscriptionGuard')
 const ROLES = require('../config/roles')
@@ -24,6 +24,7 @@ router.put('/:clubId/config', authorizeClubRoles(ROLES.TENANT_ADMIN), updateClub
 // Vinculación de la cuenta de cobro. Sólo el dueño del complejo: quien conecta
 // MercadoPago define a qué cuenta va la plata de todas las reservas.
 router.get('/:clubId/pagos/mp/connect-url', authorizeClubRoles(ROLES.TENANT_ADMIN), getMpConnectUrl)
+router.get('/:clubId/pagos/mp/resumen', authorizeClubRoles(ROLES.TENANT_ADMIN), getMpResumen)
 router.delete('/:clubId/pagos/mp', authorizeClubRoles(ROLES.TENANT_ADMIN), disconnectMp)
 
 router.get('/:id', authorizeSuperadmin, getClubById)

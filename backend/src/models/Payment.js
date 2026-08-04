@@ -83,6 +83,23 @@ const paymentSchema = new mongoose.Schema(
       default: 0,
       min: [0, 'La comisión no puede ser negativa']
     },
+    // --- Lo que MercadoPago retiene y cuándo libera la plata ---
+    //
+    // Se guardan del pago real en vez de deducirlos de la tabla de tarifas,
+    // porque el plazo de acreditación y la comisión los define cada complejo en
+    // SU cuenta y no hay forma de consultarlos por API. Estos tres campos son
+    // la única fuente honesta: no dicen "según tu plan deberías cobrar tanto",
+    // dicen lo que efectivamente pasó con esta operación.
+    comisionMp: {
+      type: Number
+    },
+    netoRecibido: {
+      type: Number
+    },
+    // `money_release_date`: cuándo el complejo va a poder disponer del dinero.
+    acreditadoEl: {
+      type: Date
+    },
     // Cómo pagó el jugador, según MercadoPago (visa, account_money, pix...).
     metodoPago: {
       type: String

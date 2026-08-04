@@ -15,7 +15,8 @@ nombre del complejo pero nunca toca el dinero.
 | Decisión | Definición |
 |---|---|
 | Vinculación | OAuth marketplace. El complejo aprieta "Conectar" y autoriza a CourtIn |
-| Qué se cobra | Total o seña (% o monto fijo), a elección de cada complejo |
+| Qué se cobra | Total o seña (% o monto fijo), a elección de cada complejo. **Default: seña 50%** |
+| Comisión de MercadoPago | La paga el complejo, como en cualquier cobro por MercadoPago. Se le muestra en el panel con datos reales de su último cobro |
 | Pagar al llegar | Switch por complejo. Se puede apagar para exigir el pago online |
 | Comisión de CourtIn | Implementada (`marketplace_fee`) pero en **0**: el negocio es el abono |
 | Devoluciones | Manuales, con botón en el panel. No hay refund automático |
