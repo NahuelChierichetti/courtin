@@ -9,7 +9,7 @@ const BRAND = {
   green: '#347048',
   greenDark: '#22492f',
   lime: '#B9CF32',
-  sand: '#F6EDE5',
+  sand: '##fffcf8',
   ink: '#16241b',
   muted: '#6b7280',
   border: '#e5e0d9',

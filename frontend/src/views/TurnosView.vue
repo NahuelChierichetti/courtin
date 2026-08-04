@@ -165,7 +165,7 @@
       v-else
       :mode="viewMode"
       :columns="columns"
-      :reservations="calendarItems"
+      :reservations="calendarVisibleItems"
       :day-start-min="dayStartMin"
       :day-end-min="dayEndMin"
       :now-min="nowMinOfDay"
@@ -366,9 +366,20 @@ const nowMinOfDay = computed(() => {
   return n.hour() * 60 + n.minute()
 })
 
+// Lo que se dibuja en la grilla. La grilla representa OCUPACIÓN, y un turno
+// cancelado no ocupa nada: dejarlo pintado hace ver un horario como tomado
+// cuando en realidad está libre para vender, que es el peor error que puede
+// cometer esta pantalla.
+//
+// Las canceladas siguen existiendo: aparecen en el CSV (que usa
+// `calendarItems` completo), en la campanita y en el email al complejo.
+const calendarVisibleItems = computed(() =>
+  calendarItems.value.filter((r) => r.estado !== 'cancelada'),
+)
+
 // --- Stats ---
 const stats = computed(() => {
-  const items = calendarItems.value.filter((r) => r.estado !== 'cancelada')
+  const items = calendarVisibleItems.value
   return {
     total: items.length,
     confirmados: items.filter((r) => r.estado === 'confirmada' || r.estado === 'completada').length,

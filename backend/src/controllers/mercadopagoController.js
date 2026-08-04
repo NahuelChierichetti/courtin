@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const Club = require('../models/Club');
 const Court = require('../models/Court');
 const Reservation = require('../models/Reservation');
+const Payment = require('../models/Payment');
 const {
   isConfigured,
   buildAuthUrl,
@@ -100,6 +101,47 @@ const mpOauthCallback = async (req, res) => {
     // eslint-disable-next-line no-console
     console.error('[mp] Falló el intercambio del code de OAuth:', err.message);
     return res.redirect(panelUrl('mp=error&motivo=oauth'));
+  }
+};
+
+// GET /clubs/:clubId/pagos/mp/resumen
+//
+// Costo real de cobrar por MercadoPago, para mostrárselo al complejo.
+//
+// Sale del último cobro acreditado y no de la tabla de tarifas de MercadoPago:
+// la comisión y el plazo dependen del plazo de acreditación que cada complejo
+// eligió en SU cuenta, que no se puede consultar por API. Mostrar lo que
+// efectivamente pasó es más honesto que estimar, y además no se desactualiza
+// cuando el complejo cambia su configuración o MercadoPago cambia sus precios.
+const getMpResumen = async (req, res, next) => {
+  try {
+    const ultimo = await Payment.findOne({
+      club: req.params.clubId,
+      estado: 'aprobado',
+      comisionMp: { $ne: null }
+    }).sort({ aprobadoEn: -1 });
+
+    if (!ultimo) {
+      // Todavía no cobró nada: no hay números reales que mostrar.
+      return res.status(200).json({ ok: true, resumen: null });
+    }
+
+    res.status(200).json({
+      ok: true,
+      resumen: {
+        monto: ultimo.monto,
+        comisionMp: ultimo.comisionMp,
+        netoRecibido: ultimo.netoRecibido,
+        acreditadoEl: ultimo.acreditadoEl,
+        moneda: ultimo.moneda,
+        fecha: ultimo.aprobadoEn,
+        // El porcentaje se calcula acá para que el panel no tenga que saber
+        // cómo se relacionan los montos.
+        porcentaje: ultimo.monto ? (ultimo.comisionMp / ultimo.monto) * 100 : null
+      }
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -260,6 +302,25 @@ const mpWebhook = async (req, res) => {
     payment.rawStatus = mpPayment.status;
     payment.rawStatusDetail = mpPayment.status_detail;
 
+    // Cuánto retuvo MercadoPago y cuándo libera la plata. Es lo único que le
+    // permite al complejo ver su costo real: el plazo y la comisión los define
+    // su propia cuenta y no se pueden consultar por API.
+    //
+    // Se excluye `application_fee`: ésa sería la comisión de CourtIn, y
+    // sumarla acá se la mostraría al complejo como retención de MercadoPago.
+    // Hoy es 0 y da lo mismo, pero el día que se active el número quedaría
+    // mintiendo sin que nadie lo note.
+    const comisiones = (mpPayment.fee_details || [])
+      .filter((f) => f.type !== 'application_fee')
+      .reduce((total, f) => total + (Number(f.amount) || 0), 0);
+    if (comisiones > 0) payment.comisionMp = comisiones;
+    if (mpPayment.transaction_details?.net_received_amount != null) {
+      payment.netoRecibido = mpPayment.transaction_details.net_received_amount;
+    }
+    if (mpPayment.money_release_date) {
+      payment.acreditadoEl = new Date(mpPayment.money_release_date);
+    }
+
     const reservation = await Reservation.findById(payment.reservation);
     if (!reservation) {
       await payment.save();
@@ -295,4 +356,4 @@ const mpWebhook = async (req, res) => {
   }
 };
 
-module.exports = { getMpConnectUrl, mpOauthCallback, disconnectMp, mpWebhook };
+module.exports = { getMpConnectUrl, mpOauthCallback, disconnectMp, mpWebhook, getMpResumen };
