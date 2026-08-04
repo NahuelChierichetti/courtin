@@ -30,13 +30,13 @@
           <!-- Body -->
           <div class="flex-1 overflow-y-auto px-6 py-6">
             <div class="space-y-5">
-              <!-- Error del backend -->
+              <!-- Error del backend o de los campos obligatorios -->
               <div
-                v-if="serverError"
+                v-if="serverError || localError"
                 class="flex items-start gap-2 rounded-lg border border-error-200 bg-error-50 px-3 py-2.5 text-sm text-error-600"
               >
                 <i class="icon-[material-symbols--error] mt-0.5 text-xs"></i>
-                <span>{{ serverError }}</span>
+                <span>{{ serverError || localError }}</span>
               </div>
 
               <!-- Cobro online. Sólo aparece en turnos que se pagan (o se
@@ -91,7 +91,7 @@
 
               <!-- Cliente -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cliente</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cliente<span class="ml-0.5 text-error-500">*</span></label>
                 <input
                   v-model="form.guestName"
                   type="text"
@@ -103,7 +103,7 @@
               <!-- Teléfono + Email -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Teléfono</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Teléfono<span class="ml-0.5 text-error-500">*</span></label>
                   <input
                     v-model="form.guestPhone"
                     type="tel"
@@ -126,7 +126,7 @@
 
               <!-- Cancha -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cancha</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cancha<span class="ml-0.5 text-error-500">*</span></label>
                 <div class="relative">
                   <select
                     v-model="form.courtId"
@@ -140,7 +140,7 @@
 
               <!-- Fecha -->
               <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Fecha</label>
+                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Fecha<span class="ml-0.5 text-error-500">*</span></label>
                 <input
                   v-model="form.fecha"
                   type="date"
@@ -154,7 +154,7 @@
               <!-- Horario -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Desde</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Desde<span class="ml-0.5 text-error-500">*</span></label>
                   <div class="relative">
                     <select
                       v-model="form.horaInicio"
@@ -166,7 +166,7 @@
                   </div>
                 </div>
                 <div>
-                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Hasta</label>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Hasta<span class="ml-0.5 text-error-500">*</span></label>
                   <div class="relative">
                     <select
                       v-model="form.horaFin"
@@ -232,6 +232,10 @@
                   class="w-full resize-none rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 ></textarea>
               </div>
+
+              <p class="text-xs text-stone-400">
+                <span class="text-error-500">*</span> Campo obligatorio
+              </p>
             </div>
           </div>
 
@@ -445,7 +449,46 @@ watch(
   },
 )
 
+// Campos que el backend rechaza si faltan (ver `validateCustomerData` e
+// `isValidInstantRange` en reservationController). Se valida acá también para
+// que el asterisco signifique algo: marcar un campo como obligatorio y después
+// dejar que el error venga de un viaje al servidor es peor que no marcarlo.
+//
+// La lista tiene que seguir a la del backend. Si alguna vez divergen, la que
+// manda es la del servidor y el usuario ve el `serverError`.
+const REQUERIDOS = [
+  { campo: 'guestName', label: 'el nombre del cliente' },
+  { campo: 'guestPhone', label: 'el teléfono' },
+  { campo: 'courtId', label: 'la cancha' },
+  { campo: 'fecha', label: 'la fecha' },
+  { campo: 'horaInicio', label: 'la hora de inicio' },
+  { campo: 'horaFin', label: 'la hora de fin' }
+]
+
+const faltantes = computed(() =>
+  REQUERIDOS.filter(({ campo }) => !String(form.value[campo] ?? '').trim()),
+)
+
+const localError = ref('')
+
+// El mensaje se limpia solo al corregir, para que no quede un cartel rojo
+// contradiciendo un formulario ya completo.
+watch(faltantes, (f) => {
+  if (f.length === 0) localError.value = ''
+})
+
 const handleSave = () => {
+  if (faltantes.value.length > 0) {
+    const nombres = faltantes.value.map((f) => f.label)
+    const lista =
+      nombres.length === 1
+        ? nombres[0]
+        : `${nombres.slice(0, -1).join(', ')} y ${nombres[nombres.length - 1]}`
+    localError.value = `Falta completar ${lista}.`
+    return
+  }
+  localError.value = ''
+
   // Convertimos fecha + hora local del club a instantes UTC. Si el fin es menor
   // o igual al inicio, el turno cruza la medianoche (día siguiente).
   const inicio = zonedToUtcISO(form.value.fecha, form.value.horaInicio, props.timezone)

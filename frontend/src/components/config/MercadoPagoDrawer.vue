@@ -29,6 +29,37 @@ const confirmDisconnect = ref(false)
 const mp = computed(() => props.pagos?.mp || {})
 const conectado = computed(() => mp.value.conectado === true)
 
+// --- Costo real de cobrar por MercadoPago ---
+//
+// Sale del último cobro acreditado, no de la tabla de tarifas: la comisión y el
+// plazo dependen de lo que cada complejo eligió en SU cuenta de MercadoPago, y
+// eso no se puede consultar por API. Antes del primer cobro no hay números que
+// mostrar y va sólo la explicación.
+const MP_COSTOS_URL = 'https://www.mercadopago.com.ar/costs-section#from-section=menu'
+
+const resumen = ref(null)
+
+const cargarResumen = async () => {
+  if (!props.clubId || !conectado.value) {
+    resumen.value = null
+    return
+  }
+  try {
+    resumen.value = await clubService.getMpResumen(props.clubId)
+  } catch (err) {
+    // Es informativo: si falla, el drawer muestra el texto genérico.
+    console.error(err)
+    resumen.value = null
+  }
+}
+
+const acreditacion = computed(() =>
+  resumen.value?.acreditadoEl ? dayjs(resumen.value.acreditadoEl).format('D [de] MMMM') : null,
+)
+const comisionPct = computed(() =>
+  resumen.value?.porcentaje != null ? resumen.value.porcentaje.toFixed(1).replace('.', ',') : null,
+)
+
 const conectadoDesde = computed(() =>
   mp.value.conectadoEn ? dayjs(mp.value.conectadoEn).format('D [de] MMMM [de] YYYY') : null,
 )
@@ -59,8 +90,9 @@ watch(
   ([v]) => {
     if (!v) return
     confirmDisconnect.value = false
+    cargarResumen()
     form.value = {
-      modalidad: props.pagos?.modalidad || 'total',
+      modalidad: props.pagos?.modalidad || 'sena',
       senaTipo: props.pagos?.senaTipo || 'porcentaje',
       senaValor: props.pagos?.senaValor ?? 50,
       permitePagoEnComplejo: props.pagos?.permitePagoEnComplejo !== false,
@@ -300,6 +332,52 @@ const handleOverlay = (e) => {
             <div v-if="!conectado" class="flex items-start gap-2 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-xs text-warning-700">
               <i class="icon-[material-symbols--info] mt-0.5 shrink-0"></i>
               <span>Sin la cuenta conectada, todas las reservas online entran como "pagar en el complejo".</span>
+            </div>
+
+            <!-- Comisión y plazos.
+                 Se dice de frente, y antes de conectar: un complejo que
+                 descubre la retención recién en su primer cobro le echa la
+                 culpa a CourtIn. Conviene ser el que se lo explicó. -->
+            <div class="rounded-xl border border-black/[0.08] px-4 py-3">
+              <p class="flex items-center gap-1.5 text-xs font-semibold text-ink-500">
+                <i class="icon-[material-symbols--info-outline] text-sm text-stone-400"></i>
+                Comisión y plazos de acreditación
+              </p>
+
+              <!-- Con datos reales del último cobro -->
+              <template v-if="resumen">
+                <p class="mt-2 text-xs leading-relaxed text-stone-500">
+                  En tu último cobro de <span class="font-semibold text-ink-500">{{ formatCurrency(resumen.monto, resumen.moneda) }}</span>,
+                  MercadoPago retuvo
+                  <span class="font-semibold text-ink-500">{{ formatCurrency(resumen.comisionMp, resumen.moneda) }}</span>
+                  <span v-if="comisionPct"> ({{ comisionPct }}%)</span>
+                  <template v-if="resumen.netoRecibido != null">
+                    y recibiste {{ formatCurrency(resumen.netoRecibido, resumen.moneda) }}</template>.
+                  <template v-if="acreditacion">
+                    El dinero se acredita el <span class="font-semibold text-ink-500">{{ acreditacion }}</span>.
+                  </template>
+                </p>
+                <p class="mt-1.5 text-xs text-stone-400">
+                  Para cobrar antes o pagar menos comisión, cambiá tu plazo de acreditación en MercadoPago.
+                </p>
+              </template>
+
+              <!-- Todavía sin cobros: sólo se puede explicar -->
+              <p v-else class="mt-2 text-xs leading-relaxed text-stone-500">
+                MercadoPago retiene una comisión por cada cobro y acredita el dinero según el plazo que
+                tengas elegido en tu cuenta. <span class="font-medium text-stone-600">Esa comisión es de
+                MercadoPago, no de CourtIn</span> — es la misma que pagarías cobrando con un link o un QR.
+              </p>
+
+              <a
+                :href="MP_COSTOS_URL"
+                target="_blank"
+                rel="noopener"
+                class="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-brand-green-600 hover:underline"
+              >
+                Ver mis costos y plazos en MercadoPago
+                <i class="icon-[material-symbols--open-in-new] text-xs"></i>
+              </a>
             </div>
           </div>
 

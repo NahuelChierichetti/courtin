@@ -140,10 +140,17 @@ const pagosSchema = new mongoose.Schema(
       default: () => ({})
     },
     // Cuánto se cobra por adelantado: el turno completo o una seña.
+    //
+    // Arranca en seña porque es lo que más le conviene al complejo, aunque no
+    // sea lo obvio: la comisión de MercadoPago se paga sobre lo que pasa por
+    // MercadoPago, así que cobrar la mitad y el resto en el mostrador cuesta la
+    // mitad de comisión. Y el efecto que importa —que el jugador tenga plata
+    // puesta y no falte— ya lo consigue la seña; el total no agrega nada ahí.
+    // Pedir el 100% por adelantado además espanta reservas.
     modalidad: {
       type: String,
       enum: ['total', 'sena'],
-      default: 'total'
+      default: 'sena'
     },
     senaTipo: {
       type: String,

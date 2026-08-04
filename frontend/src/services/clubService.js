@@ -29,6 +29,15 @@ const clubService = {
     return data.url
   },
 
+  // Costo real del último cobro: comisión de MercadoPago y fecha de
+  // acreditación. Devuelve null si el complejo todavía no cobró nada.
+  async getMpResumen(clubId) {
+    const { data } = await api.get(`/clubs/${clubId}/pagos/mp/resumen`, {
+      headers: { 'x-club-id': clubId },
+    })
+    return data.resumen
+  },
+
   async disconnectMp(clubId) {
     const { data } = await api.delete(`/clubs/${clubId}/pagos/mp`, {
       headers: { 'x-club-id': clubId },

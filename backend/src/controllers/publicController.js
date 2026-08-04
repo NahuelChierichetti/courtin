@@ -41,7 +41,7 @@ const toPublicPagos = (club) => {
 
   return {
     online,
-    modalidad: pagos.modalidad || 'total',
+    modalidad: pagos.modalidad || 'sena',
     senaTipo: pagos.senaTipo || 'porcentaje',
     senaValor: pagos.senaValor ?? 0,
     // Sin cuenta conectada no hay forma de cobrar online: el pago en el
