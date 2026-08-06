@@ -80,7 +80,7 @@
         </div>
 
         <!-- Sport legend / filter -->
-        <div class="flex items-center gap-1.5">
+        <div v-if="sportChips.length" class="flex items-center gap-1.5">
           <button
             v-for="s in sportChips"
             :key="s.value"
@@ -209,6 +209,7 @@ import courtService from '@/services/courtService'
 import scheduleService from '@/services/scheduleService'
 import reservationService from '@/services/reservationService'
 import { useAuth } from '@/composables/useAuth'
+import { sportsForClub } from '@/utils/sports'
 import { dayjs, formatCurrency, DEFAULT_TZ, zonedToUtcISO } from '@/utils/datetime'
 import {
   sportMeta,
@@ -247,12 +248,16 @@ const viewOptions = [
   { label: 'Semana', value: 'week' },
 ]
 
-const sportChips = [
-  { label: 'Todas', value: 'todas', dot: null },
-  { label: 'Pádel', value: 'padel', dot: 'bg-brand-purple-500' },
-  { label: 'Tenis', value: 'tenis', dot: 'bg-brand-lime-500' },
-  { label: 'Fútbol', value: 'futbol', dot: 'bg-brand-green-500' },
-]
+// Leyenda y filtro de la grilla: los deportes del complejo, con el color con el
+// que se pintan los turnos. Con uno solo la fila no aporta nada y se oculta.
+const sportChips = computed(() => {
+  const deportes = sportsForClub(currentClub.value)
+  if (deportes.length < 2) return []
+  return [
+    { label: 'Todas', value: 'todas', dot: null },
+    ...deportes.map((d) => ({ label: d.label, value: d.key, dot: d.dot })),
+  ]
+})
 
 const tz = computed(() => currentClub.value?.timezone || DEFAULT_TZ)
 const currency = computed(() => currentClub.value?.moneda || 'ARS')

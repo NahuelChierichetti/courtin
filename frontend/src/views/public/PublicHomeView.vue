@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import publicService from '@/services/publicService'
 import { dayjs } from '@/utils/datetime'
 import SportIcon from '@/components/public/SportIcon.vue'
+import { PUBLIC_SPORTS } from '@/utils/sports'
 import ClubCard from '@/components/public/ClubCard.vue'
 
 const router = useRouter()
@@ -14,13 +15,11 @@ const ubicacion = ref('')
 const fecha = ref(dayjs().format('YYYY-MM-DD'))
 const hora = ref('')
 
+// Los deportes que existen en la plataforma (utils/sports.js), más un acceso a
+// la búsqueda sin filtrar. No se listan deportes a mano: los que no existían
+// —vóley, hockey— llevaban a una búsqueda siempre vacía.
 const sports = [
-  { value: 'padel', label: 'Pádel' },
-  { value: 'futbol', label: 'Fútbol' },
-  { value: 'tenis', label: 'Tenis' },
-  { value: 'basquet', label: 'Básquet' },
-  { value: 'voley', label: 'Vóley' },
-  { value: 'hockey', label: 'Hockey' },
+  ...PUBLIC_SPORTS.map((s) => ({ value: s.key, label: s.label })),
   { value: '', label: 'Más' },
 ]
 
@@ -131,7 +130,7 @@ onMounted(async () => {
           @click="goToSport(s.value)"
         >
           <span class="flex h-16 w-16 items-center justify-center rounded-full border border-black/[0.06] bg-white text-brand-green-500 shadow-sm transition-all group-hover:-translate-y-0.5 group-hover:shadow-md">
-            <SportIcon :sport="s.value || 'mas'" class="h-7 w-7" />
+            <SportIcon :sport="s.value || 'otro'" class="h-7 w-7" />
           </span>
           <span class="text-sm font-medium text-ink-500">{{ s.label }}</span>
         </button>

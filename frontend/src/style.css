@@ -9,7 +9,7 @@
      #347048  verde    -> color primario: sidebar, acentos, iconos, estados activos
      #B9CF32  amarillo -> acento/CTA: logo, botones primarios (con texto verde oscuro)
      #926699  violeta  -> secundario: botones de jerarquía menor, series de datos
-     #F6EDE5  arena    -> fondo de la app (las tarjetas van en blanco)
+     #F9F9F5  arena    -> fondo de la app (las tarjetas van en blanco)
    El neutro oscuro (`ink`) y las superficies (`surface`) están teñidos en cálido
    para acompañar al arena. No se usa azul ni naranja en la marca.
 --------------------------------------------------------------------------- */
@@ -53,7 +53,7 @@
   --color-brand-sand-200: #f4ede6;
   --color-brand-sand-300: #f0e7de;
   --color-brand-sand-400: #ede4da;
-  --color-brand-sand-500: #F6EDE5;
+  --color-brand-sand-500: #F9F9F5;
   --color-brand-sand-600: #d4c2b2;
   --color-brand-sand-700: #b8a08b;
   --color-brand-sand-800: #8f7a67;
@@ -75,7 +75,7 @@
   --color-surface-200: #faf8f4;
   --color-surface-300: #f7f3ed;
   --color-surface-400: #f2ece4;
-  --color-surface-500: #F6EDE5;
+  --color-surface-500: #F9F9F5;
   --color-surface-600: #d9cbbc;
   --color-surface-700: #bda992;
 
@@ -96,6 +96,50 @@
   --color-success-500: #12b76a;
   --color-success-600: #039855;
   --color-success-700: #027a48;
+
+  /* --- Colores por deporte ---------------------------------------------------
+     Paleta CATEGÓRICA, no de marca: sirve para distinguir deportes de un vistazo
+     en la grilla de turnos, las canchas y los reportes. Por eso incluye azul y
+     naranja, que la marca no usa: la marca la sigue poniendo el verde CourtIn,
+     estos colores sólo codifican un dato.
+     Fútbol y tenis reusan el verde y el lima de marca para que el panel no se
+     vuelva un arcoíris; pádel y básquet suman los dos colores que faltaban.
+     El catálogo que los consume está en utils/sports.js.
+  --------------------------------------------------------------------------- */
+  --color-sport-futbol-50: #eef6f1;
+  --color-sport-futbol-100: #d7ebde;
+  --color-sport-futbol-500: #347048;
+  --color-sport-futbol-600: #2a5b3a;
+  --color-sport-futbol-700: #22492f;
+  --color-sport-futbol-800: #1b3a26;
+
+  --color-sport-padel-50: #eef4fa;
+  --color-sport-padel-100: #d7e6f3;
+  --color-sport-padel-500: #2f6fb0;
+  --color-sport-padel-600: #265a91;
+  --color-sport-padel-700: #1f4a77;
+  --color-sport-padel-800: #193b60;
+
+  --color-sport-tenis-50: #f8fbe9;
+  --color-sport-tenis-100: #f0f7c9;
+  --color-sport-tenis-500: #b9cf32;
+  --color-sport-tenis-600: #9cb026;
+  --color-sport-tenis-700: #7a8a20;
+  --color-sport-tenis-800: #5f6c1d;
+
+  --color-sport-basquet-50: #fdf3ec;
+  --color-sport-basquet-100: #fae3d3;
+  --color-sport-basquet-500: #e07b32;
+  --color-sport-basquet-600: #c06327;
+  --color-sport-basquet-700: #9c4f20;
+  --color-sport-basquet-800: #7b3f1a;
+
+  --color-sport-otro-50: #f7f5f3;
+  --color-sport-otro-100: #ece8e3;
+  --color-sport-otro-500: #b8a08b;
+  --color-sport-otro-600: #96806c;
+  --color-sport-otro-700: #776657;
+  --color-sport-otro-800: #5c4f44;
 
   /* Advertencia en dorado (sin naranja de marca). */
   --color-warning-50: #fdf9e7;

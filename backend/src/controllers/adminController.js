@@ -4,6 +4,7 @@ const Court = require('../models/Court');
 const Membership = require('../models/Membership');
 const Reservation = require('../models/Reservation');
 const User = require('../models/User');
+const { normalizeSports, sportLabel } = require('../config/sports');
 
 const getAdminClubs = async (req, res, next) => {
   try {
@@ -146,11 +147,16 @@ const getAdminClubById = async (req, res, next) => {
 
 const createAdminClub = async (req, res, next) => {
   try {
-    const { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado } = req.body;
+    const { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado, deportes } = req.body;
 
     const existingClub = await Club.findOne({ slug });
     if (existingClub) {
       return res.status(400).json({ ok: false, message: 'Ya existe un club con ese slug' });
+    }
+
+    const deportesHabilitados = normalizeSports(deportes);
+    if (deportes !== undefined && !deportesHabilitados?.length) {
+      return res.status(400).json({ ok: false, message: 'Elegí al menos un deporte para el complejo' });
     }
 
     const club = await Club.create({
@@ -162,6 +168,8 @@ const createAdminClub = async (req, res, next) => {
       telefono,
       plan: plan || 'start',
       estado: estado || 'trial',
+      // Sin lista explícita quedan los deportes por defecto del catálogo.
+      ...(deportesHabilitados?.length && { deportes: deportesHabilitados }),
     });
 
     res.status(201).json({
@@ -176,11 +184,39 @@ const createAdminClub = async (req, res, next) => {
 
 const updateAdminClub = async (req, res, next) => {
   try {
-    const { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado } = req.body;
+    const { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado, deportes } = req.body;
+
+    const updateData = { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado };
+
+    if (deportes !== undefined) {
+      const deportesHabilitados = normalizeSports(deportes);
+      if (!deportesHabilitados?.length) {
+        return res.status(400).json({ ok: false, message: 'El complejo tiene que tener al menos un deporte habilitado' });
+      }
+
+      // Sacar un deporte que ya tiene canchas dejaría esas canchas huérfanas:
+      // fuera de todos los filtros del panel pero recibiendo reservas. Se
+      // bloquea y se le dice cuáles borrar o cambiar primero.
+      const huerfanas = await Court.find({
+        club: req.params.id,
+        tipo: { $nin: deportesHabilitados },
+      }).select('nombre tipo');
+
+      if (huerfanas.length) {
+        const detalle = huerfanas.map((c) => `${c.nombre} (${sportLabel(c.tipo)})`).join(', ');
+        return res.status(400).json({
+          ok: false,
+          code: 'DEPORTE_CON_CANCHAS',
+          message: `No se puede sacar ese deporte: el complejo tiene canchas cargadas de ${detalle}. Cambiales el deporte o eliminalas primero.`,
+        });
+      }
+
+      updateData.deportes = deportesHabilitados;
+    }
 
     const club = await Club.findByIdAndUpdate(
       req.params.id,
-      { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado },
+      updateData,
       { new: true, runValidators: true }
     );
 

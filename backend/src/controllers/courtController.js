@@ -1,6 +1,20 @@
 const Court = require('../models/Court');
 const Club = require('../models/Club');
 const { excedeLimite, limiteCanchas, planParaCanchas, getPlan } = require('../config/plans');
+const { sportLabel } = require('../config/sports');
+
+// Un club sólo puede tener canchas de los deportes que el superadmin le
+// habilitó. Se valida acá y no en el schema porque la lista vive en otro
+// documento (`Club.deportes`) y Mongoose no la ve desde Court.
+const deporteNoHabilitado = (club, tipo) => {
+  if (!tipo) return null;
+  if ((club.deportes || []).includes(tipo)) return null;
+  return {
+    ok: false,
+    code: 'DEPORTE_NO_HABILITADO',
+    message: `El complejo no tiene ${sportLabel(tipo)} entre sus deportes habilitados.`
+  };
+};
 
 const createCourt = async (req, res, next) => {
   try {
@@ -13,6 +27,16 @@ const createCourt = async (req, res, next) => {
         ok: false,
         message: 'Club no encontrado'
       });
+    }
+
+    // Sin `tipo` explícito se toma el primer deporte del complejo, no el default
+    // del schema: en un complejo de sólo pádel, una cancha "de fútbol" por
+    // omisión sería basura.
+    const tipoFinal = tipo || club.deportes?.[0];
+
+    const deporteInvalido = deporteNoHabilitado(club, tipoFinal);
+    if (deporteInvalido) {
+      return res.status(400).json(deporteInvalido);
     }
 
     // Límite de canchas del plan. Se valida al crear y nunca al borrar: un club
@@ -34,10 +58,10 @@ const createCourt = async (req, res, next) => {
     const court = await Court.create({
       club: clubId,
       nombre,
-      tipo,
+      tipo: tipoFinal,
       superficie,
       cubierta,
-      jugadores: tipo === 'futbol' ? jugadores : undefined,
+      jugadores: tipoFinal === 'futbol' ? jugadores : undefined,
       estado,
       tarifas: tarifas || [],
       duracionTurno,
@@ -128,15 +152,29 @@ const updateCourt = async (req, res, next) => {
   try {
     const { clubId, nombre, tipo, superficie, cubierta, jugadores, estado, tarifas, duracionTurno, descripcion, visible } = req.body;
 
-    if (clubId) {
-      const club = await Club.findById(clubId);
+    const existente = await Court.findById(req.params.id);
 
-      if (!club) {
-        return res.status(404).json({
-          ok: false,
-          message: 'Club no encontrado'
-        });
-      }
+    if (!existente) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Cancha no encontrada'
+      });
+    }
+
+    // El deporte se valida contra el club de destino: el que viene en el body si
+    // la cancha se está mudando, o el actual de la cancha.
+    const club = await Club.findById(clubId || existente.club);
+
+    if (!club) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Club no encontrado'
+      });
+    }
+
+    const deporteInvalido = deporteNoHabilitado(club, tipo);
+    if (deporteInvalido) {
+      return res.status(400).json(deporteInvalido);
     }
 
     const updateData = {

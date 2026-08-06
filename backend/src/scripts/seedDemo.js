@@ -94,6 +94,7 @@ const run = async () => {
     timezone: TZ,
     moneda: 'ARS',
     estado: 'activo',
+    deportes: ['futbol', 'padel', 'tenis'],
     servicios: ['Estacionamiento', 'Buffet', 'Vestuarios', 'Alquiler de paletas'],
     horarios: { semanal: semanalAbierto() },
     publicado: true

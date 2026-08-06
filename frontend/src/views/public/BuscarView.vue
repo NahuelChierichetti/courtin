@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import publicService from '@/services/publicService'
-import { sportMeta } from '@/utils/turnos'
+import { PUBLIC_SPORTS, sportMeta } from '@/utils/sports'
 import { dayjs } from '@/utils/datetime'
 import ClubCard from '@/components/public/ClubCard.vue'
 
@@ -26,14 +26,11 @@ const clubs = ref([])
 const loading = ref(false)
 const error = ref('')
 
+// Los deportes de la plataforma, no una lista suelta: antes ofrecía vóley y
+// hockey, que ningún complejo tiene, y filtrar por ellos no daba resultados.
 const sportChips = [
   { label: 'Todos', value: '' },
-  { label: 'Pádel', value: 'padel' },
-  { label: 'Fútbol', value: 'futbol' },
-  { label: 'Tenis', value: 'tenis' },
-  { label: 'Básquet', value: 'basquet' },
-  { label: 'Vóley', value: 'voley' },
-  { label: 'Hockey', value: 'hockey' },
+  ...PUBLIC_SPORTS.map((s) => ({ label: s.label, value: s.key })),
 ]
 
 const sortChips = [
@@ -43,7 +40,7 @@ const sortChips = [
   { label: 'Menor precio', value: 'precio' },
 ]
 
-const sportLabel = computed(() => sportChips.find((s) => s.value === tipo.value)?.label || 'Todos')
+const sportLabel = computed(() => (tipo.value ? sportMeta(tipo.value).label : 'Todos'))
 
 const resultsMeta = computed(() => {
   const parts = [fecha.value]

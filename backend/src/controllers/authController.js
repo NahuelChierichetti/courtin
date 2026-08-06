@@ -228,7 +228,9 @@ const getMe = async (req, res, next) => {
     const memberships = await Membership.find({
       user: req.user._id,
       estado: 'activo'
-    }).populate('club', 'nombre slug estado timezone moneda');
+      // `deportes` viaja acá porque el panel arma con eso los filtros y el alta
+      // de canchas: sin él, la sesión no sabe con qué deportes trabaja el club.
+    }).populate('club', 'nombre slug estado timezone moneda deportes');
 
     res.status(200).json({
       ok: true,
