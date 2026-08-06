@@ -205,6 +205,10 @@
 - Descripción: crea una cancha.
 - Auth: sí
 - Rol: `tenant_admin` o `superadmin`
+- `tipo` sale del catálogo de deportes (`futbol`, `padel`, `tenis`, `basquet`,
+  `otro`) y además tiene que estar entre los deportes habilitados del complejo
+  (`Club.deportes`, que define el superadmin). Si no lo está, responde `400` con
+  `code: "DEPORTE_NO_HABILITADO"`. Sin `tipo`, se usa el primer deporte del club.
 - Body ejemplo:
 ```json
 {
@@ -224,6 +228,8 @@
 - Rol: `tenant_admin` o `superadmin`
 - Header requerido para usuarios no `superadmin`:
   - `x-club-id: ID_DEL_CLUB`
+- `tipo` se valida igual que en el alta, contra los deportes habilitados del
+  complejo de destino.
 - Body ejemplo:
 ```json
 {

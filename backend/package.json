@@ -16,7 +16,8 @@
     "jobs:holds": "node src/scripts/releaseHolds.js",
     "jobs:dunning": "node src/scripts/runDunning.js",
     "users:grandfather": "node src/scripts/verifyExistingUsers.js",
-    "migrate:planes": "node src/scripts/migratePlanes.js"
+    "migrate:planes": "node src/scripts/migratePlanes.js",
+    "migrate:deportes": "node src/scripts/migrateDeportes.js"
   },
   "repository": {
     "type": "git",

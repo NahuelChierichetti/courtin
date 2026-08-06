@@ -15,9 +15,9 @@
           <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-              :class="deporteColors[form.tipo]"
+              :class="[deporteActual.bgSoft, deporteActual.text]"
             >
-              <i :class="deporteIcons[form.tipo]" class="text-base"></i>
+              <SportIcon :sport="form.tipo" class="h-5 w-5" />
             </div>
             <div class="min-w-0 flex-1">
               <h2 class="text-lg font-semibold text-ink-500">{{ drawerTitle }}</h2>
@@ -56,8 +56,8 @@
                       v-model="form.tipo"
                       class="w-full appearance-none rounded-xl border border-black/[0.08] px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100 bg-white"
                     >
-                      <option v-for="opt in deporteOptions" :key="opt.value" :value="opt.value">
-                        {{ opt.label }}
+                      <option v-for="d in deporteOptions" :key="d.key" :value="d.key">
+                        {{ d.label }}
                       </option>
                     </select>
                     <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
@@ -351,6 +351,9 @@
 
 <script setup>
 import { ref, watch, computed, nextTick } from 'vue'
+import { sportsForClub, sportMeta } from '@/utils/sports'
+import { useAuth } from '@/composables/useAuth'
+import SportIcon from '@/components/public/SportIcon.vue'
 
 const props = defineProps({
   visible: Boolean,
@@ -361,18 +364,11 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save', 'deactivate'])
 
-const deporteOptions = [
-  { label: 'Padel', value: 'padel' },
-  { label: 'Tenis', value: 'tenis' },
-  { label: 'Futbol', value: 'futbol' },
-]
+const { currentClub } = useAuth()
 
-// Superficies sugeridas por deporte (con escape "Otra…").
-const SURFACES = {
-  padel: ['Muro de cemento', 'Cristal (Blindex)', 'Panorámica', 'Sintética'],
-  tenis: ['Polvo de ladrillo', 'Cemento / Hard', 'Césped', 'Sintética / Resina'],
-  futbol: ['Césped sintético', 'Césped natural', 'Cemento / Futsal'],
-}
+// Sólo los deportes que el superadmin le habilitó al complejo: un club de pádel
+// no tiene por qué poder cargar una cancha de fútbol.
+const deportes = computed(() => sportsForClub(currentClub.value))
 
 // Días canónicos.
 const DAYS = [
@@ -399,22 +395,34 @@ const tarifaMode = ref('simple') // 'simple' | 'avanzado'
 const precioHora = ref(0)
 const isLoading = ref(false)
 
+// Una cancha vieja puede tener un deporte que el complejo ya no tiene
+// habilitado. Se agrega igual a las opciones: si no, el select lo cambiaría
+// solo y guardar la cancha le pisaría el deporte sin que nadie lo pidiera.
+const deporteOptions = computed(() => {
+  const actual = form.value.tipo
+  if (!actual || deportes.value.some((d) => d.key === actual)) return deportes.value
+  return [...deportes.value, sportMeta(actual)]
+})
+
 const advanced = computed({
   get: () => tarifaMode.value === 'avanzado',
   set: (v) => { tarifaMode.value = v ? 'avanzado' : 'simple' },
 })
 
 function getEmptyForm() {
+  // El deporte por defecto es el primero que tenga habilitado el complejo: en
+  // uno de un solo deporte, el campo ya viene resuelto.
+  const inicial = deportes.value[0] || sportMeta('otro')
   return {
     _id: null,
     nombre: '',
-    tipo: 'padel',
+    tipo: inicial.key,
     superficie: '',
     cubierta: true,
     estado: 'activa',
     visible: true,
     jugadores: null,
-    duracionTurno: 60,
+    duracionTurno: inicial.duracionSugerida,
     tarifas: [],
   }
 }
@@ -489,7 +497,8 @@ const hasOverlap = computed(() => {
   return false
 })
 
-const surfaceOptions = computed(() => SURFACES[form.value.tipo] || [])
+// Superficies sugeridas del deporte elegido (con escape "Otra…" en el select).
+const surfaceOptions = computed(() => sportMeta(form.value.tipo).superficies)
 
 const initSurface = (sup) => {
   if (!sup) surfaceSelect.value = ''
@@ -545,31 +554,20 @@ const isEditing = computed(() => !!form.value._id)
 const drawerTitle = computed(() => (isEditing.value ? `Editar ${form.value.nombre}` : 'Nueva cancha'))
 const drawerSubtitle = computed(() => {
   if (!isEditing.value) return 'Configurar cancha y tarifas'
-  const deporte = deporteOptions.find((d) => d.value === form.value.tipo)
-  return [deporte?.label, form.value.superficie].filter(Boolean).join(' · ')
+  return [sportMeta(form.value.tipo).label, form.value.superficie].filter(Boolean).join(' · ')
 })
 
-const deporteColors = {
-  padel: 'bg-brand-purple-100 text-brand-purple-600',
-  tenis: 'bg-brand-green-100 text-brand-green-600',
-  futbol: 'bg-success-100 text-success-600',
-}
-const deporteIcons = {
-  padel: 'icon-[material-symbols--grid-view]',
-  tenis: 'icon-[material-symbols--circle]',
-  futbol: 'icon-[material-symbols--public]',
-}
+const deporteActual = computed(() => sportMeta(form.value.tipo))
 
-const showJugadores = computed(() => form.value.tipo === 'futbol')
+const showJugadores = computed(() => deporteActual.value.pideJugadores)
 
 const duracionOptions = [60, 90, 120]
-const duracionSugerida = { futbol: 60, padel: 90, tenis: 90 }
 
 watch(
   () => form.value.tipo,
   (tipo) => {
     if (isLoading.value) return
-    if (!isEditing.value && duracionSugerida[tipo]) form.value.duracionTurno = duracionSugerida[tipo]
+    if (!isEditing.value) form.value.duracionTurno = sportMeta(tipo).duracionSugerida
     // La superficie depende del deporte: al cambiar, se reinicia la selección.
     initSurface('')
   },

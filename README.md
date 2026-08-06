@@ -2,7 +2,8 @@
 
 SaaS multi-tenant para clubes deportivos: gestión de canchas, horarios y
 reservas, más una **interfaz pública** donde los jugadores reservan turnos online
-(pádel, tenis, fútbol) sin necesidad de cuenta.
+(pádel, tenis, fútbol, básquet) sin necesidad de cuenta. Qué deportes ofrece cada
+complejo lo define el superadmin al darlo de alta.
 
 El repo es un monorepo con dos apps:
 

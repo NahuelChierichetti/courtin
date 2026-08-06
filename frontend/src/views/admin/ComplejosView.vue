@@ -9,18 +9,18 @@
         </p>
       </div>
       <div class="flex items-center gap-3">
-        <Button
-          label="Exportar CSV"
-          severity="secondary"
-          outlined
-          size="small"
+        <button
+          class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer"
           @click="exportCSV"
-        />
-        <Button
-          label="Nuevo complejo"
-          size="small"
+        >
+          <i class="icon-[material-symbols--download] text-base text-brand-green-500"></i> Exportar CSV
+        </button>
+        <button
+          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
           @click="openCreateDrawer"
-        />
+        >
+          <i class="icon-[material-symbols--add] text-base"></i> Nuevo complejo
+        </button>
       </div>
     </div>
 
@@ -75,14 +75,13 @@
     <!-- Table -->
     <div class="rounded-xl border border-stone-200 bg-white">
       <!-- Table header -->
-      <div class="grid grid-cols-[2fr_1.2fr_1fr_0.8fr_0.8fr_1fr_1fr_40px] items-center gap-4 border-b border-stone-100 px-6 py-3">
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Complejo</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Owner</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Plan</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400 text-right">MRR</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400 text-center">Canchas</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Última actividad</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Estado</span>
+      <div class="grid items-center gap-4 border-b border-stone-100 px-6 py-3" :style="COLUMNAS">
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Complejo</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Owner</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Plan</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400 text-center">Canchas</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Última actividad</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Estado</span>
         <span></span>
       </div>
 
@@ -102,51 +101,46 @@
         v-else
         v-for="club in clubs"
         :key="club._id"
-        class="group grid grid-cols-[2fr_1.2fr_1fr_0.8fr_0.8fr_1fr_1fr_40px] items-center gap-4 border-b border-stone-50 px-6 py-4 transition-colors hover:bg-stone-50/50 last:border-0"
+        class="group grid items-center gap-4 border-b border-stone-50 px-6 py-3 transition-colors hover:bg-stone-50/50 last:border-0"
+        :style="COLUMNAS"
       >
         <!-- Club name -->
         <div class="flex items-center gap-3">
           <div
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-            :class="clubColor(club._id)"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-purple-500 text-[11px] font-medium text-white"
           >
             {{ clubInitials(club.nombre) }}
           </div>
           <div class="min-w-0">
-            <p class="truncate text-sm font-semibold text-stone-900">{{ club.nombre }}</p>
-            <p class="truncate text-xs text-stone-400">
+            <p class="truncate text-xs font-medium text-stone-900">{{ club.nombre }}</p>
+            <p class="truncate text-[11px] text-stone-400">
               {{ [club.ciudad, club.provincia].filter(Boolean).join(', ') || club.direccion || '—' }}
             </p>
           </div>
         </div>
 
         <!-- Owner -->
-        <span class="truncate text-sm text-stone-600">
+        <span class="truncate text-xs text-stone-700">
           {{ ownerShortName(club.owner) }}
         </span>
 
         <!-- Plan -->
         <div>
           <span
-            class="inline-block rounded px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
+            class="inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
             :class="planStyle(club.plan)"
           >
             {{ club.plan }}
           </span>
         </div>
 
-        <!-- MRR -->
-        <span class="text-right text-sm font-semibold text-stone-700">
-          —
-        </span>
-
         <!-- Canchas -->
-        <span class="text-center text-sm text-stone-600">
+        <span class="text-center text-xs text-stone-600">
           {{ club.canchas }}
         </span>
 
         <!-- Última actividad -->
-        <span class="text-sm text-stone-500">
+        <span class="text-xs text-stone-500">
           {{ formatTimeAgo(club.ultimaActividad) }}
         </span>
 
@@ -190,7 +184,7 @@
             <div class="flex items-center gap-4 border-b border-stone-200 px-6 py-5">
               <div
                 class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                :class="selectedClub ? clubColor(selectedClub._id) : 'bg-brand-green-500'"
+                :class="selectedClub ? 'bg-brand-purple-500' : 'bg-brand-green-500'"
               >
                 {{ selectedClub ? clubInitials(selectedClub.nombre) : '+' }}
               </div>
@@ -283,6 +277,22 @@
                     <div>
                       <p class="text-xs text-stone-400">Teléfono</p>
                       <p class="text-sm font-medium text-stone-700">{{ selectedClub?.telefono || '—' }}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p class="text-xs text-stone-400">Deportes habilitados</p>
+                    <div class="mt-1.5 flex flex-wrap gap-1.5">
+                      <span
+                        v-for="d in deportesDelClub"
+                        :key="d.key"
+                        class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+                        :class="[d.bg, d.text]"
+                      >
+                        <span class="h-1.5 w-1.5 rounded-full" :class="d.dot"></span>
+                        {{ d.label }}
+                      </span>
+                      <span v-if="!deportesDelClub.length" class="text-sm text-stone-400">—</span>
                     </div>
                   </div>
                 </div>
@@ -401,6 +411,32 @@
                 </div>
 
                 <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Deportes</label>
+                  <p class="mb-2 text-xs leading-relaxed text-stone-500">
+                    Con qué deportes trabaja el complejo. Sólo va a poder cargar canchas de estos.
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      v-for="d in SPORTS"
+                      :key="d.key"
+                      class="flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer"
+                      :class="
+                        form.deportes.includes(d.key)
+                          ? [d.border, d.bg, d.text]
+                          : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                      "
+                      @click="toggleDeporte(d.key)"
+                    >
+                      <span class="h-2 w-2 rounded-full" :class="form.deportes.includes(d.key) ? d.dot : 'bg-stone-300'"></span>
+                      {{ d.label }}
+                    </button>
+                  </div>
+                  <p v-if="!form.deportes.length" class="mt-2 text-xs text-error-500">
+                    Elegí al menos un deporte.
+                  </p>
+                </div>
+
+                <div>
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Plan</label>
                   <div class="flex gap-2">
                     <button
@@ -450,7 +486,7 @@
               </button>
               <button
                 class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="saving || !form.nombre || !form.slug"
+                :disabled="saving || !form.nombre || !form.slug || !form.deportes.length"
                 @click="handleSave"
               >
                 <i v-if="saving" class="icon-[material-symbols--progress-activity] animate-spin text-xs"></i>
@@ -471,7 +507,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { useAuth } from '@/composables/useAuth'
 import adminService from '@/services/adminService'
-import Button from 'primevue/button'
+import { SPORTS, sportsForClub } from '@/utils/sports'
 
 const router = useRouter()
 const confirm = useConfirm()
@@ -480,6 +516,11 @@ const { setCurrentClubId } = useAuth()
 
 // Un complejo está "eliminado" (borrado lógico) si tiene deletedAt.
 const isDeleted = computed(() => !!selectedClub.value?.deletedAt)
+
+// Columnas de la grilla. Va en una constante porque el encabezado y las filas
+// tienen que compartirlas sí o sí: definidas por separado se desalinean apenas
+// se toca una columna.
+const COLUMNAS = { gridTemplateColumns: '2fr 1.2fr 1fr 0.8fr 1fr 1fr 40px' }
 
 const clubs = ref([])
 const stats = ref({ total: 0, activos: 0 })
@@ -493,7 +534,19 @@ const drawerMode = ref('create') // 'create' | 'detail' | 'edit'
 const selectedClub = ref(null)
 const saving = ref(false)
 
+// Un complejo nuevo arranca con los tres deportes más comunes; el superadmin
+// destilda lo que no corresponda antes de crearlo.
+const DEFAULT_DEPORTES = ['futbol', 'padel', 'tenis']
+
 const form = ref(getEmptyForm())
+
+const deportesDelClub = computed(() => sportsForClub(selectedClub.value))
+
+const toggleDeporte = (key) => {
+  const i = form.value.deportes.indexOf(key)
+  if (i >= 0) form.value.deportes.splice(i, 1)
+  else form.value.deportes.push(key)
+}
 
 function getEmptyForm() {
   return {
@@ -505,8 +558,10 @@ function getEmptyForm() {
     telefono: '',
     plan: 'start',
     estado: 'trial',
+    deportes: [...DEFAULT_DEPORTES],
   }
 }
+
 
 const planFilters = [
   { label: 'Todos los planes', value: null },
@@ -591,6 +646,9 @@ const openDetailDrawer = (club) => {
     telefono: club.telefono || '',
     plan: club.plan || 'start',
     estado: club.estado || 'activo',
+    // Los complejos anteriores a los deportes habilitados pueden no tenerlos
+    // (hasta que corra la migración): se muestran los tres por defecto.
+    deportes: club.deportes?.length ? [...club.deportes] : [...DEFAULT_DEPORTES],
   }
   drawerVisible.value = true
 }
@@ -743,21 +801,6 @@ const clubInitials = (nombre) => {
   if (!nombre) return '??'
   const parts = nombre.split(' ')
   return parts.map((p) => p[0]).join('').substring(0, 2).toUpperCase()
-}
-
-const clubColors = [
-  'bg-brand-green-500',
-  'bg-brand-purple-500',
-  'bg-brand-lime-800',
-  'bg-brand-sand-900',
-  'bg-brand-green-700',
-  'bg-brand-purple-700',
-]
-
-const clubColor = (id) => {
-  if (!id) return clubColors[0]
-  const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-  return clubColors[hash % clubColors.length]
 }
 
 const formatTimeAgo = (date) => {

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const softDelete = require('../utils/softDelete');
 const { PLAN_KEYS } = require('../config/plans');
+const { SPORT_KEYS, DEFAULT_CLUB_SPORTS } = require('../config/sports');
 
 const HORA_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
@@ -232,6 +233,27 @@ const clubSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
       default: 'ARS'
+    },
+    // Deportes habilitados del complejo. Los define el superadmin al darlo de
+    // alta y son el recorte con el que trabaja todo el panel: las canchas sólo
+    // se pueden cargar de estos deportes, y los filtros de canchas, turnos y
+    // reportes muestran únicamente estos.
+    //
+    // Se guarda en el club en vez de deducirlo de las canchas cargadas porque
+    // son dos cosas distintas: un complejo de pádel y fútbol que todavía no
+    // cargó ninguna cancha de fútbol sigue siendo un complejo de pádel y fútbol,
+    // y tiene que poder cargarla.
+    deportes: {
+      type: [String],
+      enum: {
+        values: SPORT_KEYS,
+        message: 'El deporte "{VALUE}" no existe en el catálogo'
+      },
+      default: () => [...DEFAULT_CLUB_SPORTS],
+      validate: {
+        validator: (v) => Array.isArray(v) && v.length > 0,
+        message: 'El complejo tiene que tener al menos un deporte habilitado'
+      }
     },
     // El detalle de la suscripción (precio, ciclo, vigencia) vive en el modelo
     // Subscription. Acá queda sólo el plan contratado, que es lo que define el
