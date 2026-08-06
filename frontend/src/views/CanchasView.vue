@@ -9,7 +9,7 @@
         </p>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
+        <div v-if="deporteFilters.length" class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
             v-for="filter in deporteFilters"
             :key="filter.value"
@@ -90,7 +90,7 @@
         <i class="icon-[material-symbols--grid-view] text-2xl text-stone-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-ink-500">
-        {{ activeFilter === 'todas' ? 'No hay canchas' : 'No hay canchas de ' + deporteLabels[activeFilter] }}
+        {{ activeFilter === 'todas' ? 'No hay canchas' : 'No hay canchas de ' + filtroLabel }}
       </h3>
       <p class="!mt-2 text-sm text-stone-500">
         {{ activeFilter === 'todas' ? 'Creá tu primera cancha para empezar.' : 'Probá con otro filtro o creá una nueva.' }}
@@ -113,7 +113,7 @@
         :class="{ 'opacity-50': court.estado === 'inactiva' }"
       >
         <!-- Court illustration -->
-        <div class="relative h-40 flex items-center justify-center overflow-hidden" :class="deporteColors[court.tipo].bg">
+        <div class="relative h-40 flex items-center justify-center overflow-hidden" :class="sportMeta(court.tipo).bgSoft">
           <!-- Padel court -->
           <svg v-if="court.tipo === 'padel'" class="h-28 w-36" viewBox="0 0 180 140" fill="none">
             <rect x="10" y="10" width="160" height="120" rx="2" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" fill="none" />
@@ -142,6 +142,18 @@
             <rect x="10" y="50" width="15" height="40" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1" fill="none" />
             <rect x="155" y="50" width="15" height="40" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1" fill="none" />
           </svg>
+          <!-- Basketball court -->
+          <svg v-else-if="court.tipo === 'basquet'" class="h-28 w-36" viewBox="0 0 180 140" fill="none">
+            <rect x="10" y="10" width="160" height="120" rx="2" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" fill="none" />
+            <line x1="90" y1="10" x2="90" y2="130" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" />
+            <circle cx="90" cy="70" r="18" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
+            <rect x="10" y="45" width="35" height="50" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
+            <rect x="135" y="45" width="35" height="50" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
+            <path d="M45 50a22 22 0 0 1 0 40" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
+            <path d="M135 50a22 22 0 0 0 0 40" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
+          </svg>
+          <!-- Deporte sin ilustración propia: el ícono del catálogo -->
+          <SportIcon v-else :sport="court.tipo" class="h-16 w-16 text-ink-500/30" />
         </div>
 
         <!-- Court info -->
@@ -149,12 +161,11 @@
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-ink-500">{{ court.nombre }}</h3>
             <span
-              v-if="deporteColors[court.tipo]"
               class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
-              :class="[deporteColors[court.tipo].bg, deporteColors[court.tipo].text]"
+              :class="[sportMeta(court.tipo).bgSoft, sportMeta(court.tipo).text]"
             >
-              <span class="h-1.5 w-1.5 rounded-full" :class="deporteColors[court.tipo].dot"></span>
-              {{ deporteLabels[court.tipo] || court.tipo }}
+              <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(court.tipo).dot"></span>
+              {{ sportMeta(court.tipo).label }}
             </span>
           </div>
 
@@ -220,6 +231,8 @@ import CourtDrawer from '@/components/canchas/CourtDrawer.vue'
 import courtService from '@/services/courtService'
 import { useAuth } from '@/composables/useAuth'
 import { formatCurrency } from '@/utils/datetime'
+import { sportsForClub, sportMeta } from '@/utils/sports'
+import SportIcon from '@/components/public/SportIcon.vue'
 
 const { currentClubId, currentClub } = useAuth()
 const toast = useToast()
@@ -240,12 +253,13 @@ const sinCupo = computed(() => cupo.value?.puedeCrear === false)
 const loading = ref(false)
 const error = ref(null)
 
-const deporteFilters = [
-  { label: 'Todas', value: 'todas' },
-  { label: 'Padel', value: 'padel' },
-  { label: 'Tenis', value: 'tenis' },
-  { label: 'Futbol', value: 'futbol' },
-]
+// Los filtros salen de los deportes habilitados del complejo. Con un solo
+// deporte no se muestran: filtrar por "el único que hay" no hace nada.
+const deportes = computed(() => sportsForClub(currentClub.value))
+const deporteFilters = computed(() => {
+  if (deportes.value.length < 2) return []
+  return [{ label: 'Todas', value: 'todas' }, ...deportes.value.map((d) => ({ label: d.label, value: d.key }))]
+})
 
 const filteredCourts = computed(() => {
   if (activeFilter.value === 'todas') return courts.value
@@ -261,17 +275,8 @@ const activeCourtsCount = computed(() => {
   return courts.value.filter((c) => c.estado === 'activa').length
 })
 
-const deporteColors = {
-  padel: { bg: 'bg-brand-purple-100', text: 'text-brand-purple-600', dot: 'bg-brand-purple-500' },
-  tenis: { bg: 'bg-brand-lime-100', text: 'text-brand-lime-800', dot: 'bg-brand-lime-500' },
-  futbol: { bg: 'bg-brand-green-100', text: 'text-brand-green-600', dot: 'bg-brand-green-500' },
-}
-
-const deporteLabels = {
-  padel: 'Padel',
-  tenis: 'Tenis',
-  futbol: 'Futbol',
-}
+// Filtro activo, para el mensaje de "no hay canchas de X".
+const filtroLabel = computed(() => sportMeta(activeFilter.value).label)
 
 const getBasePrice = (court) => {
   if (!court.tarifas || court.tarifas.length === 0) return 0

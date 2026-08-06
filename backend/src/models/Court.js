@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const softDelete = require('../utils/softDelete');
+const { SPORT_KEYS } = require('../config/sports');
 
 const tarifaSchema = new mongoose.Schema(
   {
@@ -44,9 +45,13 @@ const courtSchema = new mongoose.Schema(
       required: [true, 'El nombre de la cancha es obligatorio'],
       trim: true
     },
+    // El deporte de la cancha. El enum es el catálogo completo de la plataforma;
+    // el recorte real lo pone el club: sólo se aceptan tipos que estén en
+    // `Club.deportes` (lo valida courtController, no el schema, porque depende
+    // de otro documento).
     tipo: {
       type: String,
-      enum: ['futbol', 'padel', 'tenis', 'basquet', 'otro'],
+      enum: SPORT_KEYS,
       default: 'futbol'
     },
     superficie: {

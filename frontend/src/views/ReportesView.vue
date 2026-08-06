@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import statsService from '@/services/statsService'
 import { dayjs, formatCurrency, DEFAULT_TZ } from '@/utils/datetime'
-import { sportMeta } from '@/utils/turnos'
+import { sportsForClub, sportMeta, sportHex } from '@/utils/sports'
 import { metodoLabel } from '@/utils/cash'
 import AreaLineChart from '@/components/reportes/AreaLineChart.vue'
 import DonutChart from '@/components/reportes/DonutChart.vue'
@@ -27,12 +27,13 @@ const periods = [
 ]
 
 const deporte = ref('')
-const deporteChips = [
-  { label: 'Todos', value: '' },
-  { label: 'Pádel', value: 'padel' },
-  { label: 'Tenis', value: 'tenis' },
-  { label: 'Fútbol', value: 'futbol' },
-]
+// Los chips salen de los deportes del complejo; con uno solo no hay nada que
+// filtrar y la fila desaparece.
+const deporteChips = computed(() => {
+  const deportes = sportsForClub(currentClub.value)
+  if (deportes.length < 2) return []
+  return [{ label: 'Todos', value: '' }, ...deportes.map((d) => ({ label: d.label, value: d.key }))]
+})
 
 // Rango personalizado (por defecto, el mes en curso).
 const customDesde = ref(dayjs().startOf('month').format('YYYY-MM-DD'))
@@ -105,12 +106,11 @@ const totalIngresosDia = computed(() => ingresosPorDia.value.reduce((a, d) => a 
 
 const reservasPorDeporte = computed(() => data.value?.reservasPorDeporte || [])
 
-// Paleta categórica de deportes (validada: CVD ΔE 27, con etiquetas directas).
-const SPORT_HEX = { padel: '#926699', tenis: '#b9cf32', futbol: '#347048' }
-const sportColor = (t) => SPORT_HEX[t] || '#b8a08b'
 const linePoints = computed(() => ingresosPorDia.value.map((d) => ({ label: dayjs(d.dia).format('DD/MM'), value: d.monto })))
 const deporteSegments = computed(() =>
-  reservasPorDeporte.value.map((d) => ({ label: sportMeta(d.tipo).label, value: d.count, color: sportColor(d.tipo) })),
+  // El color del donut es el del catálogo, para que el gráfico y los chips de
+  // la grilla de turnos hablen el mismo idioma.
+  reservasPorDeporte.value.map((d) => ({ label: sportMeta(d.tipo).label, value: d.count, color: sportHex(d.tipo) })),
 )
 
 const ingresosPorMetodo = computed(() => data.value?.ingresosPorMetodo || [])
@@ -125,7 +125,7 @@ const topClientes = computed(() => data.value?.topClientes || [])
 const initials = (n) => (n || '?').split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?'
 const fmtDia = (d) => dayjs(d).format('DD')
 
-const deporteLabel = computed(() => deporteChips.find((c) => c.value === deporte.value)?.label || 'Todos')
+const deporteLabel = computed(() => (deporte.value ? sportMeta(deporte.value).label : 'Todos'))
 const printSubtitle = computed(() => {
   const { desde, hasta } = range.value
   return `${desde.format('DD/MM/YYYY')} – ${hasta.format('DD/MM/YYYY')} · ${deporteLabel.value}`
@@ -225,7 +225,7 @@ const exportCsv = () => {
     </div>
 
     <!-- Filtro por deporte -->
-    <div v-if="currentClubId" class="flex flex-wrap items-center gap-2 print:hidden">
+    <div v-if="currentClubId && deporteChips.length" class="flex flex-wrap items-center gap-2 print:hidden">
       <span class="mr-1 text-sm font-medium text-stone-500">Deporte:</span>
       <button
         v-for="c in deporteChips"
@@ -291,7 +291,8 @@ const exportCsv = () => {
 
       <!-- Deporte + Método -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div v-if="!deporte" class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <!-- En un complejo de un solo deporte el donut sería una torta entera: se oculta. -->
+        <div v-if="!deporte && deporteChips.length" class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
           <h2 class="text-base font-semibold text-ink-500">Reservas por deporte</h2>
           <div v-if="!reservasPorDeporte.length" class="py-8 text-center text-sm text-stone-400">Sin reservas.</div>
           <div v-else class="mt-5">

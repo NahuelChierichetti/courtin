@@ -9,11 +9,12 @@
         </p>
       </div>
       <div class="flex items-center gap-3">
-        <Button
-          label="Nuevo usuario"
-          size="small"
+        <button
+          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
           @click="openCreateDrawer"
-        />
+        >
+          <i class="icon-[material-symbols--add] text-base"></i> Nuevo usuario
+        </button>
       </div>
     </div>
 
@@ -61,11 +62,12 @@
 
     <!-- Table -->
     <div class="rounded-xl border border-stone-200 bg-white">
-      <div class="grid items-center gap-4 border-b border-stone-100 px-6 py-3" style="grid-template-columns: 2fr 2fr 1.5fr 1fr 40px">
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Usuario</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Email</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Complejos</span>
-        <span class="text-xs font-semibold uppercase tracking-wider text-stone-400">Estado</span>
+      <div class="grid items-center gap-4 border-b border-stone-100 px-6 py-3" :style="COLUMNAS">
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Usuario</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Email</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Complejos</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Rol</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">Estado</span>
         <span></span>
       </div>
 
@@ -82,36 +84,46 @@
         v-else
         v-for="user in users"
         :key="user._id"
-        class="group grid items-center gap-4 border-b border-stone-50 px-6 py-4 transition-colors hover:bg-stone-50/50 last:border-0" style="grid-template-columns: 2fr 2fr 1.5fr 1fr 40px"
+        class="group grid items-center gap-4 border-b border-stone-50 px-6 py-3 transition-colors hover:bg-stone-50/50 last:border-0"
+        :style="COLUMNAS"
       >
         <!-- Name -->
         <div class="flex items-center gap-3">
           <div
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-            :class="avatarColor(user._id)"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-medium text-white bg-brand-purple-500"
           >
             {{ initials(user.nombre) }}
           </div>
           <div class="min-w-0">
-            <p class="truncate text-sm font-semibold text-stone-900">{{ user.nombre }}</p>
-            <p v-if="user.globalRole === 'superadmin'" class="text-[10px] font-semibold uppercase tracking-wider text-brand-green-500">Superadmin</p>
+            <p class="truncate text-xs font-medium text-stone-900">{{ user.nombre }}</p>
           </div>
         </div>
 
         <!-- Email -->
-        <span class="truncate text-sm text-stone-500">{{ user.email }}</span>
+        <span class="truncate text-xs text-stone-700">{{ user.email }}</span>
 
         <!-- Clubs -->
         <div class="flex flex-wrap gap-1">
           <span
             v-for="m in user.memberships.filter(mb => mb.estado === 'activo')"
             :key="m._id"
-            class="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600"
+            class="inline-flex items-center gap-1 rounded-full bg-brand-purple-200 px-2 py-0.5 text-[11px] font-medium text-brand-purple-900"
           >
             {{ m.club?.nombre }}
-            <span class="text-[10px] text-stone-400">· {{ roleLabel(m.role) }}</span>
           </span>
-          <span v-if="user.memberships.filter(mb => mb.estado === 'activo').length === 0" class="text-xs text-stone-400">Sin complejo</span>
+          <span v-if="user.memberships.filter(mb => mb.estado === 'activo').length === 0" class="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">Sin complejo</span>
+        </div>
+
+        <!-- Rol -->
+        <div class="flex flex-wrap gap-1">
+          <span
+            v-for="r in userRoles(user)"
+            :key="r.value"
+            class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+            :class="r.clase"
+          >
+            {{ r.label }}
+          </span>
         </div>
 
         <!-- Estado -->
@@ -152,7 +164,7 @@
             <div class="flex items-center gap-4 border-b border-stone-200 px-6 py-5">
               <div
                 class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                :class="selectedUser ? avatarColor(selectedUser._id) : 'bg-brand-green-500'"
+                :class="selectedUser ? 'bg-brand-purple-500' : 'bg-brand-green-500'"
               >
                 {{ selectedUser ? initials(selectedUser.nombre) : '+' }}
               </div>
@@ -465,7 +477,6 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import adminService from '@/services/adminService'
-import Button from 'primevue/button'
 
 const users = ref([])
 const stats = ref({ total: 0 })
@@ -512,6 +523,31 @@ const clubRoleOptions = [
 const roleLabel = (role) => {
   const map = { tenant_admin: 'Admin', employee: 'Empleado', customer: 'Cliente', superadmin: 'Superadmin' }
   return map[role] || role
+}
+
+// Columnas de la grilla. Va en una constante porque el encabezado y las filas
+// tienen que compartirlas sí o sí: definidas por separado se desalinean apenas
+// se agrega una columna.
+const COLUMNAS = { gridTemplateColumns: '2fr 2fr 1.5fr 1.2fr 1fr 40px' }
+
+const ROLE_CHIP = {
+  superadmin: 'bg-brand-green-100 text-brand-green-700',
+  tenant_admin: 'bg-brand-lime-100 text-brand-lime-800',
+  employee: 'bg-stone-100 text-stone-600',
+  customer: 'border border-stone-200 bg-white text-stone-500',
+}
+
+// Los roles de un usuario para la columna "Rol": el global (superadmin) más los
+// de sus complejos activos, sin repetir. Un usuario puede ser admin en un club y
+// empleado en otro, así que la columna es una lista y no un valor único.
+const userRoles = (user) => {
+  const roles = []
+  if (user.globalRole === 'superadmin') roles.push('superadmin')
+  for (const m of user.memberships || []) {
+    if (m.estado === 'activo' && !roles.includes(m.role)) roles.push(m.role)
+  }
+  if (!roles.length) return [{ value: 'sin_rol', label: 'Sin rol', clase: 'bg-stone-100 text-stone-500' }]
+  return roles.map((r) => ({ value: r, label: roleLabel(r), clase: ROLE_CHIP[r] || 'bg-stone-100 text-stone-600' }))
 }
 
 const roleDescription = (role) => {
@@ -670,21 +706,6 @@ const initials = (nombre) => {
   if (!nombre) return '??'
   const parts = nombre.split(' ')
   return parts.map((p) => p[0]).join('').substring(0, 2).toUpperCase()
-}
-
-const avatarColors = [
-  'bg-brand-green-500',
-  'bg-brand-purple-500',
-  'bg-brand-lime-800',
-  'bg-brand-sand-900',
-  'bg-brand-green-700',
-  'bg-brand-purple-700',
-]
-
-const avatarColor = (id) => {
-  if (!id) return avatarColors[0]
-  const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-  return avatarColors[hash % avatarColors.length]
 }
 
 const formatDate = (date) => {
