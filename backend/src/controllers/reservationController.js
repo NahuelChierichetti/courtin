@@ -5,7 +5,7 @@ const Club = require('../models/Club');
 const Payment = require('../models/Payment');
 const { validateReservationSlot, isReservationInProgress, canCancelReservation } = require('../utils/reservationRules');
 const { upsertClientFromReservation } = require('../utils/clients');
-const { notify } = require('../utils/notifications');
+const { notify, notifyUser } = require('../utils/notifications');
 const {
   sendReservationConfirmation,
   sendClubReservationNotice,
@@ -14,6 +14,7 @@ const {
 const { puedeCrearReservas } = require('../utils/subscriptions');
 const { registrarReembolso } = require('../utils/payments');
 const { getClubAccessToken, refundPayment } = require('../utils/mercadopago');
+const { formatInstant } = require('../utils/timezone');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -381,6 +382,16 @@ const cancelReservation = async (req, res, next) => {
       return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
     }
 
+    // Al jugador lo canceló el complejo: no se enteró por sí mismo, así que
+    // esta notificación es la única que le avisa dentro de la plataforma.
+    await notifyUser(reservation.customer?._id, {
+      tipo: 'cancelacion',
+      titulo: 'El complejo canceló tu turno',
+      mensaje: `${reservation.club?.nombre} canceló ${reservation.court?.nombre} · ${formatInstant(reservation.inicio, reservation.club?.timezone)}`,
+      club: reservation.club?._id,
+      reservation: reservation._id
+    });
+
     res.status(200).json({ ok: true, reservation });
   } catch (error) {
     next(error);
@@ -448,6 +459,59 @@ const getReservationByToken = async (req, res, next) => {
   }
 };
 
+// Cancelación pedida por el jugador (por token o desde su cuenta).
+//
+// Vive acá y no en cada controlador porque son el mismo hecho visto desde dos
+// puertas de entrada: cambian la prueba de propiedad (token vs. sesión), no lo
+// que pasa cuando la cancelación se concreta.
+//
+// Espera la reserva con `club` (incluido `horarios`) y `court` ya poblados, y
+// deja el doc en memoria con el estado nuevo para que quien llame pueda
+// serializarlo sin volver a la base.
+const applyCustomerCancellation = async (reservation) => {
+  if (reservation.estado === 'cancelada') {
+    return { ok: true }; // Idempotente: ya estaba cancelada.
+  }
+
+  if (reservation.estado === 'completada') {
+    return { ok: false, status: 400, message: 'No se puede cancelar un turno ya completado.' };
+  }
+
+  const tolerancia = reservation.club?.horarios?.reservas?.toleranciaCancelacionHoras ?? 0;
+  const check = canCancelReservation({ inicio: reservation.inicio }, tolerancia);
+  if (!check.ok) {
+    return { ok: false, status: 400, message: check.message };
+  }
+
+  await Reservation.findByIdAndUpdate(reservation._id, { estado: 'cancelada' });
+  reservation.estado = 'cancelada';
+
+  const clubId = reservation.club?._id || reservation.club;
+  const quien = reservation.guestName || reservation.customer?.nombre || 'Un cliente';
+
+  await notify(clubId, {
+    tipo: 'cancelacion',
+    titulo: 'Reserva cancelada',
+    mensaje: `${quien} canceló ${reservation.court?.nombre || 'su turno'}`,
+    reservation: reservation._id
+  });
+
+  // Aviso por email al complejo: canceló el jugador, no ellos.
+  //
+  // El club se busca aparte en vez de ampliar el populate: ese populate alimenta
+  // una respuesta pública y no corresponde traer ahí el email del complejo ni
+  // sus preferencias de notificación.
+  const clubParaEmail = await Club.findById(clubId).select(CLUB_EMAIL_FIELDS);
+  await sendClubReservationNotice({
+    tipo: 'cancelacion',
+    reservation,
+    club: clubParaEmail,
+    court: reservation.court
+  });
+
+  return { ok: true };
+};
+
 const cancelReservationByToken = async (req, res, next) => {
   try {
     const reservation = await findReservationByToken(req.params.token);
@@ -456,46 +520,10 @@ const cancelReservationByToken = async (req, res, next) => {
       return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
     }
 
-    if (reservation.estado === 'cancelada') {
-      // Idempotente: ya estaba cancelada.
-      return res.status(200).json({ ok: true, reservation: toPublicReservation(reservation) });
+    const result = await applyCustomerCancellation(reservation);
+    if (!result.ok) {
+      return res.status(result.status).json({ ok: false, message: result.message });
     }
-
-    if (reservation.estado === 'completada') {
-      return res.status(400).json({ ok: false, message: 'No se puede cancelar un turno ya completado.' });
-    }
-
-    const tolerancia = reservation.club?.horarios?.reservas?.toleranciaCancelacionHoras ?? 0;
-    const check = canCancelReservation({ inicio: reservation.inicio }, tolerancia);
-    if (!check.ok) {
-      return res.status(400).json({ ok: false, message: check.message });
-    }
-
-    await Reservation.findByIdAndUpdate(reservation._id, { estado: 'cancelada' });
-    // Reflejamos el cambio en el DTO sin re-popular (el doc en memoria sigue poblado).
-    reservation.estado = 'cancelada';
-
-    const clubId = reservation.club?._id || reservation.club;
-
-    await notify(clubId, {
-      tipo: 'cancelacion',
-      titulo: 'Reserva cancelada',
-      mensaje: `${reservation.guestName || 'Un cliente'} canceló ${reservation.court?.nombre || 'su turno'}`,
-      reservation: reservation._id
-    });
-
-    // Aviso por email al complejo: canceló el jugador, no ellos.
-    //
-    // El club se busca aparte en vez de ampliar `TOKEN_POPULATE`: ese populate
-    // alimenta una respuesta pública y no corresponde traer ahí el email del
-    // complejo ni sus preferencias de notificación.
-    const clubParaEmail = await Club.findById(clubId).select(CLUB_EMAIL_FIELDS);
-    await sendClubReservationNotice({
-      tipo: 'cancelacion',
-      reservation,
-      club: clubParaEmail,
-      court: reservation.court
-    });
 
     res.status(200).json({ ok: true, reservation: toPublicReservation(reservation) });
   } catch (error) {
@@ -503,13 +531,55 @@ const cancelReservationByToken = async (req, res, next) => {
   }
 };
 
+// --- Reservas del jugador logueado ---
+
+// Más ancho que `POPULATE`: la cuenta del jugador muestra dónde queda el
+// complejo y cómo contactarlo, y necesita `horarios` para saber hasta cuándo
+// puede cancelar. El panel del complejo no precisa nada de eso.
+const MY_POPULATE = [
+  ['club', 'nombre slug direccion ciudad telefono whatsapp timezone moneda horarios'],
+  ['court', 'nombre tipo'],
+  ['customer', 'nombre email telefono']
+];
+
+const populateMyReservation = (query) => {
+  MY_POPULATE.forEach(([path, fields]) => query.populate(path, fields));
+  return query;
+};
+
 const getMyReservations = async (req, res, next) => {
   try {
-    const reservations = await populateReservation(
+    const reservations = await populateMyReservation(
       Reservation.find({ customer: req.user._id })
     ).sort({ inicio: -1 });
 
     res.status(200).json({ ok: true, reservations });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PATCH /reservations/my/:id/cancel
+//
+// El filtro por `customer` es la autorización: si la reserva no es de quien
+// pide, no aparece y responde 404 en vez de 403. No hay por qué confirmarle a
+// nadie que el id de la reserva de otro existe.
+const cancelMyReservation = async (req, res, next) => {
+  try {
+    const reservation = await populateMyReservation(
+      Reservation.findOne({ _id: req.params.id, customer: req.user._id })
+    );
+
+    if (!reservation) {
+      return res.status(404).json({ ok: false, message: 'Reserva no encontrada' });
+    }
+
+    const result = await applyCustomerCancellation(reservation);
+    if (!result.ok) {
+      return res.status(result.status).json({ ok: false, message: result.message });
+    }
+
+    res.status(200).json({ ok: true, reservation });
   } catch (error) {
     next(error);
   }
@@ -580,6 +650,14 @@ const refundReservationPayment = async (req, res, next) => {
       reservation: reservation._id
     });
 
+    await notifyUser(reservation.customer, {
+      tipo: 'pago',
+      titulo: 'Te devolvieron el pago',
+      mensaje: `${club?.nombre} devolvió $${payment.monto.toLocaleString('es-AR')}. Puede tardar unos días en verse en tu resumen.`,
+      club: clubId,
+      reservation: reservation._id
+    });
+
     await sendRefundNotice({ reservation, club, court, payment });
 
     const updated = await populateReservation(Reservation.findById(reservation._id));
@@ -600,5 +678,6 @@ module.exports = {
   getReservationByToken,
   cancelReservationByToken,
   getMyReservations,
+  cancelMyReservation,
   refundReservationPayment
 };

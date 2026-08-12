@@ -1,18 +1,31 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { useUserNotifications } from '@/composables/useUserNotifications'
+import { useFavorites } from '@/composables/useFavorites'
+import UserMenu from '@/components/public/UserMenu.vue'
 
 const router = useRouter()
-const { isAuthenticated, user } = useAuth()
+const { isAuthenticated } = useAuth()
+const { unreadCount, fetch: fetchNotifications } = useUserNotifications()
+const { load: loadFavorites } = useFavorites()
+
+// El layout público es el único punto por el que pasan todas las vistas del
+// jugador, así que es donde se siembran los dos estados compartidos. Con
+// `immediate` cubre tanto la carga inicial con sesión abierta como el login
+// posterior, sin que cada vista tenga que acordarse de pedirlos.
+watch(
+  isAuthenticated,
+  (auth) => {
+    if (!auth) return
+    fetchNotifications()
+    loadFavorites()
+  },
+  { immediate: true },
+)
 
 const q = ref('')
-
-const initials = computed(() => {
-  const n = user.value?.nombre
-  if (!n) return ''
-  return n.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('')
-})
 
 const onSearch = () => {
   router.push({ name: 'public-buscar', query: q.value.trim() ? { q: q.value.trim() } : {} })
@@ -46,38 +59,43 @@ const onSearch = () => {
         </form>
 
         <!-- Actions -->
+        <!--
+          Con sesión, todo cuelga del menú del avatar y lo que hay adentro
+          depende del rol: un jugador no ve accesos al backoffice. Sin sesión,
+          una sola puerta de entrada ("Ingresar") para jugadores y complejos por
+          igual; después del login, `resolveLanding()` manda a cada uno a lo suyo.
+        -->
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
-          <RouterLink
-            to="/panel"
-            class="hidden items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-ink-500 no-underline transition-colors hover:bg-stone-50 sm:flex"
-          >
-            <i class="icon-[material-symbols--grid-view] text-xs text-brand-green-500"></i> Panel
-          </RouterLink>
-          <RouterLink
-            to="/mis-reservas"
-            class="flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 no-underline transition-colors hover:bg-stone-50"
-            title="Mis reservas"
-          >
-            <i class="icon-[material-symbols--calendar-month] text-sm"></i>
-          </RouterLink>
-
-          <RouterLink
-            v-if="isAuthenticated"
-            to="/mis-reservas"
-            class="flex h-10 items-center gap-2 rounded-full bg-white pl-1 pr-3 no-underline shadow-sm ring-1 ring-black/[0.06]"
-          >
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-green-500 text-xs font-bold text-white">
-              {{ initials }}
-            </span>
-            <span class="hidden text-sm font-semibold text-ink-500 sm:block">{{ user?.nombre?.split(' ')[0] }}</span>
-          </RouterLink>
-          <RouterLink
-            v-else
-            to="/login"
-            class="rounded-full bg-brand-lime-500 px-4 py-2 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
-          >
-            Ingresar
-          </RouterLink>
+          <template v-if="isAuthenticated">
+            <RouterLink
+              :to="{ name: 'mis-notificaciones' }"
+              class="relative flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 no-underline transition-colors hover:bg-stone-50"
+              title="Notificaciones"
+            >
+              <i class="icon-[material-symbols--notifications-outline] text-base"></i>
+              <span
+                v-if="unreadCount"
+                class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error-500 px-1 text-[10px] font-bold text-white"
+              >
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </RouterLink>
+            <UserMenu />
+          </template>
+          <template v-else>
+            <RouterLink
+              to="/panel/registro"
+              class="hidden text-sm font-medium text-stone-600 no-underline transition-colors hover:text-ink-500 lg:block"
+            >
+              Sumá tu complejo
+            </RouterLink>
+            <RouterLink
+              to="/login"
+              class="rounded-full bg-brand-lime-500 px-4 py-2 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
+            >
+              Ingresar
+            </RouterLink>
+          </template>
         </div>
       </div>
     </header>

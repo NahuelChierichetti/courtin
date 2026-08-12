@@ -6,6 +6,7 @@ import { useAuth } from '@/composables/useAuth'
 import { dayjs, formatCurrency } from '@/utils/datetime'
 import { sportMeta, suggestedPrice } from '@/utils/turnos'
 import BookingModal from '@/components/public/BookingModal.vue'
+import FavoriteButton from '@/components/public/FavoriteButton.vue'
 
 const route = useRoute()
 const { isAuthenticated, user } = useAuth()
@@ -241,11 +242,14 @@ const onCloseModal = () => {
             </span>
           </div>
         </div>
-        <div v-if="club.rating" class="text-right">
-          <p class="flex items-center justify-end gap-1.5 text-2xl font-bold text-success-600">
-            <i class="icon-[material-symbols--star] text-lg"></i>{{ Number(club.rating).toFixed(2) }}
-          </p>
-          <p v-if="club.reseñas" class="text-sm text-stone-400">{{ club.reseñas }} reseñas</p>
+        <div class="flex shrink-0 items-start gap-4">
+          <div v-if="club.rating" class="text-right">
+            <p class="flex items-center justify-end gap-1.5 text-2xl font-bold text-success-600">
+              <i class="icon-[material-symbols--star] text-lg"></i>{{ Number(club.rating).toFixed(2) }}
+            </p>
+            <p v-if="club.reseñas" class="text-sm text-stone-400">{{ club.reseñas }} reseñas</p>
+          </div>
+          <FavoriteButton :club="club" variant="plain" />
         </div>
       </div>
 

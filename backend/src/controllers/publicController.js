@@ -16,7 +16,7 @@ const { priceForDuration } = require('../utils/pricing');
 const { horariosToLocal, DEFAULT_TZ } = require('../utils/timezone');
 const Payment = require('../models/Payment');
 const { upsertClientFromReservation } = require('../utils/clients');
-const { notify } = require('../utils/notifications');
+const { notify, notifyUser } = require('../utils/notifications');
 const { sendReservationConfirmation, sendClubReservationNotice } = require('../utils/reservationEmails');
 const { filtroClubVisible, puedeCrearReservas } = require('../utils/subscriptions');
 const { montoACobrar, holdExpiresAt, cobraOnline, confirmarPagoDeReserva } = require('../utils/payments');
@@ -68,7 +68,7 @@ const toPublicCourt = (c) => ({
 // cancha) y texto libre.
 const getPublicClubs = async (req, res, next) => {
   try {
-    const { ciudad, tipo, q, fecha, hora } = req.query;
+    const { ciudad, tipo, q, fecha, hora, horaHasta } = req.query;
     // Incluye el estado de la suscripción: un club en mora nivel 1 sale del buscador.
     const filter = filtroClubVisible();
 
@@ -95,6 +95,17 @@ const getPublicClubs = async (req, res, next) => {
     const fechaValida = fecha && /^\d{4}-\d{2}-\d{2}$/.test(fecha);
     const horaValida = hora && /^\d{2}:\d{2}$/.test(hora);
 
+    // Cota superior opcional de la franja. Sin ella, `hora` significa "de esa
+    // hora en adelante", que es lo que el buscador viene diciendo ("desde
+    // HH:MM"): antes exigía que un turno empezara exactamente a esa hora, así
+    // que pedir las 20:30 en un club que arranca los turnos 20:00 y 21:00 no
+    // devolvía nada aunque estuviera libre toda la noche.
+    const horaHastaValida = horaHasta && /^\d{2}:\d{2}$/.test(horaHasta);
+    // Comparar "HH:MM" como texto alcanza: con dos dígitos y cero a la
+    // izquierda, el orden lexicográfico es el orden cronológico.
+    const dentroDeFranja = (horaInicio) =>
+      horaInicio >= hora && (!horaHastaValida || horaInicio <= horaHasta);
+
     // Con fecha pero sin hora puntual: ocultar los clubes que ese día están
     // cerrados (día especial "cerrado" o día semanal no abierto). No se filtra
     // por ocupación: un club abierto sigue apareciendo aunque esté lleno.
@@ -110,8 +121,9 @@ const getPublicClubs = async (req, res, next) => {
       });
     }
 
-    // Filtro por hora de inicio: sólo clubes con alguna cancha que tenga un turno
-    // libre que empiece a `hora` en `fecha` (con la duración por defecto de la cancha).
+    // Filtro por franja horaria: sólo clubes con alguna cancha que tenga un turno
+    // libre que empiece dentro de [hora, horaHasta] en `fecha` (con la duración
+    // por defecto de la cancha).
     if (fechaValida && horaValida) {
       // Ventana UTC holgada (±14h) para cubrir el día en cualquier timezone; el
       // solapamiento fino lo resuelve computeSlots por cada turno.
@@ -140,7 +152,7 @@ const getPublicClubs = async (req, res, next) => {
         if (!club) continue;
         const rs = resByCourt[court._id.toString()] || [];
         const { abierto, slots } = computeSlots(club, court, fecha, rs, court.duracionTurno);
-        if (abierto && slots.some((s) => s.horaInicio === hora && s.disponible)) {
+        if (abierto && slots.some((s) => s.disponible && dentroDeFranja(s.horaInicio))) {
           disponibles.add(court.club.toString());
         }
       }
@@ -601,6 +613,15 @@ const createPublicReservation = async (req, res, next) => {
         mensaje: `${guestName} hizo su primera reserva`
       });
     }
+
+    // Y la del jugador, si reservó con su cuenta.
+    await notifyUser(reservation.customer, {
+      tipo: 'confirmacion',
+      titulo: 'Reserva confirmada',
+      mensaje: `${club.nombre} · ${court.nombre} · ${cuando}. Se paga en el complejo.`,
+      club: club._id,
+      reservation: reservation._id
+    });
 
     // Confirmación por email al jugador, con el turno adjunto como .ics.
     // Best-effort: la reserva ya está creada y la respuesta no depende de esto.

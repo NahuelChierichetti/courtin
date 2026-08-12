@@ -67,10 +67,16 @@ const horariosToLocal = (horarios, tz = DEFAULT_TZ) =>
 const horariosToUtc = (horarios, tz = DEFAULT_TZ) =>
   mapHorariosTimes(horarios, (hhmm, refDate) => localTimeToUtc(hhmm, tz, refDate));
 
+// Instante UTC -> "DD MMM HH:mm" en hora del club. Es el formato corto que usan
+// las notificaciones para decir cuándo es un turno.
+const formatInstant = (instant, tz = DEFAULT_TZ) =>
+  dayjs(instant).tz(tz || DEFAULT_TZ).format('DD MMM HH:mm');
+
 module.exports = {
   DEFAULT_TZ,
   localTimeToUtc,
   utcTimeToLocal,
   horariosToLocal,
-  horariosToUtc
+  horariosToUtc,
+  formatInstant
 };

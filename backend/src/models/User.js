@@ -20,6 +20,14 @@ const userSchema = new mongoose.Schema(
       minlength: [6, 'La contraseña debe tener al menos 6 caracteres'],
       select: false
     },
+    // Teléfono de contacto. Opcional: la cuenta se crea sólo con nombre, email
+    // y contraseña, y el jugador lo completa después desde su cuenta. Cuando
+    // está cargado, precarga el formulario de reserva y le llega al complejo.
+    telefono: {
+      type: String,
+      trim: true,
+      default: null
+    },
     estado: {
       type: String,
       enum: ['activo', 'inactivo'],
