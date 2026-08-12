@@ -6,6 +6,8 @@ require('../models/Club');
 require('../models/Court');
 require('../models/User');
 const { sendReservationReminder } = require('../utils/reservationEmails');
+const { notifyUser } = require('../utils/notifications');
+const { formatInstant } = require('../utils/timezone');
 
 // Recordatorio de turno 24 h antes.
 //
@@ -64,6 +66,18 @@ const runReservationReminders = async () => {
       stats.omitidos += 1;
       continue;
     }
+
+    // Campanita del jugador, si reservó con su cuenta. Va antes del email y sin
+    // afectar `stats`, que cuenta envíos de correo. El `dedupeKey` es lo que
+    // evita que la ventana ancha de 2 h le deje cuatro avisos iguales.
+    await notifyUser(reservation.customer?._id, {
+      tipo: 'recordatorio',
+      titulo: 'Tu turno es mañana',
+      mensaje: `${reservation.club.nombre} · ${reservation.court?.nombre || 'tu cancha'} · ${formatInstant(reservation.inicio, reservation.club.timezone)}`,
+      club: reservation.club._id,
+      reservation: reservation._id,
+      dedupeKey: `recordatorio:${reservation._id}`
+    });
 
     const result = await sendReservationReminder({
       reservation,

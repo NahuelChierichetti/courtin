@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { sportMeta } from '@/utils/turnos'
 import { formatCurrency } from '@/utils/datetime'
+import FavoriteButton from '@/components/public/FavoriteButton.vue'
 
 const props = defineProps({
   club: { type: Object, required: true },
@@ -26,9 +27,15 @@ const hoursLabel = computed(() => {
 </script>
 
 <template>
+  <!--
+    El corazón va como hermano del botón de la card y no adentro: un <button>
+    dentro de otro <button> es HTML inválido y el click interno se vuelve
+    impredecible.
+  -->
+  <div class="relative">
   <button
     type="button"
-    class="group flex flex-col overflow-hidden rounded-3xl border border-black/[0.06] bg-white text-left shadow-sm transition-shadow hover:shadow-md cursor-pointer"
+    class="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-black/[0.06] bg-white text-left shadow-sm transition-shadow hover:shadow-md cursor-pointer"
     @click="$emit('select', club)"
   >
     <!-- Cover -->
@@ -85,4 +92,7 @@ const hoursLabel = computed(() => {
       </div>
     </div>
   </button>
+
+    <FavoriteButton :club="club" class="absolute right-3 top-3" />
+  </div>
 </template>

@@ -5,6 +5,8 @@ const {
   registerClub,
   login,
   getMe,
+  updateMe,
+  changePassword,
   forgotPassword,
   verifyResetToken,
   resetPassword,
@@ -26,6 +28,8 @@ router.post('/register-club', registerClub);
 // loguearse muchas veces bien no consume nada.
 router.post('/login', loginLimiters, login);
 router.get('/me', protect, getMe);
+router.patch('/me', protect, updateMe);
+router.put('/me/password', protect, changePassword);
 
 // Recuperación de contraseña. Públicas a propósito: quien las usa justamente no
 // puede iniciar sesión.

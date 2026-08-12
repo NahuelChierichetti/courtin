@@ -10,7 +10,7 @@ const Reservation = require('../models/Reservation');
 const CashMovement = require('../models/CashMovement');
 const { recordReservationPayment } = require('./cashLedger');
 const { upsertClientFromReservation } = require('./clients');
-const { notify } = require('./notifications');
+const { notify, notifyUser } = require('./notifications');
 const { sendReservationConfirmation, sendClubReservationNotice } = require('./reservationEmails');
 const { DEFAULT_TZ } = require('./timezone');
 
@@ -147,6 +147,19 @@ const confirmarPagoDeReserva = async ({ payment, reservation, club, court }) => 
       mensaje: `${reservation.guestName} hizo su primera reserva`
     });
   }
+
+  // Y la del jugador, si reservó con su cuenta. Una sola aunque el evento sea
+  // "confirmada + pagada": son el mismo hecho para quien reservó.
+  await notifyUser(reservation.customer, {
+    tipo: 'confirmacion',
+    titulo: 'Reserva confirmada',
+    mensaje:
+      saldo > 0
+        ? `${club.nombre} · ${nombreCancha} · ${cuando}. Seña pagada, resta $${saldo.toLocaleString('es-AR')} en el complejo.`
+        : `${club.nombre} · ${nombreCancha} · ${cuando}. Pago acreditado.`,
+    club: club._id,
+    reservation: reservation._id
+  });
 
   // Un solo email al jugador: confirma el turno Y el pago. Dos mails seguidos
   // diciendo casi lo mismo es la forma más rápida de terminar en spam.

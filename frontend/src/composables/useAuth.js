@@ -213,6 +213,20 @@ const refreshUser = async () => {
   return me.user
 }
 
+// Guarda los datos personales y refleja el resultado del servidor en la sesión,
+// para que el nombre del header cambie sin recargar.
+const updateProfile = async (payload) => {
+  isLoading.value = true
+
+  try {
+    const updated = await authService.updateMe(payload)
+    user.value = { ...user.value, ...updated }
+    return user.value
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const logout = () => {
   clearSession()
   isInitialized.value = true
@@ -294,6 +308,7 @@ export const useAuth = () => ({
   resetPassword,
   acceptInvitation,
   refreshUser,
+  updateProfile,
   // Verificación blanda: no bloquea el uso, sólo alimenta el aviso del panel.
   isEmailVerified: computed(() => Boolean(user.value?.emailVerifiedAt)),
   logout,

@@ -55,6 +55,7 @@ const buildUserResponse = (user) => {
     _id: user._id,
     nombre: user.nombre,
     email: user.email,
+    telefono: user.telefono || null,
     estado: user.estado,
     globalRole: user.globalRole,
     emailVerifiedAt: user.emailVerifiedAt || null
@@ -237,6 +238,85 @@ const getMe = async (req, res, next) => {
       user: req.user,
       memberships
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PATCH /auth/me — datos personales de la cuenta en sesión.
+//
+// El email queda afuera a propósito: cambiarlo es mudar la identidad con la que
+// se inicia sesión y con la que se deduplican los clientes de cada complejo, así
+// que necesita su propio flujo con verificación de la casilla nueva.
+const updateMe = async (req, res, next) => {
+  try {
+    const updates = {};
+
+    if (req.body.nombre !== undefined) {
+      const nombre = String(req.body.nombre).trim();
+      if (!nombre) {
+        return res.status(400).json({ ok: false, message: 'El nombre es obligatorio' });
+      }
+      updates.nombre = nombre;
+    }
+
+    // Vacío borra el teléfono: es opcional y tiene que poder sacarse.
+    if (req.body.telefono !== undefined) {
+      const telefono = String(req.body.telefono).trim();
+      updates.telefono = telefono || null;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ ok: false, message: 'No hay datos para actualizar' });
+    }
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ ok: true, user: buildUserResponse(user) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PUT /auth/me/password — cambio de contraseña con la sesión ya iniciada.
+//
+// Pide la contraseña actual aunque haya token válido: si alguien deja la sesión
+// abierta en un teléfono prestado, no debería poder quedarse con la cuenta.
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, password } = req.body;
+
+    if (!currentPassword || !password) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Ingresá tu contraseña actual y la nueva.'
+      });
+    }
+
+    if (String(password).length < 6) {
+      return res.status(400).json({
+        ok: false,
+        message: 'La contraseña nueva debe tener al menos 6 caracteres.'
+      });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({ ok: false, message: 'Usuario no encontrado' });
+    }
+
+    const matches = await bcrypt.compare(currentPassword, user.password);
+    if (!matches) {
+      return res.status(400).json({ ok: false, message: 'La contraseña actual no es correcta.' });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    await user.save();
+
+    res.status(200).json({ ok: true, message: 'Contraseña actualizada.' });
   } catch (error) {
     next(error);
   }
@@ -433,6 +513,8 @@ module.exports = {
   registerClub,
   login,
   getMe,
+  updateMe,
+  changePassword,
   forgotPassword,
   verifyResetToken,
   resetPassword,

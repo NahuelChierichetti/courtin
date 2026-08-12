@@ -60,6 +60,13 @@ const reservationService = {
     const { data } = await api.get('/reservations/my')
     return data.reservations
   },
+
+  // Cancela una reserva propia desde la cuenta. El backend valida la tolerancia
+  // de cancelación del complejo y avisa al club.
+  async cancelMyReservation(id) {
+    const { data } = await api.patch(`/reservations/my/${id}/cancel`)
+    return data.reservation
+  },
 }
 
 export default reservationService

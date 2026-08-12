@@ -10,6 +10,7 @@ const {
   getReservationByToken,
   cancelReservationByToken,
   getMyReservations,
+  cancelMyReservation,
   refundReservationPayment
 } = require('../controllers/reservationController');
 const { protect, authorizeClubRoles } = require('../middlewares/authMiddleware');
@@ -24,10 +25,15 @@ router.get('/manage/:token', getReservationByToken);
 router.patch('/manage/:token/cancel', cancelReservationByToken);
 
 router.use(protect);
+
+// Reservas del jugador logueado. Van ANTES del guard de suscripción: son suyas,
+// no del complejo, y no tienen por qué caerse porque un club se atrasó con el
+// pago. Es la misma razón por la que la gestión por token queda afuera.
+router.get('/my', getMyReservations);
+router.patch('/my/:id/cancel', cancelMyReservation);
+
 // Nivel 2: un complejo suspendido no accede al panel.
 router.use(requiereSuscripcionActiva);
-
-router.get('/my', getMyReservations);
 
 router.get(
   '/club/:clubId',

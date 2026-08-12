@@ -37,6 +37,26 @@ const router = createRouter({
           component: () => import('@/views/public/MisReservasView.vue'),
           meta: { requiresAuth: true },
         },
+        {
+          path: 'cuenta',
+          name: 'cuenta',
+          component: () => import('@/views/public/CuentaView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'favoritos',
+          name: 'favoritos',
+          component: () => import('@/views/public/FavoritosView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          // `mis-notificaciones` y no `notificaciones`: ese nombre ya lo usa la
+          // campanita del panel del complejo.
+          path: 'notificaciones',
+          name: 'mis-notificaciones',
+          component: () => import('@/views/public/MisNotificacionesView.vue'),
+          meta: { requiresAuth: true },
+        },
       ],
     },
     {
