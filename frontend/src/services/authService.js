@@ -22,6 +22,18 @@ const authService = {
     return data
   },
 
+  // Datos personales de la cuenta en sesión. El email no se cambia por acá.
+  async updateMe(payload) {
+    const { data } = await api.patch('/auth/me', payload)
+    return data.user
+  },
+
+  // Cambio de contraseña con la sesión abierta. Exige la contraseña actual.
+  async changePassword({ currentPassword, password }) {
+    const { data } = await api.put('/auth/me/password', { currentPassword, password })
+    return data
+  },
+
   // Pide el link de recuperación. Responde igual exista o no la cuenta.
   async forgotPassword(email) {
     const { data } = await api.post('/auth/forgot-password', { email })

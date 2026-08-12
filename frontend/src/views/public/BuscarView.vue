@@ -5,6 +5,11 @@ import publicService from '@/services/publicService'
 import { PUBLIC_SPORTS, sportMeta } from '@/utils/sports'
 import { dayjs } from '@/utils/datetime'
 import ClubCard from '@/components/public/ClubCard.vue'
+import NameField from '@/components/public/search/NameField.vue'
+import CityField from '@/components/public/search/CityField.vue'
+import SportField from '@/components/public/search/SportField.vue'
+import DateField from '@/components/public/search/DateField.vue'
+import TimeField from '@/components/public/search/TimeField.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,7 +23,8 @@ const fecha = ref(
     ? route.query.fecha
     : dayjs().format('YYYY-MM-DD'),
 )
-const hora = ref(typeof route.query.hora === 'string' ? route.query.hora : '')
+const horaDesde = ref(typeof route.query.hora === 'string' ? route.query.hora : '')
+const horaHasta = ref(typeof route.query.horaHasta === 'string' ? route.query.horaHasta : '')
 
 const sortBy = ref('todos')
 
@@ -33,30 +39,84 @@ const sportChips = [
   ...PUBLIC_SPORTS.map((s) => ({ label: s.label, value: s.key })),
 ]
 
+// Sólo los órdenes que hoy tienen con qué ordenar. "Cercanos" necesita
+// geolocalización y "Mejor valorados" un rating que todavía no existe en el
+// modelo: se veían activos y no cambiaban nada.
 const sortChips = [
   { label: 'Todos', value: 'todos' },
-  { label: 'Cercanos', value: 'cercanos' },
-  { label: 'Mejor valorados', value: 'valorados' },
   { label: 'Menor precio', value: 'precio' },
 ]
 
 const sportLabel = computed(() => (tipo.value ? sportMeta(tipo.value).label : 'Todos'))
 
+// Etiqueta legible de la franja elegida, para el resumen y el chip.
+const FRANJA_LABELS = {
+  '06:00|11:59': 'Mañana',
+  '12:00|17:59': 'Tarde',
+  '18:00|23:59': 'Noche',
+}
+const horaLabel = computed(() => {
+  if (!horaDesde.value) return ''
+  return FRANJA_LABELS[`${horaDesde.value}|${horaHasta.value}`] || `desde ${horaDesde.value}`
+})
+
+const fechaLabel = computed(() => {
+  const d = dayjs(fecha.value)
+  const dias = d.startOf('day').diff(dayjs().startOf('day'), 'day')
+  if (dias === 0) return 'Hoy'
+  if (dias === 1) return 'Mañana'
+  const texto = d.format('ddd D [de] MMM')
+  return texto.charAt(0).toUpperCase() + texto.slice(1)
+})
+
 const resultsMeta = computed(() => {
-  const parts = [fecha.value]
-  if (hora.value) parts.push(`desde ${hora.value}`)
+  const parts = [fechaLabel.value]
+  if (horaLabel.value) parts.push(horaLabel.value)
   parts.push(sportLabel.value)
+  if (ciudad.value) parts.push(ciudad.value)
   return parts.join(' · ')
 })
 
-// Orden en cliente: precio asc y (si hubiera) rating desc. El resto respeta el orden del back.
+// Chips de lo que está filtrando ahora mismo, cada uno con su cruz. Sin esto,
+// una búsqueda vacía deja al jugador sin saber cuál de los cinco filtros la
+// dejó así.
+const activeFilters = computed(() => {
+  const chips = []
+  if (q.value.trim()) chips.push({ key: 'q', label: `"${q.value.trim()}"` })
+  if (ciudad.value) chips.push({ key: 'ciudad', label: ciudad.value })
+  if (tipo.value) chips.push({ key: 'tipo', label: sportLabel.value })
+  if (horaDesde.value) chips.push({ key: 'hora', label: horaLabel.value })
+  return chips
+})
+
+const hayFiltros = computed(() => activeFilters.value.length > 0)
+
+const clearFilter = (key) => {
+  if (key === 'q') q.value = ''
+  if (key === 'ciudad') ciudad.value = ''
+  if (key === 'tipo') tipo.value = ''
+  if (key === 'hora') {
+    horaDesde.value = ''
+    horaHasta.value = ''
+  }
+}
+
+// La fecha no se limpia: siempre hay un día en juego, y sin fecha el resumen
+// quedaría hablando de una disponibilidad que no se está consultando.
+const limpiarFiltros = () => {
+  q.value = ''
+  ciudad.value = ''
+  tipo.value = ''
+  horaDesde.value = ''
+  horaHasta.value = ''
+}
+
+// Orden en cliente por precio ascendente. "Todos" respeta el orden del back
+// (alfabético por nombre).
 const sortedClubs = computed(() => {
   const list = [...clubs.value]
   if (sortBy.value === 'precio') {
     return list.sort((a, b) => (a.precioDesde ?? Infinity) - (b.precioDesde ?? Infinity))
-  }
-  if (sortBy.value === 'valorados') {
-    return list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
   }
   return list
 })
@@ -68,10 +128,11 @@ const fetchClubs = async () => {
   try {
     clubs.value = await publicService.searchClubs({
       q: q.value.trim() || undefined,
-      ciudad: ciudad.value.trim() || undefined,
+      ciudad: ciudad.value || undefined,
       tipo: tipo.value || undefined,
       fecha: fecha.value,
-      hora: hora.value || undefined,
+      hora: horaDesde.value || undefined,
+      horaHasta: horaHasta.value || undefined,
     })
   } catch (err) {
     console.error(err)
@@ -86,10 +147,11 @@ const fetchClubs = async () => {
 const syncUrl = () => {
   const query = {}
   if (q.value.trim()) query.q = q.value.trim()
-  if (ciudad.value.trim()) query.ciudad = ciudad.value.trim()
+  if (ciudad.value) query.ciudad = ciudad.value
   if (tipo.value) query.tipo = tipo.value
   if (fecha.value) query.fecha = fecha.value
-  if (hora.value) query.hora = hora.value
+  if (horaDesde.value) query.hora = horaDesde.value
+  if (horaHasta.value) query.horaHasta = horaHasta.value
   router.replace({ query })
 }
 
@@ -101,9 +163,10 @@ const scheduleFetch = () => {
   }, 350)
 }
 
-// Texto/ubicación: con debounce. Deporte/fecha/hora: inmediato.
-watch([q, ciudad], scheduleFetch)
-watch([tipo, fecha, hora], () => {
+// El nombre se escribe letra por letra, así que va con debounce. El resto son
+// selecciones puntuales: se aplican al toque.
+watch(q, scheduleFetch)
+watch([ciudad, tipo, fecha, horaDesde, horaHasta], () => {
   clearTimeout(debounce)
   syncUrl()
   fetchClubs()
@@ -117,7 +180,7 @@ const goToClub = (club) =>
   router.push({
     name: 'public-club',
     params: { slug: club.slug },
-    query: { fecha: fecha.value, ...(hora.value ? { hora: hora.value } : {}) },
+    query: { fecha: fecha.value, ...(horaDesde.value ? { hora: horaDesde.value } : {}) },
   })
 
 onMounted(fetchClubs)
@@ -134,45 +197,29 @@ onMounted(fetchClubs)
             <h2 class="text-lg font-bold text-ink-500">Filtros</h2>
           </div>
 
-          <!-- ¿Qué buscás? -->
-          <div class="mt-6">
-            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
-              <i class="icon-[material-symbols--search] text-[11px] text-brand-green-500"></i> ¿Qué buscás?
-            </label>
-            <input v-model="q" type="text" placeholder="Cancha o complejo"
-              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400" />
-          </div>
-
-          <!-- Ubicación -->
-          <div class="mt-5">
-            <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
-              <i class="icon-[material-symbols--location-on] text-[11px] text-brand-green-500"></i> Ubicación
-            </label>
-            <input v-model="ciudad" type="text" placeholder="Barrio o ciudad"
-              class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400" />
-          </div>
-
-          <!-- Fecha + Hora -->
-          <div class="mt-5 grid grid-cols-2 gap-3">
-            <div>
-              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
-                <i class="icon-[material-symbols--calendar-month] text-[11px] text-brand-green-500"></i> Fecha
-              </label>
-              <input v-model="fecha" type="date" :min="dayjs().format('YYYY-MM-DD')"
-                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none focus:border-brand-green-400" />
-            </div>
-            <div>
-              <label class="flex items-center gap-2 text-xs font-bold tracking-wide text-stone-500 uppercase">
-                <i class="icon-[material-symbols--schedule] text-[11px] text-brand-green-500"></i> Hora
-              </label>
-              <input v-model="hora" type="time"
-                class="mt-2 h-11 w-full rounded-xl border border-black/[0.08] bg-white px-3 text-sm text-ink-500 outline-none focus:border-brand-green-400" />
+          <!--
+            Los mismos campos del buscador de la home, apilados. Reusarlos evita
+            que el mismo filtro se comporte distinto según desde dónde se llegue.
+          -->
+          <div class="mt-5 divide-y divide-black/[0.06] rounded-2xl border border-black/[0.06]">
+            <div class="p-1"><NameField v-model="q" /></div>
+            <div class="p-1"><CityField v-model="ciudad" /></div>
+            <div class="p-1"><SportField v-model="tipo" /></div>
+            <div class="p-1"><DateField v-model="fecha" /></div>
+            <div class="p-1">
+              <TimeField
+                :desde="horaDesde"
+                :hasta="horaHasta"
+                @update:desde="horaDesde = $event"
+                @update:hasta="horaHasta = $event"
+              />
             </div>
           </div>
 
-          <!-- Deporte -->
+          <!-- Deporte también como chips: en la barra lateral hay lugar, y un
+               toque es más rápido que abrir el selector. -->
           <div class="mt-5">
-            <label class="text-xs font-bold tracking-wide text-stone-500 uppercase">Deporte</label>
+            <label class="text-xs font-bold tracking-wide text-stone-500 uppercase">Acceso rápido</label>
             <div class="mt-3 flex flex-wrap gap-2">
               <button
                 v-for="s in sportChips"
@@ -188,6 +235,16 @@ onMounted(fetchClubs)
               </button>
             </div>
           </div>
+
+          <button
+            v-if="hayFiltros"
+            type="button"
+            class="mt-5 flex w-full items-center justify-center gap-2 rounded-full border border-black/[0.08] py-2.5 text-sm font-semibold text-stone-600 transition-colors hover:bg-stone-50 cursor-pointer"
+            @click="limpiarFiltros"
+          >
+            <i class="icon-[material-symbols--refresh] text-sm"></i>
+            Limpiar filtros
+          </button>
         </div>
       </aside>
 
@@ -218,6 +275,32 @@ onMounted(fetchClubs)
           </div>
         </div>
 
+        <!-- Filtros activos -->
+        <div v-if="activeFilters.length" class="mt-4 flex flex-wrap items-center gap-2">
+          <span
+            v-for="f in activeFilters"
+            :key="f.key"
+            class="inline-flex items-center gap-1.5 rounded-full bg-brand-green-50 py-1 pl-3 pr-1.5 text-xs font-semibold text-brand-green-700"
+          >
+            {{ f.label }}
+            <button
+              type="button"
+              class="flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-brand-green-100 cursor-pointer"
+              :aria-label="`Quitar filtro ${f.label}`"
+              @click="clearFilter(f.key)"
+            >
+              <i class="icon-[material-symbols--close] text-xs"></i>
+            </button>
+          </span>
+          <button
+            type="button"
+            class="text-xs font-semibold text-stone-500 underline underline-offset-2 transition-colors hover:text-stone-700 cursor-pointer"
+            @click="limpiarFiltros"
+          >
+            Limpiar todo
+          </button>
+        </div>
+
         <!-- Loading -->
         <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
           <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-300"></i>
@@ -235,7 +318,21 @@ onMounted(fetchClubs)
             <i class="icon-[material-symbols--search] text-2xl text-stone-300"></i>
           </div>
           <h3 class="mt-4 text-lg font-semibold text-ink-500">No encontramos complejos</h3>
-          <p class="mt-2 text-sm text-stone-500">Probá ajustar la zona, el deporte o la hora.</p>
+          <p class="mt-2 max-w-sm text-sm text-stone-500">
+            {{
+              hayFiltros
+                ? 'Probá con otra fecha o quitando alguno de los filtros.'
+                : 'Todavía no hay complejos publicados para ese día.'
+            }}
+          </p>
+          <button
+            v-if="hayFiltros"
+            type="button"
+            class="mt-5 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
+            @click="limpiarFiltros"
+          >
+            Limpiar filtros
+          </button>
         </div>
 
         <!-- Grid -->
