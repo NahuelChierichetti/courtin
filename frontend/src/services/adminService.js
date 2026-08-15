@@ -21,6 +21,17 @@ const adminService = {
     return data
   },
 
+  // Circuito de aprobación de las altas pedidas desde el registro público.
+  async approveClub(id) {
+    const { data } = await api.patch(`/admin/clubs/${id}/approve`)
+    return data
+  },
+
+  async rejectClub(id, motivo) {
+    const { data } = await api.patch(`/admin/clubs/${id}/reject`, { motivo })
+    return data
+  },
+
   async suspendClub(id) {
     const { data } = await api.patch(`/admin/clubs/${id}/suspend`)
     return data

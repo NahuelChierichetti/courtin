@@ -6,6 +6,14 @@
         <h1 class="text-2xl font-bold text-stone-900">Complejos</h1>
         <p class="mt-1 text-sm text-stone-500">
           {{ stats.total }} cuentas en total · {{ stats.activos }} activas
+          <button
+            v-if="stats.pendientes"
+            class="ml-1 cursor-pointer font-semibold text-warning-700 hover:underline"
+            @click="activeEstado = 'pendiente'"
+          >
+            · {{ stats.pendientes }}
+            {{ stats.pendientes === 1 ? 'solicitud pendiente' : 'solicitudes pendientes' }}
+          </button>
         </p>
       </div>
       <div class="flex items-center gap-3">
@@ -59,7 +67,7 @@
         <button
           v-for="f in estadoFilters"
           :key="f.value"
-          class="rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
+          class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activeEstado === f.value
               ? 'bg-stone-900 text-white'
@@ -68,6 +76,13 @@
           @click="activeEstado = f.value"
         >
           {{ f.label }}
+          <span
+            v-if="f.badge && stats[f.badge]"
+            class="rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none"
+            :class="activeEstado === f.value ? 'bg-white/20 text-white' : 'bg-warning-100 text-warning-700'"
+          >
+            {{ stats[f.badge] }}
+          </span>
         </button>
       </div>
     </div>
@@ -205,8 +220,100 @@
             <div class="flex-1 overflow-y-auto px-6 py-6">
               <!-- Detail view (read mode) -->
               <div v-if="drawerMode === 'detail'" class="space-y-6">
+                <!-- Solicitud de alta pendiente: es lo único que importa de este
+                     complejo hasta resolverla, así que reemplaza a las acciones
+                     habituales en vez de sumarse a ellas. -->
+                <div v-if="isPendiente" class="space-y-4">
+                  <div class="rounded-xl border border-warning-100 bg-warning-50 p-4">
+                    <p class="flex items-center gap-2 text-sm font-semibold text-warning-700">
+                      <i class="icon-[material-symbols--hourglass-top-outline]"></i>
+                      Solicitud de alta pendiente
+                    </p>
+                    <p class="mt-1.5 text-xs leading-relaxed text-warning-700/80">
+                      Se registró {{ formatDate(selectedClub?.alta?.solicitadoEn || selectedClub?.createdAt) }}.
+                      Hasta que lo apruebes no puede entrar al panel, no aparece en el buscador y su
+                      prueba gratis no empezó a correr.
+                    </p>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4 rounded-xl border border-stone-200 p-4">
+                    <div>
+                      <p class="text-xs text-stone-400">Canchas declaradas</p>
+                      <p class="text-sm font-medium text-stone-700">
+                        {{ selectedClub?.alta?.canchasDeclaradas ?? '—' }}
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-stone-400">Plan que le toca</p>
+                      <span
+                        class="inline-block rounded px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
+                        :class="planStyle(selectedClub?.plan)"
+                      >
+                        {{ selectedClub?.plan }}
+                      </span>
+                    </div>
+                    <div>
+                      <p class="text-xs text-stone-400">Email de avisos</p>
+                      <p class="truncate text-sm font-medium text-stone-700">{{ selectedClub?.email || '—' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-stone-400">Contacto del admin</p>
+                      <p class="truncate text-sm font-medium text-stone-700">
+                        {{ selectedClub?.owner?.email || '—' }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col gap-2">
+                    <button
+                      :disabled="resolviendo"
+                      class="flex w-full cursor-pointer items-center gap-3 rounded-full bg-brand-lime-500 px-4 py-3 text-left text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      @click="handleApprove(selectedClub)"
+                    >
+                      <i class="icon-[material-symbols--check-circle] text-base"></i>
+                      Aprobar alta y activar el complejo
+                    </button>
+                    <button
+                      :disabled="resolviendo"
+                      class="flex w-full cursor-pointer items-center gap-3 rounded-full border border-error-200 px-4 py-3 text-left text-sm font-medium text-error-600 transition-colors hover:bg-error-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      @click="abrirRechazo(selectedClub)"
+                    >
+                      <i class="icon-[material-symbols--cancel-outline] text-sm"></i>
+                      Rechazar solicitud
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Solicitud ya rechazada -->
+                <div v-else-if="isRechazado" class="space-y-3">
+                  <div class="rounded-xl border border-stone-200 bg-stone-50 p-4">
+                    <p class="flex items-center gap-2 text-sm font-semibold text-stone-700">
+                      <i class="icon-[material-symbols--cancel-outline]"></i>
+                      Solicitud rechazada
+                    </p>
+                    <p v-if="selectedClub?.alta?.motivoRechazo" class="mt-1.5 text-xs leading-relaxed text-stone-500">
+                      Motivo: {{ selectedClub.alta.motivoRechazo }}
+                    </p>
+                  </div>
+                  <button
+                    :disabled="resolviendo"
+                    class="flex w-full cursor-pointer items-center gap-3 rounded-full border border-success-200 px-4 py-3 text-left text-sm font-medium text-success-700 transition-colors hover:bg-success-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    @click="handleApprove(selectedClub)"
+                  >
+                    <i class="icon-[material-symbols--check-circle] text-sm"></i>
+                    Aprobarla de todos modos
+                  </button>
+                  <button
+                    class="flex w-full cursor-pointer items-center gap-3 rounded-full border border-error-200 px-4 py-3 text-left text-sm font-medium text-error-600 transition-colors hover:bg-error-50"
+                    @click="handleDelete(selectedClub)"
+                  >
+                    <i class="icon-[material-symbols--delete] text-sm"></i>
+                    Eliminar complejo
+                  </button>
+                </div>
+
                 <!-- Quick actions (complejo activo) -->
-                <div v-if="!isDeleted" class="flex flex-col gap-2">
+                <div v-else-if="!isDeleted" class="flex flex-col gap-2">
                   <button
                     class="flex w-full items-center gap-3 rounded-full border border-stone-200 px-4 py-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
                     @click="handleEnterAsAdmin(selectedClub)"
@@ -497,18 +604,62 @@
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Rechazo de una solicitud.
+         Va aparte del confirm de PrimeVue porque necesita un campo de texto: el
+         motivo es obligatorio y se le manda tal cual al complejo. -->
+    <Teleport to="body">
+      <div
+        v-if="rechazoVisible"
+        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
+        @click.self="rechazoVisible = false"
+      >
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <h3 class="text-lg font-semibold text-stone-900">Rechazar solicitud</h3>
+          <p class="mt-1.5 text-sm text-stone-500">
+            Contale a <strong>{{ selectedClub?.nombre }}</strong> por qué no se aprobó. El texto se
+            envía tal cual por email.
+          </p>
+
+          <textarea
+            v-model="rechazoMotivo"
+            rows="4"
+            placeholder="Ej: Los datos del complejo no coinciden con la dirección declarada. Escribinos para verificarlos."
+            class="mt-4 w-full resize-none rounded-lg border border-stone-300 px-3 py-2.5 text-sm text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
+          ></textarea>
+
+          <div class="mt-5 flex items-center justify-end gap-3">
+            <button
+              class="cursor-pointer rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50"
+              @click="rechazoVisible = false"
+            >
+              Cancelar
+            </button>
+            <button
+              class="flex cursor-pointer items-center gap-2 rounded-full bg-error-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-error-600 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="resolviendo || !rechazoMotivo.trim()"
+              @click="confirmarRechazo"
+            >
+              <i v-if="resolviendo" class="icon-[material-symbols--progress-activity] animate-spin text-xs"></i>
+              Rechazar y avisar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { useAuth } from '@/composables/useAuth'
 import adminService from '@/services/adminService'
 import { SPORTS, sportsForClub } from '@/utils/sports'
 
+const route = useRoute()
 const router = useRouter()
 const confirm = useConfirm()
 const toast = useToast()
@@ -517,17 +668,25 @@ const { setCurrentClubId } = useAuth()
 // Un complejo está "eliminado" (borrado lógico) si tiene deletedAt.
 const isDeleted = computed(() => !!selectedClub.value?.deletedAt)
 
+// Estados del circuito de aprobación. Excluyen los eliminados: sobre un complejo
+// borrado no hay nada que aprobar, lo único que aplica es reestablecerlo.
+const isPendiente = computed(() => !isDeleted.value && selectedClub.value?.estado === 'pendiente')
+const isRechazado = computed(() => !isDeleted.value && selectedClub.value?.estado === 'rechazado')
+
 // Columnas de la grilla. Va en una constante porque el encabezado y las filas
 // tienen que compartirlas sí o sí: definidas por separado se desalinean apenas
 // se toca una columna.
 const COLUMNAS = { gridTemplateColumns: '2fr 1.2fr 1fr 0.8fr 1fr 1fr 40px' }
 
 const clubs = ref([])
-const stats = ref({ total: 0, activos: 0 })
+const stats = ref({ total: 0, activos: 0, pendientes: 0 })
 const loading = ref(false)
 const search = ref('')
 const activePlan = ref(null)
-const activeEstado = ref(null)
+// El email que avisa de una solicitud nueva linkea a
+// /admin/complejos?estado=pendiente: la vista arranca filtrada por lo que vino a
+// resolver el superadmin, sin obligarlo a buscarla entre todos los complejos.
+const activeEstado = ref(typeof route.query.estado === 'string' ? route.query.estado : null)
 
 const drawerVisible = ref(false)
 const drawerMode = ref('create') // 'create' | 'detail' | 'edit'
@@ -572,9 +731,13 @@ const planFilters = [
 
 const estadoFilters = [
   { label: 'Todos', value: null },
+  // Primero las solicitudes: es el único filtro que representa trabajo por
+  // hacer, y lleva el contador al lado para que se vea sin entrar.
+  { label: 'Pendientes', value: 'pendiente', badge: 'pendientes' },
   { label: 'Activos', value: 'activo' },
   { label: 'Trial', value: 'trial' },
   { label: 'Impagos', value: 'impago' },
+  { label: 'Rechazados', value: 'rechazado' },
   { label: 'Cancelados', value: 'cancelado' },
   { label: 'Eliminados', value: 'eliminado' },
 ]
@@ -692,6 +855,66 @@ const handleSave = async () => {
   }
 }
 
+// --- Aprobación de altas ---
+
+const resolviendo = ref(false)
+const rechazoVisible = ref(false)
+const rechazoMotivo = ref('')
+
+const handleApprove = (club) => {
+  confirm.require({
+    header: 'Aprobar alta',
+    message: `¿Aprobar el alta de "${club.nombre}"? Se le avisa por email, arranca su prueba gratis de 30 días y ya puede entrar al panel.`,
+    icon: 'pi pi-check-circle',
+    acceptLabel: 'Aprobar',
+    rejectLabel: 'Cancelar',
+    acceptProps: { severity: 'success' },
+    rejectProps: { severity: 'secondary', outlined: true },
+    accept: async () => {
+      resolviendo.value = true
+      try {
+        const { message } = await adminService.approveClub(club._id)
+        closeDrawer()
+        await fetchClubs()
+        toast.add({ severity: 'success', summary: 'Complejo aprobado', detail: message, life: 4000 })
+      } catch (err) {
+        console.error('Error approving club:', err)
+        const detail = err.response?.data?.message || 'No se pudo aprobar el complejo.'
+        toast.add({ severity: 'error', summary: 'Error al aprobar', detail, life: 5000 })
+      } finally {
+        resolviendo.value = false
+      }
+    },
+  })
+}
+
+const abrirRechazo = () => {
+  rechazoMotivo.value = ''
+  rechazoVisible.value = true
+}
+
+// El motivo no es opcional: viaja tal cual en el email al complejo, y un rechazo
+// sin explicación garantiza un mail de vuelta preguntando por qué.
+const confirmarRechazo = async () => {
+  const motivo = rechazoMotivo.value.trim()
+  if (!motivo) return
+
+  resolviendo.value = true
+  try {
+    const { message } = await adminService.rejectClub(selectedClub.value._id, motivo)
+    rechazoVisible.value = false
+    closeDrawer()
+    await fetchClubs()
+    toast.add({ severity: 'success', summary: 'Solicitud rechazada', detail: message, life: 4000 })
+  } catch (err) {
+    console.error('Error rejecting club:', err)
+    const detail = err.response?.data?.message || 'No se pudo rechazar la solicitud.'
+    toast.add({ severity: 'error', summary: 'Error al rechazar', detail, life: 5000 })
+  } finally {
+    resolviendo.value = false
+  }
+}
+
 const handleSuspend = async (club) => {
   try {
     const { message } = await adminService.suspendClub(club._id)
@@ -786,6 +1009,8 @@ const planStyle = (plan) => {
 
 const estadoConfig = (estado) => {
   const map = {
+    pendiente: { label: 'Pendiente', dot: 'bg-warning-500', bg: 'bg-warning-50 text-warning-700' },
+    rechazado: { label: 'Rechazado', dot: 'bg-error-500', bg: 'bg-error-50 text-error-700' },
     activo: { label: 'Activo', dot: 'bg-success-500', bg: 'bg-success-50 text-success-700' },
     trial: { label: 'Trial', dot: 'bg-brand-purple-500', bg: 'bg-brand-purple-50 text-brand-purple-700' },
     suspendido: { label: 'Suspendido', dot: 'bg-error-500', bg: 'bg-error-50 text-error-700' },

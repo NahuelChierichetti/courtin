@@ -17,13 +17,16 @@ const { protect } = require('../middlewares/authMiddleware');
 const {
   forgotPasswordLimiters,
   loginLimiters,
+  registerClubLimiter,
   resendVerificationLimiter
 } = require('../middlewares/rateLimit');
 
 const router = express.Router();
 
 router.post('/register', register);
-router.post('/register-club', registerClub);
+// Solicitud de alta de complejo: crea el club en `pendiente` y avisa al
+// superadmin. Con límite: es pública y manda emails.
+router.post('/register-club', registerClubLimiter, registerClub);
 // Con límite anti fuerza bruta. Sólo cuentan los intentos fallidos, así que
 // loguearse muchas veces bien no consume nada.
 router.post('/login', loginLimiters, login);

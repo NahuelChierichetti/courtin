@@ -129,25 +129,17 @@ const register = async (payload) => {
   }
 }
 
-// Alta de complejo: registra al dueño y su club, y deja la sesión iniciada con
-// la membership tenant_admin ya cargada vía getMe.
+// Solicitud de alta de complejo.
+//
+// A diferencia de `register`, NO deja la sesión iniciada: el backend no devuelve
+// token porque el club queda pendiente de aprobación y todavía no hay panel al
+// que entrar. La sesión se abre después, desde /panel/login, cuando llega el
+// email de aprobación.
 const registerClub = async (payload) => {
   isLoading.value = true
 
   try {
-    const data = await authService.registerClub(payload)
-    setToken(data.token)
-    token.value = data.token
-
-    const me = await authService.getMe()
-    setSession(data.token, me.user, me.memberships)
-    isInitialized.value = true
-
-    return {
-      ...data,
-      user: me.user,
-      memberships: me.memberships,
-    }
+    return await authService.registerClub(payload)
   } finally {
     isLoading.value = false
   }

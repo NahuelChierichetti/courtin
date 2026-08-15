@@ -98,12 +98,13 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Método</label>
-                <div class="relative">
-                  <select v-model="form.metodoPago" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100">
-                    <option v-for="m in METODOS" :key="m" :value="m">{{ metodoLabel(m) }}</option>
-                  </select>
-                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                </div>
+                <Select
+                  v-model="form.metodoPago"
+                  :options="metodoOptions"
+                  option-label="label"
+                  option-value="value"
+                  class="h-[42px] w-full text-sm"
+                />
               </div>
               <div>
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Fecha</label>
@@ -138,8 +139,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import Select from 'primevue/select'
 import { dayjs } from '@/utils/datetime'
 import { categoriaMeta, categoriasManuales, metodoLabel, METODOS } from '@/utils/cash'
+
+const metodoOptions = METODOS.map((m) => ({ value: m, label: metodoLabel(m) }))
 
 const props = defineProps({
   visible: Boolean,

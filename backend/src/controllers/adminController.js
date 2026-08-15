@@ -5,6 +5,9 @@ const Membership = require('../models/Membership');
 const Reservation = require('../models/Reservation');
 const User = require('../models/User');
 const { normalizeSports, sportLabel } = require('../config/sports');
+const { esperaAprobacion } = require('../utils/subscriptions');
+const { ensureSubscription } = require('../utils/billing');
+const { notificarAprobacion, notificarRechazo } = require('../utils/clubOnboarding');
 
 const getAdminClubs = async (req, res, next) => {
   try {
@@ -63,7 +66,7 @@ const getAdminClubs = async (req, res, next) => {
         role: 'tenant_admin',
         estado: 'activo',
       })
-        .populate('user', 'nombre email')
+        .populate('user', 'nombre email telefono')
         .lean(),
       Reservation.aggregate([
         { $match: { club: { $in: clubIds } } },
@@ -92,6 +95,10 @@ const getAdminClubs = async (req, res, next) => {
 
     const totalActivos = await Club.countDocuments({ estado: 'activo' });
     const totalAll = await Club.countDocuments();
+    // Alimenta el contador de la pestaña "Pendientes": es la única cifra que
+    // pide una acción del superadmin, así que se cuenta siempre, esté filtrando
+    // por lo que esté filtrando.
+    const totalPendientes = await Club.countDocuments({ estado: 'pendiente' });
 
     res.status(200).json({
       ok: true,
@@ -105,6 +112,7 @@ const getAdminClubs = async (req, res, next) => {
       stats: {
         total: totalAll,
         activos: totalActivos,
+        pendientes: totalPendientes,
       },
     });
   } catch (error) {
@@ -123,10 +131,10 @@ const getAdminClubById = async (req, res, next) => {
     const [courts, owner, memberships] = await Promise.all([
       Court.find({ club: club._id }).lean(),
       Membership.findOne({ club: club._id, role: 'tenant_admin', estado: 'activo' })
-        .populate('user', 'nombre email')
+        .populate('user', 'nombre email telefono')
         .lean(),
       Membership.find({ club: club._id, estado: 'activo' })
-        .populate('user', 'nombre email')
+        .populate('user', 'nombre email telefono')
         .lean(),
     ]);
 
@@ -184,9 +192,10 @@ const createAdminClub = async (req, res, next) => {
 
 const updateAdminClub = async (req, res, next) => {
   try {
-    const { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado, deportes } = req.body;
+    const { nombre, slug, direccion, ciudad, provincia, telefono, email, plan, estado, deportes } =
+      req.body;
 
-    const updateData = { nombre, slug, direccion, ciudad, provincia, telefono, plan, estado };
+    const updateData = { nombre, slug, direccion, ciudad, provincia, telefono, email, plan, estado };
 
     if (deportes !== undefined) {
       const deportesHabilitados = normalizeSports(deportes);
@@ -227,6 +236,107 @@ const updateAdminClub = async (req, res, next) => {
     res.status(200).json({
       ok: true,
       message: 'Complejo actualizado con éxito',
+      club,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Aprueba una solicitud de alta.
+//
+// Es el momento en el que el complejo pasa a existir de verdad: recién acá se
+// le crea la suscripción y arranca la prueba gratis. El trial se cuenta desde
+// HOY y no desde el registro, para que la demora en revisar no se le descuente
+// al club (ver ensureSubscription).
+const approveAdminClub = async (req, res, next) => {
+  try {
+    const club = await Club.findById(req.params.id);
+
+    if (!club) {
+      return res.status(404).json({ ok: false, message: 'Club no encontrado' });
+    }
+
+    if (!esperaAprobacion(club)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Este complejo ya está dado de alta.',
+      });
+    }
+
+    club.estado = 'trial';
+    club.alta = {
+      ...(club.alta?.toObject?.() || club.alta || {}),
+      resueltoEn: new Date(),
+      resueltoPor: req.user._id,
+      motivoRechazo: undefined,
+    };
+    await club.save();
+
+    let subscription = null;
+    try {
+      subscription = await ensureSubscription(club, new Date());
+    } catch (err) {
+      // La aprobación ya está hecha y es lo que importa. Si la suscripción
+      // falla, el cron de dunning la crea en la próxima corrida.
+      // eslint-disable-next-line no-console
+      console.error('No se pudo crear la suscripción del club aprobado:', err.message);
+    }
+
+    await notificarAprobacion(club, subscription);
+
+    res.status(200).json({
+      ok: true,
+      message: `"${club.nombre}" quedó aprobado y ya puede entrar al panel.`,
+      club,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Rechaza una solicitud de alta.
+//
+// El motivo es obligatorio: viaja tal cual en el email al complejo, y un rechazo
+// sin explicación sólo genera un mail de vuelta preguntando por qué.
+const rejectAdminClub = async (req, res, next) => {
+  try {
+    const motivo = (req.body?.motivo || '').trim();
+
+    if (!motivo) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Escribí el motivo del rechazo: se le manda al complejo tal cual.',
+      });
+    }
+
+    const club = await Club.findById(req.params.id);
+
+    if (!club) {
+      return res.status(404).json({ ok: false, message: 'Club no encontrado' });
+    }
+
+    if (club.estado !== 'pendiente') {
+      return res.status(400).json({
+        ok: false,
+        message: 'Sólo se puede rechazar una solicitud pendiente.',
+      });
+    }
+
+    club.estado = 'rechazado';
+    club.alta = {
+      ...(club.alta?.toObject?.() || club.alta || {}),
+      resueltoEn: new Date(),
+      resueltoPor: req.user._id,
+      motivoRechazo: motivo,
+    };
+    await club.save();
+
+    await notificarRechazo(club, motivo);
+
+    res.status(200).json({
+      ok: true,
+      message: `Se rechazó la solicitud de "${club.nombre}".`,
       club,
     });
   } catch (error) {
@@ -531,6 +641,8 @@ module.exports = {
   getAdminClubById,
   createAdminClub,
   updateAdminClub,
+  approveAdminClub,
+  rejectAdminClub,
   suspendAdminClub,
   deleteAdminClub,
   restoreAdminClub,

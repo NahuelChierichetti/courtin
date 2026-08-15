@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import BackofficeLayout from '@/layouts/BackofficeLayout.vue'
 import PublicLayout from '@/layouts/PublicLayout.vue'
 import LoginView from '@/views/auth/Login.vue'
+import RegisterChoiceView from '@/views/auth/RegisterChoice.vue'
 import RegisterView from '@/views/auth/Register.vue'
 import RegisterClubView from '@/views/auth/RegisterClub.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
@@ -191,8 +192,16 @@ const router = createRouter({
       meta: { guestOnly: true, variant: 'customer' },
     },
     {
+      // Bifurcación del registro. `/registro` no es un formulario: es la
+      // elección entre las dos altas, que son productos distintos.
       path: '/registro',
       name: 'registro',
+      component: RegisterChoiceView,
+      meta: { guestOnly: true },
+    },
+    {
+      path: '/registro/jugador',
+      name: 'registro-jugador',
       component: RegisterView,
       meta: { guestOnly: true },
     },

@@ -118,7 +118,7 @@ const handleSubmit = async () => {
 
     <!-- Columna branding -->
     <div class="relative hidden overflow-hidden bg-brand-green-700 lg:block">
-      <img src="/images/hero-tenista.png" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center mix-blend-luminosity" />
+      <img src="/images/banner-web.jpg" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-[72%_50%] mix-blend-luminosity" />
       <div class="absolute inset-0 bg-gradient-to-t from-brand-green-900 via-brand-green-900/40 to-brand-green-900/10"></div>
 
       <div class="relative flex h-full flex-col justify-end p-12">

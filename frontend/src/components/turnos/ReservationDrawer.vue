@@ -127,15 +127,14 @@
               <!-- Cancha -->
               <div>
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cancha<span class="ml-0.5 text-error-500">*</span></label>
-                <div class="relative">
-                  <select
-                    v-model="form.courtId"
-                    class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
-                  >
-                    <option v-for="c in courts" :key="c._id" :value="c._id">{{ c.nombre }} · {{ sportLabel(c.tipo) }}</option>
-                  </select>
-                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                </div>
+                <Select
+                  v-model="form.courtId"
+                  :options="courtOptions"
+                  option-label="label"
+                  option-value="value"
+                  placeholder="Elegí la cancha"
+                  class="h-[42px] w-full text-sm"
+                />
               </div>
 
               <!-- Fecha -->
@@ -155,27 +154,19 @@
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Desde<span class="ml-0.5 text-error-500">*</span></label>
-                  <div class="relative">
-                    <select
-                      v-model="form.horaInicio"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
-                    >
-                      <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
-                    </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                  </div>
+                  <Select
+                    v-model="form.horaInicio"
+                    :options="horasOptions"
+                    class="h-[42px] w-full text-sm"
+                  />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Hasta<span class="ml-0.5 text-error-500">*</span></label>
-                  <div class="relative">
-                    <select
-                      v-model="form.horaFin"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
-                    >
-                      <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
-                    </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                  </div>
+                  <Select
+                    v-model="form.horaFin"
+                    :options="horasOptions"
+                    class="h-[42px] w-full text-sm"
+                  />
                 </div>
               </div>
 
@@ -276,6 +267,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import Select from 'primevue/select'
 import { formatCurrency, dayjs, zonedToUtcISO, DEFAULT_TZ } from '@/utils/datetime'
 import { sportMeta, timeToMinutes, minutesToTime, priceForDuration, openRangeForDate, pagoMeta } from '@/utils/turnos'
 
@@ -359,6 +351,10 @@ const selectedCourt = computed(() => props.courts.find((c) => c._id === form.val
 const selectedSport = computed(() => sportMeta(selectedCourt.value?.tipo))
 
 const sportLabel = (tipo) => sportMeta(tipo).label
+
+const courtOptions = computed(() =>
+  props.courts.map((c) => ({ value: c._id, label: `${c.nombre} · ${sportLabel(c.tipo)}` })),
+)
 
 const subtitle = computed(() => {
   if (selectedCourt.value) return `${selectedCourt.value.nombre} · ${dayjs(form.value.fecha).format('ddd DD MMM')}`

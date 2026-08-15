@@ -49,14 +49,20 @@
 
       <!-- Club filter -->
       <div v-if="allClubs.length > 0" class="relative">
-        <select
+        <!-- "Todos" es la ausencia de filtro (null), y PrimeVue no puede
+             seleccionar una opción de valor null: se muestra como placeholder y
+             se vuelve a ella con la X de limpiar. -->
+        <Select
           v-model="activeClubId"
-          class="h-10 appearance-none rounded-lg border border-stone-200 bg-white pl-3 pr-8 text-xs font-medium text-stone-600 outline-none cursor-pointer"
-        >
-          <option :value="null">Todos los complejos</option>
-          <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
-        </select>
-        <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[10px] text-stone-400"></i>
+          :options="clubOptions"
+          option-label="label"
+          option-value="value"
+          placeholder="Todos los complejos"
+          show-clear
+          :filter="allClubs.length > 8"
+          filter-placeholder="Buscar complejo"
+          class="h-10 w-64 text-xs"
+        />
       </div>
     </div>
 
@@ -329,16 +335,17 @@
 
                   <div>
                     <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Complejo</label>
-                    <div class="relative">
-                      <select
-                        v-model="form.clubId"
-                        class="w-full appearance-none rounded-lg border border-stone-300 bg-white px-3 py-2.5 pr-8 text-sm text-stone-900 outline-none transition-colors focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
-                      >
-                        <option :value="null">Sin asignar</option>
-                        <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
-                      </select>
-                      <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                    </div>
+                    <Select
+                      v-model="form.clubId"
+                      :options="clubOptions"
+                      option-label="label"
+                      option-value="value"
+                      placeholder="Sin asignar"
+                      show-clear
+                      :filter="allClubs.length > 8"
+                      filter-placeholder="Buscar complejo"
+                      class="h-[42px] w-full text-sm"
+                    />
                   </div>
 
                   <div v-if="form.clubId" class="mt-4">
@@ -416,16 +423,16 @@
 
                 <div>
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Complejo</label>
-                  <div class="relative">
-                    <select
-                      v-model="assignClubId"
-                      class="w-full appearance-none rounded-lg border border-stone-300 bg-white px-3 py-2.5 pr-8 text-sm text-stone-900 outline-none transition-colors focus:border-brand-green-500 focus:ring-1 focus:ring-brand-green-500"
-                    >
-                      <option :value="null" disabled>Seleccionar complejo</option>
-                      <option v-for="c in allClubs" :key="c._id" :value="c._id">{{ c.nombre }}</option>
-                    </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                  </div>
+                  <Select
+                    v-model="assignClubId"
+                    :options="clubOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Seleccionar complejo"
+                    :filter="allClubs.length > 8"
+                    filter-placeholder="Buscar complejo"
+                    class="h-[42px] w-full text-sm"
+                  />
                 </div>
 
                 <div>
@@ -476,6 +483,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import Select from 'primevue/select'
 import adminService from '@/services/adminService'
 
 const users = ref([])
@@ -485,6 +493,10 @@ const search = ref('')
 const activeRole = ref(null)
 const activeClubId = ref(null)
 const allClubs = ref([])
+
+const clubOptions = computed(() =>
+  allClubs.value.map((c) => ({ value: c._id, label: c.nombre })),
+)
 
 const drawerVisible = ref(false)
 const drawerMode = ref('create')

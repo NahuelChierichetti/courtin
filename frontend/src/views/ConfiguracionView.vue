@@ -7,7 +7,8 @@ import courtService from '@/services/courtService'
 import publicService from '@/services/publicService'
 import { useAuth } from '@/composables/useAuth'
 import { dayjs, formatCurrency } from '@/utils/datetime'
-import { CITIES } from '@/utils/cities'
+import Select from 'primevue/select'
+import LocationFields from '@/components/common/LocationFields.vue'
 import ClubCard from '@/components/public/ClubCard.vue'
 import MercadoPagoDrawer from '@/components/config/MercadoPagoDrawer.vue'
 import ImageUpload from '@/components/config/ImageUpload.vue'
@@ -51,11 +52,6 @@ const monedaOptions = [
   { value: 'USD', label: 'Dólar (USD)' },
   { value: 'EUR', label: 'Euro (EUR)' },
 ]
-
-const ciudadOptions = computed(() => {
-  const c = form.value?.ciudad
-  return c && !CITIES.includes(c) ? [c, ...CITIES] : CITIES
-})
 
 const now = ref(dayjs.utc())
 let clockTimer = null
@@ -243,6 +239,9 @@ const fetchConfig = async () => {
       direccion: club.direccion || '',
       ciudad: club.ciudad || '',
       provincia: club.provincia || '',
+      // Coordenadas del nomenclador. Se rehacen al verificar una dirección
+      // nueva; si no se toca la dirección, se guardan las que ya tenía.
+      ubicacion: club.ubicacion?.lat != null ? { ...club.ubicacion } : null,
       timezone: club.timezone || 'America/Argentina/Buenos_Aires',
       moneda: club.moneda || 'ARS',
       publicado: club.publicado === true,
@@ -293,6 +292,7 @@ const save = async () => {
       direccion: form.value.direccion,
       ciudad: form.value.ciudad,
       provincia: form.value.provincia,
+      ...(form.value.ubicacion && { ubicacion: form.value.ubicacion }),
       timezone: form.value.timezone,
       moneda: form.value.moneda,
       publicado: form.value.publicado,
@@ -384,10 +384,6 @@ const inputBase =
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Teléfono</label>
                 <input v-model="form.telefono" type="text" placeholder="Ej: +54 11 5555-5555" :class="inputBase" />
               </div>
-              <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Dirección</label>
-                <input v-model="form.direccion" type="text" placeholder="Ej: Av. Siempreviva 742" :class="inputBase" />
-              </div>
             </div>
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Email del complejo</label>
@@ -402,40 +398,34 @@ const inputBase =
                 </template>
               </p>
             </div>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Ciudad</label>
-                <div class="relative">
-                  <select v-model="form.ciudad" :class="inputBase" class="appearance-none bg-white pr-8">
-                    <option value="">Seleccionar ciudad</option>
-                    <option v-for="c in ciudadOptions" :key="c" :value="c">{{ c }}</option>
-                  </select>
-                  <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                </div>
-              </div>
-              <div>
-                <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Provincia</label>
-                <input v-model="form.provincia" type="text" :class="inputBase" />
-              </div>
-            </div>
+            <LocationFields
+              v-model:provincia="form.provincia"
+              v-model:ciudad="form.ciudad"
+              v-model:direccion="form.direccion"
+              label-class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase"
+              control-class="h-[42px]"
+              @update:ubicacion="form.ubicacion = $event"
+            />
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Zona horaria</label>
-              <div class="relative">
-                <select v-model="form.timezone" :class="inputBase" class="appearance-none bg-white pr-8">
-                  <option v-for="tz in timezoneOptions" :key="tz.value" :value="tz.value">{{ tz.label }}</option>
-                </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-              </div>
+              <Select
+                v-model="form.timezone"
+                :options="timezoneOptions"
+                option-label="label"
+                option-value="value"
+                class="h-[42px] w-full text-sm"
+              />
               <p class="mt-2.5 text-xs text-stone-400">Hora local actual: <span class="font-medium text-stone-600">{{ localTimePreview }}</span></p>
             </div>
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Moneda</label>
-              <div class="relative">
-                <select v-model="form.moneda" :class="inputBase" class="appearance-none bg-white pr-8">
-                  <option v-for="c in monedaOptions" :key="c.value" :value="c.value">{{ c.label }}</option>
-                </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-              </div>
+              <Select
+                v-model="form.moneda"
+                :options="monedaOptions"
+                option-label="label"
+                option-value="value"
+                class="h-[42px] w-full text-sm"
+              />
               <p class="mt-2.5 text-xs text-stone-400">Ejemplo de precio: <span class="font-medium text-stone-600">{{ pricePreview }}</span></p>
             </div>
             <!-- Avisos por email al complejo -->

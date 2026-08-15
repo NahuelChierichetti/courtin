@@ -267,15 +267,52 @@ const clubSchema = new mongoose.Schema(
     // suscripción (ver utils/subscriptions.js); las lecturas lo consultan tal
     // cual, sin recalcular.
     //
+    //   pendiente    → alta solicitada desde el registro público, sin aprobar
+    //   rechazado    → el superadmin rechazó la solicitud
     //   trial/activo → todo habilitado
     //   impago       → nivel 1: despublicado y sin cargar turnos nuevos
     //   suspendido   → nivel 2: sin acceso al panel
     //   cancelado    → baja definitiva
     //   inactivo     → apagado manual por un superadmin
+    //
+    // `pendiente` y `rechazado` son los únicos que NO salen de la facturación:
+    // los escribe el circuito de aprobación (ver utils/subscriptions.js →
+    // ESTADOS_SIN_ALTA) y el cron de dunning los saltea.
     estado: {
       type: String,
-      enum: ['activo', 'inactivo', 'trial', 'suspendido', 'cancelado', 'impago'],
+      enum: [
+        'pendiente',
+        'rechazado',
+        'activo',
+        'inactivo',
+        'trial',
+        'suspendido',
+        'cancelado',
+        'impago'
+      ],
       default: 'trial'
+    },
+    // Circuito de aprobación del alta. Sólo lo completan los complejos que se
+    // registran solos: los que crea un superadmin desde el backoffice nacen
+    // aprobados y dejan esto vacío.
+    alta: {
+      // Cuántas canchas declaró tener al registrarse. No son las canchas
+      // cargadas (todavía no cargó ninguna): es lo que define el plan que le
+      // toca cuando termine la prueba gratis.
+      canchasDeclaradas: {
+        type: Number,
+        min: [1, 'Tiene que declarar al menos una cancha']
+      },
+      solicitadoEn: { type: Date },
+      resueltoEn: { type: Date },
+      resueltoPor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      motivoRechazo: {
+        type: String,
+        trim: true
+      }
     },
     horarios: {
       type: horariosSchema,

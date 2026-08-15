@@ -5,6 +5,8 @@ const {
   getAdminClubById,
   createAdminClub,
   updateAdminClub,
+  approveAdminClub,
+  rejectAdminClub,
   suspendAdminClub,
   deleteAdminClub,
   restoreAdminClub,
@@ -23,6 +25,9 @@ router.get('/clubs', getAdminClubs);
 router.post('/clubs', createAdminClub);
 router.get('/clubs/:id', getAdminClubById);
 router.put('/clubs/:id', updateAdminClub);
+// Circuito de aprobación del alta pedida desde el registro público.
+router.patch('/clubs/:id/approve', approveAdminClub);
+router.patch('/clubs/:id/reject', rejectAdminClub);
 router.patch('/clubs/:id/suspend', suspendAdminClub);
 router.patch('/clubs/:id/restore', restoreAdminClub);
 router.delete('/clubs/:id', deleteAdminClub);

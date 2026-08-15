@@ -72,7 +72,7 @@ onMounted(async () => {
       <div class="relative overflow-hidden rounded-[28px] bg-brand-green-800 px-6 pt-12 pb-28 sm:px-12 sm:pt-16 sm:pb-32">
         <!-- Tenista (billboard de marca) a la derecha -->
         <img
-          src="/images/hero-tenista.png"
+          src="/images/banner-web.jpg"
           alt=""
           aria-hidden="true"
           class="pointer-events-none absolute right-0 top-0 hidden h-full w-[62%] object-cover object-left mix-blend-luminosity md:block"
@@ -130,7 +130,7 @@ onMounted(async () => {
     </section>
 
     <!-- Explorá por deporte -->
-    <section class="mt-12">
+    <!-- <section class="mt-12">
       <h2 class="text-xl font-bold text-ink-500">Explorá por deporte</h2>
       <div class="mt-6 grid grid-cols-4 gap-3 sm:flex sm:flex-wrap sm:gap-6">
         <button
@@ -146,7 +146,7 @@ onMounted(async () => {
           <span class="text-sm font-medium text-ink-500">{{ s.label }}</span>
         </button>
       </div>
-    </section>
+    </section> -->
 
     <!-- Complejos destacados -->
     <section class="mt-12">

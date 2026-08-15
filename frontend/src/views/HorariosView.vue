@@ -180,13 +180,13 @@
                 <p class="text-xs text-stone-400">Tiempo antes del turno para cancelar sin costo</p>
               </div>
               <div class="relative shrink-0">
-                <select
-                  v-model.number="horarios.reservas.toleranciaCancelacionHoras"
-                  class="w-32 appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
-                >
-                  <option v-for="opt in toleranciaOptions" :key="opt" :value="opt">{{ opt }} horas</option>
-                </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
+                <Select
+                  v-model="horarios.reservas.toleranciaCancelacionHoras"
+                  :options="toleranciaSelectOptions"
+                  option-label="label"
+                  option-value="value"
+                  class="h-[38px] w-32 text-sm"
+                />
               </div>
             </div>
 
@@ -196,13 +196,13 @@
                 <p class="text-xs text-stone-400">Cuánto se puede reservar con antelación</p>
               </div>
               <div class="relative shrink-0">
-                <select
-                  v-model.number="horarios.reservas.anticipacionMaximaDias"
-                  class="w-32 appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
-                >
-                  <option v-for="opt in anticipacionOptions" :key="opt" :value="opt">{{ opt }} días</option>
-                </select>
-                <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
+                <Select
+                  v-model="horarios.reservas.anticipacionMaximaDias"
+                  :options="anticipacionSelectOptions"
+                  option-label="label"
+                  option-value="value"
+                  class="h-[38px] w-32 text-sm"
+                />
               </div>
             </div>
           </div>
@@ -226,6 +226,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import Select from 'primevue/select'
 import SpecialDayDrawer from '@/components/horarios/SpecialDayDrawer.vue'
 import TimePicker from '@/components/common/TimePicker.vue'
 import scheduleService from '@/services/scheduleService'
@@ -256,6 +257,9 @@ const diasSemana = [
 
 const toleranciaOptions = [0, 1, 2, 4, 6, 12, 24, 48]
 const anticipacionOptions = [7, 15, 30, 45, 60, 90]
+
+const toleranciaSelectOptions = toleranciaOptions.map((v) => ({ value: v, label: `${v} horas` }))
+const anticipacionSelectOptions = anticipacionOptions.map((v) => ({ value: v, label: `${v} días` }))
 
 const slotsCount = (dia) => {
   if (!dia.abierto || !dia.horaInicio || !dia.horaFin) return 0
