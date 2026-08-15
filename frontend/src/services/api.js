@@ -27,7 +27,13 @@ api.interceptors.response.use(
     const isAuthRequest =
       requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register')
     const pathname = window.location.pathname
-    const AUTH_PAGES = ['/login', '/registro', '/panel/login', '/panel/registro']
+    const AUTH_PAGES = [
+      '/login',
+      '/registro',
+      '/registro/jugador',
+      '/panel/login',
+      '/panel/registro',
+    ]
     const isAuthPage = AUTH_PAGES.includes(pathname)
 
     // Complejo suspendido por falta de pago: en vez de dejar el panel lleno de

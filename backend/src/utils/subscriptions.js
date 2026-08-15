@@ -23,6 +23,11 @@ const MS_POR_DIA = 24 * 60 * 60 * 1000;
 // propósito, porque si no un club suspendido no podría pagar y saldría del
 // bloqueo. Ver docs/suscripciones.md.
 const CAPACIDADES = {
+  // El alta se pidió desde el registro público y todavía no la revisó un
+  // superadmin. No es un estado de facturación: el trial arranca recién cuando
+  // se aprueba, así que la espera no le come días de prueba a nadie.
+  pendiente: { publicado: false, creaReservas: false, accedePanel: false },
+  rechazado: { publicado: false, creaReservas: false, accedePanel: false },
   trial: { publicado: true, creaReservas: true, accedePanel: true },
   activo: { publicado: true, creaReservas: true, accedePanel: true },
   impago: { publicado: false, creaReservas: false, accedePanel: true },
@@ -58,6 +63,14 @@ const filtroClubVisible = (extra = {}) => ({
 
 const puedeCrearReservas = (club) => ESTADOS_CON_RESERVAS.includes(club?.estado);
 const puedeAccederPanel = (club) => ESTADOS_CON_PANEL.includes(club?.estado);
+
+// Estados previos al alta efectiva. Un club acá no entra al circuito de
+// facturación: no tiene suscripción, no se le emite factura y el cron de
+// dunning lo saltea. Sin esta lista, `ensureSubscription` le arrancaría el trial
+// al primer barrido y la espera de la aprobación se le descontaría de la prueba.
+const ESTADOS_SIN_ALTA = ['pendiente', 'rechazado'];
+
+const esperaAprobacion = (club) => ESTADOS_SIN_ALTA.includes(club?.estado);
 
 const diasEntre = (desde, hasta) => Math.floor((hasta.getTime() - desde.getTime()) / MS_POR_DIA);
 
@@ -160,9 +173,11 @@ module.exports = {
   ESTADOS_VISIBLES,
   ESTADOS_CON_RESERVAS,
   ESTADOS_CON_PANEL,
+  ESTADOS_SIN_ALTA,
   filtroClubVisible,
   puedeCrearReservas,
   puedeAccederPanel,
+  esperaAprobacion,
   estadoPorSuscripcion,
   diasDeMora,
   proximoCorte,

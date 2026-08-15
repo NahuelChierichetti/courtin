@@ -35,12 +35,17 @@ const periodoDe = (fecha, ciclo = 'mensual') => {
  * Los clubes anteriores a esta funcionalidad no tienen ninguna: se les arma una
  * con el trial contado desde su fecha de alta, así un club que existe hace un
  * año no arranca con 30 días gratis de regalo.
+ *
+ * @param {Date} [trialDesde] Cuándo empieza la prueba gratis. Por defecto, la
+ *   fecha de alta del club. La aprobación de un complejo pasa la fecha de hoy:
+ *   la solicitud puede haber estado días esperando revisión y esa espera no
+ *   tiene por qué descontarse del mes de prueba.
  */
-const ensureSubscription = async (club) => {
+const ensureSubscription = async (club, trialDesde = null) => {
   const existente = await Subscription.findOne({ club: club._id });
   if (existente) return existente;
 
-  const desde = club.createdAt || new Date();
+  const desde = trialDesde || club.createdAt || new Date();
   const trialHasta = new Date(new Date(desde).getTime() + TRIAL_DIAS * MS_POR_DIA);
 
   return Subscription.create({
