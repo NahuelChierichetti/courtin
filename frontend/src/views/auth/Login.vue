@@ -16,7 +16,9 @@ const subtitle = computed(() =>
     ? 'Ingresá para administrar tu complejo, canchas y turnos.'
     : 'Entrá para ver y gestionar tus reservas.',
 )
-const registerTo = computed(() => (isClub.value ? '/panel/registro' : '/registro'))
+// Desde el login del jugador se va derecho a su formulario, sin pasar por la
+// pantalla de elección: quien está en /login ya eligió qué tipo de cuenta quiere.
+const registerTo = computed(() => (isClub.value ? '/panel/registro' : '/registro/jugador'))
 const forgotTo = computed(() => (isClub.value ? '/panel/recuperar' : '/recuperar'))
 const registerLabel = computed(() =>
   isClub.value ? '¿Querés sumar tu complejo?' : '¿Todavía no tenés cuenta?',
@@ -27,15 +29,29 @@ const form = reactive({ email: '', password: '' })
 const showPassword = ref(false)
 const errorMessage = ref('')
 
+// Un complejo esperando aprobación no es un error de credenciales: la contraseña
+// estaba bien y no hay nada que reintentar. Se muestra aparte, en tono de aviso,
+// para que no parezca que se equivocó al tipear.
+const avisoAlta = ref(null)
+
 const handleSubmit = async () => {
   errorMessage.value = ''
+  avisoAlta.value = null
+
   try {
     await login(form)
     const redirect =
       typeof route.query.redirect === 'string' ? route.query.redirect : resolveLanding()
     router.push(redirect)
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'No se pudo iniciar sesión.'
+    const { code, message } = error.response?.data || {}
+
+    if (code === 'CLUB_PENDIENTE' || code === 'CLUB_RECHAZADO') {
+      avisoAlta.value = { code, message }
+      return
+    }
+
+    errorMessage.value = message || 'No se pudo iniciar sesión.'
   }
 }
 </script>
@@ -60,6 +76,35 @@ const handleSubmit = async () => {
 
           <div v-if="errorMessage" class="mt-6 flex items-center gap-2 rounded-xl border border-error-100 bg-error-50 px-4 py-3 text-sm text-error-600">
             <i class="icon-[material-symbols--error] shrink-0"></i>{{ errorMessage }}
+          </div>
+
+          <div
+            v-if="avisoAlta"
+            class="mt-6 rounded-xl border px-4 py-3.5"
+            :class="
+              avisoAlta.code === 'CLUB_PENDIENTE'
+                ? 'border-warning-100 bg-warning-50'
+                : 'border-stone-200 bg-stone-50'
+            "
+          >
+            <p class="flex items-start gap-2 text-sm font-semibold" :class="avisoAlta.code === 'CLUB_PENDIENTE' ? 'text-warning-700' : 'text-stone-700'">
+              <i
+                class="mt-px shrink-0"
+                :class="
+                  avisoAlta.code === 'CLUB_PENDIENTE'
+                    ? 'icon-[material-symbols--hourglass-top-outline]'
+                    : 'icon-[material-symbols--info-outline]'
+                "
+              ></i>
+              {{
+                avisoAlta.code === 'CLUB_PENDIENTE'
+                  ? 'Tu complejo está en revisión'
+                  : 'No pudimos aprobar tu complejo'
+              }}
+            </p>
+            <p class="mt-1.5 pl-6 text-sm leading-relaxed" :class="avisoAlta.code === 'CLUB_PENDIENTE' ? 'text-warning-700/80' : 'text-stone-500'">
+              {{ avisoAlta.message }}
+            </p>
           </div>
 
           <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
@@ -132,7 +177,7 @@ const handleSubmit = async () => {
 
     <!-- Columna branding -->
     <div class="relative hidden overflow-hidden bg-brand-green-700 lg:block">
-      <img src="/images/hero-tenista.png" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-center mix-blend-luminosity" />
+      <img src="/images/banner-web.jpg" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover object-[72%_50%] mix-blend-luminosity" />
       <div class="absolute inset-0 bg-gradient-to-t from-brand-green-900 via-brand-green-900/40 to-brand-green-900/10"></div>
 
       <div class="relative flex h-full flex-col justify-end p-12">

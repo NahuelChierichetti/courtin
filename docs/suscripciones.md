@@ -65,9 +65,19 @@ Se reutiliza el enum que ya existe en `Club.estado`. No hace falta inventar
 estados nuevos: falta lo que los mueve.
 
 ```
-                    alta del complejo
+              registro público del complejo
                            │
                            ▼
+                    ┌────────────┐  sin panel, sin buscador,
+                    │ pendiente  │  SIN suscripción: el trial
+                    └──┬──────┬──┘  todavía no arrancó
+                       │      │
+              rechaza  │      │  aprueba el superadmin
+                       ▼      ▼
+              ┌────────────┐  │
+              │ rechazado  │  │
+              └────────────┘  │
+                              ▼
                      ┌───────────┐
                      │   trial   │  30 días, todo habilitado
                      └─────┬─────┘
@@ -97,6 +107,14 @@ estados nuevos: falta lo que los mueve.
 
 Los plazos (7 y 30 días) se cuentan **desde el vencimiento de la factura**, no
 desde el último aviso.
+
+`pendiente` y `rechazado` son los dos estados que quedan **fuera** del circuito
+de facturación (`ESTADOS_SIN_ALTA` en `utils/subscriptions.js`): no tienen
+suscripción, no se les emite factura y el cron de dunning los saltea. El trial
+se crea recién al aprobar y se cuenta desde ese día, no desde el registro: la
+demora en revisar la solicitud no se le descuenta al complejo. Los complejos que
+crea un superadmin a mano desde el backoffice nacen en `trial` y no pasan por
+acá.
 
 ### Invariantes — valen en todos los estados
 

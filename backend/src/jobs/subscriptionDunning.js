@@ -4,7 +4,13 @@ const Invoice = require('../models/Invoice');
 require('../models/User');
 require('../models/Membership');
 
-const { diasDeMora, estadoPorSuscripcion, DIAS_NIVEL_1, DIAS_NIVEL_2 } = require('../utils/subscriptions');
+const {
+  diasDeMora,
+  estadoPorSuscripcion,
+  esperaAprobacion,
+  DIAS_NIVEL_1,
+  DIAS_NIVEL_2
+} = require('../utils/subscriptions');
 const {
   ensureSubscription,
   sincronizarEstado,
@@ -66,6 +72,7 @@ const diasHasta = (fecha, ahora) => Math.ceil((new Date(fecha).getTime() - ahora
 const runSubscriptionCycle = async (ahora = new Date()) => {
   const stats = {
     revisadas: 0,
+    sinAprobar: 0,
     suscripcionesCreadas: 0,
     facturasEmitidas: 0,
     facturasVencidas: 0,
@@ -87,6 +94,14 @@ const runSubscriptionCycle = async (ahora = new Date()) => {
   stats.revisadas = clubs.length;
 
   for (const club of clubs) {
+    // Un alta que todavía no aprobó nadie no tiene nada que facturar. Sin este
+    // corte, `ensureSubscription` le arrancaría el trial en el primer barrido y
+    // el complejo perdería días de prueba mientras espera la aprobación.
+    if (esperaAprobacion(club)) {
+      stats.sinAprobar += 1;
+      continue;
+    }
+
     const existia = await Subscription.exists({ club: club._id });
     const subscription = await ensureSubscription(club);
     if (!existia) stats.suscripcionesCreadas += 1;

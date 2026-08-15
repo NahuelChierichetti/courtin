@@ -195,46 +195,79 @@ select {
   }
 }
 
-body {
-  margin: 0;
+/* Los resets VAN dentro de `@layer base` sí o sí.
+   Tailwind 4 mete sus utilidades en la capa `utilities`, y una regla escrita
+   fuera de toda capa le gana a cualquier regla que esté dentro de una, sin que
+   la especificidad tenga nada que ver. Escrito suelto, este `p { margin: 0 }`
+   pisaba en silencio TODOS los `mt-*` / `mb-*` aplicados a un <p> en la app
+   entera — que es justo lo que separa a un texto de ayuda de su input. */
+@layer base {
+  body {
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
 }
 
-p {
-  margin: 0;
-}
+/* --- Armonización de PrimeVue con la marca ---------------------------------
+   Los COLORES de los campos (fondo, borde, texto, placeholder, deshabilitado)
+   NO se tocan acá: salen de los tokens `surface` y `formField` del preset
+   (theme/courtinPreset.js), que es lo que hace que un Select se vea igual que un
+   input de Tailwind sin perseguir clases con `!important`.
 
-.p-inputtext,
-.p-password-input,
-.p-password .p-inputtext {
-  background: #ffffff !important;
-  color: #16241b !important;
-  border-color: rgba(22, 36, 27, 0.12) !important;
-}
+   Acá quedan sólo las dos cosas que el preset no cubre bien. */
 
-.p-inputtext::placeholder,
-.p-password-input::placeholder,
-.p-password .p-inputtext::placeholder {
-  color: #a8a29e;
-}
-
-/* --- Armonización PrimeVue con la marca (radios suaves, foco verde) --- */
+/* Radio de 12px (rounded-xl), el de los inputs de la app. */
 .p-inputtext,
 .p-password-input,
 .p-select,
+.p-autocomplete-input,
 .p-datepicker-input,
 .p-inputnumber-input {
   border-radius: 0.75rem !important;
 }
 
-.p-select {
-  border-color: rgba(22, 36, 27, 0.12) !important;
+/* Tipografía de 14px, la de todos los inputs de la app (`text-sm`).
+   PrimeVue impone 16px desde su clase base `.p-component`, así que un Select
+   quedaba con la letra más grande que el input de arriba. Va también en las
+   opciones del panel para que la lista desplegada no cambie de tamaño. */
+.p-inputtext,
+.p-select,
+.p-select-label,
+.p-autocomplete-input,
+.p-select-option,
+.p-autocomplete-option,
+.p-select-empty-message,
+.p-autocomplete-empty-message,
+.p-select-filter {
+  font-size: 0.875rem;
 }
 
+/* Centrado vertical del texto del Select.
+   Aura calcula el alto a partir del padding de su label; cuando la pantalla le
+   impone un alto mayor (h-12), el label se estira y el texto queda pegado
+   arriba. Centrando el label COMO ÍTEM del root, el texto queda al medio sea
+   cual sea el alto, y los selects sin alto explícito conservan el de Aura. */
+.p-select {
+  align-items: center;
+}
+
+/* Variante de los formularios de 48px (el alta), donde los inputs de Tailwind
+   usan `px-4`. Sin esto el texto del Select arranca 4px antes que el del input
+   de al lado, y en una columna de campos apilados se nota. */
+.p-select.field-lg .p-select-label,
+.p-autocomplete-input.field-lg {
+  padding-inline: 1rem;
+}
+
+/* Anillo de foco verde, igual al `focus:ring-2 focus:ring-brand-green-100` de
+   los inputs de Tailwind. */
 .p-inputtext:enabled:focus,
 .p-password-input:enabled:focus,
 .p-select:not(.p-disabled).p-focus,
 .p-datepicker-input:enabled:focus {
-  border-color: #4d9269 !important;
   box-shadow: 0 0 0 3px rgba(52, 112, 72, 0.15) !important;
 }
 

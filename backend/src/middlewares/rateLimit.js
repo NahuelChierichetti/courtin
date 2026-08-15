@@ -61,6 +61,16 @@ const forgotPasswordLimiters = [
   porEmail({ max: 4, texto: TEXTO_ESPERA })
 ];
 
+// Solicitudes de alta de complejo. Es público, crea registros en la base y
+// dispara dos emails (uno de ellos, al superadmin). Un límite por IP alcanza:
+// nadie da de alta cinco complejos por hora desde la misma conexión, y el
+// destinatario del aviso somos nosotros, así que el costo de abusarlo es
+// inundarnos la casilla.
+const registerClubLimiter = porIP({
+  max: 5,
+  texto: 'Ya enviaste varias solicitudes. Esperá un rato antes de mandar otra.'
+});
+
 // Reenvío del email de verificación. Va por usuario en sesión, no por email del
 // cuerpo: el endpoint no acepta destinatario.
 const resendVerificationLimiter = rateLimit({
@@ -142,6 +152,7 @@ const retryPaymentLimiter = rateLimit({
 module.exports = {
   forgotPasswordLimiters,
   loginLimiters,
+  registerClubLimiter,
   resendVerificationLimiter,
   invitationLimiter,
   retryPaymentLimiter

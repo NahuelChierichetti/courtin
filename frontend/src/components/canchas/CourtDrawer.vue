@@ -51,17 +51,14 @@
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Deporte
                   </label>
-                  <div class="relative">
-                    <select
-                      v-model="form.tipo"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100 bg-white"
-                    >
-                      <option v-for="d in deporteOptions" :key="d.key" :value="d.key">
-                        {{ d.label }}
-                      </option>
-                    </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                  </div>
+                  <Select
+                    v-model="form.tipo"
+                    :options="deporteOptions"
+                    option-label="label"
+                    option-value="key"
+                    placeholder="Elegí el deporte"
+                    class="h-[42px] w-full text-sm"
+                  />
                 </div>
               </div>
 
@@ -71,17 +68,13 @@
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
                     Superficie <span class="font-normal normal-case tracking-normal text-stone-300">(opcional)</span>
                   </label>
-                  <div class="relative">
-                    <select
-                      v-model="surfaceSelect"
-                      class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 pr-8 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
-                    >
-                      <option value="">Sin especificar</option>
-                      <option v-for="s in surfaceOptions" :key="s" :value="s">{{ s }}</option>
-                      <option value="__otra__">Otra…</option>
-                    </select>
-                    <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-stone-400"></i>
-                  </div>
+                  <Select
+                    v-model="surfaceSelect"
+                    :options="superficieOptions"
+                    option-label="label"
+                    option-value="value"
+                    class="h-[42px] w-full text-sm"
+                  />
                   <input
                     v-if="surfaceSelect === '__otra__'"
                     v-model="form.superficie"
@@ -244,21 +237,19 @@
                     <div class="mt-3 grid grid-cols-[1fr_1fr_1.1fr] items-end gap-2.5">
                       <div>
                         <label class="mb-1 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Desde</label>
-                        <div class="relative">
-                          <select v-model="band.horaInicio" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-7 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100">
-                            <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
-                          </select>
-                          <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-stone-400"></i>
-                        </div>
+                        <Select
+                          v-model="band.horaInicio"
+                          :options="horasOptions"
+                          class="h-[38px] w-full text-sm"
+                        />
                       </div>
                       <div>
                         <label class="mb-1 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Hasta</label>
-                        <div class="relative">
-                          <select v-model="band.horaFin" class="w-full appearance-none rounded-xl border border-black/[0.08] bg-white px-3 py-2 pr-7 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100">
-                            <option v-for="h in horasOptions" :key="h" :value="h">{{ h }}</option>
-                          </select>
-                          <i class="icon-[material-symbols--keyboard-arrow-down] pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs text-stone-400"></i>
-                        </div>
+                        <Select
+                          v-model="band.horaFin"
+                          :options="horasOptions"
+                          class="h-[38px] w-full text-sm"
+                        />
                       </div>
                       <div>
                         <label class="mb-1 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Precio /h</label>
@@ -351,6 +342,7 @@
 
 <script setup>
 import { ref, watch, computed, nextTick } from 'vue'
+import Select from 'primevue/select'
 import { sportsForClub, sportMeta } from '@/utils/sports'
 import { useAuth } from '@/composables/useAuth'
 import SportIcon from '@/components/public/SportIcon.vue'
@@ -499,6 +491,14 @@ const hasOverlap = computed(() => {
 
 // Superficies sugeridas del deporte elegido (con escape "Otra…" en el select).
 const surfaceOptions = computed(() => sportMeta(form.value.tipo).superficies)
+
+// Las superficies sugeridas del deporte, más las dos salidas de siempre: no
+// especificarla y escribir una propia.
+const superficieOptions = computed(() => [
+  { value: '', label: 'Sin especificar' },
+  ...surfaceOptions.value.map((s) => ({ value: s, label: s })),
+  { value: '__otra__', label: 'Otra…' },
+])
 
 const initSurface = (sup) => {
   if (!sup) surfaceSelect.value = ''
