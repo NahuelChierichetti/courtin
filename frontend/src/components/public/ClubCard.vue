@@ -35,7 +35,7 @@ const hoursLabel = computed(() => {
   <div class="relative">
   <button
     type="button"
-    class="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-black/[0.06] bg-white text-left shadow-sm transition-shadow hover:shadow-md cursor-pointer"
+    class="group relative flex h-full w-full flex-col overflow-hidden rounded-3xl border border-black/[0.06] bg-white text-left shadow-sm transition-shadow hover:shadow-md cursor-pointer"
     @click="$emit('select', club)"
   >
     <!-- Cover -->
@@ -61,9 +61,23 @@ const hoursLabel = computed(() => {
       </span>
     </div>
 
+    <!--
+      Logo del complejo, a caballo entre la foto y el cuerpo (de ahí que viva
+      fuera del cover, que recorta lo que se le desborda). `top-52` es la altura
+      del cover: con el -translate-y-1/2 queda centrado justo en el borde.
+    -->
+    <div
+      class="absolute right-5 top-52 flex h-20 w-20 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-stone-300 ring-1 ring-black/[0.06]"
+    >
+      <img v-if="club.logo" :src="club.logo" :alt="`Logo de ${club.nombre}`" class="h-full w-full bg-white object-contain" />
+      <i v-else class="icon-[material-symbols--image] text-3xl text-white"></i>
+    </div>
+
     <!-- Body -->
     <div class="flex flex-1 flex-col p-5">
-      <div class="flex items-start justify-between gap-3">
+      <!-- pr-20: el logo se mete sobre esta línea; sin esto, un nombre largo
+           pasa por debajo. -->
+      <div class="flex items-start justify-between gap-3 pr-20">
         <h3 class="text-lg font-bold leading-snug text-ink-500">{{ club.nombre }}</h3>
         <span v-if="club.rating" class="flex shrink-0 items-center gap-1 text-sm font-bold text-success-600">
           <i class="icon-[material-symbols--star] text-xs"></i>{{ Number(club.rating).toFixed(2) }}

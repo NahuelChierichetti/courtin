@@ -2,10 +2,11 @@
 import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { login, resolveLanding, isLoading } = useAuth()
+const { login, loginWithGoogle, resolveLanding, isLoading } = useAuth()
 
 // Variante del acceso: 'club' (backoffice del complejo) o 'customer' (jugador).
 // Cambia sólo el copy y el link de registro; el endpoint de login es el mismo.
@@ -52,6 +53,31 @@ const handleSubmit = async () => {
     }
 
     errorMessage.value = message || 'No se pudo iniciar sesión.'
+  }
+}
+
+// Acceso con Google, sólo para jugadores. El panel del complejo queda afuera a
+// propósito: el alta de un complejo pide datos que un botón de un clic no puede
+// dar (nombre del club, dirección, cuántas canchas) y encima pasa por
+// aprobación, así que ahí un "entrar con Google" no completa ningún camino.
+const onGoogleCredential = async (credential) => {
+  errorMessage.value = ''
+  avisoAlta.value = null
+
+  try {
+    await loginWithGoogle(credential)
+    const redirect =
+      typeof route.query.redirect === 'string' ? route.query.redirect : resolveLanding()
+    router.push(redirect)
+  } catch (error) {
+    const { code, message } = error.response?.data || {}
+
+    if (code === 'CLUB_PENDIENTE' || code === 'CLUB_RECHAZADO') {
+      avisoAlta.value = { code, message }
+      return
+    }
+
+    errorMessage.value = message || 'No se pudo iniciar sesión con Google.'
   }
 }
 </script>
@@ -106,6 +132,17 @@ const handleSubmit = async () => {
               {{ avisoAlta.message }}
             </p>
           </div>
+
+          <!-- Google va arriba del formulario: es el camino más corto, y quien
+               ya lo usó antes no tiene que leer el resto. -->
+          <template v-if="!isClub">
+            <GoogleSignInButton class="mt-7" text="signin_with" @credential="onGoogleCredential" />
+            <div class="mt-6 flex items-center gap-3">
+              <span class="h-px flex-1 bg-black/[0.08]"></span>
+              <span class="text-xs font-medium text-stone-400">o con tu email</span>
+              <span class="h-px flex-1 bg-black/[0.08]"></span>
+            </div>
+          </template>
 
           <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
             <div>

@@ -200,6 +200,9 @@ const updateClubConfig = async (req, res, next) => {
             notificaciones, pagos
         } = req.body;
 
+        // Campos a borrar (ver la ubicación más abajo): van en $unset, no en $set.
+        const unsetData = {};
+
         // Sólo seteamos los campos presentes en el body (update parcial).
         const updateData = {
             nombre,
@@ -229,9 +232,34 @@ const updateClubConfig = async (req, res, next) => {
         if (descripcion !== undefined) updateData.descripcion = descripcion;
         if (logo !== undefined) updateData.logo = logo;
         if (fotos !== undefined) updateData.fotos = fotos;
-        if (ubicacion !== undefined) updateData.ubicacion = ubicacion;
         if (servicios !== undefined) updateData.servicios = servicios;
         if (publicado !== undefined) updateData.publicado = publicado;
+
+        // Pin del mapa de la landing. Llega geocodificado desde la dirección o
+        // fijado a mano por el complejo, y `null` es una orden explícita de
+        // borrarlo: sin pin, el mapa público ubica la dirección escrita.
+        //
+        // Se valida acá y no sólo en el modelo porque el schema acepta cualquier
+        // número: una longitud de 4000 se guardaría sin quejarse y el mapa
+        // quedaría en el océano.
+        if (ubicacion !== undefined) {
+            const lat = Number(ubicacion?.lat);
+            const lng = Number(ubicacion?.lng);
+            const valida =
+                Number.isFinite(lat) && Number.isFinite(lng) &&
+                Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+
+            if (ubicacion && !valida) {
+                return res.status(400).json({ ok: false, message: 'Las coordenadas de la ubicación no son válidas.' });
+            }
+
+            if (valida) {
+                updateData['ubicacion.lat'] = lat;
+                updateData['ubicacion.lng'] = lng;
+            } else {
+                unsetData.ubicacion = '';
+            }
+        }
 
         // Sub-documento: se setea campo por campo para que mandar sólo uno de
         // los dos switches no borre el otro.
@@ -295,7 +323,7 @@ const updateClubConfig = async (req, res, next) => {
 
         const club = await Club.findByIdAndUpdate(
             req.params.clubId,
-            updateData,
+            Object.keys(unsetData).length ? { $set: updateData, $unset: unsetData } : updateData,
             {
                 new: true,
                 runValidators: true

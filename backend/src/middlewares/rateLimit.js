@@ -124,6 +124,19 @@ const loginPorIP = rateLimit({
 
 const loginLimiters = [loginPorIP, loginPorEmail];
 
+// Acceso con Google. No hay fuerza bruta posible —no se adivina un token
+// firmado por Google—, así que el límite no es contra eso: es contra alguien
+// martillando el endpoint, donde cada llamada nos cuesta una verificación
+// contra los servidores de Google. Por eso es por IP y bastante holgado.
+const googleLoginLimiter = rateLimit({
+  windowMs: QUINCE_MINUTOS,
+  limit: 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: mensaje('Demasiados intentos. Esperá un rato y probá de nuevo.'),
+  keyGenerator: (req) => ipKeyGenerator(req.ip)
+});
+
 // Invitaciones de staff: exige ser tenant_admin, así que el riesgo es menor,
 // pero un complejo no tiene por qué mandar cientos de invitaciones por hora.
 const invitationLimiter = rateLimit({
@@ -152,6 +165,7 @@ const retryPaymentLimiter = rateLimit({
 module.exports = {
   forgotPasswordLimiters,
   loginLimiters,
+  googleLoginLimiter,
   registerClubLimiter,
   resendVerificationLimiter,
   invitationLimiter,

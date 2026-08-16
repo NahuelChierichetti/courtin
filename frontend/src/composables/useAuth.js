@@ -107,6 +107,31 @@ const login = async (credentials) => {
   }
 }
 
+// Entra (o se registra) con Google. Del lado de la app termina igual que
+// `login`: mismo token, misma sesión. La única diferencia es `nuevo`, que dice
+// si la cuenta se acaba de crear, para poder saludar distinto.
+const loginWithGoogle = async (credential) => {
+  isLoading.value = true
+
+  try {
+    const data = await authService.loginWithGoogle(credential)
+    setToken(data.token)
+    token.value = data.token
+
+    const me = await authService.getMe()
+    setSession(data.token, me.user, me.memberships)
+    isInitialized.value = true
+
+    return {
+      ...data,
+      user: me.user,
+      memberships: me.memberships,
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const register = async (payload) => {
   isLoading.value = true
 
@@ -295,6 +320,7 @@ export const useAuth = () => ({
   isAuthenticated: computed(() => Boolean(token.value && user.value)),
   initializeAuth,
   login,
+  loginWithGoogle,
   register,
   registerClub,
   resetPassword,

@@ -271,6 +271,27 @@ const router = createRouter({
       component: NotFoundView,
     },
   ],
+
+  // Cada pantalla nueva arranca arriba. Sin esto el scroll se hereda de la
+  // pantalla anterior: entrar a la ficha de un complejo desde el buscador te
+  // dejaba a media página, mirando el bloque de instalaciones.
+  //
+  // Las dos excepciones son las que espera cualquiera:
+  //   • volver con el botón atrás repone dónde estabas (`savedPosition`);
+  //   • cambiar sólo la query de la misma pantalla no mueve nada — el buscador
+  //     escribe los filtros en la URL, y saltar arriba en cada clic de filtro
+  //     sería mareante.
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.hash) return { el: to.hash, behavior: 'smooth' }
+    if (to.path === from.path) return false
+
+    // El panel no scrollea la ventana sino su <main> (el layout es h-screen),
+    // así que ahí el `top: 0` de abajo no toca nada y hay que moverlo a mano.
+    document.querySelector('main')?.scrollTo({ top: 0 })
+
+    return { top: 0 }
+  },
 })
 
 router.beforeEach(async (to) => {
