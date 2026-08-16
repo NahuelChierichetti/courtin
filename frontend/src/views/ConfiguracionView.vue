@@ -9,7 +9,9 @@ import { useAuth } from '@/composables/useAuth'
 import { dayjs, formatCurrency } from '@/utils/datetime'
 import Select from 'primevue/select'
 import LocationFields from '@/components/common/LocationFields.vue'
+import ClubMap from '@/components/common/ClubMap.vue'
 import ClubCard from '@/components/public/ClubCard.vue'
+import { parseCoordenadas, esLinkCorto, formatCoords, tieneCoords } from '@/utils/maps'
 import MercadoPagoDrawer from '@/components/config/MercadoPagoDrawer.vue'
 import ImageUpload from '@/components/config/ImageUpload.vue'
 
@@ -135,6 +137,53 @@ const onGalleryAdd = (url) => {
   form.value.fotos.push(url)
 }
 const removeGaleria = (idx) => form.value.fotos.splice(idx + 1, 1)
+
+// --- Landing: ubicación en el mapa ---
+//
+// El pin sale de geocodificar la dirección, que acierta la cuadra pero no
+// siempre la puerta: un complejo sobre una avenida larga o en un country queda
+// corrido, y el jugador que sigue el mapa termina en otro lado. Por eso se puede
+// fijar a mano.
+//
+// Se pide pegar el link (o las coordenadas) de Google Maps en vez de arrastrar
+// un pin porque un mapa interactivo necesita la JS API de Google, que exige una
+// key con facturación. Copiar coordenadas desde Google Maps es un clic derecho.
+const coordsDraft = ref('')
+const coordsError = ref('')
+
+const ubicacionActual = computed(() => form.value?.ubicacion || null)
+const ubicacionTexto = computed(() => formatCoords(ubicacionActual.value))
+const tieneUbicacion = computed(() => tieneCoords(ubicacionActual.value))
+
+const aplicarCoords = () => {
+  const punto = parseCoordenadas(coordsDraft.value)
+
+  if (!punto) {
+    coordsError.value = esLinkCorto(coordsDraft.value)
+      ? 'Los links cortos (maps.app.goo.gl) no traen las coordenadas. Abrilo en Google Maps y copiá el link de la barra de direcciones, o pegá las coordenadas.'
+      : 'No encontramos coordenadas ahí. Pegá el link de Google Maps o un par como -34.603, -58.381.'
+    return
+  }
+
+  form.value.ubicacion = punto
+  coordsDraft.value = ''
+  coordsError.value = ''
+}
+
+// Vuelve al modo automático: sin coordenadas, el mapa ubica la dirección escrita.
+const quitarUbicacion = () => {
+  form.value.ubicacion = null
+  coordsDraft.value = ''
+  coordsError.value = ''
+}
+
+// Geocodificar la dirección pisa el pin sólo cuando devuelve un punto. El
+// componente emite `null` con cada tecla del campo dirección; tomarlo al pie de
+// la letra borraría el pin que el complejo ajustó a mano por empezar a corregir
+// una coma en la dirección.
+const onUbicacionGeo = (punto) => {
+  if (punto) form.value.ubicacion = punto
+}
 
 // --- Servicios (chips) ---
 const servicioDraft = ref('')
@@ -292,7 +341,9 @@ const save = async () => {
       direccion: form.value.direccion,
       ciudad: form.value.ciudad,
       provincia: form.value.provincia,
-      ...(form.value.ubicacion && { ubicacion: form.value.ubicacion }),
+      // `null` limpia el pin a propósito (ver quitarUbicacion): el backend lo
+      // borra y el mapa vuelve a ubicarse por la dirección.
+      ubicacion: form.value.ubicacion || null,
       timezone: form.value.timezone,
       moneda: form.value.moneda,
       publicado: form.value.publicado,
@@ -404,7 +455,7 @@ const inputBase =
               v-model:direccion="form.direccion"
               label-class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase"
               control-class="h-[42px]"
-              @update:ubicacion="form.ubicacion = $event"
+              @update:ubicacion="onUbicacionGeo"
             />
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Zona horaria</label>
@@ -561,6 +612,73 @@ const inputBase =
                     </div>
                     <ImageUpload :model-value="''" variant="thumb" placeholder="Agregar" @update:model-value="onGalleryAdd" />
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ubicación en el mapa -->
+            <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
+              <div class="border-b border-black/[0.06] px-6 py-5">
+                <h2 class="text-base font-semibold text-ink-500">Ubicación</h2>
+                <p class="mt-0.5 text-sm text-stone-400">
+                  El mapa que ve el jugador en tu página. Ajustá el pin si no cae justo en la entrada del complejo.
+                </p>
+              </div>
+              <div class="space-y-4 px-6 py-6">
+                <ClubMap
+                  :nombre="form.nombre || 'tu complejo'"
+                  :lat="form.ubicacion?.lat"
+                  :lng="form.ubicacion?.lng"
+                  :direccion="form.direccion"
+                  :ciudad="form.ciudad"
+                  :provincia="form.provincia"
+                  height-class="h-[260px]"
+                />
+
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-stone-50 px-4 py-3">
+                  <div class="min-w-0">
+                    <p class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Pin</p>
+                    <p v-if="tieneUbicacion" class="mt-0.5 truncate text-sm font-medium text-ink-500">{{ ubicacionTexto }}</p>
+                    <p v-else class="mt-0.5 text-sm text-stone-500">
+                      Sin coordenadas: el mapa ubica la dirección de forma aproximada.
+                    </p>
+                  </div>
+                  <button
+                    v-if="tieneUbicacion"
+                    type="button"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold text-stone-500 transition-colors hover:bg-stone-200 hover:text-error-600 cursor-pointer"
+                    @click="quitarUbicacion"
+                  >
+                    Quitar pin
+                  </button>
+                </div>
+
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">
+                    Link de Google Maps o coordenadas
+                  </label>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <input
+                      v-model="coordsDraft"
+                      type="text"
+                      placeholder="https://www.google.com/maps/… o -34.603, -58.381"
+                      class="min-w-[240px] flex-1 rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                      @keydown.enter.prevent="aplicarCoords"
+                    />
+                    <button
+                      type="button"
+                      class="shrink-0 rounded-full bg-ink-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                      :disabled="!coordsDraft.trim()"
+                      @click="aplicarCoords"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                  <p v-if="coordsError" class="mt-2 text-xs leading-relaxed text-error-600">{{ coordsError }}</p>
+                  <p v-else class="mt-2 text-xs leading-relaxed text-stone-400">
+                    En Google Maps, hacé clic derecho sobre la entrada de tu complejo y tocá las coordenadas que aparecen
+                    arriba de todo: se copian solas. También podés pegar el link de la ficha de tu complejo.
+                  </p>
                 </div>
               </div>
             </div>

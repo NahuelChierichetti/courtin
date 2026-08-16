@@ -24,8 +24,14 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status
     const requestUrl = error.config?.url || ''
+    // Un 401 acá significa "esas credenciales no sirven", no "se venció tu
+    // sesión": no hay que borrar el token ni mandar a nadie al login. Importa
+    // sobre todo para /auth/google, que se usa desde el modal de reserva — un
+    // redirect ahí le borraría la reserva a medio hacer.
     const isAuthRequest =
-      requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register')
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/register') ||
+      requestUrl.includes('/auth/google')
     const pathname = window.location.pathname
     const AUTH_PAGES = [
       '/login',

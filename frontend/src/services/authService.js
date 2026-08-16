@@ -6,6 +6,14 @@ const authService = {
     return data
   },
 
+  // Acceso con Google. `credential` es el ID token que devuelve el botón; el
+  // backend lo verifica contra Google y responde con nuestro propio token.
+  // Sirve para entrar y para registrarse: `nuevo` dice cuál de las dos fue.
+  async loginWithGoogle(credential) {
+    const { data } = await api.post('/auth/google', { credential })
+    return data
+  },
+
   async register(payload) {
     const { data } = await api.post('/auth/register', payload)
     return data

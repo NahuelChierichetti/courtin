@@ -7,6 +7,8 @@ import { dayjs, formatCurrency } from '@/utils/datetime'
 import { sportMeta, suggestedPrice } from '@/utils/turnos'
 import BookingModal from '@/components/public/BookingModal.vue'
 import FavoriteButton from '@/components/public/FavoriteButton.vue'
+import ClubMap from '@/components/common/ClubMap.vue'
+import { direccionesUrl, mapQuery } from '@/utils/maps'
 
 const route = useRoute()
 const { isAuthenticated, user } = useAuth()
@@ -86,6 +88,23 @@ const visibleServices = computed(() => {
   const list = club.value?.servicios || []
   return showAllServices.value ? list : list.slice(0, 6)
 })
+
+// --- Ubicación ---
+// El mapa necesita coordenadas o, al menos, una dirección que Google pueda
+// interpretar. Sin ninguna de las dos la sección entera no se muestra: un mapa
+// del centro del país no le sirve a nadie.
+const mapaArgs = computed(() => ({
+  lat: club.value?.ubicacion?.lat ?? null,
+  lng: club.value?.ubicacion?.lng ?? null,
+  direccion: club.value?.direccion || '',
+  ciudad: club.value?.ciudad || '',
+  provincia: club.value?.provincia || '',
+}))
+const hasUbicacion = computed(() => !!club.value && !!mapQuery(mapaArgs.value))
+const direccionCompleta = computed(() =>
+  [club.value?.direccion, club.value?.ciudad, club.value?.provincia].filter(Boolean).join(', '),
+)
+const comoLlegarUrl = computed(() => direccionesUrl(mapaArgs.value))
 
 // --- Reserva (panel derecho, estilo chips) ---
 const selectedRow = computed(() =>
@@ -181,6 +200,9 @@ const bookingOpen = ref(false)
 const prefill = computed(() => ({
   nombre: isAuthenticated.value ? user.value?.nombre || '' : '',
   email: isAuthenticated.value ? user.value?.email || '' : '',
+  // Opcional en la cuenta, así que puede no estar; cuando está, evita que quien
+  // ya reservó antes vuelva a tipear su teléfono en cada reserva.
+  telefono: isAuthenticated.value ? user.value?.telefono || '' : '',
 }))
 const openBooking = () => {
   if (selectedSlot.value) bookingOpen.value = true
@@ -285,6 +307,21 @@ const onCloseModal = () => {
             <p class="mt-3 text-[15px] leading-relaxed text-stone-500">{{ club.descripcion }}</p>
           </section>
 
+          <!-- Deportes disponibles -->
+          <section v-if="sports.length">
+            <h2 class="text-xl font-bold text-ink-500">Deportes disponibles</h2>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span
+                v-for="s in sports"
+                :key="s"
+                class="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium"
+                :class="[sportMeta(s).bg, sportMeta(s).text]"
+              >
+                <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(s).dot"></span>{{ sportMeta(s).label }}
+              </span>
+            </div>
+          </section>
+
           <!-- Instalaciones -->
           <section v-if="club.servicios && club.servicios.length">
             <div class="flex items-center justify-between">
@@ -308,41 +345,33 @@ const onCloseModal = () => {
             </div>
           </section>
 
-          <!-- Lo que ofrece -->
-          <section>
-            <h2 class="text-xl font-bold text-ink-500">Lo que ofrece</h2>
-            <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div class="rounded-2xl border border-black/[0.06] bg-white p-5">
-                <i class="icon-[material-symbols--grid-view] text-brand-green-500"></i>
-                <p class="mt-3 text-lg font-bold text-ink-500">{{ courts.length }} canchas</p>
-                <p class="mt-0.5 text-sm text-stone-400">{{ indoorCount }} indoor · {{ outdoorCount }} outdoor</p>
-              </div>
-              <div class="rounded-2xl border border-black/[0.06] bg-white p-5">
-                <i class="icon-[material-symbols--map] text-brand-green-500"></i>
-                <p class="mt-3 text-lg font-bold text-ink-500">{{ superficies.length }} superficies</p>
-                <p class="mt-0.5 text-sm text-stone-400">{{ superficies.join(', ') || 'Sin especificar' }}</p>
-              </div>
-              <div class="rounded-2xl border border-black/[0.06] bg-white p-5">
-                <i class="icon-[material-symbols--bolt] text-brand-green-500"></i>
-                <p class="mt-3 text-lg font-bold text-ink-500">Reserva online</p>
-                <p class="mt-0.5 text-sm text-stone-400">Disponibilidad en tiempo real</p>
-              </div>
-            </div>
-          </section>
-
-          <!-- Deportes disponibles -->
-          <section v-if="sports.length">
-            <h2 class="text-xl font-bold text-ink-500">Deportes disponibles</h2>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span
-                v-for="s in sports"
-                :key="s"
-                class="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium"
-                :class="[sportMeta(s).bg, sportMeta(s).text]"
+          <!-- Ubicación -->
+          <section v-if="hasUbicacion">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="text-xl font-bold text-ink-500">Ubicación</h2>
+              <a
+                :href="comoLlegarUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-green-500 no-underline hover:text-brand-green-600"
               >
-                <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(s).dot"></span>{{ sportMeta(s).label }}
-              </span>
+                <i class="icon-[material-symbols--directions] text-base"></i>Cómo llegar
+              </a>
             </div>
+            <p v-if="direccionCompleta" class="mt-2 inline-flex items-start gap-1.5 text-[15px] text-stone-500">
+              <i class="icon-[material-symbols--location-on] mt-0.5 shrink-0 text-sm text-stone-400"></i>
+              {{ direccionCompleta }}
+            </p>
+            <ClubMap
+              class="mt-4"
+              :nombre="club.nombre"
+              :lat="mapaArgs.lat"
+              :lng="mapaArgs.lng"
+              :direccion="mapaArgs.direccion"
+              :ciudad="mapaArgs.ciudad"
+              :provincia="mapaArgs.provincia"
+              height-class="h-[300px] sm:h-[360px]"
+            />
           </section>
         </div>
 
@@ -366,7 +395,7 @@ const onCloseModal = () => {
                   v-for="d in dayPills"
                   :key="d.key"
                   type="button"
-                  class="flex w-12 shrink-0 flex-col items-center rounded-full border py-2 transition-colors cursor-pointer"
+                  class="flex w-12 shrink-0 flex-col items-center rounded-md border py-2 transition-colors cursor-pointer"
                   :class="currentDate === d.key
                     ? 'border-brand-green-500 bg-brand-green-500 text-white'
                     : 'border-black/[0.08] bg-white text-stone-600 hover:bg-stone-50'"

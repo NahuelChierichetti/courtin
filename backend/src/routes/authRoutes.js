@@ -4,6 +4,7 @@ const {
   register,
   registerClub,
   login,
+  loginWithGoogle,
   getMe,
   updateMe,
   changePassword,
@@ -17,6 +18,7 @@ const { protect } = require('../middlewares/authMiddleware');
 const {
   forgotPasswordLimiters,
   loginLimiters,
+  googleLoginLimiter,
   registerClubLimiter,
   resendVerificationLimiter
 } = require('../middlewares/rateLimit');
@@ -30,6 +32,10 @@ router.post('/register-club', registerClubLimiter, registerClub);
 // Con límite anti fuerza bruta. Sólo cuentan los intentos fallidos, así que
 // loguearse muchas veces bien no consume nada.
 router.post('/login', loginLimiters, login);
+// Acceso con Google (jugadores). Registra y loguea con la misma llamada: para
+// Google es el mismo acto, y quien toca el botón no tiene por qué saber si ya
+// tenía cuenta.
+router.post('/google', googleLoginLimiter, loginWithGoogle);
 router.get('/me', protect, getMe);
 router.patch('/me', protect, updateMe);
 router.put('/me/password', protect, changePassword);
