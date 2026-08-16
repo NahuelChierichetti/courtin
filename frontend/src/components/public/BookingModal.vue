@@ -1,8 +1,10 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick, useTemplateRef } from 'vue'
 import publicService from '@/services/publicService'
 import { dayjs, formatCurrency } from '@/utils/datetime'
 import { sportMeta } from '@/utils/turnos'
+import { useAuth } from '@/composables/useAuth'
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue'
 
 const props = defineProps({
   visible: Boolean,
@@ -16,6 +18,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'confirmed'])
+
+const { isAuthenticated, loginWithGoogle } = useAuth()
 
 const step = ref(1)
 const form = ref({ nombre: '', telefono: '', email: '', notas: '' })
@@ -88,7 +92,7 @@ watch(
       metodo.value = metodos.value[0]?.value || 'complejo'
       form.value = {
         nombre: props.prefill.nombre || '',
-        telefono: '',
+        telefono: props.prefill.telefono || '',
         email: props.prefill.email || '',
         notas: '',
       }
@@ -96,11 +100,57 @@ watch(
   },
 )
 
+// Entrar con Google sin salir de la reserva.
+//
+// Acá está el momento en que más rinde: la persona ya eligió cancha y horario, y
+// mandarla a /login para volver después es la forma más segura de perderla. Con
+// la sesión abierta, `api` empieza a mandar el token y el backend engancha la
+// reserva a su cuenta (ver attachUserOptional) — que es lo que convierte una
+// reserva suelta en historial, favoritos y notificaciones.
+//
+// Nada de esto es obligatorio: reservar como invitado sigue siendo un camino
+// completo, y por eso el botón es una opción arriba y no un portón adelante.
+const googleError = ref('')
+const telefonoInput = useTemplateRef('telefonoInput')
+
+// Google no da el teléfono, así que después de entrar suele quedar ese único
+// campo vacío en medio de un formulario que se completó solo. Se le lleva el
+// cursor para que se vea dónde seguir.
+const enfocarTelefono = () => nextTick(() => telefonoInput.value?.focus())
+
+const onGoogleCredential = async (credential) => {
+  googleError.value = ''
+
+  try {
+    const { user } = await loginWithGoogle(credential)
+    form.value.nombre = user?.nombre || form.value.nombre
+    form.value.email = user?.email || form.value.email
+    // El teléfono no viene de Google, pero sí puede estar guardado en la cuenta
+    // de quien ya reservó antes. Si está, esto completa el formulario entero.
+    form.value.telefono = user?.telefono || form.value.telefono
+
+    if (!form.value.telefono) enfocarTelefono()
+  } catch (err) {
+    console.error(err)
+    googleError.value = err.response?.data?.message || 'No se pudo iniciar sesión con Google.'
+  }
+}
+
 const goToPago = () => {
-  if (!form.value.nombre.trim() || !form.value.telefono.trim()) {
-    submitError.value = 'Completá tu nombre y teléfono.'
+  // El mensaje nombra sólo lo que falta de verdad. Uno solo para los dos campos
+  // manda a revisar el que ya estaba bien: entrando con Google, el nombre llega
+  // completo y el único hueco es el teléfono, así que "completá tu nombre y
+  // teléfono" se lee como un error del sistema.
+  const faltan = []
+  if (!form.value.nombre.trim()) faltan.push('tu nombre')
+  if (!form.value.telefono.trim()) faltan.push('tu teléfono')
+
+  if (faltan.length) {
+    submitError.value = `Completá ${faltan.join(' y ')} para continuar.`
+    if (!form.value.telefono.trim()) enfocarTelefono()
     return
   }
+
   submitError.value = ''
   step.value = 2
 }
@@ -182,13 +232,29 @@ const confirmar = async () => {
 
         <!-- STEP 1: datos -->
         <div v-if="step === 1" class="mt-4 space-y-3">
+          <!-- Acceso con Google, sólo si todavía no hay sesión -->
+          <template v-if="!isAuthenticated">
+            <div class="rounded-xl border border-stone-200 bg-stone-50 p-3">
+              <p class="mb-2.5 text-center text-xs text-stone-500">
+                Entrá con Google y tené todas tus reservas en un solo lugar
+              </p>
+              <GoogleSignInButton :width="320" text="continue_with" @credential="onGoogleCredential" />
+              <p v-if="googleError" class="mt-2 text-center text-xs text-error-600">{{ googleError }}</p>
+            </div>
+            <div class="flex items-center gap-3 py-0.5">
+              <span class="h-px flex-1 bg-stone-200"></span>
+              <span class="text-xs font-medium text-stone-400">o seguí como invitado</span>
+              <span class="h-px flex-1 bg-stone-200"></span>
+            </div>
+          </template>
+
           <div>
             <label class="mb-1 block text-xs font-medium text-stone-600">Nombre y apellido</label>
             <input v-model="form.nombre" type="text" class="h-10 w-full rounded-lg border border-stone-200 px-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand-green-400" />
           </div>
           <div>
             <label class="mb-1 block text-xs font-medium text-stone-600">Teléfono de contacto</label>
-            <input v-model="form.telefono" type="tel" class="h-10 w-full rounded-lg border border-stone-200 px-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand-green-400" />
+            <input ref="telefonoInput" v-model="form.telefono" type="tel" class="h-10 w-full rounded-lg border border-stone-200 px-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand-green-400" />
           </div>
           <div>
             <label class="mb-1 block text-xs font-medium text-stone-600">Email <span class="text-stone-400">(para la confirmación)</span></label>

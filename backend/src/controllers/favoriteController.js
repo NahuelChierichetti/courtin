@@ -3,7 +3,7 @@ const Club = require('../models/Club');
 
 // Lo mismo que muestra una card del buscador: la vista de favoritos reusa
 // `ClubCard`, así que necesita los mismos campos.
-const CLUB_FIELDS = 'nombre slug direccion ciudad deportes fotos moneda horarios timezone estado';
+const CLUB_FIELDS = 'nombre slug direccion ciudad deportes fotos logo moneda horarios timezone estado';
 
 // GET /favorites — complejos guardados por el jugador, el último primero.
 const getFavorites = async (req, res, next) => {

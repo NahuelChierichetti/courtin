@@ -13,6 +13,7 @@ const verifyEmailTemplate = require('../emails/templates/verifyEmail');
 const { normalizeSports } = require('../config/sports');
 const { planParaCanchas } = require('../config/plans');
 const { slugUnico, notificarSolicitud } = require('../utils/clubOnboarding');
+const { verifyGoogleIdToken, googleHabilitado } = require('../utils/googleAuth');
 const { esperaAprobacion } = require('../utils/subscriptions');
 
 // Ventana de validez del link de reset.
@@ -70,7 +71,44 @@ const buildUserResponse = (user) => {
     telefono: user.telefono || null,
     estado: user.estado,
     globalRole: user.globalRole,
-    emailVerifiedAt: user.emailVerifiedAt || null
+    emailVerifiedAt: user.emailVerifiedAt || null,
+    avatar: user.avatar || null
+  };
+};
+
+// Un alta de complejo que todavía no aprobamos no tiene panel al que entrar. Se
+// corta el login con el motivo, en vez de dejar iniciar sesión y que la persona
+// rebote contra una pantalla vacía sin entender por qué.
+//
+// Sólo aplica si TODOS sus complejos están sin aprobar: alguien que además
+// administra un club activo entra normalmente.
+//
+// Vive acá afuera porque lo necesitan los dos accesos: si el dueño de un
+// complejo pendiente entra con Google desde el sitio del jugador, tiene que
+// encontrarse con el mismo aviso y no con un panel en blanco.
+//
+// @returns {Promise<{status: number, body: object}|null>}
+const bloqueoPorAltaPendiente = async (user) => {
+  if (user.globalRole === ROLES.SUPERADMIN) return null;
+
+  const memberships = await Membership.find({ user: user._id, estado: 'activo' })
+    .populate('club', 'nombre estado')
+    .lean();
+
+  const conClub = memberships.filter((m) => m.club);
+  if (!conClub.length || !conClub.every((m) => esperaAprobacion(m.club))) return null;
+
+  const rechazado = conClub.every((m) => m.club.estado === 'rechazado');
+
+  return {
+    status: 403,
+    body: {
+      ok: false,
+      code: rechazado ? 'CLUB_RECHAZADO' : 'CLUB_PENDIENTE',
+      message: rechazado
+        ? 'No pudimos aprobar el alta de tu complejo. Escribinos si querés volver a intentarlo.'
+        : 'Tu complejo todavía está pendiente de aprobación. Te avisamos por email en cuanto esté listo.'
+    }
   };
 };
 
@@ -294,6 +332,17 @@ const login = async (req, res, next) => {
       });
     }
 
+    // Cuenta creada con Google: no tiene contraseña contra la cual comparar.
+    // Se la manda al botón en vez de dejarla probando claves que no existen
+    // (y de paso evita que bcrypt reviente con un hash nulo).
+    if (!user.password) {
+      return res.status(401).json({
+        ok: false,
+        code: 'SOLO_GOOGLE',
+        message: 'Esta cuenta se creó con Google. Entrá con el botón de Google o restablecé tu contraseña.'
+      });
+    }
+
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
@@ -303,30 +352,9 @@ const login = async (req, res, next) => {
       });
     }
 
-    // Un alta que todavía no aprobamos no tiene panel al que entrar. Se corta
-    // acá, con el motivo, en vez de dejar iniciar sesión y que la persona rebote
-    // contra una pantalla vacía sin entender por qué.
-    //
-    // Sólo aplica si TODOS sus complejos están sin aprobar: alguien que además
-    // administra un club activo entra normalmente.
-    if (user.globalRole !== ROLES.SUPERADMIN) {
-      const memberships = await Membership.find({ user: user._id, estado: 'activo' })
-        .populate('club', 'nombre estado')
-        .lean();
-
-      const conClub = memberships.filter((m) => m.club);
-
-      if (conClub.length && conClub.every((m) => esperaAprobacion(m.club))) {
-        const rechazado = conClub.every((m) => m.club.estado === 'rechazado');
-
-        return res.status(403).json({
-          ok: false,
-          code: rechazado ? 'CLUB_RECHAZADO' : 'CLUB_PENDIENTE',
-          message: rechazado
-            ? 'No pudimos aprobar el alta de tu complejo. Escribinos si querés volver a intentarlo.'
-            : 'Tu complejo todavía está pendiente de aprobación. Te avisamos por email en cuanto esté listo.'
-        });
-      }
+    const bloqueo = await bloqueoPorAltaPendiente(user);
+    if (bloqueo) {
+      return res.status(bloqueo.status).json(bloqueo.body);
     }
 
     const token = generateToken(user._id);
@@ -335,6 +363,113 @@ const login = async (req, res, next) => {
       ok: true,
       token,
       user: buildUserResponse(user)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /auth/google — acceso de jugadores con "Iniciar sesión con Google".
+//
+// Sirve para registrarse y para entrar: son el mismo acto. Google no distingue
+// entre una cosa y la otra, y pedirle a alguien que elija de antemano si "ya
+// tiene cuenta" es una fricción que no aporta nada (encima suele fallar: la
+// gente no se acuerda).
+//
+// Emite exactamente el mismo JWT que el login con contraseña, así que para todo
+// el resto de la aplicación —`protect`, membresías, roles, reservas— un usuario
+// de Google es un usuario común y corriente.
+const loginWithGoogle = async (req, res, next) => {
+  try {
+    if (!googleHabilitado()) {
+      return res.status(503).json({
+        ok: false,
+        message: 'El acceso con Google no está disponible en este momento.'
+      });
+    }
+
+    const perfil = await verifyGoogleIdToken(req.body.credential);
+
+    if (!perfil) {
+      return res.status(401).json({
+        ok: false,
+        message: 'No pudimos validar tu cuenta de Google. Probá de nuevo.'
+      });
+    }
+
+    // Sin email confirmado por Google no se sigue, y el motivo es de seguridad,
+    // no de prolijidad: abajo se vincula por email con una cuenta que ya existe.
+    // Si aceptáramos emails sin confirmar, alcanzaría con crearse una cuenta de
+    // Google declarando el email de otro para quedarse con su cuenta de CourtIn.
+    if (!perfil.emailVerificado) {
+      return res.status(403).json({
+        ok: false,
+        message: 'Tu cuenta de Google no tiene el email confirmado. Confirmalo y volvé a intentar.'
+      });
+    }
+
+    let user = await User.findOne({ googleId: perfil.googleId });
+    let creado = false;
+
+    if (!user) {
+      // Ya existe una cuenta nuestra con ese email (se registró con contraseña):
+      // se le engancha el googleId en vez de crear una segunda. Si no, la misma
+      // persona terminaría con dos cuentas y las reservas repartidas entre las
+      // dos según con cuál entró ese día.
+      const existente = await User.findOne({ email: perfil.email });
+
+      if (existente) {
+        existente.googleId = perfil.googleId;
+        // Google ya confirmó el email: la cuenta queda verificada aunque nunca
+        // haya abierto nuestro mail.
+        existente.emailVerifiedAt = existente.emailVerifiedAt || new Date();
+        // El nombre no se pisa —puede haberlo editado— y el avatar sólo se
+        // completa si estaba vacío.
+        if (!existente.avatar && perfil.avatar) existente.avatar = perfil.avatar;
+        await existente.save();
+        user = existente;
+      }
+    }
+
+    if (!user) {
+      try {
+        user = await User.create({
+          // Google casi siempre manda el nombre; si no, la parte local del email
+          // es mejor que dejar la cuenta sin nada que mostrar.
+          nombre: perfil.nombre || perfil.email.split('@')[0],
+          email: perfil.email,
+          googleId: perfil.googleId,
+          avatar: perfil.avatar,
+          emailVerifiedAt: new Date()
+        });
+        creado = true;
+      } catch (error) {
+        // Dos pestañas entrando a la vez: la segunda choca contra el índice
+        // único. La cuenta existe, así que se la busca y se sigue normalmente.
+        if (error?.code !== 11000) throw error;
+        user = await User.findOne({
+          $or: [{ googleId: perfil.googleId }, { email: perfil.email }]
+        });
+        if (!user) throw error;
+      }
+    }
+
+    if (user.estado !== 'activo') {
+      return res.status(403).json({ ok: false, message: 'Usuario inactivo' });
+    }
+
+    const bloqueo = await bloqueoPorAltaPendiente(user);
+    if (bloqueo) {
+      return res.status(bloqueo.status).json(bloqueo.body);
+    }
+
+    res.status(creado ? 201 : 200).json({
+      ok: true,
+      token: generateToken(user._id),
+      user: buildUserResponse(user),
+      // Para que el frontend pueda saludar distinto a quien recién se crea la
+      // cuenta. No cambia ningún permiso.
+      nuevo: creado
     });
   } catch (error) {
     next(error);
@@ -406,11 +541,8 @@ const changePassword = async (req, res, next) => {
   try {
     const { currentPassword, password } = req.body;
 
-    if (!currentPassword || !password) {
-      return res.status(400).json({
-        ok: false,
-        message: 'Ingresá tu contraseña actual y la nueva.'
-      });
+    if (!password) {
+      return res.status(400).json({ ok: false, message: 'Ingresá la contraseña nueva.' });
     }
 
     if (String(password).length < 6) {
@@ -423,6 +555,26 @@ const changePassword = async (req, res, next) => {
     const user = await User.findById(req.user._id).select('+password');
     if (!user) {
       return res.status(404).json({ ok: false, message: 'Usuario no encontrado' });
+    }
+
+    // Una cuenta creada con Google no tiene contraseña actual que pedir: acá no
+    // está cambiando nada, está definiendo la primera. Exigirle una la dejaría
+    // sin forma de tener contraseña nunca, y comparar contra un hash nulo hace
+    // reventar a bcrypt.
+    //
+    // No se debilita nada: el pedido llega con su JWT, que es la misma prueba de
+    // identidad que exige el resto de la cuenta.
+    if (!user.password) {
+      user.password = await bcrypt.hash(password, 10);
+      await user.save();
+      return res.status(200).json({ ok: true, message: 'Contraseña definida.' });
+    }
+
+    if (!currentPassword) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Ingresá tu contraseña actual y la nueva.'
+      });
     }
 
     const matches = await bcrypt.compare(currentPassword, user.password);
@@ -629,6 +781,7 @@ module.exports = {
   register,
   registerClub,
   login,
+  loginWithGoogle,
   getMe,
   updateMe,
   changePassword,

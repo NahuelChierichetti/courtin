@@ -2,10 +2,11 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { register, resolveLanding, isLoading } = useAuth()
+const { register, loginWithGoogle, resolveLanding, isLoading } = useAuth()
 
 const form = reactive({
   nombre: '',
@@ -38,6 +39,22 @@ const handleSubmit = async () => {
     errorMessage.value = error.response?.data?.message || 'No se pudo crear la cuenta.'
   }
 }
+
+// El mismo botón que en el login: para Google registrarse y entrar son el mismo
+// acto, y si esta persona ya tenía cuenta, el backend la reconoce y la deja
+// pasar en vez de decirle "el email ya existe".
+const onGoogleCredential = async (credential) => {
+  errorMessage.value = ''
+
+  try {
+    await loginWithGoogle(credential)
+    const redirect =
+      typeof route.query.redirect === 'string' ? route.query.redirect : resolveLanding()
+    router.push(redirect)
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || 'No se pudo crear la cuenta con Google.'
+  }
+}
 </script>
 
 <template>
@@ -62,6 +79,16 @@ const handleSubmit = async () => {
 
           <div v-if="errorMessage" class="mt-6 flex items-center gap-2 rounded-xl border border-error-100 bg-error-50 px-4 py-3 text-sm text-error-600">
             <i class="icon-[material-symbols--error] shrink-0"></i>{{ errorMessage }}
+          </div>
+
+          <!-- `continue_with` y no `signup_with`: en español Google traduce las
+               dos como "Acceder con Google", que en una pantalla de registro
+               suena a que hay que tener cuenta. Ésta da "Continuar con Google". -->
+          <GoogleSignInButton class="mt-7" text="continue_with" @credential="onGoogleCredential" />
+          <div class="mt-6 flex items-center gap-3">
+            <span class="h-px flex-1 bg-black/[0.08]"></span>
+            <span class="text-xs font-medium text-stone-400">o con tu email</span>
+            <span class="h-px flex-1 bg-black/[0.08]"></span>
           </div>
 
           <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
