@@ -75,6 +75,27 @@ const esperaAprobacion = (club) => ESTADOS_SIN_ALTA.includes(club?.estado);
 const diasEntre = (desde, hasta) => Math.floor((hasta.getTime() - desde.getTime()) / MS_POR_DIA);
 
 /**
+ * Desde cuándo se cuenta la mora.
+ *
+ * Manda el vencimiento de la factura abierta, no el fin del trial o de la
+ * vigencia. La diferencia importa cuando la factura se emite tarde: si el reloj
+ * corriera desde el fin del trial, un complejo recién facturado ya arrancaría
+ * con días de atraso acumulados sobre una factura que acaba de recibir, y la
+ * escalera de cobranza le saltaría directo a un aviso de corte. Nadie puede
+ * estar en mora de algo que todavía no se le reclamó.
+ *
+ * Sin factura se cae al fin de la vigencia (o del trial): es el comportamiento
+ * conservador para el hueco entre que el servicio se termina y el cron emite.
+ *
+ * @param {Date} [vencimientoFactura] Vencimiento de la factura abierta más
+ *   antigua del club, si tiene alguna.
+ */
+const referenciaDeMora = (subscription, vencimientoFactura = null) => {
+  if (vencimientoFactura) return new Date(vencimientoFactura);
+  return subscription?.vigenciaHasta || subscription?.trialHasta || null;
+};
+
+/**
  * Estado que le corresponde a un club según su suscripción.
  *
  * Ojo con la ventana de gracia: entre el vencimiento y el día 7 el club sigue
@@ -84,9 +105,12 @@ const diasEntre = (desde, hasta) => Math.floor((hasta.getTime() - desde.getTime(
  *
  * @param {object} subscription Documento de Subscription.
  * @param {Date}   ahora        Inyectable para poder testear.
+ * @param {Date}   [vencimientoFactura] Ver `referenciaDeMora`. Los cortes se
+ *   cuentan desde acá: un club con factura emitida hoy no se despublica por un
+ *   trial que terminó la semana pasada.
  * @returns {string} Un valor válido de `Club.estado`.
  */
-const estadoPorSuscripcion = (subscription, ahora = new Date()) => {
+const estadoPorSuscripcion = (subscription, ahora = new Date(), vencimientoFactura = null) => {
   // Sin suscripción no hay nada que cobrar: se lo trata como apagado manual y
   // no como moroso, para no despublicar clubes por un dato que falta.
   if (!subscription) return 'inactivo';
@@ -98,9 +122,7 @@ const estadoPorSuscripcion = (subscription, ahora = new Date()) => {
 
   if (subscription.vigenciaHasta && ahora <= subscription.vigenciaHasta) return 'activo';
 
-  // Vencido: la referencia es el fin de la vigencia o, si nunca pagó, el fin
-  // del trial.
-  const referencia = subscription.vigenciaHasta || subscription.trialHasta;
+  const referencia = referenciaDeMora(subscription, vencimientoFactura);
 
   // Sin ninguna fecha no se puede calcular mora. Se lo deja fuera de servicio en
   // vez de asumir que está al día.
@@ -118,10 +140,10 @@ const estadoPorSuscripcion = (subscription, ahora = new Date()) => {
  * Días de mora acumulados. 0 si está al día.
  * Lo usan los emails de dunning para saber qué aviso toca.
  */
-const diasDeMora = (subscription, ahora = new Date()) => {
+const diasDeMora = (subscription, ahora = new Date(), vencimientoFactura = null) => {
   if (!subscription) return 0;
 
-  const referencia = subscription.vigenciaHasta || subscription.trialHasta;
+  const referencia = referenciaDeMora(subscription, vencimientoFactura);
   if (!referencia || ahora <= referencia) return 0;
 
   return diasEntre(referencia, ahora);
@@ -131,8 +153,8 @@ const diasDeMora = (subscription, ahora = new Date()) => {
  * Cuántos días faltan para el próximo corte, y cuál sería.
  * Alimenta el aviso del panel: "en 3 días se despublica tu complejo".
  */
-const proximoCorte = (subscription, ahora = new Date()) => {
-  const mora = diasDeMora(subscription, ahora);
+const proximoCorte = (subscription, ahora = new Date(), vencimientoFactura = null) => {
+  const mora = diasDeMora(subscription, ahora, vencimientoFactura);
 
   if (mora < DIAS_NIVEL_1) {
     return { nivel: 1, enDias: DIAS_NIVEL_1 - mora, efecto: 'despublicacion' };
@@ -178,6 +200,7 @@ module.exports = {
   puedeCrearReservas,
   puedeAccederPanel,
   esperaAprobacion,
+  referenciaDeMora,
   estadoPorSuscripcion,
   diasDeMora,
   proximoCorte,

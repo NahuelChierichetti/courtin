@@ -13,6 +13,7 @@ const reservationConfirmedEmail = require('../emails/templates/reservationConfir
 const reservationReminderEmail = require('../emails/templates/reservationReminder');
 const clubReservaAvisoEmail = require('../emails/templates/clubReservaAviso');
 const reservationRefundedEmail = require('../emails/templates/reservationRefunded');
+const reservationCancelledEmail = require('../emails/templates/reservationCancelled');
 const { emailsDelClub } = require('./clubContact');
 const { appUrl } = require('./publicUrls');
 
@@ -48,6 +49,9 @@ const buildContext = (reservation, club, court) => {
     hora: `${inicio.format('HH:mm')} a ${fin.format('HH:mm')}`,
     duracion: minutos >= 60 ? `${minutos / 60} h` : `${minutos} min`,
     manageUrl: `${baseUrl}/reserva/${reservation.manageToken}`,
+    // Ficha pública del complejo. Sin slug (clubs viejos, o un populate acotado)
+    // queda vacía y quien la use tiene que contemplarlo.
+    clubUrl: club.slug ? `${baseUrl}/club/${club.slug}` : null,
     direccion: [club.direccion, club.ciudad].filter(Boolean).join(', '),
     canchaNombre: court?.nombre || 'Cancha',
     telefono: club.telefono || club.whatsapp,
@@ -189,6 +193,90 @@ const sendReservationReminder = async ({ reservation, club, court, to, nombre } 
 };
 
 /**
+ * Aviso de turno cancelado al jugador.
+ *
+ * Es el email más importante de todos: si el complejo cancela y esto no sale, el
+ * jugador se presenta a jugar a un horario que ya no tiene. La notificación
+ * dentro de la app no alcanza — un invitado sin cuenta ni siquiera la ve.
+ *
+ * Adjunta un .ics de baja para que el turno se tache del calendario donde el
+ * jugador lo había agregado desde el email de confirmación.
+ *
+ * @param {boolean} porElComplejo `true` si canceló el complejo, `false` si fue
+ *                                el propio jugador (ahí el email es comprobante).
+ */
+const sendReservationCancellation = async ({
+  reservation,
+  club,
+  court,
+  to,
+  nombre,
+  porElComplejo = false
+} = {}) => {
+  try {
+    const email = to || reservation?.guestEmail;
+
+    if (!email || !reservation || !club) {
+      return { ok: false, skipped: 'sin email o datos incompletos' };
+    }
+
+    const ctx = buildContext(reservation, club, court);
+
+    const { subject, html } = reservationCancelledEmail({
+      nombre: nombre || reservation.guestName,
+      clubNombre: club.nombre,
+      canchaNombre: ctx.canchaNombre,
+      fecha: ctx.fecha,
+      hora: ctx.hora,
+      direccion: ctx.direccion,
+      telefono: ctx.telefono,
+      porElComplejo,
+      reservarUrl: ctx.clubUrl,
+      // Sólo lo cobrado online: lo que se paga en el complejo nunca salió del
+      // bolsillo del jugador y no hay nada que devolver.
+      pagado:
+        reservation.pago?.estado === 'pagado'
+          ? formatMoney(reservation.pago.montoPagado, club.moneda)
+          : null
+    });
+
+    const ics = buildReservationICS({
+      // Mismo UID que el .ics de la confirmación: es la baja de ese evento.
+      uid: String(reservation._id),
+      inicio: reservation.inicio,
+      fin: reservation.fin,
+      titulo: `${ctx.canchaNombre} · ${club.nombre}`,
+      ubicacion: ctx.direccion,
+      cancelado: true
+    });
+
+    return await sendEmail({
+      to: email,
+      subject,
+      html,
+      template: 'reservation-cancelled',
+      // El inicio va en la clave y no sólo el id de la reserva: cubre el
+      // doble clic en el panel, y a la vez deja avisar de nuevo si el turno se
+      // reactivó, se movió de horario y se volvió a cancelar.
+      dedupeKey: `reservation-cancelled:${reservation._id}:${new Date(reservation.inicio).getTime()}`,
+      refId: reservation._id,
+      club: club._id,
+      replyTo: club.email || undefined,
+      attachments: [
+        {
+          filename: 'turno-cancelado.ics',
+          content: Buffer.from(ics).toString('base64')
+        }
+      ]
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('No se pudo avisar la cancelación:', err.message);
+    return { ok: false, error: err.message };
+  }
+};
+
+/**
  * Aviso al complejo sobre el movimiento de un turno.
  *
  * Sólo se dispara por lo que el complejo NO hizo: una reserva que entró por la
@@ -308,6 +396,7 @@ const sendRefundNotice = async ({ reservation, club, court, payment, to, nombre 
 module.exports = {
   sendReservationConfirmation,
   sendReservationReminder,
+  sendReservationCancellation,
   sendClubReservationNotice,
   sendRefundNotice
 };

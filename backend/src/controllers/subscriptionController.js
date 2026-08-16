@@ -14,6 +14,7 @@ const {
   ensureSubscription,
   sincronizarEstado,
   emitirFactura,
+  facturaAbierta,
   acreditarPago,
   periodoDe,
   notificarFactura
@@ -63,7 +64,10 @@ const getClubSubscription = async (req, res, next) => {
       Court.countDocuments({ club: club._id })
     ]);
 
-    const mora = diasDeMora(subscription);
+    // Misma referencia que usa el cron: la pantalla tiene que decir los mismos
+    // días de atraso que el email que recibió el complejo.
+    const abierta = await facturaAbierta(club._id);
+    const mora = diasDeMora(subscription, new Date(), abierta?.vencimiento || null);
 
     res.status(200).json({
       ok: true,
@@ -81,7 +85,7 @@ const getClubSubscription = async (req, res, next) => {
       capacidades: capacidades(estado),
       mora: {
         dias: mora,
-        proximoCorte: proximoCorte(subscription),
+        proximoCorte: proximoCorte(subscription, new Date(), abierta?.vencimiento || null),
         diasNivel1: DIAS_NIVEL_1,
         diasNivel2: DIAS_NIVEL_2
       },
@@ -108,9 +112,18 @@ const listSubscriptions = async (req, res, next) => {
     const subPorClub = new Map(subs.map((s) => [String(s.club), s]));
 
     // Facturas pendientes o vencidas, para mostrar la deuda de un vistazo.
+    // `vencimiento` es el de la factura abierta más antigua: es la referencia
+    // desde la que corre la mora (ver `referenciaDeMora`).
     const impagas = await Invoice.aggregate([
       { $match: { estado: { $in: ['pendiente', 'vencida'] } } },
-      { $group: { _id: '$club', total: { $sum: '$monto' }, cantidad: { $sum: 1 } } }
+      {
+        $group: {
+          _id: '$club',
+          total: { $sum: '$monto' },
+          cantidad: { $sum: 1 },
+          vencimiento: { $min: '$vencimiento' }
+        }
+      }
     ]);
     const deudaPorClub = new Map(impagas.map((d) => [String(d._id), d]));
 
@@ -128,7 +141,7 @@ const listSubscriptions = async (req, res, next) => {
         precio: sub?.precio || null,
         trialHasta: sub?.trialHasta || null,
         vigenciaHasta: sub?.vigenciaHasta || null,
-        diasDeMora: sub ? diasDeMora(sub) : 0,
+        diasDeMora: sub ? diasDeMora(sub, new Date(), deuda?.vencimiento || null) : 0,
         deuda: deuda ? { monto: deuda.total, facturas: deuda.cantidad } : null,
         sinSuscripcion: !sub
       };

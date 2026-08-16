@@ -44,16 +44,21 @@ const buildReservationICS = ({
   url = '',
   // Una reserva pública nace pendiente de confirmación: el calendario lo marca
   // como tentativo hasta que el complejo la confirme.
-  confirmado = true
+  confirmado = true,
+  // Baja del evento. Mismo UID que el .ics de la confirmación y SEQUENCE mayor:
+  // así el calendario reconoce que es el mismo turno y lo tacha, en vez de
+  // agregar un evento nuevo al lado del que ya estaba.
+  cancelado = false
 }) => {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//CourtIn//Reservas//ES',
     'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+    `METHOD:${cancelado ? 'CANCEL' : 'PUBLISH'}`,
     'BEGIN:VEVENT',
     `UID:${uid}@courtinapp.com`,
+    `SEQUENCE:${cancelado ? 1 : 0}`,
     `DTSTAMP:${toICSDate(new Date())}`,
     `DTSTART:${toICSDate(inicio)}`,
     `DTEND:${toICSDate(fin)}`,
@@ -61,14 +66,19 @@ const buildReservationICS = ({
     descripcion ? `DESCRIPTION:${escapeICS(descripcion)}` : null,
     ubicacion ? `LOCATION:${escapeICS(ubicacion)}` : null,
     url ? `URL:${escapeICS(url)}` : null,
-    `STATUS:${confirmado ? 'CONFIRMED' : 'TENTATIVE'}`,
+    `STATUS:${cancelado ? 'CANCELLED' : confirmado ? 'CONFIRMED' : 'TENTATIVE'}`,
     // Recordatorio del propio calendario, 2 horas antes. Es gratis y no depende
-    // de que nuestro cron de recordatorios exista.
-    'BEGIN:VALARM',
-    'TRIGGER:-PT2H',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:Recordatorio de tu turno',
-    'END:VALARM',
+    // de que nuestro cron de recordatorios exista. En una baja no va: avisar de
+    // un turno cancelado es justo lo contrario de lo que buscamos.
+    ...(cancelado
+      ? []
+      : [
+          'BEGIN:VALARM',
+          'TRIGGER:-PT2H',
+          'ACTION:DISPLAY',
+          'DESCRIPTION:Recordatorio de tu turno',
+          'END:VALARM'
+        ]),
     'END:VEVENT',
     'END:VCALENDAR'
   ].filter(Boolean);

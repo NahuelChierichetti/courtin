@@ -6,6 +6,7 @@ const { estadoPorSuscripcion, extenderVigencia } = require('./subscriptions');
 const { emailsDelClub } = require('./clubContact');
 const { sendEmail } = require('./email');
 const { appUrl } = require('./publicUrls');
+const { DEFAULT_TZ } = require('./timezone');
 const invoiceIssuedEmail = require('../emails/templates/invoiceIssued');
 const trialAvisoEmail = require('../emails/templates/trialAviso');
 const deudaAvisoEmail = require('../emails/templates/deudaAviso');
@@ -18,6 +19,28 @@ const pagoAcreditadoEmail = require('../emails/templates/pagoAcreditado');
 
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
+// Plazo mínimo para pagar, contado desde la emisión. Es un piso, no el
+// vencimiento normal: sólo entra en juego cuando la factura se emite después de
+// que el servicio ya venció (un club viejo que recién ahora entra al circuito,
+// o un cron que estuvo caído). Sin esto la factura nace vencida y el complejo
+// recibe el reclamo antes que la factura.
+const DIAS_GRACIA_EMISION = 5;
+
+/**
+ * Lleva una fecha al final de su día.
+ *
+ * El vencimiento se guarda así para que coincida con lo que dice el email: si
+ * la factura "vence el 21 de agosto", el complejo tiene todo el 21 para pagar y
+ * la mora recién empieza a contar el 22. Guardando el instante exacto de la
+ * emisión, un club que paga el mismo día del vencimiento por la tarde ya
+ * figuraba con un día de atraso, y la escalera de avisos quedaba corrida.
+ */
+const finDelDia = (fecha) => {
+  const d = new Date(fecha);
+  d.setUTCHours(23, 59, 59, 999);
+  return d;
+};
+
 /**
  * Identificador del período que se está facturando.
  * Mensual → `2026-08`. Anual → `2026`.
@@ -27,6 +50,27 @@ const periodoDe = (fecha, ciclo = 'mensual') => {
   const anio = d.getUTCFullYear();
   if (ciclo === 'anual') return String(anio);
   return `${anio}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+};
+
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+/**
+ * El período como se lee en un email: `2026-08` → "Agosto de 2026".
+ *
+ * El formato corto es un identificador interno (índice único, clave de dedupe) y
+ * no tiene por qué salir a la vista de nadie.
+ */
+const formatPeriodo = (periodo) => {
+  const [anio, mes] = String(periodo || '').split('-');
+
+  // Ciclo anual: el período es sólo el año y ya se lee bien.
+  if (!mes) return String(periodo || '');
+
+  const nombre = MESES[Number(mes) - 1];
+  return nombre ? `${nombre} de ${anio}` : String(periodo);
 };
 
 /**
@@ -60,16 +104,28 @@ const ensureSubscription = async (club, trialDesde = null) => {
 };
 
 /**
+ * La factura abierta más antigua del club: la que se reclama y desde cuyo
+ * vencimiento corre la mora. `null` si el club está al día.
+ */
+const facturaAbierta = (clubId) =>
+  Invoice.findOne({ club: clubId, estado: { $in: ['pendiente', 'vencida'] } }).sort({ vencimiento: 1 });
+
+/**
  * Recalcula `Club.estado` a partir de la suscripción y lo persiste.
  *
  * Es el único lugar que escribe ese campo por motivos de facturación. Un
  * superadmin puede seguir poniendo `inactivo` a mano; eso se respeta porque
  * `inactivo` no sale de esta función nunca (salvo que no haya suscripción).
  *
+ * Busca la factura abierta acá adentro en vez de pedírsela al llamador: los
+ * cortes se cuentan desde su vencimiento, y dejar eso en manos de cada llamador
+ * es la forma de que el panel y el cron muestren estados distintos.
+ *
  * @returns {Promise<string>} El estado resultante.
  */
 const sincronizarEstado = async (club, subscription, ahora = new Date()) => {
-  const nuevo = estadoPorSuscripcion(subscription, ahora);
+  const factura = await facturaAbierta(club._id);
+  const nuevo = estadoPorSuscripcion(subscription, ahora, factura?.vencimiento || null);
 
   if (club.estado !== nuevo) {
     await Club.updateOne({ _id: club._id }, { estado: nuevo });
@@ -88,9 +144,15 @@ const emitirFactura = async ({ club, subscription, periodo, vencimiento }) => {
   const existente = await Invoice.findOne({ club: club._id, periodo: per });
   if (existente) return existente;
 
-  // Vence cuando termina lo que está pago: si ya venció, vence ahora.
-  const vence =
-    vencimiento || subscription.vigenciaHasta || subscription.trialHasta || new Date();
+  // Vence cuando termina lo que está pago. Con un piso: si esa fecha ya pasó
+  // —factura emitida tarde, club viejo que recién entra al circuito—, el
+  // complejo igual tiene su plazo completo para pagar contado desde hoy. Una
+  // factura que nace vencida no le da a nadie la chance de estar al día.
+  const ahora = new Date();
+  const calculado = vencimiento || subscription.vigenciaHasta || subscription.trialHasta;
+  const minimo = new Date(ahora.getTime() + DIAS_GRACIA_EMISION * MS_POR_DIA);
+
+  const vence = finDelDia(calculado && new Date(calculado) > ahora ? calculado : minimo);
 
   try {
     return await Invoice.create({
@@ -172,8 +234,17 @@ const formatMoney = (monto, moneda = MONEDA) => {
   }
 };
 
+// La zona horaria va fija a propósito: el server de producción corre en UTC, y
+// sin esto una fecha guardada al filo del día se muestra corrida un día para el
+// complejo que la lee. En un email de cobranza, un vencimiento con la fecha
+// equivocada es exactamente el error que no se puede cometer.
 const formatFecha = (fecha) =>
-  new Date(fecha).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
+  new Date(fecha).toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    timeZone: DEFAULT_TZ
+  });
 
 /**
  * Avisa al complejo que se emitió su factura.
@@ -207,7 +278,7 @@ const notificarFactura = async (club, invoice) => {
 
     const { subject, html } = invoiceIssuedEmail({
       clubNombre: club.nombre,
-      periodo: invoice.periodo,
+      periodo: formatPeriodo(invoice.periodo),
       monto: formatMoney(invoice.monto, invoice.moneda),
       vencimiento: formatFecha(invoice.vencimiento),
       plan: getPlan(invoice.plan)?.label || invoice.plan,
@@ -259,9 +330,14 @@ const enviarAlClub = async (club, { subject, html, template, dedupeKey, refId })
 
 /**
  * Aviso del período de prueba.
- * @param {number} diasRestantes 0 = ya terminó.
+ *
+ * @param {number} diasRestantes 0 = ya terminó. Es lo que dice el email.
+ * @param {number} [escalon] Umbral de la escalera que dispara este aviso. Va
+ *   separado de `diasRestantes` para que una corrida salteada no pierda el
+ *   aviso: si el cron no corrió el día 7 y corre el día 5, se manda el escalón
+ *   7 pero el texto dice los 5 días reales que quedan.
  */
-const notificarTrial = async (club, subscription, diasRestantes) => {
+const notificarTrial = async (club, subscription, diasRestantes, escalon = diasRestantes) => {
   try {
     const { subject, html } = trialAvisoEmail({
       clubNombre: club.nombre,
@@ -274,8 +350,8 @@ const notificarTrial = async (club, subscription, diasRestantes) => {
       subject,
       html,
       template: 'trial-aviso',
-      // Una vez por etapa: el cron corre a diario y no debe repetirlo.
-      dedupeKey: `trial-aviso:${subscription._id}:${diasRestantes}`,
+      // Una vez por escalón: el cron corre a diario y no debe repetirlo.
+      dedupeKey: `trial-aviso:${subscription._id}:${escalon}`,
       refId: subscription._id
     });
   } catch (err) {
@@ -298,7 +374,7 @@ const notificarDeuda = async (club, invoice, etapa, dias) => {
     const { subject, html } = deudaAvisoEmail({
       etapa: PLANTILLA_DE_ETAPA[etapa] || etapa,
       clubNombre: club.nombre,
-      periodo: invoice.periodo,
+      periodo: formatPeriodo(invoice.periodo),
       monto: formatMoney(invoice.monto, invoice.moneda),
       vencimiento: formatFecha(invoice.vencimiento),
       diasDeMora: dias,
@@ -329,7 +405,7 @@ const notificarPago = async (club, invoice, subscription, veniaCortado = false) 
   try {
     const { subject, html } = pagoAcreditadoEmail({
       clubNombre: club.nombre,
-      periodo: invoice.periodo,
+      periodo: formatPeriodo(invoice.periodo),
       monto: formatMoney(invoice.monto, invoice.moneda),
       vigenciaHasta: formatFecha(subscription.vigenciaHasta),
       panelUrl: panelUrl(),
@@ -352,7 +428,10 @@ const notificarPago = async (club, invoice, subscription, veniaCortado = false) 
 
 module.exports = {
   periodoDe,
+  formatPeriodo,
+  DIAS_GRACIA_EMISION,
   ensureSubscription,
+  facturaAbierta,
   sincronizarEstado,
   emitirFactura,
   acreditarPago,

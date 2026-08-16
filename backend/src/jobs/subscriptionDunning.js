@@ -15,6 +15,7 @@ const {
   ensureSubscription,
   sincronizarEstado,
   emitirFactura,
+  facturaAbierta,
   notificarFactura,
   notificarTrial,
   notificarDeuda,
@@ -38,6 +39,18 @@ const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
 // Avisos del trial, por días restantes.
 const AVISOS_TRIAL = [7, 1, 0];
+
+// Escalón de aviso que le corresponde a los días que quedan de prueba.
+//
+// Es "el umbral ya alcanzado" y no "el umbral exacto de hoy" por el mismo
+// motivo que la escalera de deuda: si una corrida se saltea (deploy, instancia
+// dormida), un umbral exacto pierde ese aviso para siempre y el complejo se
+// entera de que se le termina la prueba cuando ya se le terminó. El escalón sólo
+// define la clave de dedupe; el email siempre dice los días reales.
+const escalonTrial = (restantes) => {
+  const alcanzados = AVISOS_TRIAL.filter((umbral) => restantes <= umbral);
+  return alcanzados.length ? Math.min(...alcanzados) : null;
+};
 
 // Cuántos días antes del vencimiento se emite la factura. Emitirla el día
 // después de vencer llegaría tarde: el complejo recibiría el aviso cuando ya
@@ -125,6 +138,8 @@ const runSubscriptionCycle = async (ahora = new Date()) => {
     const referencia = subscription.vigenciaHasta || subscription.trialHasta;
     const faltanDias = referencia ? diasHasta(referencia, ahora) : -Infinity;
 
+    let recienEmitida = false;
+
     if (!abierta && faltanDias <= DIAS_PREVIOS_FACTURA) {
       const invoice = await emitirFactura({
         club,
@@ -132,6 +147,7 @@ const runSubscriptionCycle = async (ahora = new Date()) => {
         periodo: periodoDe(ahora, subscription.ciclo)
       });
       stats.facturasEmitidas += 1;
+      recienEmitida = true;
       const aviso = await notificarFactura(club, invoice);
       if (aviso.skipped === 'sin destinatario') stats.sinDestinatario += 1;
     }
@@ -149,31 +165,41 @@ const runSubscriptionCycle = async (ahora = new Date()) => {
     if (estadoNuevo !== estadoAnterior) stats.cambiosDeEstado += 1;
 
     // --- 4. Avisos ---
-    const mora = diasDeMora(subscription, ahora);
+    // La factura que se reclama, y desde cuyo vencimiento corre la escalera de
+    // cobranza. Se busca antes que la mora justamente porque es su referencia.
+    const factura = await facturaAbierta(club._id);
+    const mora = diasDeMora(subscription, ahora, factura?.vencimiento || null);
 
     if (mora === 0 && subscription.trialHasta && ahora <= subscription.trialHasta) {
       // Todavía en trial: avisos de "se termina".
       const restantes = diasHasta(subscription.trialHasta, ahora);
-      if (AVISOS_TRIAL.includes(restantes)) {
-        const r = await notificarTrial(club, subscription, restantes);
+      const escalon = escalonTrial(restantes);
+      if (escalon !== null) {
+        const r = await notificarTrial(club, subscription, restantes, escalon);
         if (r.ok) stats.avisosTrial += 1;
         if (r.skipped === 'sin destinatario') stats.sinDestinatario += 1;
       }
       continue;
     }
 
-    if (mora <= 0) continue; // Al día: nada que avisar.
+    if (!factura) continue; // Nada emitido: no hay nada que reclamar.
+
+    // El corte es el vencimiento de la factura, no los días de mora: `mora` es 0
+    // tanto para el que está al día como para el que venció hace unas horas, y
+    // el primer aviso de la escalera (`vencida`, día 0) tiene que salir en la
+    // primera corrida posterior al vencimiento, no un día después.
+    if (new Date(factura.vencimiento) >= ahora) continue;
+
+    // La factura salió en esta misma corrida. Mandarle además un aviso de deuda
+    // sería contradecirnos por partida doble: dos emails en el mismo minuto, y
+    // uno reclamando algo que el otro recién le está avisando. Con el piso de
+    // vencimiento de `emitirFactura` esto no debería pasar nunca; queda como
+    // red de seguridad porque el costo de equivocarse es un email que asusta a
+    // un cliente al día.
+    if (recienEmitida) continue;
 
     const etapa = etapaParaMora(mora);
     if (!etapa) continue;
-
-    // El aviso se cuelga de la factura vencida más antigua: es la que se reclama.
-    const factura = await Invoice.findOne({
-      club: club._id,
-      estado: { $in: ['pendiente', 'vencida'] }
-    }).sort({ vencimiento: 1 });
-
-    if (!factura) continue;
 
     // Se pasa la etapa real: `notificarDeuda` resuelve qué plantilla usar y la
     // clave de dedupe queda única por escalón.
