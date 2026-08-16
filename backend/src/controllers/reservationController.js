@@ -8,6 +8,7 @@ const { upsertClientFromReservation } = require('../utils/clients');
 const { notify, notifyUser } = require('../utils/notifications');
 const {
   sendReservationConfirmation,
+  sendReservationCancellation,
   sendClubReservationNotice,
   sendRefundNotice
 } = require('../utils/reservationEmails');
@@ -21,7 +22,7 @@ const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 // El club poblado por defecto no trae los datos de contacto que necesita el
 // email (dirección, teléfono, política de cancelación).
 const CLUB_EMAIL_FIELDS =
-  'nombre direccion ciudad telefono whatsapp email timezone moneda horarios notificaciones';
+  'nombre slug direccion ciudad telefono whatsapp email timezone moneda horarios notificaciones';
 
 const POPULATE = [
   ['club', 'nombre slug estado timezone moneda'],
@@ -366,6 +367,30 @@ const updateReservation = async (req, res, next) => {
   }
 };
 
+// A quién le escribimos cuando pasa algo con el turno.
+//
+// Tolera que `customer` venga poblado o como id suelto: por acá pasan reservas
+// traídas con populates distintos (panel, cuenta del jugador, token público) y
+// resolverlo en cada llamador es la forma de olvidarse en una.
+const destinatarioDelTurno = async (reservation) => {
+  const customer = reservation.customer;
+
+  if (customer?.email) {
+    return { email: customer.email, nombre: customer.nombre };
+  }
+
+  if (customer) {
+    const user = await User.findById(customer._id || customer).select('email nombre');
+    if (user?.email) {
+      return { email: user.email, nombre: user.nombre };
+    }
+  }
+
+  // Invitado sin cuenta. Puede no tener email (turno cargado por teléfono en el
+  // backoffice) y es un caso normal: ahí no se manda nada.
+  return { email: reservation.guestEmail, nombre: reservation.guestName };
+};
+
 const cancelReservation = async (req, res, next) => {
   try {
     const { clubId, id } = req.params;
@@ -391,6 +416,21 @@ const cancelReservation = async (req, res, next) => {
       club: reservation.club?._id,
       reservation: reservation._id
     });
+
+    // Y el email, que es lo único que llega a un invitado sin cuenta. Sin esto
+    // el jugador se presenta a jugar a un turno que ya no existe.
+    const { email, nombre } = await destinatarioDelTurno(reservation);
+    if (email) {
+      const clubForEmail = await Club.findById(clubId).select(CLUB_EMAIL_FIELDS);
+      await sendReservationCancellation({
+        reservation,
+        club: clubForEmail,
+        court: reservation.court,
+        to: email,
+        nombre,
+        porElComplejo: true
+      });
+    }
 
     res.status(200).json({ ok: true, reservation });
   } catch (error) {
@@ -508,6 +548,20 @@ const applyCustomerCancellation = async (reservation) => {
     club: clubParaEmail,
     court: reservation.court
   });
+
+  // Comprobante al jugador de lo que acaba de hacer. Además da de baja el turno
+  // en su calendario, que quedó agregado desde el email de confirmación.
+  const { email, nombre } = await destinatarioDelTurno(reservation);
+  if (email) {
+    await sendReservationCancellation({
+      reservation,
+      club: clubParaEmail,
+      court: reservation.court,
+      to: email,
+      nombre,
+      porElComplejo: false
+    });
+  }
 
   return { ok: true };
 };
