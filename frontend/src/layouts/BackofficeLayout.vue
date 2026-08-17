@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useSidebar, useSidebarShortcut } from '@/composables/useSidebar'
@@ -9,6 +9,18 @@ const router = useRouter()
 const { user, logout } = useAuth()
 const { collapsed, toggleSidebar, shortcutLabel, shortcutAria } = useSidebar()
 useSidebarShortcut()
+
+const userMenuOpen = ref(false)
+const closeMenus = () => {
+  userMenuOpen.value = false
+}
+
+// Al navegar el dropdown tiene que cerrarse solo: los RouterLink de adentro no
+// disparan el click-outside.
+watch(() => route.path, closeMenus)
+
+onMounted(() => document.addEventListener('click', closeMenus))
+onUnmounted(() => document.removeEventListener('click', closeMenus))
 
 const handleLogout = () => {
   logout()
@@ -91,43 +103,23 @@ const goToApp = () => {
         </div>
       </nav>
 
-      <!-- Back to app -->
-      <div class="px-3 pb-2">
-        <button
-          :title="collapsed ? 'Volver a la app' : null"
-          class="flex w-full items-center rounded-full p-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white cursor-pointer"
-          :class="collapsed ? 'justify-center' : 'gap-3'"
-          @click="goToApp"
-        >
-          <i class="icon-[material-symbols--arrow-back] text-base text-white/60"></i>
-          <span v-if="!collapsed">Volver a la app</span>
-        </button>
-      </div>
-
-      <!-- User profile -->
+      <!-- Colapsar / expandir sidebar -->
       <div class="border-t border-white/10 p-3">
-        <div
-          class="flex rounded-xl"
-          :class="collapsed ? 'flex-col items-center gap-2 py-2' : 'items-center gap-2.5 px-3 py-2'"
+        <button
+          class="flex w-full items-center rounded-md p-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white cursor-pointer"
+          :class="collapsed ? 'justify-center' : 'gap-3'"
+          :title="`${collapsed ? 'Expandir' : 'Colapsar'} menú (${shortcutLabel})`"
+          :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"
+          :aria-keyshortcuts="shortcutAria"
+          :aria-expanded="!collapsed"
+          @click="toggleSidebar"
         >
-          <div
-            :title="collapsed ? userShortName : null"
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-lime-500 text-xs font-bold text-brand-green-900"
-          >
-            {{ userInitials }}
-          </div>
-          <div v-if="!collapsed" class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold text-white">{{ userShortName }}</p>
-            <p class="text-xs text-white/60">Superadmin</p>
-          </div>
-          <button
-            title="Cerrar sesión"
-            class="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-error-300 cursor-pointer"
-            @click="handleLogout"
-          >
-            <i class="icon-[material-symbols--logout] text-sm"></i>
-          </button>
-        </div>
+          <i
+            :class="collapsed ? 'icon-[lucide--panel-left-open]' : 'icon-[lucide--panel-left-close]'"
+            class="text-base"
+          ></i>
+          <span v-if="!collapsed">Colapsar menú</span>
+        </button>
       </div>
     </aside>
 
@@ -136,22 +128,55 @@ const goToApp = () => {
       <!-- Header -->
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 bg-white px-6">
         <div class="flex items-center gap-2.5 text-sm text-stone-500">
-          <button
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 shadow-sm transition-colors hover:bg-stone-50 hover:text-brand-green-500 cursor-pointer"
-            :title="`${collapsed ? 'Expandir' : 'Colapsar'} menú (${shortcutLabel})`"
-            :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"
-            :aria-keyshortcuts="shortcutAria"
-            :aria-expanded="!collapsed"
-            @click="toggleSidebar"
-          >
-            <i
-              :class="collapsed ? 'icon-[material-symbols--left-panel-open]' : 'icon-[material-symbols--left-panel-close]'"
-              class="text-base"
-            ></i>
-          </button>
           <span class="font-medium text-stone-700">Backoffice</span>
           <i class="icon-[material-symbols--chevron-right] text-[10px] text-stone-300"></i>
           <span>{{ currentPageTitle }}</span>
+        </div>
+
+        <!-- Usuario -->
+        <div class="relative">
+          <button
+            class="flex items-center gap-2.5 rounded-xl py-1.5 pl-1.5 pr-2 transition-colors hover:bg-stone-50 cursor-pointer"
+            :aria-expanded="userMenuOpen"
+            aria-haspopup="menu"
+            @click.stop="userMenuOpen = !userMenuOpen"
+          >
+            <span
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-lime-500 text-xs font-bold text-brand-green-900"
+            >
+              {{ userInitials }}
+            </span>
+            <span class="hidden min-w-0 text-left sm:block">
+              <span class="block truncate text-sm font-semibold text-ink-500">{{ userShortName }}</span>
+              <span class="block text-xs text-stone-500">Superadmin</span>
+            </span>
+            <i
+              class="icon-[lucide--chevron-down] text-sm text-stone-400 transition-transform"
+              :class="{ 'rotate-180': userMenuOpen }"
+            ></i>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            v-if="userMenuOpen"
+            class="absolute right-0 top-full z-50 mt-1.5 w-56 overflow-hidden rounded-xl border border-black/[0.06] bg-white p-1 shadow-lg"
+          >
+            <button
+              class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
+              @click="goToApp"
+            >
+              <i class="icon-[lucide--arrow-left] text-base text-stone-400"></i>
+              Volver a la app
+            </button>
+            <div class="my-1 h-px bg-black/[0.06]"></div>
+            <button
+              class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-error-50 hover:text-error-600 cursor-pointer"
+              @click="handleLogout"
+            >
+              <i class="icon-[lucide--log-out] text-base text-stone-400"></i>
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </header>
 
