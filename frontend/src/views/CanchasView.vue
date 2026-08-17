@@ -1,19 +1,23 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-start justify-between">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Canchas</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Canchas</h1>
         <p class="mt-1 text-sm text-stone-500">
           {{ activeCourtsCount }} canchas activas &middot; {{ deporteCount }} deportes
         </p>
       </div>
-      <div class="flex items-center gap-3">
-        <div v-if="deporteFilters.length" class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
+      <div class="flex items-center gap-2 lg:gap-3">
+        <!-- Muchos deportes no entran en una fila de mobile: scrollea. -->
+        <div
+          v-if="deporteFilters.length"
+          class="flex min-w-0 overflow-x-auto rounded-full border border-black/[0.06] bg-white shadow-sm lg:overflow-hidden"
+        >
           <button
             v-for="filter in deporteFilters"
             :key="filter.value"
-            class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+            class="shrink-0 px-3.5 py-2 text-sm font-medium transition-colors cursor-pointer lg:px-4"
             :class="
               activeFilter === filter.value
                 ? 'bg-brand-purple-500 text-white'
@@ -27,10 +31,12 @@
         <button
           :disabled="sinCupo"
           :title="sinCupo ? `Tu plan ${cupo.planLabel} permite hasta ${cupo.limite} canchas` : null"
-          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-brand-lime-500 cursor-pointer"
+          class="ml-auto flex shrink-0 items-center gap-2 rounded-full bg-brand-lime-500 px-3.5 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-brand-lime-500 cursor-pointer lg:ml-0 lg:px-4"
           @click="openNewCourt"
         >
-          <i class="icon-[material-symbols--add] text-base"></i> Nueva cancha
+          <i class="icon-[material-symbols--add] text-base"></i>
+          <span class="hidden sm:inline">Nueva cancha</span>
+          <span class="sm:hidden">Nueva</span>
         </button>
       </div>
     </div>
@@ -158,10 +164,10 @@
 
         <!-- Court info -->
         <div class="p-5">
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-ink-500">{{ court.nombre }}</h3>
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="min-w-0 truncate text-base font-semibold text-ink-500">{{ court.nombre }}</h3>
             <span
-              class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
+              class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
               :class="[sportMeta(court.tipo).bgSoft, sportMeta(court.tipo).text]"
             >
               <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(court.tipo).dot"></span>
@@ -169,7 +175,7 @@
             </span>
           </div>
 
-          <div class="!mt-2 flex items-center gap-3 text-xs text-stone-500">
+          <div class="!mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
             <span v-if="court.superficie" class="flex items-center gap-1">
               <i class="icon-[material-symbols--grid-view] text-[10px]"></i>
               {{ court.superficie }}

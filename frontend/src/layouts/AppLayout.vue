@@ -9,7 +9,8 @@ import VerifyEmailBanner from '@/components/common/VerifyEmailBanner.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { collapsed, toggleSidebar, shortcutLabel, shortcutAria } = useSidebar()
+const { collapsed, railed, toggleSidebar, mobileOpen, openMobile, closeMobile, shortcutLabel, shortcutAria } =
+  useSidebar()
 useSidebarShortcut()
 const {
   user,
@@ -58,9 +59,12 @@ const closeMenus = () => {
   userMenuOpen.value = false
 }
 
-// Al navegar el dropdown de usuario tiene que cerrarse solo: los RouterLink de
-// adentro no disparan el click-outside.
-watch(() => route.path, closeMenus)
+// Al navegar el dropdown de usuario y el drawer mobile tienen que cerrarse
+// solos: los RouterLink de adentro no disparan el click-outside.
+watch(() => route.path, () => {
+  closeMenus()
+  closeMobile()
+})
 
 // --- Notificaciones sin leer (campanita + sidebar) ---
 const unreadCount = ref(0)
@@ -154,20 +158,38 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
 </script>
 
 <template>
-  <div class="flex h-screen bg-brand-sand-500 print:block print:h-auto">
-    <!-- Sidebar -->
+  <div class="flex h-dvh bg-brand-sand-500 print:block print:h-auto">
+    <!-- Backdrop del drawer mobile -->
+    <div
+      v-if="mobileOpen"
+      class="fixed inset-0 z-40 bg-black/40 lg:hidden print:hidden"
+      @click="closeMobile"
+    ></div>
+
+    <!-- Sidebar: drawer en mobile, columna fija desde lg -->
     <aside
-      class="flex shrink-0 flex-col bg-brand-green-500 transition-[width] duration-200 ease-out print:hidden"
-      :class="collapsed ? 'w-[76px]' : 'w-64'"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-brand-green-500 transition-transform duration-200 ease-out lg:static lg:z-auto lg:translate-x-0 lg:transition-[width] print:hidden"
+      :class="[
+        mobileOpen ? 'translate-x-0' : '-translate-x-full',
+        railed ? 'lg:w-[76px]' : 'lg:w-64',
+      ]"
     >
       <!-- Logo -->
-      <div class="flex items-center pt-5 pb-4" :class="collapsed ? 'justify-center px-2' : 'gap-2.5 px-5'">
+      <div class="flex items-center pt-5 pb-4" :class="railed ? 'justify-center px-2' : 'gap-2.5 px-5'">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-12 w-auto" />
-        <div v-if="!collapsed" class="leading-none">
+        <div v-if="!railed" class="leading-none">
           <p class="text-2xl font-normal text-white">
             Court<span class="text-brand-lime-500">In</span>
           </p>
         </div>
+        <!-- Cerrar (sólo drawer) -->
+        <button
+          class="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white cursor-pointer lg:hidden"
+          aria-label="Cerrar menú"
+          @click="closeMobile"
+        >
+          <i class="icon-[lucide--x] text-lg"></i>
+        </button>
       </div>
 
       <!-- Navigation -->
@@ -176,13 +198,13 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
-          :title="collapsed ? item.label : null"
+          :title="railed ? item.label : null"
           class="group relative flex items-center rounded-xl py-2.5 text-sm font-medium no-underline transition-colors"
           :class="[
             isActive(item.to)
               ? 'bg-white/12 text-white'
               : 'text-white/70 hover:bg-white/8 hover:text-white',
-            collapsed ? 'justify-center px-0' : 'gap-3 px-3',
+            railed ? 'justify-center px-0' : 'gap-3 px-3',
           ]"
         >
           <i
@@ -192,11 +214,11 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
             ]"
             class="text-lg"
           ></i>
-          <span v-if="!collapsed" class="flex-1">{{ item.label }}</span>
+          <span v-if="!railed" class="flex-1">{{ item.label }}</span>
           <template v-if="item.to === '/panel/notificaciones' && unreadCount">
             <!-- Colapsado no hay lugar para el contador: sólo un punto sobre el ícono. -->
             <span
-              v-if="collapsed"
+              v-if="railed"
               class="absolute right-3 top-1.5 h-2 w-2 rounded-full bg-error-500 ring-2 ring-brand-green-500"
             ></span>
             <span
@@ -209,11 +231,11 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
         </RouterLink>
       </nav>
 
-      <!-- Colapsar / expandir sidebar -->
-      <div class="border-t border-white/10 p-3">
+      <!-- Colapsar / expandir sidebar (en mobile el drawer no se colapsa) -->
+      <div class="hidden border-t border-white/10 p-3 lg:block">
         <button
           class="flex w-full items-center rounded-xl py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white cursor-pointer"
-          :class="collapsed ? 'justify-center px-0' : 'gap-3 px-3'"
+          :class="railed ? 'justify-center px-0' : 'gap-3 px-3'"
           :title="`${collapsed ? 'Expandir' : 'Colapsar'} menú (${shortcutLabel})`"
           :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"
           :aria-keyshortcuts="shortcutAria"
@@ -221,41 +243,51 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
           @click="toggleSidebar"
         >
           <i
-            :class="collapsed ? 'icon-[lucide--panel-left-open]' : 'icon-[lucide--panel-left-close]'"
+            :class="railed ? 'icon-[lucide--panel-left-open]' : 'icon-[lucide--panel-left-close]'"
             class="text-lg"
           ></i>
-          <span v-if="!collapsed">Colapsar menú</span>
+          <span v-if="!railed">Colapsar menú</span>
         </button>
       </div>
     </aside>
 
     <!-- Main area -->
-    <div class="flex flex-1 flex-col overflow-hidden">
+    <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
       <!-- Header -->
-      <header class="flex h-[72px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-white px-6 print:hidden">
-        <div class="flex items-center gap-2.5">
+      <header class="flex h-[72px] shrink-0 items-center justify-between gap-2 border-b border-black/[0.06] bg-white px-3 sm:px-6 print:hidden">
+        <div class="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
+          <!-- Abrir menú (mobile) -->
+          <button
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-brand-green-500 cursor-pointer lg:hidden"
+            aria-label="Abrir menú"
+            :aria-expanded="mobileOpen"
+            @click.stop="openMobile"
+          >
+            <i class="icon-[lucide--menu] text-xl"></i>
+          </button>
+
           <!-- Club selector -->
-          <div class="relative">
+          <div class="relative min-w-0">
             <button
-              class="flex min-w-[220px] items-center gap-2.5 rounded-xl border border-black/[0.06] bg-white px-4 py-2 transition-colors hover:bg-stone-50 cursor-pointer"
+              class="flex min-w-0 items-center gap-2 rounded-xl border border-black/[0.06] bg-white px-2.5 py-2 transition-colors hover:bg-stone-50 cursor-pointer sm:min-w-[220px] sm:gap-2.5 sm:px-4"
               @click.stop="clubSelectorOpen = !clubSelectorOpen"
             >
               <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-green-50 text-brand-green-500">
                 <i class="icon-[lucide--flag-triangle-right] text-base"></i>
               </span>
               <div class="min-w-0 flex-1 text-left">
-                <p class="text-[10px] font-semibold tracking-wider text-brand-green-500 uppercase">Complejo</p>
+                <p class="hidden text-[10px] font-semibold tracking-wider text-brand-green-500 uppercase sm:block">Complejo</p>
                 <p class="truncate text-sm font-semibold text-ink-500">
                   {{ selectedClubName || 'Seleccionar club' }}
                 </p>
               </div>
-              <i class="icon-[material-symbols--keyboard-arrow-down] text-sm text-stone-400 transition-transform" :class="{ 'rotate-180': clubSelectorOpen }"></i>
+              <i class="icon-[material-symbols--keyboard-arrow-down] shrink-0 text-sm text-stone-400 transition-transform" :class="{ 'rotate-180': clubSelectorOpen }"></i>
             </button>
 
             <!-- Dropdown -->
             <div
               v-if="clubSelectorOpen"
-              class="absolute left-0 top-full z-50 mt-1.5 w-64 overflow-hidden rounded-xl border border-black/[0.06] bg-white p-1 shadow-lg"
+              class="absolute left-0 top-full z-50 mt-1.5 w-[min(16rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-black/[0.06] bg-white p-1 shadow-lg"
             >
               <div v-if="availableClubs.length === 0" class="px-4 py-3 text-sm text-stone-500">
                 No hay clubes disponibles
@@ -274,10 +306,10 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
           </div>
         </div>
 
-        <div class="flex items-center gap-2.5">
+        <div class="flex shrink-0 items-center gap-1 sm:gap-2.5">
           <RouterLink
             to="/panel/notificaciones"
-            class="relative flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 no-underline transition-colors hover:bg-stone-50"
+            class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 no-underline transition-colors hover:bg-stone-50"
             title="Notificaciones"
           >
             <i class="icon-[material-symbols--notifications] text-base"></i>
@@ -292,7 +324,7 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
           <!-- Usuario -->
           <div class="relative">
             <button
-              class="flex items-center gap-2.5 rounded-xl py-1.5 pl-1.5 pr-2 transition-colors hover:bg-stone-50 cursor-pointer"
+              class="flex items-center gap-1 rounded-xl py-1.5 pl-1.5 pr-1.5 transition-colors hover:bg-stone-50 cursor-pointer sm:gap-2.5 sm:pr-2"
               :aria-expanded="userMenuOpen"
               aria-haspopup="menu"
               @click.stop="userMenuOpen = !userMenuOpen"
@@ -307,7 +339,7 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
                 <span class="block text-xs text-stone-500">{{ userRoleLabel }}</span>
               </span>
               <i
-                class="icon-[lucide--chevron-down] text-sm text-stone-400 transition-transform"
+                class="icon-[lucide--chevron-down] shrink-0 text-sm text-stone-400 transition-transform"
                 :class="{ 'rotate-180': userMenuOpen }"
               ></i>
             </button>
@@ -347,8 +379,8 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
       </header>
 
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto p-6 print:overflow-visible print:p-0">
-        <VerifyEmailBanner class="mb-6 print:hidden" />
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6 print:overflow-visible print:p-0">
+        <VerifyEmailBanner class="mb-4 sm:mb-6 print:hidden" />
         <RouterView />
       </main>
     </div>

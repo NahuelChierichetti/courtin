@@ -112,7 +112,7 @@ watch(currentClubId, fetchAll)
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-ink-500">Suscripción</h1>
+      <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Suscripción</h1>
       <p class="mt-1 text-sm text-stone-500">Tu plan, tu estado de pago y el historial de facturas.</p>
     </div>
 
@@ -129,7 +129,7 @@ watch(currentClubId, fetchAll)
 
     <template v-else-if="data">
       <!-- Aviso de estado -->
-      <div v-if="aviso" class="flex flex-wrap items-start gap-3 rounded-2xl border px-5 py-4" :class="TONOS[aviso.tono]">
+      <div v-if="aviso" class="flex flex-wrap items-start gap-3 rounded-2xl border px-4 py-4 sm:px-5" :class="TONOS[aviso.tono]">
         <i :class="estadoMeta.icono" class="mt-0.5 shrink-0 text-xl text-ink-500"></i>
         <div class="min-w-0 flex-1">
           <p class="text-sm font-semibold text-ink-500">{{ aviso.titulo }}</p>
@@ -138,16 +138,16 @@ watch(currentClubId, fetchAll)
       </div>
 
       <!-- Resumen -->
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <p class="text-sm font-medium text-stone-500">Plan</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ data.suscripcion.planLabel }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ data.suscripcion.planLabel }}</p>
           <p class="mt-1 text-xs text-stone-400">
             {{ data.uso.canchas }} de {{ data.uso.limite ?? '∞' }} canchas
           </p>
         </div>
 
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <p class="text-sm font-medium text-stone-500">Estado</p>
           <span class="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold" :class="estadoMeta.clase">
             <i :class="estadoMeta.icono" class="text-sm"></i>{{ estadoMeta.label }}
@@ -157,12 +157,12 @@ watch(currentClubId, fetchAll)
           </p>
         </div>
 
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <p class="text-sm font-medium text-stone-500">Abono {{ data.suscripcion.ciclo }}</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ money(data.suscripcion.precio) }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ money(data.suscripcion.precio) }}</p>
         </div>
 
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <p class="text-sm font-medium text-stone-500">
             {{ data.estado === 'trial' ? 'Prueba hasta' : 'Pago hasta' }}
           </p>
@@ -174,7 +174,7 @@ watch(currentClubId, fetchAll)
 
       <!-- Facturas -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="border-b border-black/[0.06] px-6 py-4">
+        <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
           <h2 class="text-sm font-semibold text-ink-500">Facturas</h2>
         </div>
 
@@ -187,7 +187,7 @@ watch(currentClubId, fetchAll)
         </div>
 
         <div v-else class="divide-y divide-black/[0.05]">
-          <div v-for="f in data.facturas" :key="f._id" class="flex flex-wrap items-center gap-4 px-6 py-3.5">
+          <div v-for="f in data.facturas" :key="f._id" class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 sm:gap-4 sm:px-6">
             <div class="min-w-0 flex-1">
               <p class="text-sm font-medium text-ink-500">{{ f.periodo }}</p>
               <p class="text-xs text-stone-400">
@@ -215,18 +215,18 @@ watch(currentClubId, fetchAll)
 
       <!-- Planes -->
       <div v-if="planes.length" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="border-b border-black/[0.06] px-6 py-4">
+        <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
           <h2 class="text-sm font-semibold text-ink-500">Planes</h2>
           <p class="mt-0.5 text-xs text-stone-500">
             Todas las funciones están en todos los planes: sólo cambia cuántas canchas podés cargar.
             Escribinos para cambiar de plan.
           </p>
         </div>
-        <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:gap-4 sm:p-6">
           <div
             v-for="p in planes"
             :key="p.key"
-            class="rounded-2xl border p-5"
+            class="rounded-2xl border p-4 sm:p-5"
             :class="p.key === data.suscripcion.plan ? 'border-brand-green-400 bg-brand-green-50' : 'border-black/[0.08]'"
           >
             <div class="flex items-center justify-between">

@@ -81,9 +81,9 @@ const center = computed(() => {
         @mouseleave="active = -1"
       >
         <span class="h-3 w-3 shrink-0 rounded-[4px]" :style="{ background: a.color }"></span>
-        <span class="flex-1 text-sm text-stone-600">{{ a.label }}</span>
-        <span class="text-sm font-semibold font-secondary text-stone-700">{{ format(a.value) }}</span>
-        <span class="w-10 text-right text-xs text-stone-400">{{ a.pct }}%</span>
+        <span class="min-w-0 flex-1 truncate text-sm text-stone-600">{{ a.label }}</span>
+        <span class="shrink-0 text-sm font-semibold font-secondary text-stone-700">{{ format(a.value) }}</span>
+        <span class="w-10 shrink-0 text-right text-xs text-stone-400">{{ a.pct }}%</span>
       </div>
     </div>
   </div>

@@ -12,7 +12,7 @@
         <!-- Drawer panel -->
         <div class="relative flex w-full max-w-md flex-col bg-white shadow-2xl">
           <!-- Header -->
-          <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
+          <div class="flex items-center gap-4 border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
               :class="form.tipo === 'especial' ? 'bg-brand-green-100 text-brand-green-600' : 'bg-stone-100 text-stone-500'"
@@ -32,7 +32,7 @@
           </div>
 
           <!-- Body -->
-          <div class="flex-1 overflow-y-auto px-6 py-6">
+          <div class="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
             <div class="space-y-6">
               <!-- Nombre -->
               <div>
@@ -109,7 +109,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex items-center justify-between border-t border-black/[0.06] px-6 py-4">
+          <div class="flex items-center justify-between border-t border-black/[0.06] px-4 py-4 sm:px-6">
             <button
               v-if="isEditing"
               class="text-sm font-medium text-error-500 transition-colors hover:text-error-600 cursor-pointer"

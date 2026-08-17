@@ -159,14 +159,14 @@ const revoke = async (inv) => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Equipo</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Equipo</h1>
         <p class="mt-1 text-sm text-stone-500">
           Quiénes pueden gestionar el complejo. Cada persona elige su propia contraseña.
         </p>
       </div>
       <button
         v-if="currentClubId"
-        class="flex h-10 items-center gap-2 rounded-full bg-brand-lime-500 px-5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
+        class="flex h-10 shrink-0 items-center gap-2 rounded-full bg-brand-lime-500 px-5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
         @click="inviteOpen = true"
       >
         <i class="icon-[material-symbols--person-add] text-base"></i> Invitar
@@ -186,27 +186,27 @@ const revoke = async (inv) => {
 
     <template v-else>
       <!-- Tiles -->
-      <div class="grid grid-cols-3 gap-4">
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-green-50 text-brand-green-500">
             <i class="icon-[material-symbols--group] text-xl"></i>
           </span>
-          <p class="mt-4 text-sm font-medium text-stone-500">Miembros activos</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ activos.length }}</p>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Miembros activos</p>
+          <p class="mt-1 text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ activos.length }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-purple-50 text-brand-purple-500">
             <i class="icon-[material-symbols--shield-outline] text-xl"></i>
           </span>
-          <p class="mt-4 text-sm font-medium text-stone-500">Administradores</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ admins }}</p>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Administradores</p>
+          <p class="mt-1 text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ admins }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-warning-50 text-warning-600">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-warning-50 text-warning-600">
             <i class="icon-[material-symbols--mail-outline] text-xl"></i>
           </span>
-          <p class="mt-4 text-sm font-medium text-stone-500">Invitaciones pendientes</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ invitations.length }}</p>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Invitaciones pendientes</p>
+          <p class="mt-1 text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ invitations.length }}</p>
         </div>
       </div>
 
@@ -218,7 +218,7 @@ const revoke = async (inv) => {
       <template v-else>
         <!-- Miembros -->
         <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-          <div class="border-b border-black/[0.06] px-6 py-4">
+          <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
             <h2 class="text-sm font-semibold text-ink-500">Miembros</h2>
           </div>
 
@@ -226,7 +226,7 @@ const revoke = async (inv) => {
             <div
               v-for="m in memberships"
               :key="m._id"
-              class="flex flex-wrap items-center gap-4 px-6 py-3.5"
+              class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 sm:gap-4 sm:px-6"
               :class="{ 'opacity-60': m.estado !== 'activo' }"
             >
               <span
@@ -294,13 +294,13 @@ const revoke = async (inv) => {
 
         <!-- Invitaciones pendientes -->
         <div v-if="invitations.length" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-          <div class="border-b border-black/[0.06] px-6 py-4">
+          <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
             <h2 class="text-sm font-semibold text-ink-500">Invitaciones pendientes</h2>
             <p class="mt-0.5 text-xs text-stone-500">Todavía no aceptaron el email.</p>
           </div>
 
           <div class="divide-y divide-black/[0.05]">
-            <div v-for="inv in invitations" :key="inv._id" class="flex flex-wrap items-center gap-4 px-6 py-3.5">
+            <div v-for="inv in invitations" :key="inv._id" class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 sm:gap-4 sm:px-6">
               <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-50 text-warning-600">
                 <i class="icon-[material-symbols--schedule] text-lg"></i>
               </span>
