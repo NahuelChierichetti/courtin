@@ -24,6 +24,7 @@ const {
 } = useAuth()
 
 const clubSelectorOpen = ref(false)
+const userMenuOpen = ref(false)
 
 const availableClubs = computed(() => {
   if (isSuperadmin.value) return superadminClubs.value
@@ -51,11 +52,15 @@ const handleClubChange = (clubId) => {
   clubSelectorOpen.value = false
 }
 
-const closeSelector = (e) => {
-  if (clubSelectorOpen.value) {
-    clubSelectorOpen.value = false
-  }
+// Un único listener global cierra cualquier menú abierto del header.
+const closeMenus = () => {
+  clubSelectorOpen.value = false
+  userMenuOpen.value = false
 }
+
+// Al navegar el dropdown de usuario tiene que cerrarse solo: los RouterLink de
+// adentro no disparan el click-outside.
+watch(() => route.path, closeMenus)
 
 // --- Notificaciones sin leer (campanita + sidebar) ---
 const unreadCount = ref(0)
@@ -78,11 +83,11 @@ watch(() => route.path, fetchUnread)
 onMounted(() => {
   fetchClubs()
   fetchUnread()
-  document.addEventListener('click', closeSelector)
+  document.addEventListener('click', closeMenus)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', closeSelector)
+  document.removeEventListener('click', closeMenus)
 })
 
 const handleLogout = () => {
@@ -144,6 +149,8 @@ const userShortName = computed(() => {
   if (parts.length >= 2) return `${parts[0]} ${parts[1][0]}.`
   return parts[0]
 })
+
+const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Empleado'))
 </script>
 
 <template>
@@ -202,82 +209,39 @@ const userShortName = computed(() => {
         </RouterLink>
       </nav>
 
-      <!-- Backoffice link (superadmin only) -->
-      <div v-if="isSuperadmin" class="px-3 pb-1">
-        <RouterLink
-          to="/admin"
-          :title="collapsed ? 'Backoffice' : null"
-          class="flex w-full items-center rounded-xl py-2.5 text-sm font-medium text-white/70 no-underline transition-colors hover:bg-white/8 hover:text-white"
-          :class="collapsed ? 'justify-center px-0' : 'gap-3 px-3'"
-        >
-          <i class="icon-[material-symbols--shield] text-lg text-white/60"></i>
-          <span v-if="!collapsed">Backoffice</span>
-        </RouterLink>
-      </div>
-
-      <!-- User profile -->
+      <!-- Colapsar / expandir sidebar -->
       <div class="border-t border-white/10 p-3">
-        <div
-          class="flex rounded-xl"
-          :class="collapsed ? 'flex-col items-center gap-2 py-2' : 'items-center gap-2.5 px-3 py-2'"
+        <button
+          class="flex w-full items-center rounded-xl py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white cursor-pointer"
+          :class="collapsed ? 'justify-center px-0' : 'gap-3 px-3'"
+          :title="`${collapsed ? 'Expandir' : 'Colapsar'} menú (${shortcutLabel})`"
+          :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"
+          :aria-keyshortcuts="shortcutAria"
+          :aria-expanded="!collapsed"
+          @click="toggleSidebar"
         >
-          <div
-            :title="collapsed ? userShortName : null"
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-lime-500 text-xs font-bold text-brand-green-900"
-          >
-            {{ userInitials }}
-          </div>
-          <div v-if="!collapsed" class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold text-white">{{ userShortName }}</p>
-            <p class="text-xs text-white/60">Administrador</p>
-          </div>
-          <RouterLink
-            to="/panel/configuracion"
-            title="Configuración"
-            class="flex h-8 w-8 items-center justify-center rounded-md text-white/60 no-underline transition-colors hover:bg-white/10 hover:text-white"
-            :class="{ 'bg-white/10 text-white': isActive('/panel/configuracion') }"
-          >
-            <i class="icon-[material-symbols--settings] text-sm"></i>
-          </RouterLink>
-          <button
-            title="Cerrar sesión"
-            class="flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-error-300 cursor-pointer"
-            @click="handleLogout"
-          >
-            <i class="icon-[material-symbols--logout] text-sm"></i>
-          </button>
-        </div>
+          <i
+            :class="collapsed ? 'icon-[lucide--panel-left-open]' : 'icon-[lucide--panel-left-close]'"
+            class="text-lg"
+          ></i>
+          <span v-if="!collapsed">Colapsar menú</span>
+        </button>
       </div>
     </aside>
 
     <!-- Main area -->
     <div class="flex flex-1 flex-col overflow-hidden">
       <!-- Header -->
-      <header class="flex h-[72px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-brand-sand-500/90 px-6 backdrop-blur print:hidden">
+      <header class="flex h-[72px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-white px-6 print:hidden">
         <div class="flex items-center gap-2.5">
-          <!-- Colapsar / expandir sidebar -->
-          <button
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 shadow-sm transition-colors hover:bg-stone-50 hover:text-brand-green-500 cursor-pointer"
-            :title="`${collapsed ? 'Expandir' : 'Colapsar'} menú (${shortcutLabel})`"
-            :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"
-            :aria-keyshortcuts="shortcutAria"
-            :aria-expanded="!collapsed"
-            @click="toggleSidebar"
-          >
-            <i
-              :class="collapsed ? 'icon-[material-symbols--left-panel-open]' : 'icon-[material-symbols--left-panel-close]'"
-              class="text-base"
-            ></i>
-          </button>
-
           <!-- Club selector -->
           <div class="relative">
             <button
-              class="flex min-w-[220px] items-center gap-2.5 rounded-full border border-black/[0.06] bg-white px-4 py-2 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer"
+              class="flex min-w-[220px] items-center gap-2.5 rounded-xl border border-black/[0.06] bg-white px-4 py-2 transition-colors hover:bg-stone-50 cursor-pointer"
               @click.stop="clubSelectorOpen = !clubSelectorOpen"
             >
               <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-green-50 text-brand-green-500">
-                <i class="icon-[material-symbols--apartment] text-base"></i>
+                <i class="icon-[lucide--flag-triangle-right] text-base"></i>
               </span>
               <div class="min-w-0 flex-1 text-left">
                 <p class="text-[10px] font-semibold tracking-wider text-brand-green-500 uppercase">Complejo</p>
@@ -299,7 +263,7 @@ const userShortName = computed(() => {
               <button
                 v-for="club in availableClubs"
                 :key="club._id"
-                class="flex w-full items-center gap-2 rounded-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer"
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer"
                 :class="club._id === currentClubId ? 'bg-brand-green-50 font-medium text-brand-green-700' : 'text-stone-700'"
                 @click.stop="handleClubChange(club._id)"
               >
@@ -313,7 +277,7 @@ const userShortName = computed(() => {
         <div class="flex items-center gap-2.5">
           <RouterLink
             to="/panel/notificaciones"
-            class="relative flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 no-underline shadow-sm transition-colors hover:bg-stone-50"
+            class="relative flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 no-underline transition-colors hover:bg-stone-50"
             title="Notificaciones"
           >
             <i class="icon-[material-symbols--notifications] text-base"></i>
@@ -324,12 +288,61 @@ const userShortName = computed(() => {
               {{ unreadCount > 9 ? '9+' : unreadCount }}
             </span>
           </RouterLink>
-          <RouterLink
-            to="/panel/turnos"
-            class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
-          >
-            <i class="icon-[material-symbols--add] text-base"></i> Nueva reserva
-          </RouterLink>
+
+          <!-- Usuario -->
+          <div class="relative">
+            <button
+              class="flex items-center gap-2.5 rounded-xl py-1.5 pl-1.5 pr-2 transition-colors hover:bg-stone-50 cursor-pointer"
+              :aria-expanded="userMenuOpen"
+              aria-haspopup="menu"
+              @click.stop="userMenuOpen = !userMenuOpen"
+            >
+              <span
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-lime-500 text-xs font-bold text-brand-green-900"
+              >
+                {{ userInitials }}
+              </span>
+              <span class="hidden min-w-0 text-left sm:block">
+                <span class="block truncate text-sm font-semibold text-ink-500">{{ userShortName }}</span>
+                <span class="block text-xs text-stone-500">{{ userRoleLabel }}</span>
+              </span>
+              <i
+                class="icon-[lucide--chevron-down] text-sm text-stone-400 transition-transform"
+                :class="{ 'rotate-180': userMenuOpen }"
+              ></i>
+            </button>
+
+            <!-- Dropdown -->
+            <div
+              v-if="userMenuOpen"
+              class="absolute right-0 top-full z-50 mt-1.5 w-56 overflow-hidden rounded-xl border border-black/[0.06] bg-white p-1 shadow-lg"
+            >
+              <RouterLink
+                to="/panel/configuracion"
+                class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-stone-700 no-underline transition-colors hover:bg-stone-50"
+                :class="{ 'bg-brand-green-50 font-medium text-brand-green-700': isActive('/panel/configuracion') }"
+              >
+                <i class="icon-[lucide--settings] text-base text-stone-400"></i>
+                Configuración
+              </RouterLink>
+              <RouterLink
+                v-if="isSuperadmin"
+                to="/admin"
+                class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-stone-700 no-underline transition-colors hover:bg-stone-50"
+              >
+                <i class="icon-[lucide--shield] text-base text-stone-400"></i>
+                Backoffice
+              </RouterLink>
+              <div class="my-1 h-px bg-black/[0.06]"></div>
+              <button
+                class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-error-50 hover:text-error-600 cursor-pointer"
+                @click="handleLogout"
+              >
+                <i class="icon-[lucide--log-out] text-base text-stone-400"></i>
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
