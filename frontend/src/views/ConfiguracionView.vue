@@ -376,7 +376,7 @@ const inputBase =
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Configuración del complejo</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Configuración del complejo</h1>
         <p class="mt-1 text-sm text-stone-500">Organizá los datos, el link público, la landing y los pagos.</p>
       </div>
       <button
@@ -421,11 +421,11 @@ const inputBase =
       <div class="min-w-0">
         <!-- GENERAL -->
         <div v-show="activeTab === 'general'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-          <div class="border-b border-black/[0.06] px-6 py-5">
+          <div class="border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <h2 class="text-base font-semibold text-ink-500">Datos generales</h2>
             <p class="mt-0.5 text-sm text-stone-400">Información de contacto, zona horaria y moneda.</p>
           </div>
-          <div class="space-y-5 px-6 py-6">
+          <div class="space-y-5 px-4 py-5 sm:px-6 sm:py-6">
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Nombre</label>
               <input v-model="form.nombre" type="text" placeholder="Ej: Club Garín Pádel" :class="inputBase" />
@@ -522,18 +522,20 @@ const inputBase =
 
         <!-- LINK DE RESERVAS -->
         <div v-show="activeTab === 'link'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-          <div class="border-b border-black/[0.06] px-6 py-5">
+          <div class="border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <h2 class="text-base font-semibold text-ink-500">Link de reservas</h2>
             <p class="mt-0.5 text-sm text-stone-400">Tu dirección pública única. Compartila en tus redes para recibir reservas online.</p>
           </div>
-          <div class="space-y-5 px-6 py-6">
+          <div class="space-y-5 px-4 py-5 sm:px-6 sm:py-6">
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Identificador (slug)</label>
               <div
                 class="flex items-stretch overflow-hidden rounded-xl border transition-colors"
                 :class="slugStatus === 'taken' || slugStatus === 'invalid' ? 'border-error-300' : slugStatus === 'available' ? 'border-success-300' : 'border-black/[0.08]'"
               >
-                <span class="flex items-center whitespace-nowrap bg-stone-50 px-3 text-sm text-stone-400">courtinapp.com/club/</span>
+                <!-- En mobile el prefijo se come el input: el link completo se
+                     ve igual en la caja "Tu link" de abajo. -->
+                <span class="hidden items-center whitespace-nowrap bg-stone-50 px-3 text-sm text-stone-400 sm:flex">courtinapp.com/club/</span>
                 <input v-model="form.slug" type="text" placeholder="tu-complejo" class="min-w-0 flex-1 bg-white px-3 py-2.5 text-sm text-ink-500 outline-none placeholder:text-stone-400" @input="onSlugInput" />
                 <span class="flex items-center pr-3">
                   <i v-if="slugStatus === 'checking'" class="icon-[material-symbols--progress-activity] animate-spin text-stone-300"></i>
@@ -571,7 +573,7 @@ const inputBase =
         <div v-show="activeTab === 'landing'" class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div class="space-y-6">
             <!-- Publicar -->
-            <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+            <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
               <div class="flex items-center justify-between gap-4">
                 <div>
                   <p class="text-sm font-semibold text-stone-800">Publicar complejo</p>
@@ -585,11 +587,11 @@ const inputBase =
 
             <!-- Imágenes -->
             <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-              <div class="border-b border-black/[0.06] px-6 py-5">
+              <div class="border-b border-black/[0.06] px-4 py-5 sm:px-6">
                 <h2 class="text-base font-semibold text-ink-500">Imágenes</h2>
                 <p class="mt-0.5 text-sm text-stone-400">Subí el logo, una imagen destacada y fotos de tu complejo (hasta 5 MB c/u).</p>
               </div>
-              <div class="space-y-5 px-6 py-6">
+              <div class="space-y-5 px-4 py-5 sm:px-6 sm:py-6">
                 <div>
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Logo</label>
                   <ImageUpload v-model="form.logo" variant="logo" placeholder="Subir logo" />
@@ -618,13 +620,13 @@ const inputBase =
 
             <!-- Ubicación en el mapa -->
             <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-              <div class="border-b border-black/[0.06] px-6 py-5">
+              <div class="border-b border-black/[0.06] px-4 py-5 sm:px-6">
                 <h2 class="text-base font-semibold text-ink-500">Ubicación</h2>
                 <p class="mt-0.5 text-sm text-stone-400">
                   El mapa que ve el jugador en tu página. Ajustá el pin si no cae justo en la entrada del complejo.
                 </p>
               </div>
-              <div class="space-y-4 px-6 py-6">
+              <div class="space-y-4 px-4 py-5 sm:px-6 sm:py-6">
                 <ClubMap
                   :nombre="form.nombre || 'tu complejo'"
                   :lat="form.ubicacion?.lat"
@@ -662,7 +664,7 @@ const inputBase =
                       v-model="coordsDraft"
                       type="text"
                       placeholder="https://www.google.com/maps/… o -34.603, -58.381"
-                      class="min-w-[240px] flex-1 rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                      class="w-full flex-1 rounded-xl sm:w-auto sm:min-w-[240px] border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                       @keydown.enter.prevent="aplicarCoords"
                     />
                     <button
@@ -685,10 +687,10 @@ const inputBase =
 
             <!-- Descripción + servicios -->
             <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-              <div class="border-b border-black/[0.06] px-6 py-5">
+              <div class="border-b border-black/[0.06] px-4 py-5 sm:px-6">
                 <h2 class="text-base font-semibold text-ink-500">Descripción y servicios</h2>
               </div>
-              <div class="space-y-5 px-6 py-6">
+              <div class="space-y-5 px-4 py-5 sm:px-6 sm:py-6">
                 <div>
                   <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Descripción</label>
                   <textarea v-model="form.descripcion" rows="3" placeholder="Contá qué hace especial a tu complejo…" :class="inputBase"></textarea>
@@ -729,11 +731,11 @@ const inputBase =
 
         <!-- PAGOS -->
         <div v-show="activeTab === 'pagos'" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-          <div class="border-b border-black/[0.06] px-6 py-5">
+          <div class="border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <h2 class="text-base font-semibold text-ink-500">Pasarelas de pago</h2>
             <p class="mt-0.5 text-sm text-stone-400">Conectá tu cuenta para cobrar las reservas online.</p>
           </div>
-          <div class="space-y-4 px-6 py-6">
+          <div class="space-y-4 px-4 py-5 sm:px-6 sm:py-6">
             <!-- MercadoPago -->
             <div class="flex flex-wrap items-center gap-4 rounded-2xl border border-black/[0.06] p-5">
               <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#009ee3]/10 text-[#009ee3]">

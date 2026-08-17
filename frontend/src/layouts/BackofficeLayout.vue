@@ -7,7 +7,8 @@ import { useSidebar, useSidebarShortcut } from '@/composables/useSidebar'
 const route = useRoute()
 const router = useRouter()
 const { user, logout } = useAuth()
-const { collapsed, toggleSidebar, shortcutLabel, shortcutAria } = useSidebar()
+const { collapsed, railed, toggleSidebar, mobileOpen, openMobile, closeMobile, shortcutLabel, shortcutAria } =
+  useSidebar()
 useSidebarShortcut()
 
 const userMenuOpen = ref(false)
@@ -15,9 +16,12 @@ const closeMenus = () => {
   userMenuOpen.value = false
 }
 
-// Al navegar el dropdown tiene que cerrarse solo: los RouterLink de adentro no
-// disparan el click-outside.
-watch(() => route.path, closeMenus)
+// Al navegar el dropdown y el drawer mobile tienen que cerrarse solos: los
+// RouterLink de adentro no disparan el click-outside.
+watch(() => route.path, () => {
+  closeMenus()
+  closeMobile()
+})
 
 onMounted(() => document.addEventListener('click', closeMenus))
 onUnmounted(() => document.removeEventListener('click', closeMenus))
@@ -60,21 +64,35 @@ const goToApp = () => {
 </script>
 
 <template>
-  <div class="flex h-screen bg-brand-sand-500">
-    <!-- Sidebar -->
+  <div class="flex h-dvh bg-brand-sand-500">
+    <!-- Backdrop del drawer mobile -->
+    <div v-if="mobileOpen" class="fixed inset-0 z-40 bg-black/40 lg:hidden" @click="closeMobile"></div>
+
+    <!-- Sidebar: drawer en mobile, columna fija desde lg -->
     <aside
-      class="flex shrink-0 flex-col bg-brand-green-700 transition-[width] duration-200 ease-out"
-      :class="collapsed ? 'w-[76px]' : 'w-64'"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-brand-green-700 transition-transform duration-200 ease-out lg:static lg:z-auto lg:translate-x-0 lg:transition-[width]"
+      :class="[
+        mobileOpen ? 'translate-x-0' : '-translate-x-full',
+        railed ? 'lg:w-[76px]' : 'lg:w-64',
+      ]"
     >
       <!-- Logo -->
-      <div class="flex items-center pt-5 pb-4" :class="collapsed ? 'justify-center px-2' : 'gap-2.5 px-5'">
+      <div class="flex items-center pt-5 pb-4" :class="railed ? 'justify-center px-2' : 'gap-2.5 px-5'">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-12 w-auto" />
-        <div v-if="!collapsed" class="flex flex-col text-start">
+        <div v-if="!railed" class="flex flex-col text-start">
           <p class="text-2xl font-normal text-white">
             Court<span class="text-brand-lime-500">In</span>
           </p>
           <span class="max-w-[50px] rounded bg-brand-lime-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-lime-400">Admin</span>
         </div>
+        <!-- Cerrar (sólo drawer) -->
+        <button
+          class="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white cursor-pointer lg:hidden"
+          aria-label="Cerrar menú"
+          @click="closeMobile"
+        >
+          <i class="icon-[lucide--x] text-lg"></i>
+        </button>
       </div>
 
       <!-- Navigation -->
@@ -82,13 +100,13 @@ const goToApp = () => {
         <div v-for="item in navItems" :key="item.label" class="mb-1">
           <RouterLink
             :to="item.to"
-            :title="collapsed ? item.label : null"
+            :title="railed ? item.label : null"
             class="group flex items-center rounded-md p-3 text-sm font-medium no-underline transition-colors"
             :class="[
               isActive(item.to)
                 ? 'bg-white/12 text-white'
                 : 'text-white/70 hover:bg-white/8 hover:text-white',
-              collapsed ? 'justify-center' : 'gap-3',
+              railed ? 'justify-center' : 'gap-3',
             ]"
           >
             <i
@@ -98,16 +116,16 @@ const goToApp = () => {
               ]"
               class="text-base"
             ></i>
-            <span v-if="!collapsed" class="flex-1">{{ item.label }}</span>
+            <span v-if="!railed" class="flex-1">{{ item.label }}</span>
           </RouterLink>
         </div>
       </nav>
 
-      <!-- Colapsar / expandir sidebar -->
-      <div class="border-t border-white/10 p-3">
+      <!-- Colapsar / expandir sidebar (en mobile el drawer no se colapsa) -->
+      <div class="hidden border-t border-white/10 p-3 lg:block">
         <button
           class="flex w-full items-center rounded-md p-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white cursor-pointer"
-          :class="collapsed ? 'justify-center' : 'gap-3'"
+          :class="railed ? 'justify-center' : 'gap-3'"
           :title="`${collapsed ? 'Expandir' : 'Colapsar'} menú (${shortcutLabel})`"
           :aria-label="collapsed ? 'Expandir menú' : 'Colapsar menú'"
           :aria-keyshortcuts="shortcutAria"
@@ -115,28 +133,38 @@ const goToApp = () => {
           @click="toggleSidebar"
         >
           <i
-            :class="collapsed ? 'icon-[lucide--panel-left-open]' : 'icon-[lucide--panel-left-close]'"
+            :class="railed ? 'icon-[lucide--panel-left-open]' : 'icon-[lucide--panel-left-close]'"
             class="text-base"
           ></i>
-          <span v-if="!collapsed">Colapsar menú</span>
+          <span v-if="!railed">Colapsar menú</span>
         </button>
       </div>
     </aside>
 
     <!-- Main area -->
-    <div class="flex flex-1 flex-col overflow-hidden">
+    <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
       <!-- Header -->
-      <header class="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 bg-white px-6">
-        <div class="flex items-center gap-2.5 text-sm text-stone-500">
-          <span class="font-medium text-stone-700">Backoffice</span>
-          <i class="icon-[material-symbols--chevron-right] text-[10px] text-stone-300"></i>
-          <span>{{ currentPageTitle }}</span>
+      <header class="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-stone-200 bg-white px-3 sm:px-6">
+        <div class="flex min-w-0 items-center gap-1.5 text-sm text-stone-500 sm:gap-2.5">
+          <!-- Abrir menú (mobile) -->
+          <button
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-brand-green-500 cursor-pointer lg:hidden"
+            aria-label="Abrir menú"
+            :aria-expanded="mobileOpen"
+            @click.stop="openMobile"
+          >
+            <i class="icon-[lucide--menu] text-xl"></i>
+          </button>
+          <!-- En mobile sólo la página actual: el breadcrumb completo no entra. -->
+          <span class="hidden font-medium text-stone-700 sm:inline">Backoffice</span>
+          <i class="icon-[material-symbols--chevron-right] hidden text-[10px] text-stone-300 sm:inline"></i>
+          <span class="truncate font-medium text-stone-700 sm:font-normal sm:text-stone-500">{{ currentPageTitle }}</span>
         </div>
 
         <!-- Usuario -->
-        <div class="relative">
+        <div class="relative shrink-0">
           <button
-            class="flex items-center gap-2.5 rounded-xl py-1.5 pl-1.5 pr-2 transition-colors hover:bg-stone-50 cursor-pointer"
+            class="flex items-center gap-1 rounded-xl py-1.5 pl-1.5 pr-1.5 transition-colors hover:bg-stone-50 cursor-pointer sm:gap-2.5 sm:pr-2"
             :aria-expanded="userMenuOpen"
             aria-haspopup="menu"
             @click.stop="userMenuOpen = !userMenuOpen"
@@ -151,7 +179,7 @@ const goToApp = () => {
               <span class="block text-xs text-stone-500">Superadmin</span>
             </span>
             <i
-              class="icon-[lucide--chevron-down] text-sm text-stone-400 transition-transform"
+              class="icon-[lucide--chevron-down] shrink-0 text-sm text-stone-400 transition-transform"
               :class="{ 'rotate-180': userMenuOpen }"
             ></i>
           </button>
@@ -181,7 +209,7 @@ const goToApp = () => {
       </header>
 
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto p-6">
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6">
         <RouterView />
       </main>
     </div>

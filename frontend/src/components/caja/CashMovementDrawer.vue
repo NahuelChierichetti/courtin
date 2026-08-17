@@ -6,7 +6,7 @@
 
         <div class="relative flex w-full max-w-md flex-col bg-white shadow-2xl">
           <!-- Header -->
-          <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
+          <div class="flex items-center gap-4 border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
               :class="form.tipo === 'ingreso' ? 'bg-success-50 text-success-600' : 'bg-error-50 text-error-600'"
@@ -23,7 +23,7 @@
           </div>
 
           <!-- Body -->
-          <div class="flex-1 space-y-5 overflow-y-auto px-6 py-6">
+          <div class="flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
             <!-- Tipo -->
             <div>
               <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Tipo</label>
@@ -118,7 +118,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex items-center justify-end gap-3 border-t border-black/[0.06] px-6 py-4">
+          <div class="flex items-center justify-end gap-3 border-t border-black/[0.06] px-4 py-4 sm:px-6">
             <button class="rounded-full border border-black/[0.08] px-5 py-2.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer" @click="emit('close')">
               Cancelar
             </button>

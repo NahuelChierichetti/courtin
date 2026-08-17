@@ -12,7 +12,7 @@
         <!-- Drawer panel -->
         <div class="relative flex w-full max-w-lg flex-col bg-white shadow-2xl">
           <!-- Header -->
-          <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
+          <div class="flex items-center gap-4 border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
               :class="[deporteActual.bgSoft, deporteActual.text]"
@@ -32,7 +32,7 @@
           </div>
 
           <!-- Body -->
-          <div class="flex-1 overflow-y-auto px-6 py-6">
+          <div class="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
             <div class="space-y-6">
               <!-- Name & Sport -->
               <div class="grid grid-cols-2 gap-4">
@@ -306,7 +306,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex items-center justify-between border-t border-black/[0.06] px-6 py-4">
+          <div class="flex items-center justify-between border-t border-black/[0.06] px-4 py-4 sm:px-6">
             <button
               v-if="isEditing"
               class="flex items-center gap-1.5 text-sm font-medium text-error-500 transition-colors hover:text-error-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"

@@ -1,16 +1,16 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-start justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Horarios de apertura</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Horarios de apertura</h1>
         <p class="mt-1 text-sm text-stone-500">
           Definí los días y horas en que el complejo acepta reservas.
         </p>
       </div>
       <div v-if="currentClubId && !loading && !error" class="flex items-center gap-3">
         <button
-          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:opacity-60 cursor-pointer"
+          class="flex shrink-0 items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 disabled:opacity-60 cursor-pointer"
           :disabled="saving"
           @click="save"
         >
@@ -52,13 +52,13 @@
     <div v-else-if="horarios" class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Weekly schedule -->
       <div class="lg:col-span-2 rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="flex items-center justify-between border-b border-black/[0.06] px-6 py-5">
-          <div>
+        <div class="flex items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-5 sm:px-6">
+          <div class="min-w-0">
             <h2 class="text-base font-semibold text-ink-500">Horario semanal regular</h2>
             <p class="mt-0.5 text-sm text-stone-400">Aplica a todas las canchas salvo excepciones puntuales</p>
           </div>
           <button
-            class="text-sm font-medium text-brand-green-500 transition-colors hover:text-brand-green-600 cursor-pointer"
+            class="shrink-0 text-sm font-medium text-brand-green-500 transition-colors hover:text-brand-green-600 cursor-pointer"
             @click="copyToAll"
           >
             Copiar a todas
@@ -66,14 +66,21 @@
         </div>
 
         <div class="divide-y divide-stone-100">
+          <!-- En mobile el día y el switch van arriba y los horarios en su
+               propia fila: los dos TimePicker no entran al lado del label. -->
           <div
             v-for="dia in diasSemana"
             :key="dia.key"
-            class="flex items-center gap-4 px-6 py-4"
+            class="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-4 sm:px-6"
           >
-            <span class="w-24 shrink-0 text-sm font-medium text-ink-500">{{ dia.label }}</span>
+            <span class="order-1 shrink-0 text-sm font-medium text-ink-500 sm:w-24">{{ dia.label }}</span>
 
-            <div class="flex items-center gap-2" :class="{ 'opacity-40': !horarios.semanal[dia.key].abierto }">
+            <!-- w-full en mobile: si se deja envolver solo, la fila queda en una
+                 o dos líneas según el largo del nombre del día. -->
+            <div
+              class="order-3 flex w-full items-center gap-2 sm:order-2 sm:w-auto"
+              :class="{ 'opacity-40': !horarios.semanal[dia.key].abierto }"
+            >
               <TimePicker
                 v-model="horarios.semanal[dia.key].horaInicio"
                 :disabled="!horarios.semanal[dia.key].abierto"
@@ -87,13 +94,13 @@
               />
             </div>
 
-            <span class="hidden flex-1 text-xs text-stone-400 sm:block">
+            <span class="order-4 hidden flex-1 text-xs text-stone-400 lg:block">
               <template v-if="horarios.semanal[dia.key].abierto">
                 ~{{ slotsCount(horarios.semanal[dia.key]) }} turnos de 1h
               </template>
             </span>
 
-            <div class="ml-auto flex items-center gap-3">
+            <div class="order-2 ml-auto flex items-center gap-3 sm:order-5">
               <span class="text-sm" :class="horarios.semanal[dia.key].abierto ? 'text-stone-600' : 'text-stone-400'">
                 {{ horarios.semanal[dia.key].abierto ? 'Abierto' : 'Cerrado' }}
               </span>
@@ -117,7 +124,7 @@
       <div class="space-y-6">
         <!-- Special days -->
         <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-          <div class="flex items-center justify-between border-b border-black/[0.06] px-6 py-5">
+          <div class="flex items-center justify-between border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div>
               <h2 class="text-base font-semibold text-ink-500">Días especiales</h2>
               <p class="mt-0.5 text-sm text-stone-400">Feriados y excepciones</p>
@@ -130,7 +137,7 @@
             </button>
           </div>
 
-          <div v-if="horarios.diasEspeciales.length === 0" class="px-6 py-8 text-center text-sm text-stone-400">
+          <div v-if="horarios.diasEspeciales.length === 0" class="px-4 py-8 text-center text-sm text-stone-400 sm:px-6">
             No hay días especiales cargados.
           </div>
 
@@ -138,7 +145,7 @@
             <div
               v-for="(dia, idx) in horarios.diasEspeciales"
               :key="dia._id || idx"
-              class="group flex items-center gap-3 px-6 py-4"
+              class="group flex items-center gap-3 px-4 py-4 sm:px-6"
             >
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
@@ -154,7 +161,7 @@
                 </p>
               </div>
               <button
-                class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 opacity-0 transition-all hover:bg-stone-100 hover:text-stone-600 cursor-pointer group-hover:opacity-100"
+                class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-all hover:bg-stone-100 hover:text-stone-600 cursor-pointer lg:opacity-0 lg:group-hover:opacity-100"
                 @click="openEditSpecialDay(dia, idx)"
               >
                 <i class="icon-[material-symbols--edit] text-sm"></i>
@@ -164,7 +171,7 @@
         </div>
 
         <!-- Booking settings -->
-        <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm p-6">
+        <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm p-4 sm:p-6">
           <h2 class="text-base font-semibold text-ink-500">Ajustes de reserva</h2>
 
           <div class="mt-4 rounded-lg bg-stone-50 px-4 py-3 text-xs text-stone-500">

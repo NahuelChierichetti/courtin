@@ -1,61 +1,83 @@
 <template>
   <div class="space-y-4">
     <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="flex flex-wrap items-center gap-3">
-        <!-- Date nav -->
-        <div class="flex items-center rounded-full border border-black/[0.06] bg-white shadow-sm">
-          <button
-            class="flex h-9 w-9 items-center justify-center rounded-l-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
-            @click="shiftDate(-1)"
-          >
-            <i class="icon-[material-symbols--chevron-left] text-xs"></i>
-          </button>
-          <span class="min-w-[180px] px-3 text-center text-sm font-semibold text-ink-500">
-            {{ dateLabel }}
-          </span>
-          <button
-            class="flex h-9 w-9 items-center justify-center rounded-r-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
-            @click="shiftDate(1)"
-          >
-            <i class="icon-[material-symbols--chevron-right] text-xs"></i>
-          </button>
-        </div>
-
+    <div class="flex flex-wrap items-center gap-2 lg:gap-3">
+      <!-- Date nav -->
+      <div class="flex items-center rounded-full border border-black/[0.06] bg-white shadow-sm">
         <button
-          class="h-9 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50 cursor-pointer"
-          @click="goToday"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-l-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
+          @click="shiftDate(-1)"
         >
-          Hoy
+          <i class="icon-[material-symbols--chevron-left] text-xs"></i>
         </button>
+        <span class="min-w-[128px] px-2 text-center text-sm font-semibold text-ink-500 lg:min-w-[180px] lg:px-3">
+          <!-- En mobile no entra la fecha larga. -->
+          <span class="lg:hidden">{{ dateLabelShort }}</span>
+          <span class="hidden lg:inline">{{ dateLabel }}</span>
+        </span>
+        <button
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-r-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
+          @click="shiftDate(1)"
+        >
+          <i class="icon-[material-symbols--chevron-right] text-xs"></i>
+        </button>
+      </div>
 
-        <!-- Day / Week toggle -->
-        <div class="flex overflow-hidden rounded-full border border-black/[0.06]">
-          <button
-            v-for="opt in viewOptions"
-            :key="opt.value"
-            class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
-            :class="viewMode === opt.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
-            @click="setViewMode(opt.value)"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
+      <button
+        class="h-9 shrink-0 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50 cursor-pointer"
+        @click="goToday"
+      >
+        Hoy
+      </button>
 
-        <!-- Court filter -->
-        <div class="relative" @click.stop>
-          <button
-            class="flex h-9 items-center gap-2 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
-            @click="courtMenuOpen = !courtMenuOpen"
-          >
-            <i class="icon-[material-symbols--filter-alt] text-xs text-stone-400"></i>
-            {{ selectedCourt ? selectedCourt.nombre : 'Todas las canchas' }}
-            <i class="icon-[material-symbols--keyboard-arrow-down] text-[10px] text-stone-400"></i>
-          </button>
-          <div
-            v-if="courtMenuOpen"
-            class="absolute left-0 top-full z-30 mt-1 w-56 rounded-lg border border-black/[0.06] bg-white shadow-sm py-1 shadow-lg"
-          >
+      <!-- Acciones: en mobile arrancan fila propia alineadas a la derecha; en
+           desktop quedan al final de la única fila. -->
+      <div class="order-3 ml-auto flex shrink-0 items-center gap-2 lg:order-last">
+        <button
+          class="flex h-9 w-9 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed lg:h-10 lg:w-10"
+          title="Exportar a CSV"
+          :disabled="!calendarItems.length"
+          @click="exportCsv"
+        >
+          <i class="icon-[material-symbols--download] text-base"></i>
+        </button>
+        <button
+          class="flex h-9 items-center gap-1.5 rounded-full bg-brand-lime-500 px-3.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer lg:h-10 lg:gap-2 lg:px-4"
+          @click="openNew"
+        >
+          <i class="icon-[material-symbols--add] text-base"></i>
+          <span class="hidden sm:inline">Nuevo turno</span>
+          <span class="sm:hidden">Nuevo</span>
+        </button>
+      </div>
+
+      <!-- Day / Week toggle -->
+      <div class="order-4 flex shrink-0 overflow-hidden rounded-full border border-black/[0.06] lg:order-none">
+        <button
+          v-for="opt in viewOptions"
+          :key="opt.value"
+          class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+          :class="viewMode === opt.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
+          @click="setViewMode(opt.value)"
+        >
+          {{ opt.label }}
+        </button>
+      </div>
+
+      <!-- Court filter -->
+      <div class="relative order-5 min-w-0 lg:order-none" @click.stop>
+        <button
+          class="flex h-9 w-full items-center gap-2 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
+          @click="courtMenuOpen = !courtMenuOpen"
+        >
+          <i class="icon-[material-symbols--filter-alt] shrink-0 text-xs text-stone-400"></i>
+          <span class="truncate">{{ selectedCourt ? selectedCourt.nombre : 'Todas las canchas' }}</span>
+          <i class="icon-[material-symbols--keyboard-arrow-down] shrink-0 text-[10px] text-stone-400"></i>
+        </button>
+        <div
+          v-if="courtMenuOpen"
+          class="absolute left-0 top-full z-30 mt-1 w-[min(14rem,calc(100vw-2rem))] rounded-lg border border-black/[0.06] bg-white shadow-sm py-1 shadow-lg"
+        >
             <button
               class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
               :class="!selectedCourtId ? 'text-brand-green-600' : 'text-stone-700'"
@@ -79,52 +101,38 @@
           </div>
         </div>
 
-        <!-- Sport legend / filter -->
-        <div v-if="sportChips.length" class="flex items-center gap-1.5">
-          <button
-            v-for="s in sportChips"
-            :key="s.value"
-            class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
-            :class="sportFilter === s.value
-              ? 'border-stone-300 bg-stone-100 text-ink-500'
-              : 'border-transparent text-stone-500 hover:bg-stone-50'"
-            @click="toggleSport(s.value)"
-          >
-            <span v-if="s.dot" class="h-2 w-2 rounded-full" :class="s.dot" />
-            {{ s.label }}
-          </button>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
+      <!-- Sport legend / filter. En mobile scrollea en horizontal en vez de
+           romper la fila con muchos deportes. -->
+      <div
+        v-if="sportChips.length"
+        class="order-6 -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 lg:order-none lg:mx-0 lg:w-auto lg:overflow-visible lg:px-0"
+      >
         <button
-          class="flex h-10 w-10 items-center justify-center rounded-full border border-black/[0.06] bg-white text-stone-500 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-          title="Exportar a CSV"
-          :disabled="!calendarItems.length"
-          @click="exportCsv"
+          v-for="s in sportChips"
+          :key="s.value"
+          class="flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
+          :class="sportFilter === s.value
+            ? 'border-stone-300 bg-stone-100 text-ink-500'
+            : 'border-transparent text-stone-500 hover:bg-stone-50'"
+          @click="toggleSport(s.value)"
         >
-          <i class="icon-[material-symbols--download] text-base"></i>
-        </button>
-        <button
-          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
-          @click="openNew"
-        >
-          <i class="icon-[material-symbols--add] text-base"></i> Nuevo turno
+          <span v-if="s.dot" class="h-2 w-2 rounded-full" :class="s.dot" />
+          {{ s.label }}
         </button>
       </div>
     </div>
 
     <!-- Summary strip -->
-    <div v-if="currentClubId && courts.length" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
+    <div v-if="currentClubId && courts.length" class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-3 py-2.5 sm:px-4 sm:py-3">
         <p class="text-xs text-stone-400">Turnos {{ viewMode === 'day' ? 'del día' : 'de la semana' }}</p>
         <p class="mt-0.5 text-xl font-bold font-secondary text-ink-500">{{ stats.total }}</p>
       </div>
-      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
+      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-3 py-2.5 sm:px-4 sm:py-3">
         <p class="text-xs text-stone-400">Confirmados</p>
         <p class="mt-0.5 text-xl font-bold font-secondary text-success-600">{{ stats.confirmados }}</p>
       </div>
-      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
+      <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-3 py-2.5 sm:px-4 sm:py-3">
         <p class="text-xs text-stone-400">Pendientes</p>
         <p class="mt-0.5 text-xl font-bold font-secondary text-warning-600">{{ stats.pendientes }}</p>
       </div>
@@ -285,6 +293,14 @@ const dateLabel = computed(() => {
   const start = weekStart.value
   const end = start.add(6, 'day')
   return `${start.format('DD MMM')} – ${end.format('DD MMM')}`
+})
+
+// Versión corta para mobile: en la barra no hay ancho para "Lun. 17 de agosto,
+// 2026". En vista semanal el rango ya es corto y se reusa tal cual.
+const dateLabelShort = computed(() => {
+  if (viewMode.value !== 'day') return dateLabel.value
+  const l = dayjs(currentDate.value).format('ddd DD MMM')
+  return l.charAt(0).toUpperCase() + l.slice(1)
 })
 
 // --- Columnas ---

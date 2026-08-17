@@ -158,17 +158,17 @@ watch(currentClubId, fetchUpcoming)
 <template>
   <div class="space-y-6">
     <!-- Page header -->
-    <div class="flex items-start justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Dashboard</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Dashboard</h1>
         <p class="mt-1 text-xs text-stone-500 first-letter:uppercase">{{ todayFormatted }}</p>
       </div>
-      <div class="flex items-center gap-3">
-        <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
+      <div class="-mx-1 flex items-center overflow-x-auto px-1 sm:mx-0 sm:overflow-visible sm:px-0">
+        <div class="flex shrink-0 overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
             v-for="period in periods"
             :key="period.value"
-            class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+            class="px-3.5 py-2 text-sm font-medium transition-colors cursor-pointer sm:px-4"
             :class="selectedPeriod === period.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
             @click="selectedPeriod = period.value"
           >
@@ -179,26 +179,26 @@ watch(currentClubId, fetchUpcoming)
     </div>
 
     <!-- Stats cards -->
-    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <div v-for="stat in statTiles" :key="stat.title" class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl" :class="statColorMap[stat.color].bg">
-            <i :class="[stat.icon, statColorMap[stat.color].icon]" class="text-xl"></i>
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div v-for="stat in statTiles" :key="stat.title" class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+        <div class="flex items-center justify-between gap-2">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11" :class="statColorMap[stat.color].bg">
+            <i :class="[stat.icon, statColorMap[stat.color].icon]" class="text-lg sm:text-xl"></i>
           </span>
           <span
             v-if="stat.trendPct !== null && stat.trendPct !== undefined"
-            class="rounded-full px-2 py-0.5 text-xs font-semibold"
+            class="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold"
             :class="stat.trendPct >= 0 ? 'bg-success-50 text-success-600' : 'bg-error-50 text-error-600'"
           >
             {{ stat.trendPct >= 0 ? '+' : '' }}{{ stat.trendPct }}%
           </span>
         </div>
-        <p class="mt-4 text-sm font-medium text-stone-500">{{ stat.title }}</p>
-        <p class="mt-1 text-3xl font-bold font-secondary text-ink-500">{{ stat.value }}</p>
+        <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">{{ stat.title }}</p>
+        <p class="mt-1 text-2xl font-bold font-secondary text-ink-500 sm:text-3xl">{{ stat.value }}</p>
       </div>
       <!-- Skeleton mientras carga -->
       <template v-if="!statTiles.length">
-        <div v-for="n in 4" :key="n" class="h-[132px] animate-pulse rounded-2xl border border-black/[0.06] bg-white shadow-sm"></div>
+        <div v-for="n in 4" :key="n" class="h-[118px] animate-pulse rounded-2xl border border-black/[0.06] bg-white shadow-sm sm:h-[132px]"></div>
       </template>
     </div>
 
@@ -206,7 +206,7 @@ watch(currentClubId, fetchUpcoming)
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <!-- Próximas reservas -->
       <div class="col-span-1 min-h-[400px] rounded-2xl border border-black/[0.06] bg-white shadow-sm lg:col-span-2">
-        <div class="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
             <h2 class="text-base font-semibold text-ink-500">Próximas reservas</h2>
             <p class="text-xs text-stone-400">Próximos turnos desde las {{ nowLabel }} hs</p>
@@ -216,8 +216,8 @@ watch(currentClubId, fetchUpcoming)
           </button>
         </div>
 
-        <div class="px-6">
-          <div class="grid grid-cols-[80px_1fr_120px_110px_32px] items-center gap-6 border-b border-stone-100 py-3 text-xs font-semibold tracking-wide text-stone-400 uppercase">
+        <div class="px-4 sm:px-6">
+          <div class="hidden grid-cols-[80px_1fr_120px_110px_32px] items-center gap-6 border-b border-stone-100 py-3 text-xs font-semibold tracking-wide text-stone-400 uppercase lg:grid">
             <span>Hora</span><span>Cliente</span><span>Cancha</span><span>Estado</span><span></span>
           </div>
 
@@ -240,23 +240,29 @@ watch(currentClubId, fetchUpcoming)
             <div
               v-for="reservation in upcomingReservations"
               :key="reservation.id"
-              class="grid grid-cols-[80px_1fr_120px_110px_32px] items-center gap-6 border-b border-stone-50 py-4 last:border-b-0"
+              class="grid grid-cols-[76px_1fr_28px] items-center gap-3 border-b border-stone-50 py-3.5 last:border-b-0 lg:grid-cols-[80px_1fr_120px_110px_32px] lg:gap-6 lg:py-4"
             >
               <div class="flex items-center gap-1 text-xs text-stone-500">
                 {{ reservation.time }} – {{ reservation.timeEnd }}
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex min-w-0 items-center gap-3">
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-green-50 text-xs font-semibold font-secondary text-brand-green-600">
                   {{ reservation.initials }}
                 </div>
-                <span class="text-sm font-medium text-stone-800">{{ reservation.name }}</span>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-medium text-stone-800">{{ reservation.name }}</p>
+                  <!-- Cancha y estado no tienen columna propia en mobile. -->
+                  <p class="truncate text-xs text-stone-400 lg:hidden">
+                    {{ reservation.court }} · <span :class="reservation.estadoText">{{ reservation.estadoLabel }}</span>
+                  </p>
+                </div>
               </div>
-              <div>
+              <div class="hidden lg:block">
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-purple-50 px-2.5 py-1 text-xs font-medium font-secondary text-brand-purple-700">
                   <span class="h-1.5 w-1.5 rounded-full bg-brand-purple-500"></span>{{ reservation.court }}
                 </span>
               </div>
-              <div>
+              <div class="hidden lg:block">
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-stone-50 px-2.5 py-1 text-xs font-medium font-secondary" :class="reservation.estadoText">
                   <span class="h-1.5 w-1.5 rounded-full" :class="reservation.estadoDot"></span>{{ reservation.estadoLabel }}
                 </span>
@@ -271,14 +277,14 @@ watch(currentClubId, fetchUpcoming)
 
       <!-- Ocupación por cancha -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
             <h2 class="text-base font-semibold text-ink-500">Ocupación por cancha</h2>
             <p class="text-xs text-stone-400">Hoy</p>
           </div>
         </div>
-        <div v-if="!ocupacionPorCancha.length" class="px-6 py-10 text-center text-sm text-stone-400">Sin canchas activas.</div>
-        <div v-else class="mt-4 space-y-3 px-6 pb-2">
+        <div v-if="!ocupacionPorCancha.length" class="px-4 py-10 text-center sm:px-6 text-sm text-stone-400">Sin canchas activas.</div>
+        <div v-else class="mt-4 space-y-3 px-4 pb-2 sm:px-6">
           <div v-for="court in ocupacionPorCancha" :key="court.nombre" class="flex items-center gap-3">
             <div class="flex w-24 items-center gap-2">
               <span class="h-2 w-2 shrink-0 rounded-full" :class="getCourtOccupationColor(court.pct)"></span>
@@ -297,13 +303,13 @@ watch(currentClubId, fetchUpcoming)
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <!-- Mapa de calor -->
       <div class="col-span-1 rounded-2xl border border-black/[0.06] bg-white shadow-sm lg:col-span-2">
-        <div class="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
             <h2 class="text-base font-semibold text-ink-500">Mapa de calor — Esta semana</h2>
             <p class="text-xs text-stone-400">Ocupación por día y franja horaria</p>
           </div>
         </div>
-        <div class="overflow-x-auto px-6 py-4 pb-6">
+        <div class="overflow-x-auto px-4 py-4 pb-6 sm:px-6">
           <div class="min-w-[500px]">
             <div class="my-2 grid" :style="{ gridTemplateColumns: '48px repeat(7, 1fr)', gap: '4px' }">
               <div></div>
@@ -337,14 +343,14 @@ watch(currentClubId, fetchUpcoming)
 
       <!-- Actividad reciente -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+        <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
             <h2 class="text-base font-semibold text-ink-500">Actividad reciente</h2>
             <p class="text-xs text-stone-400">Últimos eventos del complejo</p>
           </div>
         </div>
-        <div v-if="!actividad.length" class="px-6 py-10 text-center text-sm text-stone-400">Sin actividad reciente.</div>
-        <div v-else class="divide-y divide-stone-50 px-6">
+        <div v-if="!actividad.length" class="px-4 py-10 text-center sm:px-6 text-sm text-stone-400">Sin actividad reciente.</div>
+        <div v-else class="divide-y divide-stone-50 px-4 sm:px-6">
           <div v-for="(a, index) in actividad" :key="index" class="flex items-center gap-3 py-3.5">
             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" :class="actMeta(a.tipo).color">
               <i :class="actMeta(a.tipo).icon" class="text-sm"></i>
