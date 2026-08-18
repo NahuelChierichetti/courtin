@@ -61,6 +61,14 @@ const router = createRouter({
       ],
     },
     {
+      // Página de venta, dirigida al dueño del complejo. Fuera de `PublicLayout`
+      // a propósito: ese layout le habla al jugador (buscador de canchas en el
+      // encabezado) y acá la audiencia es la que paga. Trae su propio chrome.
+      path: '/complejos',
+      name: 'landing-complejos',
+      component: () => import('@/views/landing/LandingComplejosView.vue'),
+    },
+    {
       // Gestión de una reserva por token (invitado sin cuenta).
       path: '/reserva/:token',
       component: PublicLayout,

@@ -114,46 +114,7 @@
       >
         <!-- Court illustration -->
         <div class="relative h-40 flex items-center justify-center overflow-hidden" :class="sportMeta(court.tipo).bgSoft">
-          <!-- Padel court -->
-          <svg v-if="court.tipo === 'padel'" class="h-28 w-36" viewBox="0 0 180 140" fill="none">
-            <rect x="10" y="10" width="160" height="120" rx="2" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" fill="none" />
-            <line x1="90" y1="10" x2="90" y2="130" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" />
-            <rect x="35" y="10" width="110" height="30" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="35" y="100" width="110" height="30" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <line x1="10" y1="70" x2="170" y2="70" stroke="#16241b" stroke-opacity="0.35" stroke-width="1" stroke-dasharray="4 3" />
-          </svg>
-          <!-- Tennis court -->
-          <svg v-else-if="court.tipo === 'tenis'" class="h-28 w-36" viewBox="0 0 180 140" fill="none">
-            <rect x="10" y="10" width="160" height="120" rx="2" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" fill="none" />
-            <line x1="90" y1="10" x2="90" y2="130" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" />
-            <rect x="40" y="10" width="100" height="35" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="40" y="95" width="100" height="35" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="55" y="10" width="70" height="35" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1" fill="none" />
-            <rect x="55" y="95" width="70" height="35" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1" fill="none" />
-            <line x1="10" y1="70" x2="170" y2="70" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" />
-          </svg>
-          <!-- Football court -->
-          <svg v-else-if="court.tipo === 'futbol'" class="h-28 w-36" viewBox="0 0 180 140" fill="none">
-            <rect x="10" y="10" width="160" height="120" rx="2" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" fill="none" />
-            <line x1="90" y1="10" x2="90" y2="130" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" />
-            <circle cx="90" cy="70" r="20" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="10" y="35" width="30" height="70" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="140" y="35" width="30" height="70" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="10" y="50" width="15" height="40" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1" fill="none" />
-            <rect x="155" y="50" width="15" height="40" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1" fill="none" />
-          </svg>
-          <!-- Basketball court -->
-          <svg v-else-if="court.tipo === 'basquet'" class="h-28 w-36" viewBox="0 0 180 140" fill="none">
-            <rect x="10" y="10" width="160" height="120" rx="2" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" fill="none" />
-            <line x1="90" y1="10" x2="90" y2="130" stroke="#16241b" stroke-opacity="0.55" stroke-width="2" />
-            <circle cx="90" cy="70" r="18" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="10" y="45" width="35" height="50" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <rect x="135" y="45" width="35" height="50" rx="1" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <path d="M45 50a22 22 0 0 1 0 40" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-            <path d="M135 50a22 22 0 0 0 0 40" stroke="#16241b" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
-          </svg>
-          <!-- Deporte sin ilustración propia: el ícono del catálogo -->
-          <SportIcon v-else :sport="court.tipo" class="h-16 w-16 text-ink-500/30" />
+          <CourtIllustration :tipo="court.tipo" />
         </div>
 
         <!-- Court info -->
@@ -232,7 +193,7 @@ import courtService from '@/services/courtService'
 import { useAuth } from '@/composables/useAuth'
 import { formatCurrency } from '@/utils/datetime'
 import { sportsForClub, sportMeta } from '@/utils/sports'
-import SportIcon from '@/components/public/SportIcon.vue'
+import CourtIllustration from '@/components/canchas/CourtIllustration.vue'
 
 const { currentClubId, currentClub } = useAuth()
 const toast = useToast()

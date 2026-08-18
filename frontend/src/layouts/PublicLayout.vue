@@ -83,8 +83,10 @@ const onSearch = () => {
             <UserMenu />
           </template>
           <template v-else>
+            <!-- Va a la página de venta, no al formulario: quien todavía no
+                 sabe qué es CourtIn no arranca por el alta. -->
             <RouterLink
-              to="/panel/registro"
+              to="/complejos"
               class="hidden text-sm font-medium text-stone-600 no-underline transition-colors hover:text-ink-500 lg:block"
             >
               Sumá tu complejo
@@ -128,9 +130,9 @@ const onSearch = () => {
         <div>
           <p class="text-xs font-semibold tracking-wider text-white/60 uppercase">Complejos</p>
           <ul class="mt-3 space-y-2 text-sm text-white/80">
-            <li><RouterLink to="/panel/registro" class="no-underline text-white/80 hover:text-white">Sumá tu complejo</RouterLink></li>
+            <li><RouterLink to="/complejos" class="no-underline text-white/80 hover:text-white">Sumá tu complejo</RouterLink></li>
             <li><RouterLink to="/panel/login" class="no-underline text-white/80 hover:text-white">Panel de gestión</RouterLink></li>
-            <li>Precios</li>
+            <li><RouterLink to="/complejos#demo" class="no-underline text-white/80 hover:text-white">Ver la demo</RouterLink></li>
           </ul>
         </div>
         <div>
