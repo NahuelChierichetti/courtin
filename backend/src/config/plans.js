@@ -10,6 +10,12 @@
 //
 // El ciclo anual es un PAGO ÚNICO ADELANTADO, no doce cuotas con descuento. El
 // precio "por mes" es sólo la forma de comunicarlo.
+//
+// El descuento anual es del 20% PAREJO en los tres planes (anual = mensual × 12
+// × 0,8). Antes era un monto fijo de $5.000/mes, que en porcentaje daba 12,5% /
+// 8,3% / 6,25%: el incentivo a pagar por adelantado se debilitaba justo con los
+// clientes más grandes, que son los que más ayudan al flujo de caja. El 20% es
+// además el número que publican Clubo y PlayWith.
 
 const PLANS = {
   start: {
@@ -19,10 +25,10 @@ const PLANS = {
     maxCanchas: 3,
     precios: {
       mensual: 40000,
-      anual: 420000
+      anual: 384000
     },
     // Para mostrar en la web: lo que se comunica es el valor mensualizado.
-    precioMensualizadoAnual: 35000
+    precioMensualizadoAnual: 32000
   },
   pro: {
     key: 'pro',
@@ -30,9 +36,9 @@ const PLANS = {
     maxCanchas: 6,
     precios: {
       mensual: 60000,
-      anual: 660000
+      anual: 576000
     },
-    precioMensualizadoAnual: 55000
+    precioMensualizadoAnual: 48000
   },
   elite: {
     key: 'elite',
@@ -40,9 +46,9 @@ const PLANS = {
     maxCanchas: null,
     precios: {
       mensual: 80000,
-      anual: 900000
+      anual: 768000
     },
-    precioMensualizadoAnual: 75000
+    precioMensualizadoAnual: 64000
   }
 };
 
