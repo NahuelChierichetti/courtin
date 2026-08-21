@@ -41,10 +41,10 @@ const destinoLabel = computed(() => (isAuthenticated.value ? 'Ir a mi panel' : '
     <!-- Columna contenido -->
     <div class="flex min-h-screen flex-col px-6 py-8 sm:px-12 lg:px-16">
       <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
-        <img src="/images/logo-green.svg" alt="CourtIn" class="h-10 w-auto" />
+        <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-bold tracking-tight text-ink-500">
-            Court<span class="text-brand-green-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-ink-500">
+            Court<span class="text-brand-lime-500">In</span>
           </p>
         </div>
       </RouterLink>
