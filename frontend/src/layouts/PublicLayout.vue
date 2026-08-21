@@ -39,10 +39,10 @@ const onSearch = () => {
       <div class="mx-auto flex h-[72px] w-full max-w-7xl items-center gap-4 px-4 sm:gap-6">
         <!-- Brand -->
         <RouterLink :to="{ name: 'public-home' }" class="flex shrink-0 items-center gap-2.5 no-underline">
-          <img src="/images/logo-green.svg" alt="CourtIn" class="h-10 w-auto" />
+          <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
           <div class="hidden leading-none sm:block">
-            <p class="text-lg font-bold tracking-tight text-ink-500">
-              Court<span class="text-brand-green-500">In</span>
+            <p class="text-lg font-normal tracking-tight text-ink-500">
+              Court<span class="text-brand-lime-500">In</span>
             </p>
           </div>
         </RouterLink>
