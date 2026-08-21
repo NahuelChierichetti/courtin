@@ -356,9 +356,9 @@ const PUNTOS_COBRO = [
         class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between"
       >
         <div class="flex items-center gap-2.5">
-          <img src="/images/logo-green.svg" alt="" class="h-8 w-auto" />
+          <img src="/images/logo-lime.svg" alt="" class="h-8 w-auto" />
           <span class="text-sm font-medium text-ink-500">
-            Court<span class="text-brand-green-500">In</span>
+            Court<span class="text-brand-lime-500">In</span>
           </span>
         </div>
         <div class="flex flex-wrap items-center gap-6 text-sm text-stone-500">
