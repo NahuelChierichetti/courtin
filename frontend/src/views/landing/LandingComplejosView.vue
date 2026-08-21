@@ -72,7 +72,7 @@ const PUNTOS_COBRO = [
 
         <nav class="ml-4 hidden items-center gap-6 md:flex">
           <a href="#demo" class="text-sm text-stone-600 no-underline transition-colors hover:text-ink-500">
-            Probalo
+            Probar demo
           </a>
           <a href="#precios" class="text-sm text-stone-600 no-underline transition-colors hover:text-ink-500">
             Precios
