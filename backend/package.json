@@ -15,6 +15,7 @@
     "jobs:reminders": "node src/scripts/sendReminders.js",
     "jobs:holds": "node src/scripts/releaseHolds.js",
     "jobs:dunning": "node src/scripts/runDunning.js",
+    "jobs:recurring": "node src/scripts/materializeRecurring.js",
     "users:grandfather": "node src/scripts/verifyExistingUsers.js",
     "fix:facturas": "node src/scripts/fixFacturasNacidasVencidas.js",
     "migrate:planes": "node src/scripts/migratePlanes.js",

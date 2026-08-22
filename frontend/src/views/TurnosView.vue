@@ -42,6 +42,23 @@
           <i class="icon-[material-symbols--download] text-base"></i>
         </button>
         <button
+          class="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-black/[0.06] bg-white px-3.5 text-sm font-medium text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer lg:h-10 lg:gap-2 lg:px-4"
+          title="Turnos fijos"
+          @click="openRecurringList"
+        >
+          <i class="icon-[material-symbols--push-pin] text-base text-stone-400"></i>
+          <span class="hidden sm:inline">Turnos fijos</span>
+          <span
+            v-if="recurringConConflictos > 0"
+            class="flex h-5 min-w-5 items-center justify-center rounded-full bg-warning-100 px-1.5 text-[10px] font-bold text-warning-700"
+            :title="`${recurringConConflictos} con fechas trabadas`"
+          >{{ recurringConConflictos }}</span>
+          <span
+            v-else-if="recurringActivos"
+            class="flex h-5 min-w-5 items-center justify-center rounded-full bg-stone-100 px-1.5 text-[10px] font-bold text-stone-500"
+          >{{ recurringActivos }}</span>
+        </button>
+        <button
           class="flex h-9 items-center gap-1.5 rounded-full bg-brand-lime-500 px-3.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer lg:h-10 lg:gap-2 lg:px-4"
           @click="openNew"
         >
@@ -202,8 +219,37 @@
       :refund-error="refundError"
       @close="drawerOpen = false"
       @save="handleSave"
+      @save-recurring="handleSaveRecurring"
       @cancel="handleCancel"
       @refund="handleRefund"
+    />
+
+    <!-- Preview del turno fijo: las fechas que se van a generar, antes de crear
+         nada. Un conflicto tiene que verse acá y no descubrirse después. -->
+    <RecurringPreviewDialog
+      :visible="previewOpen"
+      :loading="previewLoading"
+      :saving="recurringSaving"
+      :error="previewError"
+      :preview="previewData"
+      :timezone="tz"
+      :cliente-nombre="pendingRecurring?.guestName || ''"
+      :cancha-nombre="courtsById[pendingRecurring?.courtId]?.nombre || ''"
+      @close="closePreview"
+      @confirm="confirmRecurring"
+    />
+
+    <RecurringListDrawer
+      :visible="recurringListOpen"
+      :loading="recurringLoading"
+      :recurring="recurring"
+      :currency="currency"
+      :timezone="tz"
+      :is-admin="isClubAdmin"
+      :busy-id="recurringBusyId"
+      @close="recurringListOpen = false"
+      @cancel-rule="handleCancelRecurring"
+      @toggle-pause="handleTogglePause"
     />
   </div>
 </template>
@@ -213,9 +259,12 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import ReservationCalendar from '@/components/turnos/ReservationCalendar.vue'
 import ReservationDrawer from '@/components/turnos/ReservationDrawer.vue'
+import RecurringPreviewDialog from '@/components/turnos/RecurringPreviewDialog.vue'
+import RecurringListDrawer from '@/components/turnos/RecurringListDrawer.vue'
 import courtService from '@/services/courtService'
 import scheduleService from '@/services/scheduleService'
 import reservationService from '@/services/reservationService'
+import recurringService from '@/services/recurringService'
 import { useAuth } from '@/composables/useAuth'
 import { sportsForClub } from '@/utils/sports'
 import { dayjs, formatCurrency, DEFAULT_TZ, zonedToUtcISO } from '@/utils/datetime'
@@ -458,6 +507,9 @@ const fetchReservations = async () => {
 const reload = async () => {
   await fetchCourtsAndHorarios()
   await fetchReservations()
+  // En paralelo y sin await: alimenta el contador del header (incluido el aviso
+  // de fechas trabadas). Que tarde no tiene que demorar el calendario.
+  fetchRecurring()
 }
 
 onMounted(() => {
@@ -480,6 +532,7 @@ watch(currentClubId, (id) => {
   else {
     courts.value = []
     reservations.value = []
+    recurring.value = []
   }
 })
 
@@ -656,6 +709,164 @@ const handleRefund = async (id) => {
     refundError.value = err.response?.data?.message || 'No se pudo devolver el pago.'
   } finally {
     refunding.value = false
+  }
+}
+
+// --- Turnos fijos ---
+//
+// La regla vive en `/recurring`; las ocurrencias son reservas normales y se
+// gestionan con el resto de la pantalla. En particular, cancelar UN día es la
+// cancelación de siempre: no hay nada especial que hacer acá.
+
+const recurring = ref([])
+const recurringLoading = ref(false)
+const recurringListOpen = ref(false)
+const recurringBusyId = ref('')
+
+const recurringActivos = computed(() => recurring.value.filter((r) => r.estado !== 'finalizado').length)
+const recurringConConflictos = computed(
+  () => recurring.value.filter((r) => r.estado !== 'finalizado' && r.conflictos?.length).length,
+)
+
+const fetchRecurring = async () => {
+  if (!currentClubId.value) {
+    recurring.value = []
+    return
+  }
+  recurringLoading.value = true
+  try {
+    recurring.value = await recurringService.getRecurring(currentClubId.value)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    recurringLoading.value = false
+  }
+}
+
+const openRecurringList = async () => {
+  recurringListOpen.value = true
+  await fetchRecurring()
+}
+
+// --- Alta de un turno fijo ---
+const previewOpen = ref(false)
+const previewLoading = ref(false)
+const previewError = ref('')
+const previewData = ref(null)
+const recurringSaving = ref(false)
+const pendingRecurring = ref(null)
+
+// El drawer de turno pide la previsualización en vez de guardar. Se cierra
+// enseguida: el complejo ya completó los datos y lo que tiene que mirar ahora
+// son las fechas.
+const handleSaveRecurring = async (payload) => {
+  pendingRecurring.value = payload
+  previewData.value = null
+  previewError.value = ''
+  drawerOpen.value = false
+  previewOpen.value = true
+  previewLoading.value = true
+  try {
+    previewData.value = await recurringService.preview(currentClubId.value, {
+      courtId: payload.courtId,
+      inicio: payload.inicio,
+      duracionMin: payload.duracionMin,
+    })
+  } catch (err) {
+    console.error(err)
+    previewError.value = err.response?.data?.message || 'No se pudieron calcular las fechas.'
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+const closePreview = () => {
+  previewOpen.value = false
+  pendingRecurring.value = null
+  previewData.value = null
+}
+
+const confirmRecurring = async () => {
+  if (!pendingRecurring.value) return
+  recurringSaving.value = true
+  try {
+    const p = pendingRecurring.value
+    const res = await recurringService.createRecurring(currentClubId.value, {
+      courtId: p.courtId,
+      inicio: p.inicio,
+      duracionMin: p.duracionMin,
+      precioPorTurno: p.precioFinal,
+      guestName: p.guestName,
+      guestPhone: p.guestPhone,
+      guestEmail: p.guestEmail,
+      notas: p.notas,
+    })
+    closePreview()
+    await Promise.all([fetchReservations(), fetchRecurring()])
+    // Los conflictos se nombran en el toast: si el complejo creó igual sabiendo
+    // que había fechas trabadas, el recordatorio no está de más.
+    const detalle = res.conflictos?.length
+      ? `${res.generadas} turnos generados · ${res.conflictos.length} fechas trabadas`
+      : `${res.generadas} turnos generados`
+    toast.add({
+      severity: res.conflictos?.length ? 'warn' : 'success',
+      summary: 'Turno fijo creado',
+      detail: `${p.guestName} · ${detalle}`,
+      life: 5000,
+    })
+  } catch (err) {
+    console.error(err)
+    previewError.value = err.response?.data?.message || 'No se pudo crear el turno fijo.'
+  } finally {
+    recurringSaving.value = false
+  }
+}
+
+const handleCancelRecurring = async (rule) => {
+  recurringBusyId.value = rule._id
+  try {
+    const res = await recurringService.cancelRecurring(currentClubId.value, rule._id)
+    await Promise.all([fetchRecurring(), fetchReservations()])
+    toast.add({
+      severity: 'success',
+      summary: 'Turno fijo dado de baja',
+      detail: `Se liberaron ${res.liberadas} turnos futuros.`,
+      life: 4000,
+    })
+  } catch (err) {
+    console.error(err)
+    const detail = err.response?.data?.message || 'No se pudo dar de baja el turno fijo.'
+    toast.add({ severity: 'error', summary: 'Error', detail, life: 5000 })
+  } finally {
+    recurringBusyId.value = ''
+  }
+}
+
+// Pausar libera los turnos del rango y reanudar los vuelve a generar. Se usa
+// para las vacaciones del cliente: la regla sigue viva y el horario sigue
+// siendo suyo cuando vuelve.
+const handleTogglePause = async (rule) => {
+  recurringBusyId.value = rule._id
+  const pausando = rule.estado !== 'pausado'
+  try {
+    await recurringService.updateRecurring(currentClubId.value, rule._id, {
+      estado: pausando ? 'pausado' : 'activo',
+    })
+    await Promise.all([fetchRecurring(), fetchReservations()])
+    toast.add({
+      severity: 'success',
+      summary: pausando ? 'Turno fijo pausado' : 'Turno fijo reanudado',
+      detail: pausando
+        ? 'No se generan turnos nuevos hasta que lo reanudes.'
+        : 'Los turnos se regeneran en la próxima corrida.',
+      life: 4000,
+    })
+  } catch (err) {
+    console.error(err)
+    const detail = err.response?.data?.message || 'No se pudo actualizar el turno fijo.'
+    toast.add({ severity: 'error', summary: 'Error', detail, life: 5000 })
+  } finally {
+    recurringBusyId.value = ''
   }
 }
 

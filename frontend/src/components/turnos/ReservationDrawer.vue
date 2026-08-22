@@ -39,6 +39,22 @@
                 <span>{{ serverError || localError }}</span>
               </div>
 
+              <!-- Este turno viene de un turno fijo. Importa decirlo antes de
+                   que toquen "Cancelar turno": lo que se cancela es ESTE día y
+                   no la serie, y esa diferencia es todo el feature. -->
+              <div
+                v-if="form.esFijo"
+                class="flex items-start gap-2.5 rounded-xl border border-brand-purple-100 bg-brand-purple-50/60 px-3.5 py-3"
+              >
+                <i class="icon-[material-symbols--push-pin] mt-0.5 text-xs text-brand-purple-500"></i>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-ink-500">Turno fijo</p>
+                  <p class="mt-0.5 text-xs text-stone-500">
+                    Se repite todas las semanas. Si cancelás, se libera <strong>sólo este día</strong> y la serie sigue.
+                  </p>
+                </div>
+              </div>
+
               <!-- Cobro online. Sólo aparece en turnos que se pagan (o se
                    pagaron) por la web: en los cargados a mano no hay nada que
                    mostrar y el bloque sería ruido. -->
@@ -171,7 +187,7 @@
               </div>
 
               <!-- Estado -->
-              <div>
+              <div v-if="!form.esFijo">
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Estado</label>
                 <div class="grid grid-cols-3 gap-2">
                   <button
@@ -211,6 +227,26 @@
                     @input="priceTouched = true"
                   />
                 </div>
+              </div>
+
+              <!-- Hacerlo fijo. Sólo al crear: convertir en fijo un turno que ya
+                   existe abre la pregunta de qué pasa con ese turno suelto, y
+                   la respuesta corta es que conviene crearlo como fijo desde el
+                   principio. -->
+              <div v-if="!isEditing" class="rounded-xl border border-black/[0.08] p-4">
+                <label class="flex cursor-pointer items-start gap-3">
+                  <input
+                    v-model="form.esFijo"
+                    type="checkbox"
+                    class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-purple-500"
+                  />
+                  <span class="min-w-0">
+                    <span class="block text-sm font-medium text-ink-500">Se repite todas las semanas</span>
+                    <span class="mt-0.5 block text-xs text-stone-500">
+                      Turno fijo: se genera solo y no vence. Vas a poder revisar las fechas antes de confirmar.
+                    </span>
+                  </span>
+                </label>
               </div>
 
               <!-- Notas -->
@@ -255,7 +291,7 @@
                 @click="handleSave"
               >
                 <i v-if="saving" class="icon-[material-symbols--progress-activity] animate-spin text-xs"></i>
-                {{ saving ? 'Guardando...' : 'Guardar' }}
+                {{ saving ? 'Guardando...' : form.esFijo ? 'Ver fechas' : 'Guardar' }}
               </button>
             </div>
           </div>
@@ -291,7 +327,7 @@ const props = defineProps({
   refundError: { type: String, default: '' },
 })
 
-const emit = defineEmits(['close', 'save', 'cancel', 'refund'])
+const emit = defineEmits(['close', 'save', 'save-recurring', 'cancel', 'refund'])
 
 const estadoOptions = [
   { label: 'Pendiente', value: 'pendiente' },
@@ -325,6 +361,7 @@ function emptyForm() {
     estado: 'confirmada',
     precioFinal: null,
     notas: '',
+    esFijo: false,
   }
 }
 
@@ -396,6 +433,7 @@ watch(
         estado: r.estado || 'confirmada',
         precioFinal: r.precioFinal ?? null,
         notas: r.notas || '',
+        esFijo: !!r.esFijo,
       }
       priceTouched.value = true
     } else {
@@ -494,7 +532,7 @@ const handleSave = () => {
       : form.value.fecha
   const fin = zonedToUtcISO(finDay, form.value.horaFin, props.timezone)
 
-  emit('save', {
+  const payload = {
     _id: form.value._id,
     courtId: form.value.courtId,
     guestName: form.value.guestName.trim(),
@@ -505,7 +543,22 @@ const handleSave = () => {
     estado: form.value.estado,
     precioFinal: form.value.precioFinal ?? 0,
     notas: form.value.notas?.trim() || '',
-  })
+  }
+
+  // Un turno fijo no se guarda acá: se previsualiza primero. La regla la crea
+  // `/recurring`, que además genera las 13 ocurrencias de una. Lo que viaja es
+  // el instante del turno (`inicio`) y su duración; el día de la semana y la
+  // hora UTC los deriva el backend de ahí, sin ninguna conversión de zona.
+  if (form.value.esFijo) {
+    emit('save-recurring', {
+      ...payload,
+      estado: 'confirmada',
+      duracionMin: dayjs.utc(fin).diff(dayjs.utc(inicio), 'minute'),
+    })
+    return
+  }
+
+  emit('save', payload)
 }
 
 const handleOverlayClick = (e) => {

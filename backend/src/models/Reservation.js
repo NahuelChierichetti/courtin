@@ -103,6 +103,21 @@ const reservationSchema = new mongoose.Schema(
         default: 0
       }
     },
+    // Turno fijo que generó esta reserva, si vino de uno. La regla vive en
+    // `RecurringBooking` y este campo es lo único que las ata: cancelar esta
+    // reserva libera ese día puntual y no toca la serie.
+    recurring: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'RecurringBooking',
+      default: null
+    },
+    // Redundante con `recurring != null`, pero ahorra un populate en el
+    // timeline y en los listados, que es donde más se consulta.
+    esFijo: {
+      type: Boolean,
+      default: false
+    },
+
     // Vencimiento del bloqueo del horario mientras el jugador está pagando.
     //
     // La reserva nace `pendiente` para que el índice único de abajo le reserve
@@ -121,6 +136,12 @@ const reservationSchema = new mongoose.Schema(
 );
 
 reservationSchema.index({ club: 1, court: 1, inicio: 1, fin: 1 });
+
+// La pregunta que hace el job de turnos fijos en cada corrida: "¿ya generé esta
+// ocurrencia?". Va SIN filtrar por estado a propósito — una ocurrencia cancelada
+// tiene que seguir contando como generada, o el job la regeneraría al día
+// siguiente y pisaría la excepción que puso el complejo.
+reservationSchema.index({ recurring: 1, inicio: 1 });
 
 // Backstop de concurrencia: impide que dos reservas activas ocupen exactamente
 // el mismo inicio en la misma cancha. La validación de solapamiento parcial
