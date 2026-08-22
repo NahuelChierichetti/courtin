@@ -3,6 +3,7 @@ const cron = require('node-cron');
 const { runReservationReminders } = require('./reservationReminders');
 const { runSubscriptionCycle } = require('./subscriptionDunning');
 const { runReservationHolds } = require('./reservationHolds');
+const { runRecurringBookings } = require('./recurringBookings');
 
 // Tareas programadas del backend.
 //
@@ -29,6 +30,12 @@ const SUBSCRIPTION_CYCLE_CRON = '0 9 * * *';
 // dura 15 minutos. Correr cada 2 min hace que el turno vuelva a estar
 // disponible a lo sumo dos minutos tarde.
 const RESERVATION_HOLDS_CRON = '*/2 * * * *';
+
+// Una vez por día, de madrugada. Acá no importa la latencia sino lo contrario
+// que en los holds: lo que se genera está a 90 días de distancia, así que
+// llegar un día tarde no le cambia nada a nadie. Lo que sí importa es que la
+// corrida no se saltee en silencio, por eso los conflictos avisan al complejo.
+const RECURRING_BOOKINGS_CRON = '15 4 * * *';
 
 const registeredJobs = [];
 
@@ -90,9 +97,17 @@ const startJobs = () => {
 
   registeredJobs.push(holds);
 
+  const fijos = cron.schedule(
+    RECURRING_BOOKINGS_CRON,
+    safeRun('turnos fijos', runRecurringBookings),
+    { timezone: 'America/Argentina/Buenos_Aires' }
+  );
+
+  registeredJobs.push(fijos);
+
   // eslint-disable-next-line no-console
   console.log(
-    `[jobs] Recordatorios 24h (${RESERVATION_REMINDERS_CRON}) · Ciclo de suscripciones (${SUBSCRIPTION_CYCLE_CRON}) · Holds de pago (${RESERVATION_HOLDS_CRON}).`
+    `[jobs] Recordatorios 24h (${RESERVATION_REMINDERS_CRON}) · Ciclo de suscripciones (${SUBSCRIPTION_CYCLE_CRON}) · Holds de pago (${RESERVATION_HOLDS_CRON}) · Turnos fijos (${RECURRING_BOOKINGS_CRON}).`
   );
 };
 
