@@ -77,17 +77,19 @@ const markAll = async () => {
   <div class="space-y-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Notificaciones</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Notificaciones</h1>
         <p class="mt-1 text-sm text-stone-500">
           {{ unreadCount ? `${unreadCount} sin leer` : 'Todo al día' }}
         </p>
       </div>
       <button
         v-if="unreadCount"
-        class="flex items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer"
+        class="flex shrink-0 items-center gap-2 rounded-full border border-black/[0.06] bg-white px-4 py-2 text-sm font-semibold text-stone-600 shadow-sm transition-colors hover:bg-stone-50 cursor-pointer"
         @click="markAll"
       >
-        <i class="icon-[material-symbols--done-all] text-base text-brand-green-500"></i> Marcar todas como leídas
+        <i class="icon-[material-symbols--done-all] text-base text-brand-green-500"></i>
+        <span class="hidden sm:inline">Marcar todas como leídas</span>
+        <span class="sm:hidden">Marcar leídas</span>
       </button>
     </div>
 
@@ -113,7 +115,7 @@ const markAll = async () => {
         <button
           v-for="n in notifications"
           :key="n._id"
-          class="flex w-full items-start gap-4 px-6 py-4 text-left transition-colors hover:bg-stone-50 cursor-pointer"
+          class="flex w-full items-start gap-3 px-4 py-4 text-left sm:gap-4 sm:px-6 transition-colors hover:bg-stone-50 cursor-pointer"
           :class="{ 'bg-brand-green-50/40': !n.leida }"
           @click="markRead(n)"
         >
@@ -122,7 +124,7 @@ const markAll = async () => {
           </span>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <p class="text-sm font-semibold text-ink-500">{{ n.titulo }}</p>
+              <p class="min-w-0 text-sm font-semibold text-ink-500">{{ n.titulo }}</p>
               <span v-if="!n.leida" class="h-2 w-2 shrink-0 rounded-full bg-brand-green-500"></span>
             </div>
             <p class="mt-0.5 text-sm text-stone-500">{{ n.mensaje }}</p>

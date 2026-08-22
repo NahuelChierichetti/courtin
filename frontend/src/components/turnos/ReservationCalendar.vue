@@ -1,19 +1,21 @@
 <template>
   <div class="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
-    <div ref="scrollEl" class="max-h-[calc(100vh-13rem)] overflow-auto">
+    <div ref="scrollEl" class="max-h-[calc(100dvh-19rem)] overflow-auto lg:max-h-[calc(100vh-13rem)]">
       <div class="min-w-max">
         <!-- Header row -->
         <div
           data-cal-header
           class="sticky top-0 z-20 flex border-b border-black/[0.06] bg-white"
         >
-          <div class="w-16 text-center shrink-0 border-r border-black/[0.06] px-2 py-3">
+          <!-- z-30: la esquina tiene que tapar tanto a la fila de canchas como
+               a la columna de horas cuando el scroll va en las dos direcciones. -->
+          <div class="sticky left-0 z-30 w-12 shrink-0 border-r border-black/[0.06] bg-white px-2 py-3 text-center sm:w-16">
             <span class="text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Hora</span>
           </div>
           <div
             v-for="col in columns"
             :key="col.key"
-            class="flex-1 border-r border-black/[0.06] px-4 py-3 last:border-r-0"
+            class="flex-1 border-r border-black/[0.06] px-3 py-3 last:border-r-0 sm:px-4"
             :style="{ minWidth: colMinWidth }"
           >
             <div class="flex items-center gap-2">
@@ -26,15 +28,17 @@
 
         <!-- Body (pt para que no se corte la primera etiqueta de hora) -->
         <div class="flex">
-          <!-- Time gutter -->
-          <div class="w-16 shrink-0 border-r border-black/[0.06]">
+          <!-- Time gutter (queda fija al scrollear las canchas en horizontal) -->
+          <!-- z-20: por encima de las tarjetas de las columnas, que vienen
+               después en el DOM y si no le pasarían por arriba al scrollear. -->
+          <div class="sticky left-0 z-20 w-12 shrink-0 border-r border-black/[0.06] bg-white sm:w-16">
             <div
               v-for="h in hourMarks"
               :key="h.min"
               class="relative border-b border-black/[0.06] flex items-center justify-center"
               :style="{ height: hourHeight + 'px' }"
             >
-              <span class="-top-2 right-2 text-xs font-medium text-stone-400 font-secondary">
+              <span class="-top-2 right-2 text-[11px] font-medium text-stone-400 font-secondary sm:text-xs">
                 {{ h.label }}
               </span>
             </div>
@@ -79,7 +83,7 @@
             <div
               v-for="r in columnReservations(col.key)"
               :key="r._id"
-              class="absolute select-none overflow-hidden rounded-lg border-l-[3px] px-2.5 py-1.5 transition-shadow"
+              class="absolute select-none overflow-hidden rounded-lg border-l-[3px] px-2 py-1 transition-shadow sm:px-2.5 sm:py-1.5"
               :class="[
                 cardClasses(r),
                 draggable(r)
@@ -89,6 +93,7 @@
               ]"
               :style="cardStyle(r)"
               @pointerdown="onPointerDown($event, r, colIndex)"
+              @click.stop="onCardClick(r)"
               @dblclick.stop="emit('edit', r)"
             >
               <div class="flex items-start justify-between gap-1">
@@ -123,7 +128,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { sportMeta, minutesToTime, reservationLabel } from '@/utils/turnos'
 import { formatCurrency } from '@/utils/datetime'
 
@@ -151,7 +156,19 @@ const SLOT = 30 // minutos por slot
 const hourHeight = 64
 const slotHeight = hourHeight / 2
 
-const colMinWidth = computed(() => (props.mode === 'week' ? '120px' : '160px'))
+// En mobile las columnas se angostan para que entren ~2 canchas en pantalla sin
+// quedar ilegibles; el resto se alcanza scrolleando en horizontal.
+const NARROW_QUERY = '(max-width: 639px)'
+const narrowMq = typeof window !== 'undefined' ? window.matchMedia(NARROW_QUERY) : null
+const isNarrow = ref(narrowMq ? narrowMq.matches : false)
+const onNarrowChange = (e) => (isNarrow.value = e.matches)
+onMounted(() => narrowMq?.addEventListener('change', onNarrowChange))
+onUnmounted(() => narrowMq?.removeEventListener('change', onNarrowChange))
+
+const colMinWidth = computed(() => {
+  if (props.mode === 'week') return isNarrow.value ? '96px' : '120px'
+  return isNarrow.value ? '132px' : '160px'
+})
 
 const bodyHeight = computed(
   () => ((props.dayEndMin - props.dayStartMin) / 60) * hourHeight,
@@ -332,7 +349,18 @@ const showNowLine = (col) => {
 // --- Drag con pointer events ---
 const DRAG_THRESHOLD = 5
 
+// Último tipo de puntero que tocó una tarjeta. Con mouse el gesto es arrastrar
+// y se abre con doble click; con dedo/lápiz el gesto vertical es el scroll de la
+// grilla, así que no se arrastra y un tap abre el turno.
+let lastPointerType = 'mouse'
+
+const onCardClick = (r) => {
+  if (lastPointerType !== 'mouse') emit('edit', r)
+}
+
 const onPointerDown = (e, r, colIndex) => {
+  lastPointerType = e.pointerType || 'mouse'
+  if (lastPointerType !== 'mouse') return
   if (e.button !== 0) return
   if (!draggable(r)) return
   dragCtx = {

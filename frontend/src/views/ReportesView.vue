@@ -183,23 +183,24 @@ const exportCsv = () => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Reportes</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Reportes</h1>
         <p class="mt-1 text-sm text-stone-500 print:hidden">Métricas reales de ingresos, reservas y ocupación.</p>
         <p class="mt-1 hidden text-sm text-stone-500 print:block">{{ currentClub?.nombre }} · {{ printSubtitle }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-2 print:hidden">
-        <!-- Rango personalizado -->
-        <div class="flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-white px-3 py-1.5 shadow-sm">
+        <!-- Rango personalizado: en mobile toma la fila entera para que los dos
+             inputs de fecha no queden apretados contra los presets. -->
+        <div class="flex w-full items-center justify-center gap-1.5 rounded-full border border-black/[0.06] bg-white px-3 py-1.5 shadow-sm sm:w-auto sm:justify-start">
           <input v-model="customDesde" type="date" :max="customHasta" class="bg-transparent text-xs text-ink-500 outline-none [color-scheme:light]" @change="onCustomDate" />
           <i class="icon-[material-symbols--arrow-forward] text-xs text-stone-300"></i>
           <input v-model="customHasta" type="date" :min="customDesde" class="bg-transparent text-xs text-ink-500 outline-none [color-scheme:light]" @change="onCustomDate" />
         </div>
         <!-- Presets -->
-        <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
+        <div class="flex shrink-0 overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
             v-for="p in periods"
             :key="p.value"
-            class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+            class="px-3 py-2 text-sm font-medium transition-colors cursor-pointer sm:px-4"
             :class="period === p.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
             @click="selectPreset(p.value)"
           >
@@ -225,12 +226,15 @@ const exportCsv = () => {
     </div>
 
     <!-- Filtro por deporte -->
-    <div v-if="currentClubId && deporteChips.length" class="flex flex-wrap items-center gap-2 print:hidden">
-      <span class="mr-1 text-sm font-medium text-stone-500">Deporte:</span>
+    <div
+      v-if="currentClubId && deporteChips.length"
+      class="-mx-1 flex items-center gap-2 overflow-x-auto px-1 print:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+    >
+      <span class="mr-1 shrink-0 text-sm font-medium text-stone-500">Deporte:</span>
       <button
         v-for="c in deporteChips"
         :key="c.value"
-        class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+        class="shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
         :class="deporte === c.value ? 'bg-brand-green-500 text-white' : 'border border-black/[0.06] bg-white text-stone-600 hover:bg-stone-50'"
         @click="deporte = c.value"
       >
@@ -248,37 +252,37 @@ const exportCsv = () => {
 
     <template v-else>
       <!-- KPIs -->
-      <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-success-50 text-success-600"><i class="icon-[material-symbols--payments] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Ingresos</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-success-600">{{ money(kpis.ingresos) }}</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-success-600">{{ money(kpis.ingresos) }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--calendar-month] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Reservas</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ kpis.reservas }}</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ kpis.reservas }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--pie-chart] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Ocupación</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ kpis.ocupacion }}%</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ kpis.ocupacion }}%</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--receipt-long] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Ticket promedio</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ money(kpis.ticketPromedio) }}</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ money(kpis.ticketPromedio) }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--person-add] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Clientes nuevos</p>
-          <p class="mt-0.5 text-2xl font-bold font-secondary text-ink-500">{{ kpis.clientesNuevos }}</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ kpis.clientesNuevos }}</p>
         </div>
       </div>
 
       <!-- Ingresos por día -->
-      <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
-        <div class="flex items-center justify-between">
+      <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <h2 class="text-base font-semibold text-ink-500">Ingresos por día</h2>
           <span class="text-sm text-stone-500">Total: <span class="font-semibold text-stone-700">{{ money(totalIngresosDia) }}</span></span>
         </div>
@@ -292,7 +296,7 @@ const exportCsv = () => {
       <!-- Deporte + Método -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <!-- En un complejo de un solo deporte el donut sería una torta entera: se oculta. -->
-        <div v-if="!deporte && deporteChips.length" class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <div v-if="!deporte && deporteChips.length" class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
           <h2 class="text-base font-semibold text-ink-500">Reservas por deporte</h2>
           <div v-if="!reservasPorDeporte.length" class="py-8 text-center text-sm text-stone-400">Sin reservas.</div>
           <div v-else class="mt-5">
@@ -300,7 +304,7 @@ const exportCsv = () => {
           </div>
         </div>
 
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
           <h2 class="text-base font-semibold text-ink-500">Ingresos por método</h2>
           <div v-if="!ingresosPorMetodo.length" class="py-8 text-center text-sm text-stone-400">Sin ingresos.</div>
           <div v-else class="mt-5">
@@ -311,7 +315,7 @@ const exportCsv = () => {
 
       <!-- Top canchas + Top clientes -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
           <h2 class="text-base font-semibold text-ink-500">Canchas más reservadas</h2>
           <div v-if="!topCanchas.length" class="py-8 text-center text-sm text-stone-400">Sin datos.</div>
           <div v-else class="mt-4 space-y-1">
@@ -322,12 +326,12 @@ const exportCsv = () => {
                 <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre }}</p>
                 <p class="text-xs text-stone-400">{{ c.reservas }} reservas</p>
               </div>
-              <span class="text-sm font-semibold font-secondary text-stone-700">{{ money(c.ingresos) }}</span>
+              <span class="shrink-0 text-xs font-semibold font-secondary text-stone-700 sm:text-sm">{{ money(c.ingresos) }}</span>
             </div>
           </div>
         </div>
 
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
           <h2 class="text-base font-semibold text-ink-500">Mejores clientes</h2>
           <div v-if="!topClientes.length" class="py-8 text-center text-sm text-stone-400">Sin datos.</div>
           <div v-else class="mt-4 space-y-1">
@@ -338,7 +342,7 @@ const exportCsv = () => {
                 <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre }}</p>
                 <p class="text-xs text-stone-400">{{ c.reservas }} reservas</p>
               </div>
-              <span class="text-sm font-semibold font-secondary text-success-600">{{ money(c.gastado) }}</span>
+              <span class="shrink-0 text-xs font-semibold font-secondary text-success-600 sm:text-sm">{{ money(c.gastado) }}</span>
             </div>
           </div>
         </div>

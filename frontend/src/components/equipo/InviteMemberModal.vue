@@ -75,7 +75,7 @@ const handleSubmit = async () => {
         <div class="absolute inset-0 bg-black/30"></div>
 
         <div class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl">
-          <div class="flex items-center justify-between border-b border-black/[0.06] px-6 py-5">
+          <div class="flex items-center justify-between border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div>
               <h2 class="text-lg font-semibold text-ink-500">Invitar al equipo</h2>
               <p class="mt-0.5 text-sm text-stone-500">Le llega un email para crear su acceso.</p>
@@ -88,7 +88,7 @@ const handleSubmit = async () => {
             </button>
           </div>
 
-          <form class="space-y-5 px-6 py-6" @submit.prevent="handleSubmit">
+          <form class="space-y-5 px-4 py-5 sm:px-6 sm:py-6" @submit.prevent="handleSubmit">
             <div
               v-if="errorMessage"
               class="flex items-center gap-2 rounded-xl border border-error-100 bg-error-50 px-4 py-3 text-sm text-error-600"

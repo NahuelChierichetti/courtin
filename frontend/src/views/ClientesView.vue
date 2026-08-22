@@ -92,7 +92,7 @@ const onUpdated = (updated) => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Clientes</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Clientes</h1>
         <p class="mt-1 text-sm text-stone-500">Se registran automáticamente al reservar (identificados por email).</p>
       </div>
     </div>
@@ -108,32 +108,32 @@ const onUpdated = (updated) => {
 
     <template v-else>
       <!-- Tiles -->
-      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--group] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-stone-500">Total clientes</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.total }}</p>
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--group] text-xl"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Total clientes</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ resumen.total }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-success-50 text-success-600"><i class="icon-[material-symbols--person-add] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-stone-500">Nuevos este mes</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ nuevosMes }}</p>
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-success-50 text-success-600"><i class="icon-[material-symbols--person-add] text-xl"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Nuevos este mes</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ nuevosMes }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--repeat] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-stone-500">Recurrentes</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.recurrentes }}</p>
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--repeat] text-xl"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Recurrentes</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ resumen.recurrentes }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-          <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--calendar-month] text-xl"></i></span>
-          <p class="mt-4 text-sm font-medium text-stone-500">Reservas totales</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.reservasTotales }}</p>
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--calendar-month] text-xl"></i></span>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Reservas totales</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ resumen.reservasTotales }}</p>
         </div>
       </div>
 
       <!-- Lista -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-6 py-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-4 sm:px-6">
           <div class="relative w-full max-w-xs">
             <i class="icon-[material-symbols--search] absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-stone-400"></i>
             <input
@@ -143,11 +143,11 @@ const onUpdated = (updated) => {
               class="h-10 w-full rounded-full border border-black/[0.08] bg-white pl-10 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
             />
           </div>
-          <div class="flex overflow-hidden rounded-full border border-black/[0.06]">
+          <div class="flex shrink-0 overflow-hidden rounded-full border border-black/[0.06]">
             <button
               v-for="s in sortChips"
               :key="s.value"
-              class="px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer"
+              class="px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer sm:px-3.5"
               :class="sortBy === s.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
               @click="sortBy = s.value"
             >
@@ -173,7 +173,7 @@ const onUpdated = (updated) => {
         <!-- Rows -->
         <div v-else>
           <!-- Encabezado (desktop) -->
-          <div class="hidden grid-cols-[1fr_110px_130px_130px] gap-4 border-b border-black/[0.05] px-6 py-2.5 text-xs font-semibold tracking-wide text-stone-400 uppercase sm:grid">
+          <div class="hidden grid-cols-[1fr_110px_130px_130px] gap-4 border-b border-black/[0.05] px-4 py-2.5 text-xs font-semibold sm:px-6 tracking-wide text-stone-400 uppercase sm:grid">
             <span>Cliente</span>
             <span class="text-center">Reservas</span>
             <span class="text-right">Total gastado</span>
@@ -183,7 +183,7 @@ const onUpdated = (updated) => {
             <button
               v-for="c in visibleClients"
               :key="c._id"
-              class="grid w-full grid-cols-[1fr_auto] items-center gap-4 px-6 py-3.5 text-left transition-colors hover:bg-stone-50 cursor-pointer sm:grid-cols-[1fr_110px_130px_130px]"
+              class="grid w-full grid-cols-[1fr_auto] items-center gap-3 px-4 py-3.5 text-left sm:gap-4 sm:px-6 transition-colors hover:bg-stone-50 cursor-pointer sm:grid-cols-[1fr_110px_130px_130px]"
               @click="openClient(c)"
             >
               <div class="flex min-w-0 items-center gap-3">

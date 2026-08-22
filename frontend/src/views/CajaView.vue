@@ -139,17 +139,17 @@ const onDelete = async (m) => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Control de caja</h1>
+        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Control de caja</h1>
         <p class="mt-1 text-sm text-stone-500">Ingresos y egresos del complejo · {{ periodSubtitle }}</p>
       </div>
-      <div class="flex items-center gap-3">
-        <div class="flex overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
+      <div class="flex items-center gap-2 lg:gap-3">
+        <div class="flex shrink-0 overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
           <button
             v-for="p in periods"
             :key="p.value"
-            class="px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
+            class="px-3 py-2 text-sm font-medium transition-colors cursor-pointer sm:px-4"
             :class="selectedPeriod === p.value ? 'bg-brand-purple-500 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'"
             @click="selectedPeriod = p.value"
           >
@@ -157,10 +157,12 @@ const onDelete = async (m) => {
           </button>
         </div>
         <button
-          class="flex items-center gap-2 rounded-full bg-brand-lime-500 px-4 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer"
+          class="ml-auto flex shrink-0 items-center gap-2 rounded-full bg-brand-lime-500 px-3.5 py-2.5 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-brand-lime-600 cursor-pointer lg:ml-0 lg:px-4"
           @click="drawerOpen = true"
         >
-          <i class="icon-[material-symbols--add] text-base"></i> Registrar movimiento
+          <i class="icon-[material-symbols--add] text-base"></i>
+          <span class="hidden sm:inline">Registrar movimiento</span>
+          <span class="sm:hidden">Registrar</span>
         </button>
       </div>
     </div>
@@ -176,74 +178,74 @@ const onDelete = async (m) => {
 
     <template v-else>
       <!-- Tiles -->
-      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <div class="flex items-center justify-between">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-success-50 text-success-600">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-success-50 text-success-600">
               <i class="icon-[material-symbols--south-west] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-stone-500">Ingresos</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-success-600">{{ money(resumen.ingresos) }}</p>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Ingresos</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl text-success-600">{{ money(resumen.ingresos) }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <div class="flex items-center justify-between">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-error-50 text-error-600">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-error-50 text-error-600">
               <i class="icon-[material-symbols--north-east] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-stone-500">Egresos</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-error-600">{{ money(resumen.egresos) }}</p>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Egresos</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl text-error-600">{{ money(resumen.egresos) }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <div class="flex items-center justify-between">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-green-50 text-brand-green-500">
               <i class="icon-[material-symbols--account-balance-wallet] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-stone-500">Balance neto</p>
-          <p class="mt-1 text-2xl font-bold font-secondary" :class="resumen.neto >= 0 ? 'text-ink-500' : 'text-error-600'">{{ money(resumen.neto) }}</p>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Balance neto</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl" :class="resumen.neto >= 0 ? 'text-ink-500' : 'text-error-600'">{{ money(resumen.neto) }}</p>
         </div>
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <div class="flex items-center justify-between">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-purple-50 text-brand-purple-500">
               <i class="icon-[material-symbols--receipt-long] text-xl"></i>
             </span>
           </div>
-          <p class="mt-4 text-sm font-medium text-stone-500">Movimientos</p>
-          <p class="mt-1 text-2xl font-bold font-secondary text-ink-500">{{ resumen.count }}</p>
+          <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Movimientos</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ resumen.count }}</p>
         </div>
       </div>
 
       <!-- Breakdowns -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
           <h2 class="text-base font-semibold text-ink-500">Ingresos por categoría</h2>
           <div v-if="!categoriaBreakdown.length" class="py-6 text-center text-sm text-stone-400">Sin ingresos en el período.</div>
           <div v-else class="mt-4 space-y-3">
             <div v-for="row in categoriaBreakdown" :key="row.cat" class="flex items-center gap-3">
-              <span class="flex w-36 items-center gap-2 text-sm text-stone-600">
+              <span class="flex w-24 items-center gap-2 text-sm text-stone-600 sm:w-36">
                 <i :class="categoriaMeta(row.cat).icon" class="text-sm text-stone-400"></i>
                 <span class="truncate">{{ categoriaMeta(row.cat).label }}</span>
               </span>
               <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-stone-100">
                 <div class="absolute inset-y-0 left-0 rounded-full bg-success-500" :style="{ width: row.pct + '%' }"></div>
               </div>
-              <span class="w-24 text-right text-sm font-semibold font-secondary text-stone-700">{{ money(row.monto) }}</span>
+              <span class="w-20 text-right text-xs font-semibold font-secondary text-stone-700 sm:w-24 sm:text-sm">{{ money(row.monto) }}</span>
             </div>
           </div>
         </div>
 
-        <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
           <h2 class="text-base font-semibold text-ink-500">Ingresos por método</h2>
           <div v-if="!metodoBreakdown.length" class="py-6 text-center text-sm text-stone-400">Sin ingresos en el período.</div>
           <div v-else class="mt-4 space-y-3">
             <div v-for="row in metodoBreakdown" :key="row.metodo" class="flex items-center gap-3">
-              <span class="w-36 truncate text-sm text-stone-600">{{ metodoLabel(row.metodo) }}</span>
+              <span class="w-24 truncate text-sm text-stone-600 sm:w-36">{{ metodoLabel(row.metodo) }}</span>
               <div class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-stone-100">
                 <div class="absolute inset-y-0 left-0 rounded-full bg-brand-green-500" :style="{ width: row.pct + '%' }"></div>
               </div>
-              <span class="w-24 text-right text-sm font-semibold font-secondary text-stone-700">{{ money(row.monto) }}</span>
+              <span class="w-20 text-right text-xs font-semibold font-secondary text-stone-700 sm:w-24 sm:text-sm">{{ money(row.monto) }}</span>
             </div>
           </div>
         </div>
@@ -251,7 +253,7 @@ const onDelete = async (m) => {
 
       <!-- Movements -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-6 py-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-4 sm:px-6">
           <h2 class="text-base font-semibold text-ink-500">Movimientos</h2>
           <div class="flex overflow-hidden rounded-full border border-black/[0.06]">
             <button
@@ -282,7 +284,7 @@ const onDelete = async (m) => {
 
         <!-- List -->
         <div v-else class="divide-y divide-black/[0.05]">
-          <div v-for="m in visibleMovements" :key="m._id" class="group flex items-center gap-4 px-6 py-3.5">
+          <div v-for="m in visibleMovements" :key="m._id" class="group flex items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-6">
             <span
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
               :class="m.tipo === 'ingreso' ? 'bg-success-50 text-success-600' : 'bg-error-50 text-error-600'"
@@ -307,14 +309,15 @@ const onDelete = async (m) => {
               </p>
             </div>
             <span
-              class="shrink-0 text-sm font-bold font-secondary"
+              class="shrink-0 text-right text-xs font-bold font-secondary sm:text-sm"
               :class="m.tipo === 'ingreso' ? 'text-success-600' : 'text-error-600'"
             >
               {{ m.tipo === 'ingreso' ? '+' : '−' }} {{ money(m.monto) }}
             </span>
+            <!-- En touch no hay hover: el botón se muestra siempre en mobile. -->
             <button
               v-if="m.origen !== 'online'"
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-stone-300 opacity-0 transition-all hover:bg-error-50 hover:text-error-500 cursor-pointer group-hover:opacity-100 disabled:opacity-50"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-stone-300 transition-all hover:bg-error-50 hover:text-error-500 cursor-pointer disabled:opacity-50 lg:opacity-0 lg:group-hover:opacity-100"
               :disabled="deletingId === m._id"
               title="Eliminar"
               @click="onDelete(m)"

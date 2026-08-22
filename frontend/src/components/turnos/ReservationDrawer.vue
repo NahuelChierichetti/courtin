@@ -8,7 +8,7 @@
         <!-- Drawer panel -->
         <div class="relative flex w-full max-w-md flex-col bg-white shadow-2xl">
           <!-- Header -->
-          <div class="flex items-center gap-4 border-b border-black/[0.06] px-6 py-5">
+          <div class="flex items-center gap-4 border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
               :class="[selectedSport.bg, selectedSport.text]"
@@ -28,7 +28,7 @@
           </div>
 
           <!-- Body -->
-          <div class="flex-1 overflow-y-auto px-6 py-6">
+          <div class="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
             <div class="space-y-5">
               <!-- Error del backend o de los campos obligatorios -->
               <div
@@ -267,7 +267,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex items-center justify-between border-t border-black/[0.06] px-6 py-4">
+          <div class="flex items-center justify-between border-t border-black/[0.06] px-4 py-4 sm:px-6">
             <button
               v-if="isEditing && form.estado !== 'cancelada'"
               class="flex items-center gap-1.5 text-sm font-medium text-error-500 transition-colors hover:text-error-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
