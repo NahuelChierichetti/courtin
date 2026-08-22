@@ -1,6 +1,7 @@
 const Club = require('../models/Club');
 const Court = require('../models/Court');
 const { horariosToLocal, horariosToUtc, DEFAULT_TZ } = require('../utils/timezone');
+const { HORIZON_DAYS } = require('../utils/recurring');
 
 const createClub = async (req, res, next) => {
     try {
@@ -156,6 +157,18 @@ const updateClubHorarios = async (req, res, next) => {
         }
 
         const tz = club.timezone || DEFAULT_TZ;
+
+        // La anticipación máxima no puede pasar el horizonte de los turnos
+        // fijos. Si el público pudiera reservar más lejos que lo que el job
+        // tiene materializado, alguien tomaría el horario del cliente fijo
+        // antes de que el job llegue a generarlo. Ver docs/turnos-fijos.md.
+        const anticipacion = Number(reservas?.anticipacionMaximaDias);
+        if (Number.isFinite(anticipacion) && anticipacion >= HORIZON_DAYS) {
+            return res.status(400).json({
+                ok: false,
+                message: `La anticipación máxima debe ser menor a ${HORIZON_DAYS} días para no pisar los turnos fijos.`
+            });
+        }
 
         // El frontend envía las horas en la zona del club; se guardan en UTC.
         club.horarios = horariosToUtc(

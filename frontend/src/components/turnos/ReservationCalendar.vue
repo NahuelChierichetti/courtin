@@ -100,8 +100,15 @@
                   :class="badgeClasses(r)"
                 >{{ badgeLabel(r) }}</span>
               </div>
-              <p class="truncate text-[13px] font-semibold leading-tight" :class="textColor(r, 'name')">
-                {{ reservationLabel(r) }}
+              <p class="flex items-center gap-1 truncate text-[13px] font-semibold leading-tight" :class="textColor(r, 'name')">
+                <!-- Turno fijo: el complejo tiene que poder distinguirlo de un
+                     turno suelto de un vistazo, sin abrirlo. -->
+                <i
+                  v-if="r.esFijo"
+                  class="icon-[material-symbols--push-pin] shrink-0 text-[10px] opacity-70"
+                  title="Turno fijo"
+                ></i>
+                <span class="truncate">{{ reservationLabel(r) }}</span>
               </p>
               <p v-if="r.precioFinal != null" class="mt-0.5 truncate text-[11px]" :class="textColor(r, 'price')">
                 {{ formatCurrency(r.precioFinal, currency) }}
