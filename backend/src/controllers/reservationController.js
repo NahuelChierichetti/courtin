@@ -15,7 +15,7 @@ const {
 const { puedeCrearReservas } = require('../utils/subscriptions');
 const { registrarReembolso } = require('../utils/payments');
 const { getClubAccessToken, refundPayment } = require('../utils/mercadopago');
-const { formatInstant } = require('../utils/timezone');
+const { formatInstant, localDayRange } = require('../utils/timezone');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -221,24 +221,44 @@ const getReservationsByClub = async (req, res, next) => {
 // Próximos turnos del club a partir del instante actual: incluye los que están
 // en curso o por comenzar (fin > ahora), ordenados por inicio y acotados a
 // `limit` (por defecto 6) desde el servidor.
+// Lo que queda del día de HOY (en la zona del club): los turnos de la fecha
+// actual que todavía no terminaron. El techo en la medianoche local no es un
+// detalle: con turnos fijos materializados a 90 días, una lista sin fecha de
+// corte se llena con la misma repetición del mismo turno en días distintos y
+// la tarjeta deja de responder lo único que le preguntan, que es qué falta
+// atender hoy.
+//
+// Devuelve además `restantes` (cuántos quedan, más allá del `limit`) y `total`
+// (cuántos hubo hoy en total), para que la tarjeta pueda decir "8 de 13".
 const getUpcomingReservationsByClub = async (req, res, next) => {
   try {
     const { clubId } = req.params;
     const parsedLimit = parseInt(req.query.limit, 10);
     const limit = Math.min(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 6, 50);
 
-    const filter = {
+    const club = await Club.findById(clubId).select('timezone').lean();
+    const ahora = new Date();
+    const dia = localDayRange(ahora, club?.timezone);
+
+    const delDia = {
       club: clubId,
       estado: { $in: ACTIVE_RESERVATION_STATUSES },
-      fin: { $gt: new Date() }
+      inicio: { $gte: dia.inicio, $lt: dia.fin }
     };
+    // En curso cuenta como pendiente de atender: el corte es por `fin`, no por
+    // `inicio`.
+    const restantesFilter = { ...delDia, fin: { $gt: ahora } };
 
-    const reservations = await populateReservation(Reservation.find(filter))
-      .select('-manageToken')
-      .sort({ inicio: 1 })
-      .limit(limit);
+    const [reservations, restantes, total] = await Promise.all([
+      populateReservation(Reservation.find(restantesFilter))
+        .select('-manageToken')
+        .sort({ inicio: 1 })
+        .limit(limit),
+      Reservation.countDocuments(restantesFilter),
+      Reservation.countDocuments(delDia)
+    ]);
 
-    res.status(200).json({ ok: true, reservations });
+    res.status(200).json({ ok: true, reservations, restantes, total, fecha: dia.dateKey });
   } catch (error) {
     next(error);
   }

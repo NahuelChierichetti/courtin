@@ -11,14 +11,22 @@ const reservationService = {
     return data.reservations
   },
 
-  // Próximos turnos del club a partir de ahora (en curso o por comenzar).
-  // El backend acota el resultado a `limit` (por defecto 6) ordenado por inicio.
+  // Lo que queda del día de hoy en el club: los turnos de la fecha actual que
+  // todavía no terminaron (en curso o por comenzar), ordenados por inicio y
+  // acotados a `limit`. Devuelve el sobre completo porque la tarjeta del
+  // dashboard necesita los contadores: `restantes` (cuántos quedan, aunque no
+  // entren en la lista) y `total` (cuántos hubo hoy).
   async getUpcomingReservations(clubId, { limit = 6 } = {}) {
     const { data } = await api.get(`/reservations/club/${clubId}/upcoming`, {
       params: { limit },
       headers: { 'x-club-id': clubId },
     })
-    return data.reservations
+    return {
+      reservations: data.reservations || [],
+      restantes: data.restantes ?? (data.reservations?.length || 0),
+      total: data.total ?? 0,
+      fecha: data.fecha || null,
+    }
   },
 
   async createReservation(clubId, payload) {

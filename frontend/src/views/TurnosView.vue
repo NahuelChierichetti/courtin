@@ -191,6 +191,7 @@
       :mode="viewMode"
       :columns="columns"
       :reservations="calendarVisibleItems"
+      :focus-id="focusReservationId"
       :day-start-min="dayStartMin"
       :day-end-min="dayEndMin"
       :now-min="nowMinOfDay"
@@ -256,6 +257,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import ReservationCalendar from '@/components/turnos/ReservationCalendar.vue'
 import ReservationDrawer from '@/components/turnos/ReservationDrawer.vue'
@@ -294,8 +296,19 @@ const horarios = ref(null)
 const reservations = ref([])
 const loading = ref(false)
 
+// El dashboard entra acá apuntando a un turno concreto: `?fecha=YYYY-MM-DD` abre
+// el calendario en ese día y `?reserva=<id>` lo centra y lo resalta. Sin esto la
+// flecha de la tarjeta caía en el día de hoy y había que buscar el turno a mano.
+const route = useRoute()
+const router = useRouter()
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/
+const queryDate = typeof route.query.fecha === 'string' && DATE_KEY.test(route.query.fecha)
+  ? route.query.fecha
+  : null
+
 const viewMode = ref('day')
-const currentDate = ref(dayjs().format('YYYY-MM-DD'))
+const currentDate = ref(queryDate || dayjs().format('YYYY-MM-DD'))
+const focusReservationId = ref(typeof route.query.reserva === 'string' ? route.query.reserva : null)
 const selectedCourtId = ref(null)
 const sportFilter = ref('todas')
 const courtMenuOpen = ref(false)
@@ -539,12 +552,23 @@ watch(currentClubId, (id) => {
 watch([currentDate, viewMode, selectedCourtId], () => fetchReservations())
 
 // --- Navegación ---
+// El resaltado sirve para encontrar el turno al llegar desde el dashboard; en
+// cuanto el usuario se mueve por su cuenta deja de tener sentido, y la URL
+// vuelve a ser la del calendario a secas para que un refresh no lo reviva.
+const clearFocus = () => {
+  if (!focusReservationId.value && !route.query.fecha && !route.query.reserva) return
+  focusReservationId.value = null
+  router.replace({ name: 'turnos' })
+}
+
 const shiftDate = (dir) => {
+  clearFocus()
   const unit = viewMode.value === 'day' ? 'day' : 'week'
   currentDate.value = dayjs(currentDate.value).add(dir, unit).format('YYYY-MM-DD')
 }
 
 const goToday = () => {
+  clearFocus()
   currentDate.value = dayjs().format('YYYY-MM-DD')
 }
 
