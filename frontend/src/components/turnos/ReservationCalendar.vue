@@ -90,6 +90,7 @@
                   ? (draggingId === r._id ? 'z-30 cursor-grabbing shadow-lg ring-2 ring-offset-1' : 'cursor-grab hover:shadow-md')
                   : 'cursor-default',
                 draggingId === r._id ? sportMeta(r.tipo).ring : '',
+                isFocused(r) ? 'z-20 shadow-lg ring-2 ring-brand-lime-500 ring-offset-2' : '',
               ]"
               :style="cardStyle(r)"
               @pointerdown="onPointerDown($event, r, colIndex)"
@@ -147,6 +148,8 @@ const props = defineProps({
   viewDateKey: { type: String, default: null },
   // Rango abierto por columna: { [colKey]: { startMin, endMin } | null }
   openRanges: { type: Object, default: () => ({}) },
+  // Turno a resaltar y centrar al abrir (viene del dashboard por la URL).
+  focusId: { type: String, default: null },
   currency: { type: String, default: 'ARS' },
 })
 
@@ -201,21 +204,61 @@ const closedBands = (colKey) => {
   return bands
 }
 
-// --- Auto-scroll al horario actual al abrir/cambiar de vista ---
+// --- Auto-scroll al abrir/cambiar de vista ---
+// Por defecto centra el horario actual; si vienen apuntando a un turno concreto
+// (`focusId`), ese gana: llegar de un click y tener que buscarlo en la grilla
+// sería no haber llegado.
 const scrollEl = ref(null)
 
-const scrollToNow = () => {
-  if (!scrollEl.value || props.nowMin == null) return
-  const headerH = scrollEl.value.querySelector('[data-cal-header]')?.offsetHeight || 0
-  const target = headerH + yFor(props.nowMin) - scrollEl.value.clientHeight / 2
-  scrollEl.value.scrollTop = Math.max(0, target)
+const centerVertically = (min) => {
+  const el = scrollEl.value
+  if (!el) return
+  const headerH = el.querySelector('[data-cal-header]')?.offsetHeight || 0
+  el.scrollTop = Math.max(0, headerH + yFor(min) - el.clientHeight / 2)
 }
 
-onMounted(() => nextTick(scrollToNow))
+const scrollToNow = () => {
+  if (props.nowMin == null) return
+  centerVertically(props.nowMin)
+}
+
+// Devuelve false si el turno todavía no está en la grilla (las reservas llegan
+// después del primer render), para poder reintentar cuando aparezca.
+const scrollToFocus = () => {
+  const el = scrollEl.value
+  if (!el || !props.focusId) return false
+  const r = props.reservations.find((x) => x._id === props.focusId)
+  if (!r) return false
+
+  centerVertically((r.startMin + r.endMin) / 2)
+
+  // En horizontal hay que traer la columna del turno: con varias canchas puede
+  // estar fuera de pantalla.
+  const colIndex = props.columns.findIndex((c) => c.key === r.columnKey)
+  const colEl = colEls[colIndex]
+  if (colEl) {
+    const delta = colEl.getBoundingClientRect().left - el.getBoundingClientRect().left
+    el.scrollLeft = Math.max(0, el.scrollLeft + delta - (el.clientWidth - colEl.offsetWidth) / 2)
+  }
+  return true
+}
+
+const scrollToTarget = () => {
+  if (scrollToFocus()) return
+  scrollToNow()
+}
+
+onMounted(() => nextTick(scrollToTarget))
 watch(
   () => [props.mode, props.viewDateKey, props.columns[0]?.key],
-  () => nextTick(scrollToNow),
+  () => nextTick(scrollToTarget),
 )
+watch(
+  () => [props.focusId, props.reservations.length],
+  () => nextTick(scrollToFocus),
+)
+
+const isFocused = (r) => props.focusId != null && r._id === props.focusId
 
 // --- Derivación de estado según la fecha/hora actual ---
 // Una reserva pasada se muestra como "completada" y en gris; una en curso no

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import reservationService from '@/services/reservationService'
@@ -13,7 +13,14 @@ const router = useRouter()
 const tz = computed(() => currentClub.value?.timezone || DEFAULT_TZ)
 const moneda = computed(() => currentClub.value?.moneda || 'ARS')
 const money = (n) => formatCurrency(n, moneda.value)
-const nowLabel = computed(() => dayjs().tz(tz.value).format('HH:mm'))
+// La hora que muestra la tarjeta de próximas reservas se usa para explicar el
+// corte ("desde las 17:47"), así que no puede quedar congelada en el momento en
+// que se abrió el panel: `nowTick` la refresca cada minuto.
+const nowTick = ref(dayjs())
+const nowLabel = computed(() => {
+  nowTick.value
+  return dayjs().tz(tz.value).format('HH:mm')
+})
 
 const selectedPeriod = ref('hoy')
 const periods = [
@@ -108,7 +115,11 @@ const hace = (f) => {
 }
 
 // --- Próximas reservas (datos reales) ---
+// La tarjeta muestra sólo lo que queda del día de hoy: los turnos de la fecha
+// actual que todavía no terminaron. El recorte lo hace el backend.
 const upcomingRaw = ref([])
+const upcomingRestantes = ref(0)
+const upcomingTotal = ref(0)
 const loadingUpcoming = ref(false)
 
 const getInitials = (name) =>
@@ -122,11 +133,15 @@ const upcomingReservations = computed(() =>
     const meta = ESTADO_META[r.estado] || ESTADO_META.pendiente
     return {
       id: r._id,
+      // Fecha del turno en la zona del club: es la que abre el calendario en el
+      // día correcto al hacer click en la fila.
+      fecha: start.format('YYYY-MM-DD'),
       time: start.format('HH:mm'),
       timeEnd: end.format('HH:mm'),
       name,
       initials: getInitials(name),
       court: r.court?.nombre || 'Cancha',
+      esFijo: !!r.esFijo,
       estadoLabel: meta.label,
       estadoDot: meta.dot,
       estadoText: meta.text,
@@ -134,24 +149,70 @@ const upcomingReservations = computed(() =>
   }),
 )
 
+// Cuántos quedan sin mostrar por el límite de la consulta.
+const upcomingOcultos = computed(() =>
+  Math.max(0, upcomingRestantes.value - upcomingReservations.value.length),
+)
+
+const plural = (n, singular, plural_) => (n === 1 ? singular : plural_)
+
+// El subtítulo tiene que dejar explícita la regla: son los turnos de HOY que
+// todavía no pasaron, no los próximos turnos del complejo en general.
+const upcomingSubtitle = computed(() => {
+  if (loadingUpcoming.value) return 'Turnos de hoy pendientes'
+  if (!upcomingTotal.value) return 'Turnos de hoy que todavía no terminaron'
+  if (!upcomingRestantes.value) {
+    return `Hoy hubo ${upcomingTotal.value} ${plural(upcomingTotal.value, 'turno', 'turnos')} y ya terminaron todos`
+  }
+  return `${upcomingRestantes.value} de ${upcomingTotal.value} ${plural(upcomingTotal.value, 'turno', 'turnos')} de hoy siguen por delante, desde las ${nowLabel.value} hs`
+})
+
 const fetchUpcoming = async () => {
   if (!currentClubId.value) {
     upcomingRaw.value = []
+    upcomingRestantes.value = 0
+    upcomingTotal.value = 0
     return
   }
   loadingUpcoming.value = true
   try {
-    upcomingRaw.value = await reservationService.getUpcomingReservations(currentClubId.value, { limit: 6 })
+    const { reservations, restantes, total } = await reservationService.getUpcomingReservations(
+      currentClubId.value,
+      { limit: 6 },
+    )
+    upcomingRaw.value = reservations
+    upcomingRestantes.value = restantes
+    upcomingTotal.value = total
   } catch (err) {
     console.error(err)
     upcomingRaw.value = []
+    upcomingRestantes.value = 0
+    upcomingTotal.value = 0
   } finally {
     loadingUpcoming.value = false
   }
 }
 
 const goToTurnos = () => router.push({ name: 'turnos' })
-onMounted(fetchUpcoming)
+
+// El calendario abre en el día del turno y lo deja resaltado y centrado: la
+// flecha de la fila tiene que llevar al turno concreto, no a "los turnos".
+const goToReservation = (reservation) =>
+  router.push({ name: 'turnos', query: { fecha: reservation.fecha, reserva: reservation.id } })
+
+let nowInterval = null
+let upcomingInterval = null
+onMounted(() => {
+  fetchUpcoming()
+  nowInterval = setInterval(() => (nowTick.value = dayjs()), 60 * 1000)
+  // La lista envejece sola con el correr del día (un turno termina y deja de
+  // corresponder): se refresca sin obligar a recargar el panel.
+  upcomingInterval = setInterval(fetchUpcoming, 5 * 60 * 1000)
+})
+onUnmounted(() => {
+  if (nowInterval) clearInterval(nowInterval)
+  if (upcomingInterval) clearInterval(upcomingInterval)
+})
 watch(currentClubId, fetchUpcoming)
 </script>
 
@@ -209,7 +270,7 @@ watch(currentClubId, fetchUpcoming)
         <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
             <h2 class="text-base font-semibold text-ink-500">Próximas reservas</h2>
-            <p class="text-xs text-stone-400">Próximos turnos desde las {{ nowLabel }} hs</p>
+            <p class="text-xs text-stone-400">{{ upcomingSubtitle }}</p>
           </div>
           <button class="flex items-center gap-1 text-sm font-medium text-brand-green-500 hover:text-brand-green-600 cursor-pointer" @click="goToTurnos">
             Ver todas
@@ -229,8 +290,14 @@ watch(currentClubId, fetchUpcoming)
             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
               <i class="icon-[material-symbols--calendar-month] text-xl text-stone-400"></i>
             </div>
-            <h3 class="mt-4 text-sm font-semibold text-ink-500">No hay próximas reservas</h3>
-            <p class="!mt-1 text-xs text-stone-500">Las reservas que cargues aparecerán acá.</p>
+            <h3 class="mt-4 text-sm font-semibold text-ink-500">
+              {{ upcomingTotal ? 'No queda ningún turno por delante' : 'No hay turnos para hoy' }}
+            </h3>
+            <p class="!mt-1 text-xs text-stone-500">
+              {{ upcomingTotal
+                ? 'Todos los turnos de hoy ya terminaron.'
+                : 'Acá aparecen los turnos de hoy que todavía no terminaron.' }}
+            </p>
             <button class="mt-4 text-sm font-medium text-brand-green-500 hover:text-brand-green-600 cursor-pointer" @click="goToTurnos">
               Ir al calendario de turnos
             </button>
@@ -240,7 +307,9 @@ watch(currentClubId, fetchUpcoming)
             <div
               v-for="reservation in upcomingReservations"
               :key="reservation.id"
-              class="grid grid-cols-[76px_1fr_28px] items-center gap-3 border-b border-stone-50 py-3.5 last:border-b-0 lg:grid-cols-[80px_1fr_120px_110px_32px] lg:gap-6 lg:py-4"
+              class="-mx-2 grid cursor-pointer grid-cols-[76px_1fr_28px] items-center gap-3 rounded-xl border-b border-stone-50 px-2 py-3.5 transition-colors last:border-b-0 hover:bg-stone-50 lg:grid-cols-[80px_1fr_120px_110px_32px] lg:gap-6 lg:py-4"
+              :title="`Ver en el calendario · ${reservation.time} hs`"
+              @click="goToReservation(reservation)"
             >
               <div class="flex items-center gap-1 text-xs text-stone-500">
                 {{ reservation.time }} – {{ reservation.timeEnd }}
@@ -250,7 +319,16 @@ watch(currentClubId, fetchUpcoming)
                   {{ reservation.initials }}
                 </div>
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-medium text-stone-800">{{ reservation.name }}</p>
+                  <p class="flex items-center gap-1 truncate text-sm font-medium text-stone-800">
+                    <!-- Turno fijo: se distingue de un turno suelto sin abrirlo,
+                         igual que en la grilla del calendario. -->
+                    <i
+                      v-if="reservation.esFijo"
+                      class="icon-[material-symbols--push-pin] shrink-0 text-[11px] text-stone-400"
+                      title="Turno fijo"
+                    ></i>
+                    <span class="truncate">{{ reservation.name }}</span>
+                  </p>
                   <!-- Cancha y estado no tienen columna propia en mobile. -->
                   <p class="truncate text-xs text-stone-400 lg:hidden">
                     {{ reservation.court }} · <span :class="reservation.estadoText">{{ reservation.estadoLabel }}</span>
@@ -267,10 +345,20 @@ watch(currentClubId, fetchUpcoming)
                   <span class="h-1.5 w-1.5 rounded-full" :class="reservation.estadoDot"></span>{{ reservation.estadoLabel }}
                 </span>
               </div>
-              <button class="flex h-7 w-7 items-center justify-center rounded-full text-stone-300 transition-colors hover:bg-stone-50 hover:text-stone-500 cursor-pointer" @click="goToTurnos">
+              <span class="flex h-7 w-7 items-center justify-center rounded-full text-stone-300">
                 <i class="icon-[material-symbols--chevron-right] text-xs"></i>
-              </button>
+              </span>
             </div>
+
+            <!-- La lista viene acotada: si quedan más turnos hoy, hay que poder
+                 llegar a ellos sin que el corte pase inadvertido. -->
+            <button
+              v-if="upcomingOcultos"
+              class="w-full py-3 text-center text-xs font-medium text-brand-green-500 hover:text-brand-green-600 cursor-pointer"
+              @click="goToTurnos"
+            >
+              Ver {{ upcomingOcultos }} {{ upcomingOcultos === 1 ? 'turno más de hoy' : 'turnos más de hoy' }}
+            </button>
           </template>
         </div>
       </div>
