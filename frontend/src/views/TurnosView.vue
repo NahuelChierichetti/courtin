@@ -3,32 +3,7 @@
     <!-- Header -->
     <div class="flex flex-wrap items-center gap-2 lg:gap-3">
       <!-- Date nav -->
-      <div class="flex items-center rounded-full border border-black/[0.06] bg-white shadow-sm">
-        <button
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-l-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
-          @click="shiftDate(-1)"
-        >
-          <i class="icon-[material-symbols--chevron-left] text-xs"></i>
-        </button>
-        <span class="min-w-[128px] px-2 text-center text-sm font-semibold text-ink-500 lg:min-w-[180px] lg:px-3">
-          <!-- En mobile no entra la fecha larga. -->
-          <span class="lg:hidden">{{ dateLabelShort }}</span>
-          <span class="hidden lg:inline">{{ dateLabel }}</span>
-        </span>
-        <button
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-r-full text-stone-500 transition-colors hover:bg-stone-50 cursor-pointer"
-          @click="shiftDate(1)"
-        >
-          <i class="icon-[material-symbols--chevron-right] text-xs"></i>
-        </button>
-      </div>
-
-      <button
-        class="h-9 shrink-0 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-600 transition-colors hover:bg-stone-50 cursor-pointer"
-        @click="goToday"
-      >
-        Hoy
-      </button>
+      <DateNavigator :model-value="currentDate" :mode="viewMode" @update:model-value="setDate" />
 
       <!-- Acciones: en mobile arrancan fila propia alineadas a la derecha; en
            desktop quedan al final de la única fila. -->
@@ -81,31 +56,47 @@
         </button>
       </div>
 
-      <!-- Court filter -->
+      <!-- Court filter: el único filtro de la grilla. Las canchas van agrupadas
+           por deporte, que es lo que antes era un filtro aparte. -->
       <div class="relative order-5 min-w-0 lg:order-none" @click.stop>
         <button
           class="flex h-9 w-full items-center gap-2 rounded-full border border-black/[0.06] bg-white shadow-sm px-4 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer"
           @click="courtMenuOpen = !courtMenuOpen"
         >
-          <i class="icon-[material-symbols--filter-alt] shrink-0 text-xs text-stone-400"></i>
-          <span class="truncate">{{ selectedCourt ? selectedCourt.nombre : 'Todas las canchas' }}</span>
+          <span
+            v-if="selectedCourt"
+            class="h-2 w-2 shrink-0 rounded-sm"
+            :class="sportMeta(selectedCourt.tipo).bgStrong"
+          />
+          <i v-else class="icon-[material-symbols--filter-alt] shrink-0 text-xs text-stone-400"></i>
+          <span class="truncate">{{ courtFilterLabel }}</span>
           <i class="icon-[material-symbols--keyboard-arrow-down] shrink-0 text-[10px] text-stone-400"></i>
         </button>
         <div
           v-if="courtMenuOpen"
-          class="absolute left-0 top-full z-30 mt-1 w-[min(14rem,calc(100vw-2rem))] rounded-lg border border-black/[0.06] bg-white shadow-sm py-1 shadow-lg"
+          class="absolute left-0 top-full z-30 mt-1 w-[min(15rem,calc(100vw-2rem))] rounded-lg border border-black/[0.06] bg-white py-1 shadow-lg"
         >
-            <button
-              class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-              :class="!selectedCourtId ? 'text-brand-green-600' : 'text-stone-700'"
-              :disabled="viewMode === 'week'"
-              @click="selectCourt(null)"
+          <!-- En semana no se ofrece "todas": la grilla es una cancha con los 7
+               días como columnas, así que siempre hay una elegida. -->
+          <button
+            v-if="viewMode === 'day'"
+            class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer"
+            :class="!selectedCourtId ? 'text-brand-green-600' : 'text-stone-700'"
+            @click="selectCourt(null)"
+          >
+            <span class="flex-1">Todas las canchas</span>
+            <i v-if="!selectedCourtId" class="icon-[material-symbols--check] text-xs text-brand-green-500"></i>
+          </button>
+
+          <template v-for="g in courtGroups" :key="g.key">
+            <p
+              v-if="courtGroups.length > 1"
+              class="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400"
             >
-              <span class="flex-1">Todas las canchas</span>
-              <i v-if="!selectedCourtId" class="icon-[material-symbols--check] text-xs text-brand-green-500"></i>
-            </button>
+              {{ g.label }}
+            </p>
             <button
-              v-for="c in courts"
+              v-for="c in g.courts"
               :key="c._id"
               class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm transition-colors hover:bg-stone-50 cursor-pointer"
               :class="selectedCourtId === c._id ? 'text-brand-green-600' : 'text-stone-700'"
@@ -115,27 +106,18 @@
               <span class="flex-1 truncate">{{ c.nombre }}</span>
               <i v-if="selectedCourtId === c._id" class="icon-[material-symbols--check] text-xs text-brand-green-500"></i>
             </button>
-          </div>
-        </div>
+          </template>
 
-      <!-- Sport legend / filter. En mobile scrollea en horizontal en vez de
-           romper la fila con muchos deportes. -->
-      <div
-        v-if="sportChips.length"
-        class="order-6 -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 lg:order-none lg:mx-0 lg:w-auto lg:overflow-visible lg:px-0"
-      >
-        <button
-          v-for="s in sportChips"
-          :key="s.value"
-          class="flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
-          :class="sportFilter === s.value
-            ? 'border-stone-300 bg-stone-100 text-ink-500'
-            : 'border-transparent text-stone-500 hover:bg-stone-50'"
-          @click="toggleSport(s.value)"
-        >
-          <span v-if="s.dot" class="h-2 w-2 rounded-full" :class="s.dot" />
-          {{ s.label }}
-        </button>
+          <p v-if="!activeCourts.length" class="px-4 py-2 text-sm text-stone-400">
+            No hay canchas activas.
+          </p>
+          <p
+            v-else-if="viewMode === 'week'"
+            class="mt-1 border-t border-black/[0.06] px-4 pb-1 pt-2 text-[11px] leading-snug text-stone-400"
+          >
+            La vista semanal muestra una cancha por vez.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -259,6 +241,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import DateNavigator from '@/components/turnos/DateNavigator.vue'
 import ReservationCalendar from '@/components/turnos/ReservationCalendar.vue'
 import ReservationDrawer from '@/components/turnos/ReservationDrawer.vue'
 import RecurringPreviewDialog from '@/components/turnos/RecurringPreviewDialog.vue'
@@ -268,7 +251,6 @@ import scheduleService from '@/services/scheduleService'
 import reservationService from '@/services/reservationService'
 import recurringService from '@/services/recurringService'
 import { useAuth } from '@/composables/useAuth'
-import { sportsForClub } from '@/utils/sports'
 import { dayjs, formatCurrency, DEFAULT_TZ, zonedToUtcISO } from '@/utils/datetime'
 import {
   sportMeta,
@@ -310,24 +292,12 @@ const viewMode = ref('day')
 const currentDate = ref(queryDate || dayjs().format('YYYY-MM-DD'))
 const focusReservationId = ref(typeof route.query.reserva === 'string' ? route.query.reserva : null)
 const selectedCourtId = ref(null)
-const sportFilter = ref('todas')
 const courtMenuOpen = ref(false)
 
 const viewOptions = [
   { label: 'Día', value: 'day' },
   { label: 'Semana', value: 'week' },
 ]
-
-// Leyenda y filtro de la grilla: los deportes del complejo, con el color con el
-// que se pintan los turnos. Con uno solo la fila no aporta nada y se oculta.
-const sportChips = computed(() => {
-  const deportes = sportsForClub(currentClub.value)
-  if (deportes.length < 2) return []
-  return [
-    { label: 'Todas', value: 'todas', dot: null },
-    ...deportes.map((d) => ({ label: d.label, value: d.key, dot: d.dot })),
-  ]
-})
 
 const tz = computed(() => currentClub.value?.timezone || DEFAULT_TZ)
 const currency = computed(() => currentClub.value?.moneda || 'ARS')
@@ -347,30 +317,29 @@ const visibleDays = computed(() => {
   return Array.from({ length: 7 }, (_, i) => weekStart.value.add(i, 'day').format('YYYY-MM-DD'))
 })
 
-const dateLabel = computed(() => {
-  if (viewMode.value === 'day') {
-    const l = dayjs(currentDate.value).format('ddd DD [de] MMMM, YYYY')
-    return l.charAt(0).toUpperCase() + l.slice(1)
+// --- Filtro de cancha ---
+// Uno solo: qué canchas se ven. El deporte no es un filtro aparte —eran dos
+// controles sobre lo mismo y se contradecían—; queda como el agrupador del
+// desplegable y el color con el que se pinta cada cancha.
+const activeCourts = computed(() => courts.value.filter((c) => c.estado === 'activa'))
+
+// Opciones del desplegable agrupadas por deporte: una lista plana de canchas no
+// dice de qué deporte es cada una.
+const courtGroups = computed(() => {
+  const grupos = new Map()
+  for (const c of activeCourts.value) {
+    if (!grupos.has(c.tipo)) grupos.set(c.tipo, [])
+    grupos.get(c.tipo).push(c)
   }
-  const start = weekStart.value
-  const end = start.add(6, 'day')
-  return `${start.format('DD MMM')} – ${end.format('DD MMM')}`
+  return [...grupos].map(([key, list]) => ({ key, label: sportMeta(key).label, courts: list }))
 })
 
-// Versión corta para mobile: en la barra no hay ancho para "Lun. 17 de agosto,
-// 2026". En vista semanal el rango ya es corto y se reusa tal cual.
-const dateLabelShort = computed(() => {
-  if (viewMode.value !== 'day') return dateLabel.value
-  const l = dayjs(currentDate.value).format('ddd DD MMM')
-  return l.charAt(0).toUpperCase() + l.slice(1)
-})
+const courtFilterLabel = computed(() => selectedCourt.value?.nombre || 'Todas las canchas')
 
 // --- Columnas ---
 const filteredCourts = computed(() => {
-  let list = courts.value.filter((c) => c.estado === 'activa')
-  if (selectedCourtId.value) return list.filter((c) => c._id === selectedCourtId.value)
-  if (sportFilter.value !== 'todas') list = list.filter((c) => c.tipo === sportFilter.value)
-  return list
+  if (selectedCourtId.value) return activeCourts.value.filter((c) => c._id === selectedCourtId.value)
+  return activeCourts.value
 })
 
 const columns = computed(() => {
@@ -529,15 +498,21 @@ onMounted(() => {
   reload()
   nowInterval = setInterval(() => (nowTick.value = dayjs()), 60 * 1000)
   document.addEventListener('click', closeCourtMenu)
+  document.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
   if (nowInterval) clearInterval(nowInterval)
   document.removeEventListener('click', closeCourtMenu)
+  document.removeEventListener('keydown', onKeydown)
 })
 
 const closeCourtMenu = () => {
   courtMenuOpen.value = false
+}
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape') closeCourtMenu()
 }
 
 watch(currentClubId, (id) => {
@@ -551,6 +526,15 @@ watch(currentClubId, (id) => {
 
 watch([currentDate, viewMode, selectedCourtId], () => fetchReservations())
 
+// Los filtros apuntan a cosas que pueden desaparecer: cambio de club, cancha
+// dada de baja o borrada. Sin esto la barra queda mostrando un filtro que ya no
+// existe y la grilla vacía sin explicación.
+watch(activeCourts, (list) => {
+  if (selectedCourtId.value && !list.some((c) => c._id === selectedCourtId.value)) {
+    selectedCourtId.value = viewMode.value === 'week' ? list[0]?._id || null : null
+  }
+})
+
 // --- Navegación ---
 // El resaltado sirve para encontrar el turno al llegar desde el dashboard; en
 // cuanto el usuario se mueve por su cuenta deja de tener sentido, y la URL
@@ -561,33 +545,25 @@ const clearFocus = () => {
   router.replace({ name: 'turnos' })
 }
 
-const shiftDate = (dir) => {
+// El selector de fecha (flechas + calendario) ya resuelve a qué día ir; acá
+// sólo se apaga el resaltado que trae el link del dashboard.
+const setDate = (value) => {
   clearFocus()
-  const unit = viewMode.value === 'day' ? 'day' : 'week'
-  currentDate.value = dayjs(currentDate.value).add(dir, unit).format('YYYY-MM-DD')
-}
-
-const goToday = () => {
-  clearFocus()
-  currentDate.value = dayjs().format('YYYY-MM-DD')
+  currentDate.value = value
 }
 
 const setViewMode = (mode) => {
   if (mode === 'week' && !selectedCourtId.value) {
-    // La vista semanal necesita una cancha concreta.
-    selectedCourtId.value = filteredCourts.value[0]?._id || courts.value[0]?._id || null
+    // La vista semanal es una cancha por columna de día, así que necesita una
+    // cancha concreta: se elige la primera de la lista.
+    selectedCourtId.value = activeCourts.value[0]?._id || null
   }
   viewMode.value = mode
 }
 
 const selectCourt = (id) => {
-  if (id === null && viewMode.value === 'week') return
   selectedCourtId.value = id
   courtMenuOpen.value = false
-}
-
-const toggleSport = (value) => {
-  sportFilter.value = value
 }
 
 // --- Drawer ---
