@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { dayjs } from '@/utils/datetime'
 
 // Calendario chico para elegir una fecha.
@@ -10,8 +10,13 @@ import { dayjs } from '@/utils/datetime'
 // arrastra ~112 KB al bundle para un mes de casillas.
 const props = defineProps({
   modelValue: { type: String, default: '' },
-  // Nada antes de hoy: no se reserva para atrás.
+  // Nada antes de hoy: no se reserva para atrás. En el panel se pasa `null`
+  // porque ahí sí se miran días pasados.
   minDate: { type: String, default: () => dayjs().format('YYYY-MM-DD') },
+  // Rango a resaltar además del día elegido (la semana visible, en el panel).
+  // Ambos extremos incluidos.
+  rangeStart: { type: String, default: '' },
+  rangeEnd: { type: String, default: '' },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -20,6 +25,17 @@ const emit = defineEmits(['update:modelValue'])
 const DIAS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
 const cursor = ref(dayjs(props.modelValue || undefined).startOf('month'))
+
+// La fecha también cambia desde afuera (flechas del header, atajo "Hoy"): si el
+// mes no acompaña, al abrir el calendario el día elegido no está a la vista.
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (!value) return
+    const d = dayjs(value)
+    if (!d.isSame(cursor.value, 'month')) cursor.value = d.startOf('month')
+  },
+)
 
 const titulo = computed(() => {
   const t = cursor.value.format('MMMM YYYY')
@@ -40,15 +56,21 @@ const celdas = computed(() => {
   ]
 })
 
-const min = computed(() => dayjs(props.minDate).startOf('day'))
+const min = computed(() => (props.minDate ? dayjs(props.minDate).startOf('day') : null))
 
-const esPasado = (d) => d.startOf('day').isBefore(min.value)
+const esPasado = (d) => !!min.value && d.startOf('day').isBefore(min.value)
 const esSeleccionado = (d) => props.modelValue === d.format('YYYY-MM-DD')
 const esHoy = (d) => d.isSame(dayjs(), 'day')
 
+const esDelRango = (d) => {
+  if (!props.rangeStart || !props.rangeEnd) return false
+  const key = d.format('YYYY-MM-DD')
+  return key >= props.rangeStart && key <= props.rangeEnd
+}
+
 // No se puede retroceder más allá del mes de `minDate`: un mes entero de días
-// deshabilitados no le sirve a nadie.
-const puedeRetroceder = computed(() => cursor.value.isAfter(min.value, 'month'))
+// deshabilitados no le sirve a nadie. Sin `minDate` no hay tope.
+const puedeRetroceder = computed(() => !min.value || cursor.value.isAfter(min.value, 'month'))
 
 const mover = (meses) => {
   if (meses < 0 && !puedeRetroceder.value) return
@@ -103,9 +125,11 @@ const elegir = (d) => {
           :class="
             esSeleccionado(celda)
               ? 'bg-brand-green-500 text-white'
-              : esHoy(celda)
-                ? 'text-brand-green-600 ring-1 ring-brand-green-200 hover:bg-brand-green-50'
-                : 'text-stone-700 hover:bg-stone-100'
+              : esDelRango(celda)
+                ? 'bg-brand-green-50 text-brand-green-700 hover:bg-brand-green-100'
+                : esHoy(celda)
+                  ? 'text-brand-green-600 ring-1 ring-brand-green-200 hover:bg-brand-green-50'
+                  : 'text-stone-700 hover:bg-stone-100'
           "
           @click="elegir(celda)"
         >

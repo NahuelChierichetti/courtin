@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { dayjs } from '@/utils/datetime'
 import FilterPopover from './FilterPopover.vue'
-import MiniCalendar from './MiniCalendar.vue'
+import MiniCalendar from '@/components/common/MiniCalendar.vue'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
