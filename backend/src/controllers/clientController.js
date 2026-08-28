@@ -1,5 +1,6 @@
 const Client = require('../models/Client');
 const Reservation = require('../models/Reservation');
+const { scopedById } = require('../utils/scope');
 
 const clubIdFrom = (req) =>
   req.query.clubId || req.body?.clubId || req.headers['x-club-id'] || null;
@@ -41,8 +42,11 @@ const getClients = async (req, res, next) => {
 // GET /clients/:id — detalle del cliente + sus reservas.
 const getClientById = async (req, res, next) => {
   try {
-    const client = await Client.findById(req.params.id);
-    if (!client || (clubIdFrom(req) && client.club.toString() !== clubIdFrom(req))) {
+    // El club sale de la membresía ya validada, no del pedido: comparar contra
+    // el `clubId` que mandó el cliente sólo funciona mientras el middleware lea
+    // exactamente la misma fuente.
+    const client = await Client.findOne(scopedById(req, req.params.id));
+    if (!client) {
       return res.status(404).json({ ok: false, message: 'Cliente no encontrado' });
     }
 
@@ -63,8 +67,8 @@ const getClientById = async (req, res, next) => {
 // PATCH /clients/:id — edita datos manuales del cliente (nombre, teléfono, notas).
 const updateClient = async (req, res, next) => {
   try {
-    const client = await Client.findById(req.params.id);
-    if (!client || (clubIdFrom(req) && client.club.toString() !== clubIdFrom(req))) {
+    const client = await Client.findOne(scopedById(req, req.params.id));
+    if (!client) {
       return res.status(404).json({ ok: false, message: 'Cliente no encontrado' });
     }
 

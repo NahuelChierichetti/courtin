@@ -1,4 +1,5 @@
 const Notification = require('../models/Notification');
+const { scopedById } = require('../utils/scope');
 
 const clubIdFrom = (req) => req.query.clubId || req.body?.clubId || req.headers['x-club-id'] || null;
 
@@ -34,9 +35,9 @@ const markAllRead = async (req, res, next) => {
 // PATCH /notifications/:id/read — marca una como leída.
 const markRead = async (req, res, next) => {
   try {
-    const clubId = clubIdFrom(req);
-    const notif = await Notification.findById(req.params.id);
-    if (!notif || (clubId && notif.club.toString() !== clubId)) {
+    // Acotado por la membresía ya validada, no por el `clubId` del pedido.
+    const notif = await Notification.findOne(scopedById(req, req.params.id));
+    if (!notif) {
       return res.status(404).json({ ok: false, message: 'Notificación no encontrada' });
     }
     notif.leida = true;
