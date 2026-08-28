@@ -48,6 +48,7 @@ const Membership = require('../models/Membership');
 const Subscription = require('../models/Subscription');
 const ROLES = require('../config/roles');
 const { upsertClientFromReservation } = require('../utils/clients');
+const { localTimeToUtc } = require('../utils/timezone');
 const { precioDe } = require('../config/plans');
 
 const SLUG = 'demo-courtin';
@@ -84,8 +85,17 @@ if (!isLocal && !flag('prod')) {
 const passwordExplicita = valorDe('password') || process.env.DEMO_CLUB_PASSWORD || null;
 const generarPassword = () => crypto.randomBytes(9).toString('base64url').slice(0, 12);
 
+// OJO: `Club.horarios` se guarda en UTC, no en hora local del club (por eso
+// existen `utils/timezone.js` y la migración `migrateHorariosToUtc.js`). Las
+// lecturas lo devuelven convertido con `horariosToLocal`. Escribir acá '08:00'
+// crudo dejaba al complejo abierto de 05:00 a 20:30 hora argentina: sin la
+// franja de la tarde-noche, que es justo la que se muestra en una demo.
 const semanalAbierto = () => {
-  const dia = { abierto: true, horaInicio: '08:00', horaFin: '23:30' };
+  const dia = {
+    abierto: true,
+    horaInicio: localTimeToUtc('08:00', TZ),
+    horaFin: localTimeToUtc('23:30', TZ)
+  };
   return {
     lunes: { ...dia },
     martes: { ...dia },
@@ -331,13 +341,21 @@ const run = async () => {
     console.log('· Turnos existentes intactos (usá --refresh para regenerarlos).');
   }
 
-  const appUrl = process.env.APP_PUBLIC_URL || 'http://localhost:5173';
+  // `APP_PUBLIC_URL` sale del .env local, que apunta a localhost aunque la base
+  // sea la de producción: sin este aviso el script imprime links que no son.
+  const appUrl = valorDe('app-url') || process.env.APP_PUBLIC_URL || 'http://localhost:5173';
+  const appUrlEsLocal = /localhost|127\.0\.0\.1/.test(appUrl);
 
   console.log('\n✅ Complejo demo listo\n');
   console.log(`   Panel      : ${appUrl}/panel/login`);
   console.log(`   Usuario    : ${OWNER_EMAIL}`);
   console.log(`   Contraseña : ${passwordCambiada ? password || passwordExplicita : '(sin cambios; la que ya tenías)'}`);
   console.log(`   Link público: ${appUrl}/club/${SLUG}`);
+  if (!isLocal && appUrlEsLocal) {
+    console.log('\n   ⚠️  Los links de arriba dicen localhost porque APP_PUBLIC_URL sale del .env local,');
+    console.log('       pero los datos se escribieron en la base remota. Pasá --app-url=https://tu-dominio');
+    console.log('       para que se impriman bien.');
+  }
   console.log('\n   El club NO aparece en el buscador (demo: true). Sólo llega quien tiene el link.');
   if (passwordCambiada) {
     console.log('   ⚠️  Anotá la contraseña ahora: no se vuelve a mostrar.\n');
