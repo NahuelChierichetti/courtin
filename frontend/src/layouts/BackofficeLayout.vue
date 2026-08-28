@@ -70,7 +70,7 @@ const goToApp = () => {
 
     <!-- Sidebar: drawer en mobile, columna fija desde lg -->
     <aside
-      class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-brand-green-700 transition-transform duration-200 ease-out lg:static lg:z-auto lg:translate-x-0 lg:transition-[width]"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-brand-green-900 transition-transform duration-200 ease-out lg:static lg:z-auto lg:translate-x-0 lg:transition-[width]"
       :class="[
         mobileOpen ? 'translate-x-0' : '-translate-x-full',
         railed ? 'lg:w-[76px]' : 'lg:w-64',
@@ -79,9 +79,9 @@ const goToApp = () => {
       <!-- Logo -->
       <div class="flex items-center pt-5 pb-4" :class="railed ? 'justify-center px-2' : 'gap-2.5 px-5'">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-12 w-auto" />
-        <div v-if="!railed" class="flex flex-col text-start">
+        <div v-if="!railed" class="flex items-center gap-1.5">
           <p class="text-2xl font-normal text-white">
-            Court<span class="text-brand-lime-500">In</span>
+            Court<span class="text-brand-lime-500">in</span>
           </p>
           <span class="max-w-[50px] rounded bg-brand-lime-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-lime-400">Admin</span>
         </div>
@@ -175,7 +175,7 @@ const goToApp = () => {
               {{ userInitials }}
             </span>
             <span class="hidden min-w-0 text-left sm:block">
-              <span class="block truncate text-sm font-semibold text-ink-500">{{ userShortName }}</span>
+              <span class="block truncate text-sm font-semibold text-brand-green-900">{{ userShortName }}</span>
               <span class="block text-xs text-stone-500">Superadmin</span>
             </span>
             <i

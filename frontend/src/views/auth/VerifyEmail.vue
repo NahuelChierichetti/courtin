@@ -43,8 +43,8 @@ const destinoLabel = computed(() => (isAuthenticated.value ? 'Ir a mi panel' : '
       <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-normal tracking-tight text-ink-500">
-            Court<span class="text-brand-lime-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-brand-green-900">
+            Court<span class="text-brand-lime-500">in</span>
           </p>
         </div>
       </RouterLink>
@@ -60,7 +60,7 @@ const destinoLabel = computed(() => (isAuthenticated.value ? 'Ir a mi panel' : '
             <div class="flex h-14 w-14 items-center justify-center rounded-full bg-success-50">
               <i class="icon-[material-symbols--check-circle-outline] text-2xl text-success-600"></i>
             </div>
-            <h1 class="mt-6 text-3xl font-bold text-ink-500 sm:text-4xl">Email confirmado</h1>
+            <h1 class="mt-6 text-3xl font-bold text-brand-green-900 sm:text-4xl">Email confirmado</h1>
             <p class="mt-3 text-sm leading-relaxed text-stone-500">{{ mensaje }}</p>
             <RouterLink
               :to="destino"
@@ -74,7 +74,7 @@ const destinoLabel = computed(() => (isAuthenticated.value ? 'Ir a mi panel' : '
             <div class="flex h-14 w-14 items-center justify-center rounded-full bg-error-50">
               <i class="icon-[material-symbols--link-off] text-2xl text-error-600"></i>
             </div>
-            <h1 class="mt-6 text-3xl font-bold text-ink-500 sm:text-4xl">No pudimos confirmarlo</h1>
+            <h1 class="mt-6 text-3xl font-bold text-brand-green-900 sm:text-4xl">No pudimos confirmarlo</h1>
             <p class="mt-3 text-sm leading-relaxed text-stone-500">{{ mensaje }}</p>
             <p class="mt-3 text-sm leading-relaxed text-stone-500">
               Podés pedir un link nuevo desde el aviso que aparece en tu panel.

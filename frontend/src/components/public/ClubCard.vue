@@ -53,12 +53,12 @@ const hoursLabel = computed(() => {
           <div class="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15"></div>
         </div>
       </div>
-      <span
+      <!-- <span
         v-if="primarySport"
-        class="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink-500 shadow-sm"
+        class="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-green-900 shadow-sm"
       >
         {{ sportMeta(primarySport).label }}
-      </span>
+      </span> -->
     </div>
 
     <!--
@@ -78,7 +78,7 @@ const hoursLabel = computed(() => {
       <!-- pr-20: el logo se mete sobre esta línea; sin esto, un nombre largo
            pasa por debajo. -->
       <div class="flex items-start justify-between gap-3 pr-20">
-        <h3 class="text-lg font-bold leading-snug text-ink-500">{{ club.nombre }}</h3>
+        <h3 class="text-lg font-bold leading-snug text-brand-green-900">{{ club.nombre }}</h3>
         <span v-if="club.rating" class="flex shrink-0 items-center gap-1 text-sm font-bold text-success-600">
           <i class="icon-[material-symbols--star] text-xs"></i>{{ Number(club.rating).toFixed(2) }}
         </span>
@@ -97,12 +97,18 @@ const hoursLabel = computed(() => {
         </p>
       </div>
 
-      <div class="mt-4 border-t border-black/[0.06] pt-4">
+      <div class="mt-4 flex items-center justify-between gap-3 border-t border-black/[0.06] pt-4">
         <p v-if="club.precioDesde" class="text-lg font-bold text-brand-green-500">
           {{ formatCurrency(club.precioDesde, club.moneda) }}
           <span class="text-sm font-medium text-stone-400">/hora</span>
         </p>
         <p v-else class="text-sm font-medium text-stone-400">Ver disponibilidad</p>
+        <span
+          class="rounded-full bg-brand-lime-500 px-4 py-2 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
+        >
+          Reservar
+          <i class="icon-[material-symbols--arrow-forward] text-base transition-transform group-hover:translate-x-0.5"></i>
+        </span>
       </div>
     </div>
   </button>

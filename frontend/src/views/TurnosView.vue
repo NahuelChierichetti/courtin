@@ -125,7 +125,7 @@
     <div v-if="currentClubId && courts.length" class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
       <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-3 py-2.5 sm:px-4 sm:py-3">
         <p class="text-xs text-stone-400">Turnos {{ viewMode === 'day' ? 'del día' : 'de la semana' }}</p>
-        <p class="mt-0.5 text-xl font-bold font-secondary text-ink-500">{{ stats.total }}</p>
+        <p class="mt-0.5 text-xl font-bold font-secondary text-brand-green-900">{{ stats.total }}</p>
       </div>
       <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-3 py-2.5 sm:px-4 sm:py-3">
         <p class="text-xs text-stone-400">Confirmados</p>
@@ -137,7 +137,7 @@
       </div>
       <div class="rounded-xl border border-black/[0.06] bg-white shadow-sm px-4 py-3">
         <p class="text-xs text-stone-400">Ingresos estimados</p>
-        <p class="mt-0.5 text-xl font-bold font-secondary text-ink-500">{{ formatCurrency(stats.ingresos, currency) }}</p>
+        <p class="mt-0.5 text-xl font-bold font-secondary text-brand-green-900">{{ formatCurrency(stats.ingresos, currency) }}</p>
       </div>
     </div>
 
@@ -146,7 +146,7 @@
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-stone-500">Seleccioná un club desde el encabezado para ver los turnos.</p>
     </div>
 
@@ -159,7 +159,7 @@
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--grid-view] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">No hay canchas</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">No hay canchas</h3>
       <p class="!mt-2 text-sm text-stone-500">Creá canchas para empezar a cargar turnos.</p>
     </div>
 

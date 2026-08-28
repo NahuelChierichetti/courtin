@@ -66,7 +66,7 @@ const center = computed(() => {
         />
       </svg>
       <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <p class="text-xl font-bold font-secondary text-ink-500">{{ fmtCenter(center.value) }}</p>
+        <p class="text-xl font-bold font-secondary text-brand-green-900">{{ fmtCenter(center.value) }}</p>
         <p class="text-xs text-stone-400">{{ center.label }}</p>
       </div>
     </div>

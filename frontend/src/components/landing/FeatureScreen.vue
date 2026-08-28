@@ -130,7 +130,7 @@ const FILA = 26 // alto de una fila de la grilla, en px
             <p class="font-secondary text-[8px] leading-tight" :class="sportMeta(b.tipo).textSoft">
               {{ b.hora }}
             </p>
-            <p class="truncate text-[9px] leading-tight font-medium text-ink-500">{{ b.quien }}</p>
+            <p class="truncate text-[9px] leading-tight font-medium text-brand-green-900">{{ b.quien }}</p>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@ const FILA = 26 // alto de una fila de la grilla, en px
             {{ c.iniciales }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-[11px] font-medium text-ink-500">{{ c.nombre }}</p>
+            <p class="truncate text-[11px] font-medium text-brand-green-900">{{ c.nombre }}</p>
             <p class="text-[10px] text-stone-400">{{ c.turnos }} turnos jugados</p>
           </div>
           <i class="icon-[material-symbols--chevron-right] shrink-0 text-sm text-stone-300"></i>
@@ -247,7 +247,7 @@ const FILA = 26 // alto de una fila de la grilla, en px
               ? 'border-black/[0.04] bg-stone-50 text-stone-300 line-through'
               : s.estado === 'elegido'
                 ? 'border-brand-green-500 bg-brand-green-500 text-white'
-                : 'border-black/[0.08] bg-white text-ink-500'
+                : 'border-black/[0.08] bg-white text-brand-green-900'
           "
         >
           {{ s.hora }}

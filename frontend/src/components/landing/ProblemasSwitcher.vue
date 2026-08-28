@@ -120,7 +120,7 @@ onBeforeUnmount(detener)
               </p>
               <p
                 class="mt-1.5 text-base font-medium transition-colors duration-300"
-                :class="activo === i ? 'text-brand-purple-800' : 'text-ink-500'"
+                :class="activo === i ? 'text-brand-purple-800' : 'text-brand-green-900'"
               >
                 {{ p.titulo }}
               </p>

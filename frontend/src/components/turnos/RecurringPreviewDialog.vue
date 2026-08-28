@@ -11,7 +11,7 @@
               <i class="icon-[material-symbols--push-pin] text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-ink-500">Turno fijo</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">Turno fijo</h2>
               <p class="truncate text-sm text-stone-400">{{ subtitle }}</p>
             </div>
             <button
@@ -41,7 +41,7 @@
               <!-- Lo que hace el turno fijo, en una frase. Es la promesa que el
                    complejo le está haciendo al cliente, y conviene que la lea. -->
               <div class="rounded-xl border border-brand-purple-100 bg-brand-purple-50/50 px-4 py-3">
-                <p class="text-sm font-medium text-ink-500">
+                <p class="text-sm font-medium text-brand-green-900">
                   Todos los {{ diaLabel }} a las {{ horaLabel }}, sin fecha de fin.
                 </p>
                 <p class="mt-1 text-xs text-stone-500">
@@ -74,7 +74,7 @@
                   :key="f.inicio"
                   class="flex items-center justify-between gap-3 px-3.5 py-2.5"
                 >
-                  <span class="text-sm" :class="f.estado === 'libre' ? 'text-ink-500' : 'text-stone-400'">
+                  <span class="text-sm" :class="f.estado === 'libre' ? 'text-brand-green-900' : 'text-stone-400'">
                     {{ fechaLabel(f.inicio) }}
                   </span>
                   <span

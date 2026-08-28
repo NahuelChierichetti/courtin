@@ -193,7 +193,7 @@ const confirmar = async () => {
 <template>
   <Teleport to="body">
     <div v-if="visible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-stone-900/50" @click="step !== 3 && emit('close')"></div>
+      <div class="absolute inset-0 text-brand-green-900/50" @click="step !== 3 && emit('close')"></div>
 
       <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <!-- Header + progress (steps 1-2) -->
@@ -238,7 +238,7 @@ const confirmar = async () => {
               <p class="mb-2.5 text-center text-xs text-stone-500">
                 Entrá con Google y tené todas tus reservas en un solo lugar
               </p>
-              <GoogleSignInButton :width="320" text="continue_with" @credential="onGoogleCredential" />
+              <GoogleSignInButton text="continue_with" @credential="onGoogleCredential" />
               <p v-if="googleError" class="mt-2 text-center text-xs text-error-600">{{ googleError }}</p>
             </div>
             <div class="flex items-center gap-3 py-0.5">

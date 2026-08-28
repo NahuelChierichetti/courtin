@@ -53,7 +53,7 @@
           class="rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activePlan === f.value
-              ? 'bg-stone-900 text-white'
+              ? 'bg-brand-green-900 text-white'
               : 'text-stone-600 hover:bg-stone-50'
           "
           @click="activePlan = f.value"
@@ -70,7 +70,7 @@
           class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activeEstado === f.value
-              ? 'bg-stone-900 text-white'
+              ? 'bg-brand-green-900 text-white'
               : 'text-stone-600 hover:bg-stone-50'
           "
           @click="activeEstado = f.value"

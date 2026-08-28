@@ -10,7 +10,7 @@ const title = route.meta.title || 'Página'
     <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-green-50">
       <i class="icon-[material-symbols--build] text-2xl text-brand-green-500"></i>
     </div>
-    <h1 class="mt-4 text-xl font-bold text-ink-500">{{ title }}</h1>
+    <h1 class="mt-4 text-xl font-bold text-brand-green-900">{{ title }}</h1>
     <p class="!mt-2 text-sm text-stone-500">Esta sección estará disponible próximamente.</p>
   </div>
 </template>

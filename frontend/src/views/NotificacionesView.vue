@@ -77,7 +77,7 @@ const markAll = async () => {
   <div class="space-y-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Notificaciones</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Notificaciones</h1>
         <p class="mt-1 text-sm text-stone-500">
           {{ unreadCount ? `${unreadCount} sin leer` : 'Todo al día' }}
         </p>
@@ -97,7 +97,7 @@ const markAll = async () => {
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
     </div>
 
     <div v-else class="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-sm">
@@ -107,7 +107,7 @@ const markAll = async () => {
         <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
           <i class="icon-[material-symbols--notifications] text-xl text-stone-400"></i>
         </div>
-        <h3 class="mt-4 text-sm font-semibold text-ink-500">Sin notificaciones</h3>
+        <h3 class="mt-4 text-sm font-semibold text-brand-green-900">Sin notificaciones</h3>
         <p class="mt-1 text-xs text-stone-500">Acá vas a ver reservas, cancelaciones y nuevos clientes.</p>
       </div>
 
@@ -124,7 +124,7 @@ const markAll = async () => {
           </span>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <p class="min-w-0 text-sm font-semibold text-ink-500">{{ n.titulo }}</p>
+              <p class="min-w-0 text-sm font-semibold text-brand-green-900">{{ n.titulo }}</p>
               <span v-if="!n.leida" class="h-2 w-2 shrink-0 rounded-full bg-brand-green-500"></span>
             </div>
             <p class="mt-0.5 text-sm text-stone-500">{{ n.mensaje }}</p>

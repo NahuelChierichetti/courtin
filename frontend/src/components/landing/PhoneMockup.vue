@@ -69,7 +69,7 @@ const favorito = ref(false)
           <div class="px-4 py-3">
             <div class="flex items-start justify-between gap-2">
               <div>
-                <p class="text-base font-bold text-ink-500">Complejo Los Amigos</p>
+                <p class="text-base font-bold text-brand-green-900">Complejo Los Amigos</p>
                 <p class="mt-0.5 flex items-center gap-1 text-[11px] text-stone-500">
                   <i class="icon-[material-symbols--location-on] text-[11px]"></i>
                   Av. Rivadavia 4820, Ramos Mejía
@@ -98,7 +98,7 @@ const favorito = ref(false)
             </div>
 
             <div class="mt-3 rounded-2xl border border-black/[0.06] bg-white p-3.5">
-              <p class="text-sm font-bold text-ink-500">Reservá esta cancha</p>
+              <p class="text-sm font-bold text-brand-green-900">Reservá esta cancha</p>
 
               <p class="mt-3 text-[10px] font-bold tracking-wide text-stone-500 uppercase">Día</p>
               <div class="mt-1.5 flex gap-1.5">
@@ -155,7 +155,7 @@ const favorito = ref(false)
                       ? 'cursor-not-allowed border-black/[0.04] bg-stone-50 text-stone-300 line-through'
                       : hora === h.hora
                         ? 'cursor-pointer border-brand-green-500 bg-brand-green-500 text-white'
-                        : 'cursor-pointer border-black/[0.08] bg-white text-ink-500'
+                        : 'cursor-pointer border-black/[0.08] bg-white text-brand-green-900'
                   "
                   @click="hora = h.hora"
                 >
@@ -166,7 +166,7 @@ const favorito = ref(false)
               <div class="mt-3 flex items-center justify-between border-t border-black/[0.06] pt-2.5">
                 <div>
                   <p class="text-[10px] text-stone-500">Seña (50%)</p>
-                  <p class="font-secondary text-sm font-bold text-ink-500">$ 11.000</p>
+                  <p class="font-secondary text-sm font-bold text-brand-green-900">$ 11.000</p>
                 </div>
                 <span
                   class="rounded-full bg-brand-lime-500 px-4 py-2 text-xs font-bold text-brand-green-900"

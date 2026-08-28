@@ -8,6 +8,7 @@ import PhoneMockup from '@/components/landing/PhoneMockup.vue'
 import SenaSimulador from '@/components/landing/SenaSimulador.vue'
 import PricingPlans from '@/components/landing/PricingPlans.vue'
 import FaqList from '@/components/landing/FaqList.vue'
+import DemoRequestForm from '@/components/landing/DemoRequestForm.vue'
 
 // Página de venta para dueños de complejo.
 //
@@ -65,19 +66,22 @@ const PUNTOS_COBRO = [
       <div class="mx-auto flex h-[72px] w-full max-w-7xl items-center gap-6 px-4">
         <RouterLink to="/complejos" class="flex shrink-0 items-center gap-2.5 no-underline">
           <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
-          <p class="text-lg font-normal tracking-tight text-ink-500">
-            Court<span class="text-brand-lime-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-brand-green-900">
+            Court<span class="text-brand-lime-500">in</span>
           </p>
         </RouterLink>
 
         <nav class="ml-4 hidden items-center gap-6 md:flex">
-          <a href="#demo" class="text-sm text-stone-600 no-underline transition-colors hover:text-ink-500">
+          <a href="#demo" class="text-sm text-stone-600 no-underline transition-colors hover:text-brand-green-900">
             Probar demo
           </a>
-          <a href="#precios" class="text-sm text-stone-600 no-underline transition-colors hover:text-ink-500">
+          <a href="#precios" class="text-sm text-stone-600 no-underline transition-colors hover:text-brand-green-900">
             Precios
           </a>
-          <RouterLink to="/" class="text-sm text-stone-600 no-underline transition-colors hover:text-ink-500">
+          <a href="#agendar" class="text-sm text-stone-600 no-underline transition-colors hover:text-brand-green-900">
+            Agendar demo
+          </a>
+          <RouterLink to="/" class="text-sm text-stone-600 no-underline transition-colors hover:text-brand-green-900">
             Soy jugador
           </RouterLink>
         </nav>
@@ -85,7 +89,7 @@ const PUNTOS_COBRO = [
         <div class="ml-auto flex shrink-0 items-center gap-3">
           <RouterLink
             to="/panel/login"
-            class="hidden text-sm text-stone-600 no-underline transition-colors hover:text-ink-500 sm:block"
+            class="hidden text-sm text-stone-600 no-underline transition-colors hover:text-brand-green-900 sm:block"
           >
             Ingresar
           </RouterLink>
@@ -113,7 +117,7 @@ const PUNTOS_COBRO = [
 
           <h1
             v-reveal="80"
-            class="mt-6 text-4xl leading-[1.12] font-semibold tracking-tight text-ink-500 sm:text-5xl"
+            class="mt-6 text-4xl leading-[1.12] font-semibold tracking-tight text-brand-green-900 sm:text-5xl"
           >
             Dejá de anotar turnos en el cuaderno
             <span class="text-brand-green-500">y de perder reservas por WhatsApp</span>
@@ -133,7 +137,7 @@ const PUNTOS_COBRO = [
             </RouterLink>
             <a
               href="#demo"
-              class="rounded-full border border-black/[0.1] bg-white px-7 py-3.5 text-center text-base text-ink-500 no-underline transition-all hover:-translate-y-0.5 hover:shadow-md"
+              class="rounded-full border border-black/[0.1] bg-white px-7 py-3.5 text-center text-base text-brand-green-900 no-underline transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
               Ver la demo
             </a>
@@ -155,7 +159,7 @@ const PUNTOS_COBRO = [
       <div class="mx-auto w-full max-w-6xl">
         <div v-reveal class="mb-10 max-w-2xl">
           <span class="text-sm font-medium text-brand-purple-600">Probalo sin registrarte</span>
-          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-ink-500 sm:text-4xl">
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-brand-green-900 sm:text-4xl">
             Probá el sistema ahora mismo, con un complejo de ejemplo
           </h2>
           <p class="mt-4 text-base leading-relaxed text-stone-600">
@@ -174,7 +178,7 @@ const PUNTOS_COBRO = [
       <div class="mx-auto w-full max-w-6xl">
         <div v-reveal class="mb-12 max-w-2xl">
           <span class="text-sm font-medium text-brand-purple-600">Lo que se resuelve</span>
-          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-ink-500 sm:text-4xl">
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-brand-green-900 sm:text-4xl">
             Cuatro problemas que ya no vas a tener
           </h2>
           <p class="mt-4 text-base leading-relaxed text-stone-600">
@@ -196,7 +200,7 @@ const PUNTOS_COBRO = [
       >
         <div v-reveal.left>
           <span class="text-sm font-medium text-brand-purple-600">Tu link de reservas</span>
-          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-ink-500 sm:text-4xl">
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-brand-green-900 sm:text-4xl">
             Tus clientes reservan solos,
             <span class="text-brand-green-500">sin escribirte</span>
           </h2>
@@ -249,7 +253,7 @@ const PUNTOS_COBRO = [
       >
         <div class="max-w-2xl">
           <span class="text-sm font-medium text-brand-purple-600">Cobros online</span>
-          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-ink-500 sm:text-4xl">
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-brand-green-900 sm:text-4xl">
             Cobrá la seña antes de que lleguen
           </h2>
           <p class="mt-4 text-lg leading-relaxed text-stone-600">
@@ -272,7 +276,7 @@ const PUNTOS_COBRO = [
               >
                 <i :class="p.icon" class="text-lg"></i>
               </span>
-              <p class="mt-3.5 text-base font-medium text-ink-500">{{ p.titulo }}</p>
+              <p class="mt-3.5 text-base font-medium text-brand-green-900">{{ p.titulo }}</p>
               <p class="mt-1 text-sm leading-relaxed text-stone-600">{{ p.texto }}</p>
             </li>
           </ul>
@@ -289,7 +293,7 @@ const PUNTOS_COBRO = [
       <div class="mx-auto w-full max-w-6xl">
         <div v-reveal class="mb-10 max-w-2xl">
           <span class="text-sm font-medium text-brand-purple-600">Precios</span>
-          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-ink-500 sm:text-4xl">
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-brand-green-900 sm:text-4xl">
             Un precio por tamaño de complejo
           </h2>
           <p class="mt-4 text-base leading-relaxed text-stone-600">
@@ -303,16 +307,16 @@ const PUNTOS_COBRO = [
 
     <!-- ---------- Preguntas -------------------------------------------------- -->
     <section class="px-4 py-20">
-      <div class="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-16">
-        <div v-reveal.left class="lg:sticky lg:top-28 lg:self-start">
+      <div class="mx-auto flex flex-col w-full max-w-6xl gap-10">
+        <div v-reveal.left class="lg:top-28 lg:self-start">
           <span class="text-sm font-medium text-brand-purple-600">Preguntas</span>
-          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-ink-500 sm:text-4xl">
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-brand-green-900 sm:text-4xl">
             Lo que todos preguntan
           </h2>
           <p class="mt-4 text-base leading-relaxed text-stone-600">
             ¿Te quedó otra duda?
             <a
-              href="mailto:hola@courtinapp.com"
+              href="mailto:courtinapp@gmail.com"
               class="font-medium text-brand-purple-600 underline underline-offset-4 transition-colors hover:text-brand-purple-700"
             >Escribinos</a>
             y te la sacamos.
@@ -321,6 +325,33 @@ const PUNTOS_COBRO = [
 
         <div v-reveal="80">
           <FaqList />
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- Agendar demo ----------------------------------------------- -->
+    <!--
+      Va justo después de precios a propósito: es el momento en que aparece la
+      duda ("¿esto me sirve a mí?"), y la respuesta acá no es otro botón de
+      registro sino hablar con alguien. El alta por cuenta propia sigue viva en
+      el cierre, para quien ya se decidió.
+    -->
+    <section id="agendar" class="scroll-mt-24 border-t border-black/[0.06] px-4 py-20">
+      <div class="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:gap-16">
+        <div v-reveal.left class="lg:top-28 lg:self-start">
+          <span class="text-sm font-medium text-brand-purple-600">Demo</span>
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-brand-green-900 sm:text-4xl">
+            Te lo mostramos funcionando
+          </h2>
+          <p class="mt-4 text-base leading-relaxed text-stone-600">
+            Una llamada de 20 minutos con el sistema andando: la grilla de turnos, la caja del
+            día y el link público. Hacemos una reserva de punta a punta y vos preguntás lo que
+            quieras sobre tu caso.
+          </p>
+        </div>
+
+        <div v-reveal="80">
+          <DemoRequestForm />
         </div>
       </div>
     </section>
@@ -341,12 +372,20 @@ const PUNTOS_COBRO = [
           </p>
         </div>
 
-        <RouterLink
-          to="/panel/registro"
-          class="justify-self-start rounded-full bg-brand-lime-500 px-8 py-3.5 text-base font-medium text-brand-green-900 no-underline transition-all hover:-translate-y-0.5 hover:bg-brand-lime-600 hover:shadow-lg lg:justify-self-end"
-        >
-          Crear mi cuenta
-        </RouterLink>
+        <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center lg:justify-self-end">
+          <RouterLink
+            to="/panel/registro"
+            class="rounded-full bg-brand-lime-500 px-8 py-3.5 text-base font-medium text-brand-green-900 no-underline transition-all hover:-translate-y-0.5 hover:bg-brand-lime-600 hover:shadow-lg"
+          >
+            Crear mi cuenta
+          </RouterLink>
+          <a
+            href="#agendar"
+            class="rounded-full border border-white/25 px-8 py-3.5 text-base font-medium text-white no-underline transition-colors hover:bg-white/10"
+          >
+            Agendar una demo
+          </a>
+        </div>
       </div>
     </section>
 
@@ -357,14 +396,15 @@ const PUNTOS_COBRO = [
       >
         <div class="flex items-center gap-2.5">
           <img src="/images/logo-lime.svg" alt="" class="h-8 w-auto" />
-          <span class="text-sm font-medium text-ink-500">
+          <span class="text-sm font-medium text-brand-green-900">
             Court<span class="text-brand-lime-500">In</span>
           </span>
         </div>
         <div class="flex flex-wrap items-center gap-6 text-sm text-stone-500">
-          <a href="#precios" class="text-stone-500 no-underline transition-colors hover:text-ink-500">Precios</a>
-          <RouterLink to="/" class="text-stone-500 no-underline transition-colors hover:text-ink-500">Buscar canchas</RouterLink>
-          <RouterLink to="/panel/login" class="text-stone-500 no-underline transition-colors hover:text-ink-500">Ingresar</RouterLink>
+          <a href="#precios" class="text-stone-500 no-underline transition-colors hover:text-brand-green-900">Precios</a>
+          <a href="#agendar" class="text-stone-500 no-underline transition-colors hover:text-brand-green-900">Agendar demo</a>
+          <RouterLink to="/" class="text-stone-500 no-underline transition-colors hover:text-brand-green-900">Buscar canchas</RouterLink>
+          <RouterLink to="/panel/login" class="text-stone-500 no-underline transition-colors hover:text-brand-green-900">Ingresar</RouterLink>
         </div>
         <p class="text-xs text-stone-400">© {{ new Date().getFullYear() }} CourtIn</p>
       </div>

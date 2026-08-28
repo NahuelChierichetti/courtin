@@ -71,6 +71,13 @@ const publicService = {
     return data.pago
   },
 
+  // Pedido de demo desde la landing de complejos. No crea cuenta ni club: deja
+  // el contacto para que lo llamemos.
+  async requestDemo({ clubNombre, email, telefono, canchas }) {
+    const { data } = await api.post('/public/demos', { clubNombre, email, telefono, canchas })
+    return data
+  },
+
   async cancelReservationByToken(token) {
     const { data } = await api.patch(`/reservations/manage/${token}/cancel`)
     return data.reservation

@@ -47,7 +47,7 @@ onMounted(fetch)
   <div class="mx-auto max-w-2xl px-4 py-8">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Notificaciones</h1>
+        <h1 class="text-2xl font-bold text-brand-green-900">Notificaciones</h1>
         <p class="mt-1 text-sm text-stone-500">Novedades de tus reservas y tus complejos.</p>
       </div>
       <button
@@ -76,7 +76,7 @@ onMounted(fetch)
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--notifications-outline] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">No tenés notificaciones</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">No tenés notificaciones</h3>
       <p class="mt-1 max-w-sm text-sm text-stone-500">
         Acá te vamos a avisar cuando se confirme una reserva, se acerque un turno o haya
         novedades de un complejo.
@@ -110,7 +110,7 @@ onMounted(fetch)
 
         <div class="min-w-0 flex-1">
           <div class="flex items-start justify-between gap-3">
-            <p class="text-sm font-semibold text-ink-500">
+            <p class="text-sm font-semibold text-brand-green-900">
               {{ n.titulo }}
               <span
                 v-if="!n.leida"

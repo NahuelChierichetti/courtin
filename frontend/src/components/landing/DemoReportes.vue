@@ -23,21 +23,21 @@ const kpis = computed(() => [
     value: reportes.value.kpis.reservas,
     icon: 'icon-[material-symbols--calendar-month]',
     tone: 'bg-brand-purple-50 text-brand-purple-500',
-    valueClass: 'text-ink-500',
+    valueClass: 'text-brand-green-900',
   },
   {
     label: 'Ocupación',
     value: `${reportes.value.kpis.ocupacion}%`,
     icon: 'icon-[material-symbols--pie-chart]',
     tone: 'bg-brand-green-50 text-brand-green-500',
-    valueClass: 'text-ink-500',
+    valueClass: 'text-brand-green-900',
   },
   {
     label: 'Ticket promedio',
     value: money(reportes.value.kpis.ticket),
     icon: 'icon-[material-symbols--receipt-long]',
     tone: 'bg-brand-green-50 text-brand-green-500',
-    valueClass: 'text-ink-500',
+    valueClass: 'text-brand-green-900',
   },
 ])
 
@@ -66,7 +66,7 @@ const maxIngresoCancha = computed(() =>
     <!-- Ingresos por día -->
     <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
       <div class="flex items-center justify-between">
-        <h3 class="text-sm font-semibold text-ink-500">Ingresos por día</h3>
+        <h3 class="text-sm font-semibold text-brand-green-900">Ingresos por día</h3>
         <span class="text-xs text-stone-500">Últimos 14 días</span>
       </div>
       <div class="mt-3">
@@ -77,7 +77,7 @@ const maxIngresoCancha = computed(() =>
     <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
       <!-- Reservas por deporte -->
       <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-        <h3 class="text-sm font-semibold text-ink-500">Reservas por deporte</h3>
+        <h3 class="text-sm font-semibold text-brand-green-900">Reservas por deporte</h3>
         <div class="mt-3">
           <DonutChart :segments="reportes.porDeporte" center-label="reservas" />
         </div>
@@ -85,11 +85,11 @@ const maxIngresoCancha = computed(() =>
 
       <!-- Rendimiento por cancha -->
       <div class="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm">
-        <h3 class="text-sm font-semibold text-ink-500">Qué cancha te rinde más</h3>
+        <h3 class="text-sm font-semibold text-brand-green-900">Qué cancha te rinde más</h3>
         <ul class="mt-4 space-y-3.5">
           <li v-for="c in reportes.porCancha" :key="c.nombre">
             <div class="flex items-baseline justify-between">
-              <span class="text-sm font-medium text-ink-500">{{ c.nombre }}</span>
+              <span class="text-sm font-medium text-brand-green-900">{{ c.nombre }}</span>
               <span class="font-secondary text-sm font-semibold text-stone-600">
                 {{ moneyShort(c.ingresos) }}
                 <span class="ml-1 text-xs font-normal text-stone-400">{{ c.ocupacion }}% ocupada</span>

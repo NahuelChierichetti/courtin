@@ -38,7 +38,7 @@
           class="rounded-full px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer"
           :class="
             activeRole === f.value
-              ? 'bg-stone-900 text-white'
+              ? 'text-brand-green-900 text-white'
               : 'text-stone-600 hover:bg-stone-50'
           "
           @click="activeRole = f.value"

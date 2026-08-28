@@ -34,7 +34,7 @@ const filtros = computed(() => [
     <!-- Encabezado -->
     <div class="flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-ink-500">Canchas</h1>
+        <h1 class="text-2xl font-bold text-brand-green-900">Canchas</h1>
         <p class="mt-1 text-sm text-stone-500">
           {{ activas }} canchas activas &middot; {{ deportes }} deportes
         </p>
@@ -75,7 +75,7 @@ const filtros = computed(() => [
 
         <div class="p-5">
           <div class="flex items-center justify-between gap-2">
-            <h3 class="truncate text-base font-semibold text-ink-500">{{ court.nombre }}</h3>
+            <h3 class="truncate text-base font-semibold text-brand-green-900">{{ court.nombre }}</h3>
             <span
               class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
               :class="[sportMeta(court.tipo).bgSoft, sportMeta(court.tipo).text]"
@@ -102,7 +102,7 @@ const filtros = computed(() => [
 
           <div class="mt-4 flex items-end justify-between">
             <div class="flex items-center gap-1">
-              <p class="font-secondary text-lg font-bold text-ink-500">
+              <p class="font-secondary text-lg font-bold text-brand-green-900">
                 {{ formatCurrency(court.precio) }}
               </p>
               <p class="mt-1 text-xs text-stone-400">/ hora</p>
@@ -141,7 +141,7 @@ const filtros = computed(() => [
       >
         <div class="flex items-start justify-between border-b border-black/[0.06] px-5 py-4">
           <div>
-            <p class="text-base font-semibold text-ink-500">Editar cancha</p>
+            <p class="text-base font-semibold text-brand-green-900">Editar cancha</p>
             <p class="mt-0.5 text-xs text-stone-500">{{ courtDraft.nombre }}</p>
           </div>
           <button
@@ -162,7 +162,7 @@ const filtros = computed(() => [
             <input
               v-model="courtDraft.nombre"
               type="text"
-              class="h-9 w-full rounded-lg border border-black/[0.08] px-3 text-sm text-ink-500 outline-none focus:ring-2 focus:ring-brand-green-200"
+              class="h-9 w-full rounded-lg border border-black/[0.08] px-3 text-sm text-brand-green-900 outline-none focus:ring-2 focus:ring-brand-green-200"
             />
           </div>
 
@@ -171,7 +171,7 @@ const filtros = computed(() => [
               Deporte
             </label>
             <div
-              class="flex h-9 items-center gap-2 rounded-lg border border-black/[0.08] px-3 text-sm text-ink-500"
+              class="flex h-9 items-center gap-2 rounded-lg border border-black/[0.08] px-3 text-sm text-brand-green-900"
             >
               <span class="h-1.5 w-1.5 rounded-full" :class="sportMeta(courtDraft.tipo).dot"></span>
               {{ sportMeta(courtDraft.tipo).label }}
@@ -183,7 +183,7 @@ const filtros = computed(() => [
               Superficie
             </label>
             <div
-              class="flex h-9 items-center rounded-lg border border-black/[0.08] px-3 text-sm text-ink-500"
+              class="flex h-9 items-center rounded-lg border border-black/[0.08] px-3 text-sm text-brand-green-900"
             >
               {{ courtDraft.superficie }}
             </div>
@@ -196,7 +196,7 @@ const filtros = computed(() => [
             <input
               v-model.number="courtDraft.precio"
               type="number"
-              class="h-9 w-full rounded-lg border border-black/[0.08] px-3 text-sm text-ink-500 outline-none focus:ring-2 focus:ring-brand-green-200"
+              class="h-9 w-full rounded-lg border border-black/[0.08] px-3 text-sm text-brand-green-900 outline-none focus:ring-2 focus:ring-brand-green-200"
             />
           </div>
 

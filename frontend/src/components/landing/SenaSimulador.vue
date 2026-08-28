@@ -47,7 +47,7 @@ const resumen = computed(() => {
   <div class="rounded-3xl border border-black/[0.06] bg-white p-6 shadow-lg shadow-brand-green-900/5 sm:p-7">
     <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-base font-medium text-ink-500">Armá tu forma de cobrar</p>
+        <p class="text-base font-medium text-brand-green-900">Armá tu forma de cobrar</p>
         <p class="mt-1 text-sm text-stone-500">
           Pádel 1 · 90 minutos · {{ formatCurrency(PRECIO_TURNO) }}
         </p>
@@ -100,7 +100,7 @@ const resumen = computed(() => {
             :key="m.v"
             type="button"
             class="cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors"
-            :class="modo === m.v ? 'bg-brand-purple-500 text-white' : 'text-stone-600 hover:text-ink-500'"
+            :class="modo === m.v ? 'bg-brand-purple-500 text-white' : 'text-stone-600 hover:text-brand-green-900'"
             @click="modo = m.v"
           >
             {{ m.label }}

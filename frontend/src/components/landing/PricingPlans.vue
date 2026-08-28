@@ -72,7 +72,7 @@ const precio = computed(() => (p) => (anual.value ? p.anualPorMes : p.mensual))
         <button
           type="button"
           class="cursor-pointer rounded-full px-5 py-2 text-sm font-medium transition-colors"
-          :class="!anual ? 'bg-brand-green-500 text-white' : 'text-stone-600 hover:text-ink-500'"
+          :class="!anual ? 'bg-brand-green-500 text-white' : 'text-stone-600 hover:text-brand-green-900'"
           @click="anual = false"
         >
           Mensual
@@ -80,7 +80,7 @@ const precio = computed(() => (p) => (anual.value ? p.anualPorMes : p.mensual))
         <button
           type="button"
           class="flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors"
-          :class="anual ? 'bg-brand-green-500 text-white' : 'text-stone-600 hover:text-ink-500'"
+          :class="anual ? 'bg-brand-green-500 text-white' : 'text-stone-600 hover:text-brand-green-900'"
           @click="anual = true"
         >
           Anual
@@ -111,7 +111,7 @@ const precio = computed(() => (p) => (anual.value ? p.anualPorMes : p.mensual))
         <p class="mt-0.5 text-sm text-stone-500">{{ p.para }}</p>
 
         <div class="mt-5">
-          <span class="font-secondary text-4xl font-semibold text-ink-500">
+          <span class="font-secondary text-4xl font-semibold text-brand-green-900">
             {{ formatCurrency(precio(p)) }}
           </span>
           <span class="text-sm text-stone-500">/mes</span>
@@ -122,7 +122,7 @@ const precio = computed(() => (p) => (anual.value ? p.anualPorMes : p.mensual))
 
         <div class="mt-5 flex items-center gap-2 rounded-xl bg-brand-sand-500 px-3.5 py-2.5">
           <i class="icon-[material-symbols--grid-view] text-base text-brand-green-500"></i>
-          <span class="text-sm font-medium text-ink-500">{{ p.canchas }}</span>
+          <span class="text-sm font-medium text-brand-green-900">{{ p.canchas }}</span>
         </div>
 
         <RouterLink
@@ -144,7 +144,7 @@ const precio = computed(() => (p) => (anual.value ? p.anualPorMes : p.mensual))
           <i class="icon-[material-symbols--lock-open-right-outline] text-sm"></i>
           Sin funciones bloqueadas
         </span>
-        <p class="mt-3 text-lg font-medium text-ink-500">
+        <p class="mt-3 text-lg font-medium text-brand-green-900">
           Los tres planes traen todo. Lo único que cambia es cuántas canchas tenés.
         </p>
       </div>

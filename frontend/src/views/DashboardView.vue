@@ -60,7 +60,7 @@ const statColorMap = {
   purple: { bg: 'bg-brand-purple-50', icon: 'text-brand-purple-500' },
   green: { bg: 'bg-brand-green-50', icon: 'text-brand-green-500' },
   lime: { bg: 'bg-brand-lime-100', icon: 'text-brand-lime-800' },
-  neutral: { bg: 'bg-ink-100', icon: 'text-ink-500' },
+  neutral: { bg: 'bg-ink-100', icon: 'text-brand-green-900' },
 }
 
 const statTiles = computed(() => {
@@ -221,7 +221,7 @@ watch(currentClubId, fetchUpcoming)
     <!-- Page header -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Dashboard</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Dashboard</h1>
         <p class="mt-1 text-xs text-stone-500 first-letter:uppercase">{{ todayFormatted }}</p>
       </div>
       <div class="-mx-1 flex items-center overflow-x-auto px-1 sm:mx-0 sm:overflow-visible sm:px-0">
@@ -255,7 +255,7 @@ watch(currentClubId, fetchUpcoming)
           </span>
         </div>
         <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">{{ stat.title }}</p>
-        <p class="mt-1 text-2xl font-bold font-secondary text-ink-500 sm:text-3xl">{{ stat.value }}</p>
+        <p class="mt-1 text-2xl font-bold font-secondary text-brand-green-900 sm:text-3xl">{{ stat.value }}</p>
       </div>
       <!-- Skeleton mientras carga -->
       <template v-if="!statTiles.length">
@@ -269,7 +269,7 @@ watch(currentClubId, fetchUpcoming)
       <div class="col-span-1 min-h-[400px] rounded-2xl border border-black/[0.06] bg-white shadow-sm lg:col-span-2">
         <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
-            <h2 class="text-base font-semibold text-ink-500">Próximas reservas</h2>
+            <h2 class="text-base font-semibold text-brand-green-900">Próximas reservas</h2>
             <p class="text-xs text-stone-400">{{ upcomingSubtitle }}</p>
           </div>
           <button class="flex items-center gap-1 text-sm font-medium text-brand-green-500 hover:text-brand-green-600 cursor-pointer" @click="goToTurnos">
@@ -290,7 +290,7 @@ watch(currentClubId, fetchUpcoming)
             <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
               <i class="icon-[material-symbols--calendar-month] text-xl text-stone-400"></i>
             </div>
-            <h3 class="mt-4 text-sm font-semibold text-ink-500">
+            <h3 class="mt-4 text-sm font-semibold text-brand-green-900">
               {{ upcomingTotal ? 'No queda ningún turno por delante' : 'No hay turnos para hoy' }}
             </h3>
             <p class="!mt-1 text-xs text-stone-500">
@@ -367,7 +367,7 @@ watch(currentClubId, fetchUpcoming)
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
-            <h2 class="text-base font-semibold text-ink-500">Ocupación por cancha</h2>
+            <h2 class="text-base font-semibold text-brand-green-900">Ocupación por cancha</h2>
             <p class="text-xs text-stone-400">Hoy</p>
           </div>
         </div>
@@ -393,7 +393,7 @@ watch(currentClubId, fetchUpcoming)
       <div class="col-span-1 rounded-2xl border border-black/[0.06] bg-white shadow-sm lg:col-span-2">
         <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
-            <h2 class="text-base font-semibold text-ink-500">Mapa de calor — Esta semana</h2>
+            <h2 class="text-base font-semibold text-brand-green-900">Mapa de calor — Esta semana</h2>
             <p class="text-xs text-stone-400">Ocupación por día y franja horaria</p>
           </div>
         </div>
@@ -433,7 +433,7 @@ watch(currentClubId, fetchUpcoming)
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-stone-100 px-4 py-4 sm:px-6">
           <div>
-            <h2 class="text-base font-semibold text-ink-500">Actividad reciente</h2>
+            <h2 class="text-base font-semibold text-brand-green-900">Actividad reciente</h2>
             <p class="text-xs text-stone-400">Últimos eventos del complejo</p>
           </div>
         </div>

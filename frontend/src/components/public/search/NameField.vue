@@ -25,7 +25,7 @@ defineEmits(['update:modelValue'])
         :value="modelValue"
         type="text"
         placeholder="Nombre"
-        class="block h-5 w-full bg-transparent text-sm font-medium text-ink-500 outline-none placeholder:font-medium placeholder:text-stone-400"
+        class="block h-5 w-full bg-transparent text-sm font-medium text-brand-green-900 outline-none placeholder:font-medium placeholder:text-stone-400"
         @input="$emit('update:modelValue', $event.target.value)"
       />
     </span>

@@ -141,7 +141,7 @@ const onDelete = async (m) => {
     <!-- Header -->
     <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Control de caja</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Control de caja</h1>
         <p class="mt-1 text-sm text-stone-500">Ingresos y egresos del complejo · {{ periodSubtitle }}</p>
       </div>
       <div class="flex items-center gap-2 lg:gap-3">
@@ -172,7 +172,7 @@ const onDelete = async (m) => {
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-stone-500">Seleccioná un club desde el encabezado para ver la caja.</p>
     </div>
 
@@ -204,7 +204,7 @@ const onDelete = async (m) => {
             </span>
           </div>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Balance neto</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl" :class="resumen.neto >= 0 ? 'text-ink-500' : 'text-error-600'">{{ money(resumen.neto) }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl" :class="resumen.neto >= 0 ? 'text-brand-green-900' : 'text-error-600'">{{ money(resumen.neto) }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <div class="flex items-center justify-between">
@@ -213,14 +213,14 @@ const onDelete = async (m) => {
             </span>
           </div>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Movimientos</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ resumen.count }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary sm:text-2xl text-brand-green-900">{{ resumen.count }}</p>
         </div>
       </div>
 
       <!-- Breakdowns -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
-          <h2 class="text-base font-semibold text-ink-500">Ingresos por categoría</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Ingresos por categoría</h2>
           <div v-if="!categoriaBreakdown.length" class="py-6 text-center text-sm text-stone-400">Sin ingresos en el período.</div>
           <div v-else class="mt-4 space-y-3">
             <div v-for="row in categoriaBreakdown" :key="row.cat" class="flex items-center gap-3">
@@ -237,7 +237,7 @@ const onDelete = async (m) => {
         </div>
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
-          <h2 class="text-base font-semibold text-ink-500">Ingresos por método</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Ingresos por método</h2>
           <div v-if="!metodoBreakdown.length" class="py-6 text-center text-sm text-stone-400">Sin ingresos en el período.</div>
           <div v-else class="mt-4 space-y-3">
             <div v-for="row in metodoBreakdown" :key="row.metodo" class="flex items-center gap-3">
@@ -254,7 +254,7 @@ const onDelete = async (m) => {
       <!-- Movements -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-4 sm:px-6">
-          <h2 class="text-base font-semibold text-ink-500">Movimientos</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Movimientos</h2>
           <div class="flex overflow-hidden rounded-full border border-black/[0.06]">
             <button
               v-for="t in tipoChips"
@@ -278,7 +278,7 @@ const onDelete = async (m) => {
           <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
             <i class="icon-[material-symbols--point-of-sale] text-xl text-stone-400"></i>
           </div>
-          <h3 class="mt-4 text-sm font-semibold text-ink-500">Sin movimientos</h3>
+          <h3 class="mt-4 text-sm font-semibold text-brand-green-900">Sin movimientos</h3>
           <p class="mt-1 text-xs text-stone-500">Registrá ingresos y egresos para llevar el control de caja.</p>
         </div>
 
@@ -293,7 +293,7 @@ const onDelete = async (m) => {
             </span>
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <p class="truncate text-sm font-medium text-ink-500">
+                <p class="truncate text-sm font-medium text-brand-green-900">
                   {{ m.concepto || categoriaMeta(m.categoria).label }}
                 </p>
                 <span v-if="m.origen === 'online'" class="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-purple-50 px-2 py-0.5 text-[10px] font-semibold text-brand-purple-600">

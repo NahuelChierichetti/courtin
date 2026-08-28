@@ -41,8 +41,8 @@ const onSearch = () => {
         <RouterLink :to="{ name: 'public-home' }" class="flex shrink-0 items-center gap-2.5 no-underline">
           <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
           <div class="hidden leading-none sm:block">
-            <p class="text-lg font-normal tracking-tight text-ink-500">
-              Court<span class="text-brand-lime-500">In</span>
+            <p class="text-lg font-normal tracking-tight text-brand-green-900">
+              Court<span class="text-brand-lime-500">in</span>
             </p>
           </div>
         </RouterLink>
@@ -54,7 +54,7 @@ const onSearch = () => {
             v-model="q"
             type="text"
             placeholder="Buscá canchas, deportes o complejos"
-            class="h-11 w-full rounded-full border border-black/[0.06] bg-white pl-11 pr-4 text-sm text-ink-500 outline-none transition-shadow placeholder:text-stone-400 focus:ring-2 focus:ring-brand-green-200"
+            class="h-11 w-full rounded-full border border-black/[0.06] bg-white pl-11 pr-4 text-sm text-brand-green-900 outline-none transition-shadow placeholder:text-stone-400 focus:ring-2 focus:ring-brand-green-200"
           />
         </form>
 
@@ -87,7 +87,7 @@ const onSearch = () => {
                  sabe qué es CourtIn no arranca por el alta. -->
             <RouterLink
               to="/complejos"
-              class="hidden text-sm font-medium text-stone-600 no-underline transition-colors hover:text-ink-500 lg:block"
+              class="hidden text-sm font-medium text-stone-600 no-underline transition-colors hover:text-brand-green-900 lg:block"
             >
               Sumá tu complejo
             </RouterLink>
@@ -107,46 +107,50 @@ const onSearch = () => {
       <RouterView />
     </main>
 
-    <!-- Footer -->
-    <footer class="mt-16 bg-brand-green-800">
-      <div class="mx-auto grid w-full max-w-7xl grid-cols-2 gap-8 px-4 py-12 sm:grid-cols-4">
-        <div class="col-span-2 sm:col-span-1">
-          <div class="flex items-center gap-2.5">
-            <img src="/images/logo-lime.svg" alt="CourtIn" class="h-9 w-auto" />
-            <span class="text-base font-bold text-white">Court<span class="text-brand-lime-500">In</span></span>
-          </div>
-          <p class="mt-3 text-sm leading-relaxed text-white/60">
-            Reservá tu cancha de pádel, tenis o fútbol en segundos.
-          </p>
-        </div>
-        <div>
-          <p class="text-xs font-semibold tracking-wider text-white/60 uppercase">Jugadores</p>
-          <ul class="mt-3 space-y-2 text-sm text-white/80">
-            <li><RouterLink :to="{ name: 'public-buscar' }" class="no-underline text-white/80 hover:text-white">Explorar complejos</RouterLink></li>
-            <li>Cómo funciona</li>
-            <li>Ayuda</li>
-          </ul>
-        </div>
-        <div>
-          <p class="text-xs font-semibold tracking-wider text-white/60 uppercase">Complejos</p>
-          <ul class="mt-3 space-y-2 text-sm text-white/80">
-            <li><RouterLink to="/complejos" class="no-underline text-white/80 hover:text-white">Sumá tu complejo</RouterLink></li>
-            <li><RouterLink to="/panel/login" class="no-underline text-white/80 hover:text-white">Panel de gestión</RouterLink></li>
-            <li><RouterLink to="/complejos#demo" class="no-underline text-white/80 hover:text-white">Ver la demo</RouterLink></li>
-          </ul>
-        </div>
-        <div>
-          <p class="text-xs font-semibold tracking-wider text-white/60 uppercase">Empresa</p>
-          <ul class="mt-3 space-y-2 text-sm text-white/80">
-            <li>Nosotros</li>
-            <li>Contacto</li>
-            <li>Términos</li>
-          </ul>
-        </div>
+    <!--
+      Footer: cierre en una sola fila de enlaces en vez de columnas por
+      categoría. Con esta cantidad de destinos reales las columnas quedaban
+      medio vacías y hubo que rellenarlas con ítems que no llevaban a ningún
+      lado ("Cómo funciona", "Ayuda"): sin página detrás, era texto disfrazado
+      de link. Todo lo que quedó apunta a algo que existe.
+    -->
+    <footer class="mt-16 bg-brand-green-900">
+      <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between">
+        <RouterLink :to="{ name: 'public-home' }" class="flex shrink-0 items-center gap-2.5 no-underline">
+          <img src="/images/logo-lime.svg" alt="" class="h-9 w-auto" />
+          <span class="text-lg font-normal tracking-tight text-white">
+            Court<span class="text-brand-lime-500">in</span>
+          </span>
+        </RouterLink>
+
+        <nav class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/70">
+          <RouterLink :to="{ name: 'public-buscar' }" class="no-underline text-white/70 transition-colors hover:text-white">
+            Buscar canchas
+          </RouterLink>
+          <!-- Sólo con sesión: la ruta está detrás del guard y sin login manda
+               al formulario, que es un callejón raro viniendo del pie. -->
+          <RouterLink v-if="isAuthenticated" :to="{ name: 'mis-reservas' }" class="no-underline text-white/70 transition-colors hover:text-white">
+            Mis reservas
+          </RouterLink>
+          <RouterLink to="/complejos" class="no-underline text-white/70 transition-colors hover:text-white">
+            Sumá tu complejo
+          </RouterLink>
+          <RouterLink to="/complejos#precios" class="no-underline text-white/70 transition-colors hover:text-white">
+            Precios
+          </RouterLink>
+          <RouterLink to="/panel/login" class="no-underline text-white/70 transition-colors hover:text-white">
+            Panel de gestión
+          </RouterLink>
+          <a href="mailto:courtinapp@gmail.com" class="no-underline text-white/70 transition-colors hover:text-white">
+            Contacto
+          </a>
+        </nav>
       </div>
+
       <div class="border-t border-white/10">
-        <div class="mx-auto w-full max-w-7xl px-4 py-4 text-center text-xs text-white/60">
-          © {{ new Date().getFullYear() }} CourtIn. Todos los derechos reservados.
+        <div class="mx-auto flex w-full max-w-7xl flex-col items-center gap-1 px-4 py-4 text-xs text-white/50 sm:flex-row sm:justify-between">
+          <p>© {{ new Date().getFullYear() }} CourtIn. Todos los derechos reservados.</p>
+          <p>Reservá tu cancha de pádel, tenis o fútbol en segundos.</p>
         </div>
       </div>
     </footer>
