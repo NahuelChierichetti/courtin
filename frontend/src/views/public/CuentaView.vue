@@ -99,12 +99,12 @@ const cambiarPassword = async () => {
 }
 
 const inputClass =
-  'h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100'
+  'h-12 w-full rounded-xl border border-black/[0.08] bg-white px-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100'
 </script>
 
 <template>
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <h1 class="text-2xl font-bold text-ink-500">Mi cuenta</h1>
+    <h1 class="text-2xl font-bold text-brand-green-900">Mi cuenta</h1>
     <p class="mt-1 text-sm text-stone-500">Tus datos y la seguridad de tu cuenta.</p>
 
     <div class="mt-6">
@@ -116,7 +116,7 @@ const inputClass =
 
       <!-- Datos personales -->
       <section class="rounded-2xl border border-black/[0.06] bg-white p-6">
-        <h2 class="text-base font-semibold text-ink-500">Datos personales</h2>
+        <h2 class="text-base font-semibold text-brand-green-900">Datos personales</h2>
         <p class="mt-1 text-sm text-stone-500">
           El complejo usa estos datos para contactarte por tu reserva.
         </p>
@@ -130,12 +130,12 @@ const inputClass =
 
         <form class="mt-5 space-y-5" @submit.prevent="guardarPerfil">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-ink-500" for="nombre">Nombre</label>
+            <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="nombre">Nombre</label>
             <input id="nombre" v-model="perfil.nombre" autocomplete="name" required :class="inputClass" />
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-ink-500" for="telefono">
+            <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="telefono">
               Teléfono <span class="font-normal text-stone-400">(opcional)</span>
             </label>
             <input
@@ -149,7 +149,7 @@ const inputClass =
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-ink-500" for="email">Email</label>
+            <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="email">Email</label>
             <div class="relative">
               <input
                 id="email"
@@ -192,7 +192,7 @@ const inputClass =
 
       <!-- Contraseña -->
       <section class="rounded-2xl border border-black/[0.06] bg-white p-6">
-        <h2 class="text-base font-semibold text-ink-500">Contraseña</h2>
+        <h2 class="text-base font-semibold text-brand-green-900">Contraseña</h2>
         <p class="mt-1 text-sm text-stone-500">
           Te pedimos la actual para confirmar que sos vos.
         </p>
@@ -206,7 +206,7 @@ const inputClass =
 
         <form class="mt-5 space-y-5" @submit.prevent="cambiarPassword">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-ink-500" for="currentPassword">
+            <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="currentPassword">
               Contraseña actual
             </label>
             <div class="relative">
@@ -236,7 +236,7 @@ const inputClass =
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-ink-500" for="newPassword">
+            <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="newPassword">
               Contraseña nueva
             </label>
             <div class="relative">
@@ -267,7 +267,7 @@ const inputClass =
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-ink-500" for="confirmPassword">
+            <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="confirmPassword">
               Repetir contraseña nueva
             </label>
             <input
@@ -283,7 +283,7 @@ const inputClass =
           <button
             type="submit"
             :disabled="guardandoPassword"
-            class="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white text-sm font-semibold text-ink-500 transition-colors hover:bg-stone-50 disabled:opacity-50 cursor-pointer sm:w-auto sm:px-8"
+            class="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white text-sm font-semibold text-brand-green-900 transition-colors hover:bg-stone-50 disabled:opacity-50 cursor-pointer sm:w-auto sm:px-8"
           >
             <i v-if="guardandoPassword" class="icon-[material-symbols--progress-activity] animate-spin"></i>
             {{ guardandoPassword ? 'Cambiando...' : 'Cambiar contraseña' }}

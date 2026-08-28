@@ -226,7 +226,7 @@ const onCloseModal = () => {
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
         <i class="icon-[material-symbols--warning] text-2xl text-stone-300"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">{{ error }}</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">{{ error }}</h3>
       <RouterLink :to="{ name: 'public-buscar' }" class="mt-3 text-sm font-semibold text-brand-green-500 no-underline">
         ← Volver a la búsqueda
       </RouterLink>
@@ -244,13 +244,35 @@ const onCloseModal = () => {
           {{ primarySport ? sportMeta(primarySport).label : 'Complejos' }}
         </RouterLink>
         <span>/</span>
-        <span class="font-medium text-ink-500">{{ club.nombre }}</span>
+        <span class="font-medium text-brand-green-900">{{ club.nombre }}</span>
       </nav>
+
+      <!--
+        Aviso de complejo de demostración. El club demo no sale en el buscador,
+        pero su link es público: si alguien lo recibe reenviado tiene que saber,
+        antes de elegir un turno, que ese complejo no existe.
+      -->
+      <div
+        v-if="club.demo"
+        class="flex items-start gap-3 rounded-2xl border border-warning-200 bg-warning-50 px-4 py-3.5"
+      >
+        <i class="icon-[material-symbols--info-outline] mt-0.5 shrink-0 text-warning-600"></i>
+        <p class="text-sm leading-relaxed text-warning-700">
+          <strong class="font-semibold">Complejo de demostración.</strong>
+          Sirve para mostrar cómo funciona CourtIn: las canchas y los turnos son de mentira, así
+          que no reserves acá esperando jugar.
+          <RouterLink
+            :to="{ name: 'public-buscar' }"
+            class="font-medium text-warning-700 underline underline-offset-2"
+            >Buscá complejos reales</RouterLink
+          >.
+        </p>
+      </div>
 
       <!-- Header -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-ink-500 sm:text-4xl">{{ club.nombre }}</h1>
+          <h1 class="text-3xl font-bold text-brand-green-900 sm:text-4xl">{{ club.nombre }}</h1>
           <div class="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-stone-500">
             <span v-if="club.direccion || club.ciudad" class="inline-flex items-center gap-1.5">
               <i class="icon-[material-symbols--location-on] text-xs"></i>{{ [club.direccion, club.ciudad].filter(Boolean).join(', ') }}
@@ -303,13 +325,13 @@ const onCloseModal = () => {
         <div class="min-w-0 space-y-10">
           <!-- Sobre este complejo -->
           <section v-if="club.descripcion">
-            <h2 class="text-xl font-bold text-ink-500">Sobre este complejo</h2>
+            <h2 class="text-xl font-semibold text-brand-green-900">Sobre este complejo</h2>
             <p class="mt-3 text-[15px] leading-relaxed text-stone-500">{{ club.descripcion }}</p>
           </section>
 
           <!-- Deportes disponibles -->
           <section v-if="sports.length">
-            <h2 class="text-xl font-bold text-ink-500">Deportes disponibles</h2>
+            <h2 class="text-xl font-semibold text-brand-green-900">Deportes disponibles</h2>
             <div class="mt-4 flex flex-wrap gap-2">
               <span
                 v-for="s in sports"
@@ -325,7 +347,7 @@ const onCloseModal = () => {
           <!-- Instalaciones -->
           <section v-if="club.servicios && club.servicios.length">
             <div class="flex items-center justify-between">
-              <h2 class="text-xl font-bold text-ink-500">Instalaciones</h2>
+              <h2 class="text-xl font-semibold text-brand-green-900">Instalaciones</h2>
               <button
                 v-if="club.servicios.length > 6"
                 type="button"
@@ -348,7 +370,7 @@ const onCloseModal = () => {
           <!-- Ubicación -->
           <section v-if="hasUbicacion">
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <h2 class="text-xl font-bold text-ink-500">Ubicación</h2>
+              <h2 class="text-xl font-semibold text-brand-green-900">Ubicación</h2>
               <a
                 :href="comoLlegarUrl"
                 target="_blank"
@@ -378,8 +400,8 @@ const onCloseModal = () => {
         <!-- Derecha: panel de reserva -->
         <div class="lg:sticky lg:top-24 lg:self-start">
           <div class="rounded-3xl border border-black/[0.06] bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-bold text-ink-500">Reservá esta cancha</h3>
-            <p class="mt-1 text-sm text-stone-400">Elegí cancha y horario</p>
+            <h3 class="text-xl font-bold text-brand-green-900">Reservá esta cancha</h3>
+            <p class="text-sm text-stone-400">Elegí cancha y horario</p>
 
             <template v-if="!courts.length">
               <p class="mt-6 rounded-2xl bg-stone-50 py-8 text-center text-sm text-stone-500">
@@ -389,8 +411,7 @@ const onCloseModal = () => {
 
             <template v-else>
               <!-- Día -->
-              <p class="mt-6 text-xs font-bold tracking-wide text-stone-500 uppercase">Día</p>
-              <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
+              <div class="mt-4 flex gap-2 overflow-x-auto pb-1">
                 <button
                   v-for="d in dayPills"
                   :key="d.key"
@@ -447,7 +468,7 @@ const onCloseModal = () => {
                   :class="isSlotSelected(slot)
                     ? 'border-brand-green-500 bg-brand-green-500 text-white cursor-pointer'
                     : slot.disponible
-                      ? 'border-black/[0.08] bg-white text-ink-500 hover:border-brand-green-400 hover:bg-brand-green-50 cursor-pointer'
+                      ? 'border-black/[0.08] bg-white text-brand-green-900 hover:border-brand-green-400 hover:bg-brand-green-50 cursor-pointer'
                       : 'border-transparent bg-stone-100 text-stone-300 cursor-not-allowed'"
                   @click="selectSlot(slot)"
                 >
@@ -468,7 +489,7 @@ const onCloseModal = () => {
                 </div>
                 <p v-if="selectedSlot" class="text-right text-sm text-stone-500">
                   {{ selectedSlot.horaInicio }}–{{ selectedSlot.horaFin }}<br />
-                  <span class="font-semibold text-ink-500">{{ formatCurrency(selectedSlot.precio, moneda) }}</span>
+                  <span class="font-semibold text-brand-green-900">{{ formatCurrency(selectedSlot.precio, moneda) }}</span>
                 </p>
               </div>
 

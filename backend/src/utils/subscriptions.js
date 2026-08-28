@@ -61,6 +61,18 @@ const filtroClubVisible = (extra = {}) => ({
   ...extra
 });
 
+/**
+ * Filtro de los clubes que además de visibles se pueden DESCUBRIR: buscador y
+ * filtro de ciudades. La diferencia con `filtroClubVisible` es el complejo de
+ * demostración, que tiene el link público vivo (si no, no habría nada que
+ * mostrar en una demo) pero no tiene por qué aparecerle a un jugador que busca
+ * dónde jugar el sábado.
+ *
+ * Regla al agregar consultas públicas: si la consulta LISTA clubes, va con
+ * ésta; si resuelve un club que ya te dieron por slug, va con la otra.
+ */
+const filtroClubDescubrible = (extra = {}) => filtroClubVisible({ demo: { $ne: true }, ...extra });
+
 const puedeCrearReservas = (club) => ESTADOS_CON_RESERVAS.includes(club?.estado);
 const puedeAccederPanel = (club) => ESTADOS_CON_PANEL.includes(club?.estado);
 
@@ -197,6 +209,7 @@ module.exports = {
   ESTADOS_CON_PANEL,
   ESTADOS_SIN_ALTA,
   filtroClubVisible,
+  filtroClubDescubrible,
   puedeCrearReservas,
   puedeAccederPanel,
   esperaAprobacion,

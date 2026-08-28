@@ -36,15 +36,15 @@ const opciones = [
       <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-normal tracking-tight text-ink-500">
-            Court<span class="text-brand-lime-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-brand-green-900">
+            Court<span class="text-brand-lime-500">in</span>
           </p>
         </div>
       </RouterLink>
 
       <div class="flex flex-1 flex-col justify-center py-10">
         <div class="mx-auto w-full max-w-md">
-          <h1 class="text-3xl font-bold text-ink-500 sm:text-4xl">¿Cómo querés usar CourtIn?</h1>
+          <h1 class="text-3xl font-bold text-brand-green-900 sm:text-4xl">¿Cómo querés usar CourtIn?</h1>
           <p class="mt-3 text-sm leading-relaxed text-stone-500">
             Elegí el tipo de cuenta que necesitás. Podés cambiar de idea más adelante.
           </p>
@@ -74,7 +74,7 @@ const opciones = [
                 </div>
 
                 <div class="min-w-0 flex-1">
-                  <h2 class="text-lg font-bold text-ink-500">{{ opcion.titulo }}</h2>
+                  <h2 class="text-lg font-bold text-brand-green-900">{{ opcion.titulo }}</h2>
                   <p class="mt-1.5 text-sm leading-relaxed text-stone-500">{{ opcion.bajada }}</p>
 
                   <ul class="mt-3 space-y-1.5">

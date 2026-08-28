@@ -1,0 +1,22 @@
+# El sitio público de CourtIn se indexa entero salvo lo que sigue.
+
+User-agent: *
+
+# Complejo de demostración: no sale en el buscador de la app, pero su link es
+# público (si no, no habría flujo real que mostrar en una demo). Sin esta línea
+# alcanza con que alguien lo comparta una vez para que quede indexado y empiece
+# a recibir jugadores buscando dónde jugar.
+Disallow: /club/demo-courtin
+
+# Pantallas con sesión o token: no aportan nada en un resultado de búsqueda y
+# varias devuelven 404 sin credenciales.
+Disallow: /panel/
+Disallow: /admin/
+Disallow: /cuenta
+Disallow: /mis-reservas
+Disallow: /favoritos
+Disallow: /notificaciones
+Disallow: /reserva/
+Disallow: /verificar
+Disallow: /restablecer
+Disallow: /invitacion/

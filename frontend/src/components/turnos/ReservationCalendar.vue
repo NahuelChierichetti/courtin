@@ -20,7 +20,7 @@
           >
             <div class="flex items-center gap-2">
               <span class="h-2.5 w-2.5 shrink-0 rounded-sm" :class="sportMeta(col.tipo).bgStrong" v-if="col.tipo" />
-              <span class="text-sm font-semibold text-ink-500">{{ col.label }}</span>
+              <span class="text-sm font-semibold text-brand-green-900">{{ col.label }}</span>
             </div>
             <p v-if="col.sublabel" class="mt-0.5 truncate text-xs text-stone-400">{{ col.sublabel }}</p>
           </div>
@@ -300,7 +300,7 @@ const textColor = (r, part) => {
   if (st === 'cancelada') return part === 'name' ? 'text-stone-400 line-through' : 'text-stone-400'
   if (st === 'completada') return 'text-stone-500'
   if (part === 'time') return sportMeta(r.tipo).textSoft
-  if (part === 'name') return 'text-ink-500'
+  if (part === 'name') return 'text-brand-green-900'
   return 'text-stone-500'
 }
 

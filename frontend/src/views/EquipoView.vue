@@ -159,7 +159,7 @@ const revoke = async (inv) => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Equipo</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Equipo</h1>
         <p class="mt-1 text-sm text-stone-500">
           Quiénes pueden gestionar el complejo. Cada persona elige su propia contraseña.
         </p>
@@ -178,7 +178,7 @@ const revoke = async (inv) => {
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-stone-500">
         Seleccioná un club desde el encabezado para ver su equipo.
       </p>
@@ -192,21 +192,21 @@ const revoke = async (inv) => {
             <i class="icon-[material-symbols--group] text-xl"></i>
           </span>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Miembros activos</p>
-          <p class="mt-1 text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ activos.length }}</p>
+          <p class="mt-1 text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ activos.length }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-purple-50 text-brand-purple-500">
             <i class="icon-[material-symbols--shield-outline] text-xl"></i>
           </span>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Administradores</p>
-          <p class="mt-1 text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ admins }}</p>
+          <p class="mt-1 text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ admins }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-warning-50 text-warning-600">
             <i class="icon-[material-symbols--mail-outline] text-xl"></i>
           </span>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Invitaciones pendientes</p>
-          <p class="mt-1 text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ invitations.length }}</p>
+          <p class="mt-1 text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ invitations.length }}</p>
         </div>
       </div>
 
@@ -219,7 +219,7 @@ const revoke = async (inv) => {
         <!-- Miembros -->
         <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
           <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
-            <h2 class="text-sm font-semibold text-ink-500">Miembros</h2>
+            <h2 class="text-sm font-semibold text-brand-green-900">Miembros</h2>
           </div>
 
           <div class="divide-y divide-black/[0.05]">
@@ -237,7 +237,7 @@ const revoke = async (inv) => {
               </span>
 
               <div class="min-w-0 flex-1">
-                <p class="flex items-center gap-2 truncate text-sm font-medium text-ink-500">
+                <p class="flex items-center gap-2 truncate text-sm font-medium text-brand-green-900">
                   {{ m.user?.nombre || 'Sin nombre' }}
                   <span v-if="esUnoMismo(m)" class="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-500">
                     vos
@@ -295,7 +295,7 @@ const revoke = async (inv) => {
         <!-- Invitaciones pendientes -->
         <div v-if="invitations.length" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
           <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
-            <h2 class="text-sm font-semibold text-ink-500">Invitaciones pendientes</h2>
+            <h2 class="text-sm font-semibold text-brand-green-900">Invitaciones pendientes</h2>
             <p class="mt-0.5 text-xs text-stone-500">Todavía no aceptaron el email.</p>
           </div>
 
@@ -306,7 +306,7 @@ const revoke = async (inv) => {
               </span>
 
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-ink-500">{{ inv.nombre || inv.email }}</p>
+                <p class="truncate text-sm font-medium text-brand-green-900">{{ inv.nombre || inv.email }}</p>
                 <p class="truncate text-xs text-stone-400">
                   <template v-if="inv.nombre">{{ inv.email }} · </template>
                   Enviada el {{ fmtDate(inv.createdAt) }} · {{ diasParaVencer(inv.expiresAt) }}

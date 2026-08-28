@@ -56,7 +56,7 @@ const toggle = (i) => (abierta.value = abierta.value === i ? null : i)
         :aria-expanded="abierta === i"
         @click="toggle(i)"
       >
-        <span class="text-base font-medium text-ink-500">{{ p.q }}</span>
+        <span class="text-base font-medium text-brand-green-900">{{ p.q }}</span>
         <i
           class="icon-[material-symbols--expand-more] shrink-0 text-xl transition-transform duration-300"
           :class="abierta === i ? 'rotate-180 text-brand-purple-500' : 'text-stone-400'"

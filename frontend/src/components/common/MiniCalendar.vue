@@ -95,7 +95,7 @@ const elegir = (d) => {
       >
         <i class="icon-[material-symbols--chevron-left] text-base"></i>
       </button>
-      <span class="text-sm font-semibold text-ink-500">{{ titulo }}</span>
+      <span class="text-sm font-semibold text-brand-green-900">{{ titulo }}</span>
       <button
         type="button"
         class="flex h-7 w-7 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 cursor-pointer"

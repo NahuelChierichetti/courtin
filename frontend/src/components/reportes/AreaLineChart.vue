@@ -173,7 +173,7 @@ const tooltipStyle = computed(() => {
       :style="tooltipStyle"
     >
       <p class="text-[10px] text-stone-400">{{ activePoint.label }}</p>
-      <p class="text-xs font-bold font-secondary text-ink-500">{{ format(activePoint.value) }}</p>
+      <p class="text-xs font-bold font-secondary text-brand-green-900">{{ format(activePoint.value) }}</p>
     </div>
   </div>
 </template>

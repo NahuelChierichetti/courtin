@@ -18,7 +18,7 @@ const Payment = require('../models/Payment');
 const { upsertClientFromReservation } = require('../utils/clients');
 const { notify, notifyUser } = require('../utils/notifications');
 const { sendReservationConfirmation, sendClubReservationNotice } = require('../utils/reservationEmails');
-const { filtroClubVisible, puedeCrearReservas } = require('../utils/subscriptions');
+const { filtroClubVisible, filtroClubDescubrible, puedeCrearReservas } = require('../utils/subscriptions');
 const { montoACobrar, holdExpiresAt, cobraOnline, confirmarPagoDeReserva } = require('../utils/payments');
 const { getClubAccessToken, createPreference, searchPayments } = require('../utils/mercadopago');
 const { appUrl, apiUrl } = require('../utils/publicUrls');
@@ -27,7 +27,7 @@ const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
 // Campos del club seguros de exponer públicamente (sin plan/estado/horarios crudos).
 const PUBLIC_CLUB_FIELDS =
-  'nombre slug descripcion direccion ciudad provincia telefono whatsapp email logo fotos ubicacion servicios timezone moneda';
+  'nombre slug descripcion direccion ciudad provincia telefono whatsapp email logo fotos ubicacion servicios timezone moneda demo';
 
 const escapeRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -69,8 +69,10 @@ const toPublicCourt = (c) => ({
 const getPublicClubs = async (req, res, next) => {
   try {
     const { ciudad, tipo, q, fecha, hora, horaHasta } = req.query;
-    // Incluye el estado de la suscripción: un club en mora nivel 1 sale del buscador.
-    const filter = filtroClubVisible();
+    // Incluye el estado de la suscripción: un club en mora nivel 1 sale del
+    // buscador. Y `descubrible` además saca al complejo demo, que existe para
+    // mostrarse por link, no para que lo encuentre un jugador.
+    const filter = filtroClubDescubrible();
 
     if (ciudad) filter.ciudad = new RegExp(escapeRegex(ciudad), 'i');
 
@@ -333,7 +335,7 @@ const getClubAvailability = async (req, res, next) => {
 // Ciudades (distinct) con al menos un club publicado, para el filtro del buscador.
 const getPublicCities = async (req, res, next) => {
   try {
-    const cities = await Club.find(filtroClubVisible({ ciudad: { $nin: [null, ''] } })).distinct('ciudad');
+    const cities = await Club.find(filtroClubDescubrible({ ciudad: { $nin: [null, ''] } })).distinct('ciudad');
     cities.sort((a, b) => a.localeCompare(b, 'es'));
     res.status(200).json({ ok: true, cities });
   } catch (error) {

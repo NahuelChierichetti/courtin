@@ -16,7 +16,7 @@
               <i class="icon-[material-symbols--calendar-month] text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-ink-500">{{ isEditing ? 'Editar turno' : 'Nuevo turno' }}</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">{{ isEditing ? 'Editar turno' : 'Nuevo turno' }}</h2>
               <p class="truncate text-sm text-stone-400">{{ subtitle }}</p>
             </div>
             <button
@@ -48,7 +48,7 @@
               >
                 <i class="icon-[material-symbols--push-pin] mt-0.5 text-xs text-brand-purple-500"></i>
                 <div class="min-w-0">
-                  <p class="text-sm font-medium text-ink-500">Turno fijo</p>
+                  <p class="text-sm font-medium text-brand-green-900">Turno fijo</p>
                   <p class="mt-0.5 text-xs text-stone-500">
                     Se repite todas las semanas. Si cancelás, se libera <strong>sólo este día</strong> y la serie sigue.
                   </p>
@@ -112,7 +112,7 @@
                   v-model="form.guestName"
                   type="text"
                   placeholder="Nombre y apellido"
-                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
 
@@ -124,7 +124,7 @@
                     v-model="form.guestPhone"
                     type="tel"
                     placeholder="Ej: 11 2345 6789"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
                 <div>
@@ -135,7 +135,7 @@
                     v-model="form.guestEmail"
                     type="email"
                     placeholder="cliente@mail.com"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
               </div>
@@ -159,7 +159,7 @@
                 <input
                   v-model="form.fecha"
                   type="date"
-                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
                 <p v-if="openRange" class="mt-2.5 text-xs text-stone-400">
                   Atención: {{ minutesToTime(openRange.startMin) }} a {{ minutesToTime(openRange.endMin) }}
@@ -223,7 +223,7 @@
                     type="number"
                     min="0"
                     step="500"
-                    class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-right text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-right text-sm font-medium font-secondary text-brand-green-900 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                     @input="priceTouched = true"
                   />
                 </div>
@@ -241,7 +241,7 @@
                     class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-purple-500"
                   />
                   <span class="min-w-0">
-                    <span class="block text-sm font-medium text-ink-500">Se repite todas las semanas</span>
+                    <span class="block text-sm font-medium text-brand-green-900">Se repite todas las semanas</span>
                     <span class="mt-0.5 block text-xs text-stone-500">
                       Turno fijo: se genera solo y no vence. Vas a poder revisar las fechas antes de confirmar.
                     </span>
@@ -256,7 +256,7 @@
                   v-model="form.notas"
                   rows="2"
                   placeholder="Observaciones (opcional)"
-                  class="w-full resize-none rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="w-full resize-none rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 ></textarea>
               </div>
 

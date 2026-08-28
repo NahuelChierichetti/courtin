@@ -194,7 +194,7 @@ onMounted(fetchClubs)
         <div class="rounded-3xl border border-black/[0.06] bg-white p-6 shadow-sm">
           <div class="flex items-center gap-2.5">
             <i class="icon-[material-symbols--tune] text-brand-green-500"></i>
-            <h2 class="text-lg font-bold text-ink-500">Filtros</h2>
+            <h2 class="text-lg font-bold text-brand-green-900">Filtros</h2>
           </div>
 
           <!--
@@ -252,7 +252,7 @@ onMounted(fetchClubs)
       <section>
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-ink-500">
+            <h1 class="text-2xl font-bold text-brand-green-900">
               {{ sortedClubs.length }} {{ sortedClubs.length === 1 ? 'resultado' : 'resultados' }}
             </h1>
             <p class="mt-1 text-sm text-stone-500">{{ resultsMeta }}</p>
@@ -317,7 +317,7 @@ onMounted(fetchClubs)
           <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
             <i class="icon-[material-symbols--search] text-2xl text-stone-300"></i>
           </div>
-          <h3 class="mt-4 text-lg font-semibold text-ink-500">No encontramos complejos</h3>
+          <h3 class="mt-4 text-lg font-semibold text-brand-green-900">No encontramos complejos</h3>
           <p class="mt-2 max-w-sm text-sm text-stone-500">
             {{
               hayFiltros

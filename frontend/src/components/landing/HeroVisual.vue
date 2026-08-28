@@ -39,7 +39,7 @@ import FeatureScreen from './FeatureScreen.vue'
       >
         <i class="icon-[material-symbols--check] text-sm"></i>
       </span>
-      <span class="text-xs font-medium whitespace-nowrap text-ink-500">Turno confirmado</span>
+      <span class="text-xs font-medium whitespace-nowrap text-brand-green-900">Turno confirmado</span>
     </div>
 
     <!-- Aviso de seña cobrada -->
@@ -53,7 +53,7 @@ import FeatureScreen from './FeatureScreen.vue'
       </span>
       <div>
         <p class="text-[10px] text-stone-500">Seña acreditada</p>
-        <p class="font-secondary text-sm font-medium text-ink-500">$ 11.000</p>
+        <p class="font-secondary text-sm font-medium text-brand-green-900">$ 11.000</p>
       </div>
     </div>
   </div>

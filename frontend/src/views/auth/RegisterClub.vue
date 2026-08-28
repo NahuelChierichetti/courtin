@@ -188,8 +188,8 @@ const enviar = async () => {
 }
 
 const inputBase =
-  'h-12 w-full rounded-xl border border-black/[0.08] bg-white text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100'
-const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
+  'h-12 w-full rounded-xl border border-black/[0.08] bg-white text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100'
+const labelBase = 'mb-1.5 block text-sm font-medium text-brand-green-900'
 </script>
 
 <template>
@@ -199,8 +199,8 @@ const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
       <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-normal tracking-tight text-ink-500">
-            Court<span class="text-brand-lime-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-brand-green-900">
+            Court<span class="text-brand-lime-500">in</span>
           </p>
         </div>
       </RouterLink>
@@ -212,12 +212,12 @@ const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
             <i class="icon-[material-symbols--mark-email-read-outline] text-3xl text-brand-green-600"></i>
           </div>
 
-          <h1 class="mt-6 text-3xl font-bold text-ink-500">Solicitud enviada</h1>
+          <h1 class="mt-6 text-3xl font-bold text-brand-green-900">Solicitud enviada</h1>
           <p class="mt-3 text-sm leading-relaxed text-stone-500">
-            El alta de <strong class="text-ink-500">{{ form.clubNombre }}</strong> quedó
-            <strong class="text-ink-500">pendiente de aprobación</strong>. Nuestro equipo la revisa y
+            El alta de <strong class="text-brand-green-900">{{ form.clubNombre }}</strong> quedó
+            <strong class="text-brand-green-900">pendiente de aprobación</strong>. Nuestro equipo la revisa y
             te avisamos por email a
-            <strong class="text-ink-500">{{ form.adminEmail }}</strong> en cuanto esté lista.
+            <strong class="text-brand-green-900">{{ form.adminEmail }}</strong> en cuanto esté lista.
           </p>
 
           <div class="mt-8 space-y-3 rounded-2xl border border-black/[0.06] bg-white p-6 text-left">
@@ -246,7 +246,7 @@ const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
 
           <RouterLink
             to="/"
-            class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white px-6 text-sm font-semibold text-ink-500 no-underline transition-colors hover:bg-stone-50"
+            class="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white px-6 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-stone-50"
           >
             <i class="icon-[material-symbols--arrow-back] text-base"></i>
             Volver al inicio
@@ -255,7 +255,7 @@ const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
 
         <!-- Pasos 1 a 3 -->
         <div v-else class="mx-auto w-full max-w-md">
-          <h1 class="text-3xl font-bold text-ink-500 sm:text-4xl">Registrá tu complejo</h1>
+          <h1 class="text-3xl font-bold text-brand-green-900 sm:text-4xl">Registrá tu complejo</h1>
           <p class="mt-3 text-sm leading-relaxed text-stone-500">
             Contanos de tu complejo y lo damos de alta. Son tres pasos y no lleva más de dos
             minutos.
@@ -281,7 +281,7 @@ const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
                   </span>
                   <span
                     class="truncate text-xs font-semibold"
-                    :class="step >= paso.n ? 'text-ink-500' : 'text-stone-400'"
+                    :class="step >= paso.n ? 'text-brand-green-900' : 'text-stone-400'"
                   >
                     {{ paso.titulo }}
                   </span>
@@ -517,7 +517,7 @@ const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
                   ></i>
                   <span
                     class="flex-1 text-sm font-semibold"
-                    :class="form.deportes.includes(d.key) ? 'text-ink-500' : 'text-stone-500'"
+                    :class="form.deportes.includes(d.key) ? 'text-brand-green-900' : 'text-stone-500'"
                   >
                     {{ d.label }}
                   </span>
@@ -540,7 +540,7 @@ const labelBase = 'mb-1.5 block text-sm font-medium text-ink-500'
               <button
                 v-if="step > 1"
                 type="button"
-                class="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white px-6 text-sm font-semibold text-ink-500 transition-colors hover:bg-stone-50"
+                class="flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white px-6 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-stone-50"
                 @click="volver"
               >
                 <i class="icon-[material-symbols--arrow-back] text-base"></i>

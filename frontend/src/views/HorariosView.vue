@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Horarios de apertura</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Horarios de apertura</h1>
         <p class="mt-1 text-sm text-stone-500">
           Definí los días y horas en que el complejo acepta reservas.
         </p>
@@ -25,7 +25,7 @@
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-stone-500">
         Seleccioná un club desde el selector en el encabezado para configurar los horarios.
       </p>
@@ -54,7 +54,7 @@
       <div class="lg:col-span-2 rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="flex items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-5 sm:px-6">
           <div class="min-w-0">
-            <h2 class="text-base font-semibold text-ink-500">Horario semanal regular</h2>
+            <h2 class="text-base font-semibold text-brand-green-900">Horario semanal regular</h2>
             <p class="mt-0.5 text-sm text-stone-400">Aplica a todas las canchas salvo excepciones puntuales</p>
           </div>
           <button
@@ -73,7 +73,7 @@
             :key="dia.key"
             class="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-4 sm:px-6"
           >
-            <span class="order-1 shrink-0 text-sm font-medium text-ink-500 sm:w-24">{{ dia.label }}</span>
+            <span class="order-1 shrink-0 text-sm font-medium text-brand-green-900 sm:w-24">{{ dia.label }}</span>
 
             <!-- w-full en mobile: si se deja envolver solo, la fila queda en una
                  o dos líneas según el largo del nombre del día. -->
@@ -126,7 +126,7 @@
         <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
           <div class="flex items-center justify-between border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div>
-              <h2 class="text-base font-semibold text-ink-500">Días especiales</h2>
+              <h2 class="text-base font-semibold text-brand-green-900">Días especiales</h2>
               <p class="mt-0.5 text-sm text-stone-400">Feriados y excepciones</p>
             </div>
             <button
@@ -154,7 +154,7 @@
                 <i :class="dia.tipo === 'especial' ? 'icon-[material-symbols--star]' : 'icon-[material-symbols--power-settings-new]'" class="text-sm"></i>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-ink-500">{{ dia.nombre }}</p>
+                <p class="truncate text-sm font-medium text-brand-green-900">{{ dia.nombre }}</p>
                 <p class="text-xs text-stone-400">
                   {{ formatDate(dia.fecha) }} &middot;
                   {{ dia.tipo === 'especial' ? `Extendido ${dia.horaInicio} – ${dia.horaFin}` : 'Cerrado' }}
@@ -172,7 +172,7 @@
 
         <!-- Booking settings -->
         <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm p-4 sm:p-6">
-          <h2 class="text-base font-semibold text-ink-500">Ajustes de reserva</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Ajustes de reserva</h2>
 
           <div class="mt-4 rounded-lg bg-stone-50 px-4 py-3 text-xs text-stone-500">
             La duración del turno se configura por cancha (60, 90 o 120 min) desde la sección

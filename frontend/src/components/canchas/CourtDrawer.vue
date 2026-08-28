@@ -20,7 +20,7 @@
               <SportIcon :sport="form.tipo" class="h-5 w-5" />
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-ink-500">{{ drawerTitle }}</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">{{ drawerTitle }}</h2>
               <p class="text-sm text-stone-400">{{ drawerSubtitle }}</p>
             </div>
             <button
@@ -44,7 +44,7 @@
                     v-model="form.nombre"
                     type="text"
                     placeholder="Ej: Cancha 1"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
                 <div>
@@ -80,7 +80,7 @@
                     v-model="form.superficie"
                     type="text"
                     placeholder="Especificá la superficie"
-                    class="mt-2 w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="mt-2 w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
                 <div>
@@ -118,7 +118,7 @@
                     min="3"
                     max="11"
                     placeholder="Ej: 5, 7, 11"
-                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
               </div>
@@ -181,7 +181,7 @@
                       min="0"
                       step="500"
                       placeholder="0"
-                      class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                      class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-brand-green-900 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                     />
                   </div>
                   <p class="mt-2.5 text-xs text-stone-400">
@@ -255,7 +255,7 @@
                         <label class="mb-1 block text-[10px] font-semibold tracking-wider text-stone-400 uppercase">Precio /h</label>
                         <div class="relative">
                           <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-stone-400">$</span>
-                          <input v-model.number="band.precio" type="number" min="0" step="500" class="w-full rounded-xl border border-black/[0.08] py-2 pr-3 pl-7 text-right text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
+                          <input v-model.number="band.precio" type="number" min="0" step="500" class="w-full rounded-xl border border-black/[0.08] py-2 pr-3 pl-7 text-right text-sm font-medium font-secondary text-brand-green-900 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
                         </div>
                       </div>
                     </div>

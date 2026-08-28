@@ -81,18 +81,18 @@ onBeforeUnmount(() => io?.disconnect())
           </span>
           <span
             class="hidden text-xs sm:block"
-            :class="i === stepIndex && !finished ? 'text-ink-500' : 'text-stone-400'"
+            :class="i === stepIndex && !finished ? 'text-brand-green-900' : 'text-stone-400'"
           >{{ p.titulo }}</span>
           <span v-if="i < pasos.length - 1" class="h-px w-6 bg-black/[0.08]"></span>
         </li>
       </ol>
 
       <p v-if="step" class="mt-4 text-base text-stone-600">
-        <span class="font-medium text-ink-500">{{ step.titulo }}.</span>
+        <span class="font-medium text-brand-green-900">{{ step.titulo }}.</span>
         {{ step.hint }}
       </p>
       <div v-else class="mt-4">
-        <p class="text-base font-medium text-ink-500">Eso es todo. Así se maneja el complejo.</p>
+        <p class="text-base font-medium text-brand-green-900">Eso es todo. Así se maneja el complejo.</p>
         <button
           type="button"
           class="mt-2 cursor-pointer text-sm font-medium text-brand-purple-600 underline underline-offset-4 transition-colors hover:text-brand-purple-700"
@@ -122,7 +122,7 @@ onBeforeUnmount(() => io?.disconnect())
 
       <div class="flex h-[620px]">
         <!-- Sidebar -->
-        <aside class="flex w-56 shrink-0 flex-col bg-brand-green-500">
+        <aside class="flex w-56 shrink-0 flex-col bg-brand-green-900">
           <div class="flex items-center gap-2.5 px-5 pt-5 pb-4">
             <img src="/images/logo-lime.svg" alt="" class="h-10 w-auto" />
             <p class="text-xl leading-none text-white">
@@ -178,7 +178,7 @@ onBeforeUnmount(() => io?.disconnect())
             class="flex shrink-0 items-center justify-between border-b border-black/[0.06] bg-white px-6 py-3.5"
           >
             <div>
-              <h3 class="text-base font-semibold text-ink-500">{{ TITULOS[tab] }}</h3>
+              <h3 class="text-base font-semibold text-brand-green-900">{{ TITULOS[tab] }}</h3>
               <p class="text-xs text-stone-500">Viernes 13 de marzo</p>
             </div>
             <div class="flex items-center gap-2">
@@ -239,7 +239,7 @@ onBeforeUnmount(() => io?.disconnect())
             class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-purple-500 text-xs font-medium text-white"
           >{{ i + 1 }}</span>
           <div>
-            <p class="text-sm font-medium text-ink-500">{{ p.titulo }}</p>
+            <p class="text-sm font-medium text-brand-green-900">{{ p.titulo }}</p>
             <p class="mt-0.5 text-sm leading-relaxed text-stone-600">{{ p.logro }}</p>
           </div>
         </li>

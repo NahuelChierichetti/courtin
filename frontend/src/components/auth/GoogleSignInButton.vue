@@ -20,8 +20,10 @@ const props = defineProps({
   // Ojo con 'signup_with': en español Google lo traduce igual que 'signin_with'
   // ("Acceder con Google"), así que para registrarse conviene 'continue_with'.
   text: { type: String, default: 'continue_with' },
-  // Ancho en píxeles. GIS lo exige numérico y lo topa en 400.
-  width: { type: Number, default: 360 },
+  // Ancho en píxeles. GIS lo exige numérico y lo topa en 400 (no acepta '100%'),
+  // así que para ocupar todo el ancho hay que medir el contenedor y redibujar.
+  // Sin valor explícito se usa ese ancho medido.
+  width: { type: Number, default: null },
 })
 
 const emit = defineEmits(['credential', 'error'])
@@ -31,6 +33,39 @@ const SRC = 'https://accounts.google.com/gsi/client'
 
 const contenedor = useTemplateRef('contenedor')
 const error = ref('')
+
+// GIS no dibuja botones más anchos que 400px ni más angostos que 200px: fuera de
+// ese rango ignora el valor y usa el suyo.
+const ANCHO_MAX = 400
+const ANCHO_MIN = 200
+let anchoDibujado = 0
+let observador = null
+
+const anchoObjetivo = () => {
+  if (props.width) return props.width
+  const medido = Math.floor(contenedor.value?.getBoundingClientRect().width || 0)
+  return Math.min(Math.max(medido, ANCHO_MIN), ANCHO_MAX)
+}
+
+// Redibuja sólo si el ancho cambió de verdad: renderButton reemplaza el nodo, y
+// hacerlo en cada evento del observer haría parpadear el botón.
+const dibujar = () => {
+  if (!contenedor.value || !window.google?.accounts?.id) return
+
+  const ancho = anchoObjetivo()
+  if (ancho === anchoDibujado) return
+  anchoDibujado = ancho
+
+  window.google.accounts.id.renderButton(contenedor.value, {
+    type: 'standard',
+    theme: 'outline',
+    size: 'large',
+    shape: 'pill',
+    text: props.text,
+    logo_alignment: 'center',
+    width: ancho,
+  })
+}
 
 // Sin client id configurado el botón no se muestra: es preferible a mostrar uno
 // que al tocarlo no hace nada.
@@ -92,18 +127,19 @@ onMounted(async () => {
     cancel_on_tap_outside: true,
   })
 
-  window.google.accounts.id.renderButton(contenedor.value, {
-    type: 'standard',
-    theme: 'outline',
-    size: 'large',
-    shape: 'pill',
-    text: props.text,
-    logo_alignment: 'center',
-    width: props.width,
-  })
+  dibujar()
+
+  // El ancho del contenedor recién se conoce una vez montado, y cambia al
+  // redimensionar o al abrirse el modal. Redibujar es la única forma de que el
+  // botón acompañe: GIS no reescala lo ya dibujado.
+  if (!props.width && window.ResizeObserver) {
+    observador = new ResizeObserver(dibujar)
+    observador.observe(contenedor.value)
+  }
 })
 
 onBeforeUnmount(() => {
+  observador?.disconnect()
   // Cierra cualquier ventana de GIS que haya quedado abierta al desmontarse el
   // botón (cerrar el modal de reserva a mitad del login, por ejemplo).
   window.google?.accounts?.id?.cancel()
@@ -111,9 +147,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div v-if="habilitado" class="flex flex-col items-center">
-    <!-- GIS dibuja el botón acá adentro; el contenedor sólo lo centra. -->
-    <div ref="contenedor" class="flex min-h-[44px] justify-center"></div>
+  <div v-if="habilitado" class="flex w-full flex-col items-center">
+    <!-- GIS dibuja el botón acá adentro, del ancho que mida este div. -->
+    <div ref="contenedor" class="flex min-h-[44px] w-full justify-center"></div>
     <p v-if="error" class="mt-2 text-center text-xs text-stone-400">{{ error }}</p>
   </div>
 </template>

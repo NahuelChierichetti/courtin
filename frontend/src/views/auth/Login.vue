@@ -89,15 +89,15 @@ const onGoogleCredential = async (credential) => {
       <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-normal tracking-tight text-ink-500">
-            Court<span class="text-brand-lime-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-brand-green-900">
+            Court<span class="text-brand-lime-500">in</span>
           </p>
         </div>
       </RouterLink>
 
       <div class="flex flex-1 flex-col justify-center py-10">
         <div class="mx-auto w-full max-w-md">
-          <h1 class="text-3xl font-bold text-ink-500 sm:text-4xl">Iniciar sesión</h1>
+          <h1 class="text-3xl font-bold text-brand-green-900 sm:text-4xl">Iniciar sesión</h1>
           <p class="mt-3 text-sm leading-relaxed text-stone-500">{{ subtitle }}</p>
 
           <div v-if="errorMessage" class="mt-6 flex items-center gap-2 rounded-xl border border-error-100 bg-error-50 px-4 py-3 text-sm text-error-600">
@@ -133,20 +133,9 @@ const onGoogleCredential = async (credential) => {
             </p>
           </div>
 
-          <!-- Google va arriba del formulario: es el camino más corto, y quien
-               ya lo usó antes no tiene que leer el resto. -->
-          <template v-if="!isClub">
-            <GoogleSignInButton class="mt-7" text="signin_with" @credential="onGoogleCredential" />
-            <div class="mt-6 flex items-center gap-3">
-              <span class="h-px flex-1 bg-black/[0.08]"></span>
-              <span class="text-xs font-medium text-stone-400">o con tu email</span>
-              <span class="h-px flex-1 bg-black/[0.08]"></span>
-            </div>
-          </template>
-
           <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="email">Email</label>
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="email">Email</label>
               <div class="relative">
                 <i class="icon-[material-symbols--mail-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                 <input
@@ -156,13 +145,13 @@ const onGoogleCredential = async (credential) => {
                   autocomplete="email"
                   placeholder="tuemail@ejemplo.com"
                   required
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="password">Contraseña</label>
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="password">Contraseña</label>
               <div class="relative">
                 <i class="icon-[material-symbols--lock-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                 <input
@@ -172,7 +161,7 @@ const onGoogleCredential = async (credential) => {
                   autocomplete="current-password"
                   placeholder="Ingresá tu contraseña"
                   required
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
                 <button
                   type="button"
@@ -201,6 +190,17 @@ const onGoogleCredential = async (credential) => {
               {{ isLoading ? 'Ingresando...' : 'Ingresar' }}
             </button>
           </form>
+
+          <!-- Google va arriba del formulario: es el camino más corto, y quien
+               ya lo usó antes no tiene que leer el resto. -->
+            <template v-if="!isClub">
+              <div class="mt-6 flex items-center gap-3">
+                <span class="h-px flex-1 bg-black/[0.08]"></span>
+                <span class="text-xs font-normal text-stone-400">o con tu cuenta de Google</span>
+                <span class="h-px flex-1 bg-black/[0.08]"></span>
+              </div>
+              <GoogleSignInButton class="mt-7" text="signin_with" @credential="onGoogleCredential" />
+            </template>
 
           <p class="mt-7 text-center text-sm text-stone-500">
             {{ registerLabel }}

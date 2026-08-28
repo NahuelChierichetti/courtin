@@ -14,7 +14,7 @@
               <i :class="form.tipo === 'ingreso' ? 'icon-[material-symbols--south-west]' : 'icon-[material-symbols--north-east]'" class="text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-ink-500">Registrar movimiento</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">Registrar movimiento</h2>
               <p class="text-sm text-stone-400">Cargá un ingreso o egreso de caja</p>
             </div>
             <button class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer" @click="emit('close')">
@@ -76,7 +76,7 @@
                   min="0"
                   step="500"
                   placeholder="0"
-                  class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="w-full rounded-xl border border-black/[0.08] py-2.5 pr-3 pl-7 text-sm font-medium font-secondary text-brand-green-900 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
             </div>
@@ -90,7 +90,7 @@
                 v-model="form.concepto"
                 type="text"
                 :placeholder="conceptoPlaceholder"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
               />
             </div>
 
@@ -108,7 +108,7 @@
               </div>
               <div>
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Fecha</label>
-                <input v-model="form.fecha" type="date" :max="today" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
+                <input v-model="form.fecha" type="date" :max="today" class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100" />
               </div>
             </div>
 
