@@ -1,5 +1,6 @@
 const CashMovement = require('../models/CashMovement');
 const { CATEGORIAS_INGRESO, CATEGORIAS_EGRESO, METODOS } = require('../models/CashMovement');
+const { scopedById } = require('../utils/scope');
 
 const clubIdFrom = (req) =>
   req.query.clubId || req.body?.clubId || req.headers['x-club-id'] || null;
@@ -116,7 +117,9 @@ const createMovement = async (req, res, next) => {
 // PATCH /cash/:id — edita un movimiento manual (los 'online' no se editan acá).
 const updateMovement = async (req, res, next) => {
   try {
-    const movement = await CashMovement.findById(req.params.id);
+    // Acotado al club autorizado: la ruta no lleva `:clubId`, y sin esto se
+    // editaba la caja de otro complejo con sólo saber el id del movimiento.
+    const movement = await CashMovement.findOne(scopedById(req, req.params.id));
     if (!movement) {
       return res.status(404).json({ ok: false, message: 'Movimiento no encontrado' });
     }
@@ -158,7 +161,7 @@ const updateMovement = async (req, res, next) => {
 // DELETE /cash/:id — elimina un movimiento manual.
 const deleteMovement = async (req, res, next) => {
   try {
-    const movement = await CashMovement.findById(req.params.id);
+    const movement = await CashMovement.findOne(scopedById(req, req.params.id));
     if (!movement) {
       return res.status(404).json({ ok: false, message: 'Movimiento no encontrado' });
     }

@@ -40,12 +40,10 @@ const userSchema = new mongoose.Schema(
     // por email, ese día se crearía un usuario duplicado y la persona perdería
     // sus reservas, favoritos y notificaciones.
     //
-    // `sparse` porque la enorme mayoría de las cuentas no lo tiene, y sin eso el
-    // índice único chocaría entre todos los `null`.
+    // El índice único va abajo, como índice PARCIAL y no `sparse`: ver la nota
+    // al pie del schema.
     googleId: {
       type: String,
-      unique: true,
-      sparse: true,
       default: null
     },
     // Foto de perfil de Google. Decorativa: si el día de mañana la URL deja de
@@ -87,6 +85,25 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true
   }
+);
+
+// Único sobre el googleId, pero indexando SÓLO las cuentas que tienen uno de
+// verdad (un string).
+//
+// Antes era `unique + sparse` con `default: null`, y esa combinación no
+// funciona: `sparse` saltea los documentos donde el campo está AUSENTE, pero un
+// `null` está presente. Como toda cuenta nueva nace con `googleId: null` por el
+// default, la primera se quedaba con el único lugar disponible para el null y
+// **la siguiente registración fallaba** con "Ya existe un registro con ese
+// googleId". Es la misma trampa que ya está documentada en `EmailLog.dedupeKey`,
+// que la evita no poniéndole default.
+//
+// `partialFilterExpression` lo resuelve sin depender del default: los `null` y
+// los ausentes quedan fuera del índice, y dos cuentas de Google con el mismo id
+// siguen sin poder coexistir, que es lo único que este índice tiene que impedir.
+userSchema.index(
+  { googleId: 1 },
+  { unique: true, partialFilterExpression: { googleId: { $type: 'string' } } }
 );
 
 module.exports = mongoose.model('User', userSchema);
