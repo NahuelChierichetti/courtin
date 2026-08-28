@@ -2,6 +2,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const Sentry = require('@sentry/node');
 
 const notFound = require('./middlewares/notFound');
 const errorHandler = require('./middlewares/errorHandler');
@@ -39,6 +40,13 @@ app.use(
 app.use(express.json());
 app.use('/api', routes);
 app.use(notFound);
+
+// Va DESPUÉS de las rutas y ANTES del errorHandler propio: ése responde el JSON
+// y corta la cadena de middlewares, así que un Sentry puesto abajo no vería
+// ningún error. Por defecto sólo reporta los de servidor (500 en adelante), de
+// modo que un 404 o un 403 no llenan la casilla.
+Sentry.setupExpressErrorHandler(app);
+
 app.use(errorHandler);
 
 module.exports = app;

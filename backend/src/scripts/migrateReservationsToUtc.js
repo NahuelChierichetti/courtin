@@ -16,6 +16,11 @@
  */
 
 require('dotenv').config();
+
+// Aborta si la URI y la intención no coinciden (ver utils/scriptTarget.js).
+const { confirmarDestino } = require('../utils/scriptTarget');
+
+confirmarDestino('node src/scripts/migrateReservationsToUtc.js');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');

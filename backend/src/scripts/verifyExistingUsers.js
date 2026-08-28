@@ -13,6 +13,11 @@
 
 require('dotenv').config();
 
+// Aborta si la URI y la intención no coinciden (ver utils/scriptTarget.js).
+const { confirmarDestino } = require('../utils/scriptTarget');
+
+confirmarDestino('npm run users:grandfather');
+
 const connectDB = require('../config/db');
 const User = require('../models/User');
 
