@@ -5,3 +5,8 @@ node_modules/
 
 dist/
 build/
+# Backups de la base (mongodump). Traen datos reales de clientes —emails,
+# teléfonos, movimientos de caja— así que no entran nunca al repo.
+courtin-*.gz
+*.dump
+dump/
