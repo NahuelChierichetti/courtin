@@ -101,7 +101,7 @@ onUnmounted(() => {
 
       <button
         type="button"
-        class="flex h-9 min-w-[136px] items-center justify-center gap-1.5 px-2 text-sm font-semibold text-ink-500 transition-colors hover:bg-stone-50 cursor-pointer lg:min-w-[196px] lg:px-3"
+        class="flex h-9 min-w-[136px] items-center justify-center gap-1.5 px-2 text-sm font-semibold text-brand-green-900 transition-colors hover:bg-stone-50 cursor-pointer lg:min-w-[196px] lg:px-3"
         :aria-expanded="open"
         aria-haspopup="dialog"
         title="Elegir fecha"

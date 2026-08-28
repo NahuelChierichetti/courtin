@@ -140,7 +140,7 @@ onMounted(fetchReservations)
 
 <template>
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <h1 class="text-2xl font-bold text-ink-500">Mis reservas</h1>
+    <h1 class="text-2xl font-bold text-brand-green-900">Mis reservas</h1>
     <p class="mt-1 text-sm text-stone-500">Gestioná tus turnos y revisá tu historial.</p>
 
     <div class="mt-6">
@@ -175,7 +175,7 @@ onMounted(fetchReservations)
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--calendar-month] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Todavía no tenés reservas</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Todavía no tenés reservas</h3>
       <p class="mt-1 text-sm text-stone-500">Buscá un complejo y reservá tu primera cancha.</p>
       <RouterLink
         :to="{ name: 'public-buscar' }"
@@ -194,7 +194,7 @@ onMounted(fetchReservations)
           class="-mb-px flex items-center gap-2 border-b-2 px-1 pb-3 text-sm font-semibold transition-colors cursor-pointer"
           :class="
             tab === t.key
-              ? 'border-brand-green-500 text-ink-500'
+              ? 'border-brand-green-500 text-brand-green-900'
               : 'border-transparent text-stone-500 hover:text-stone-700'
           "
           @click="tab = t.key"
@@ -245,7 +245,7 @@ onMounted(fetchReservations)
                   <SportIcon :sport="r.court?.tipo" class="h-5 w-5" />
                 </span>
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-semibold text-ink-500">{{ r.club?.nombre }}</p>
+                  <p class="truncate text-sm font-semibold text-brand-green-900">{{ r.club?.nombre }}</p>
                   <p class="truncate text-xs text-stone-500">
                     {{ r.court?.nombre }}
                     <template v-if="r.court?.tipo"> · {{ sportLabel(r.court.tipo) }}</template>
@@ -289,7 +289,7 @@ onMounted(fetchReservations)
             <!-- Precio y pago -->
             <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.06] pt-4">
               <div>
-                <p class="text-base font-bold text-ink-500">
+                <p class="text-base font-bold text-brand-green-900">
                   {{ formatCurrency(r.precioFinal, monedaOf(r)) }}
                 </p>
                 <p v-if="pagoMetaOf(r)" class="mt-0.5 flex items-center gap-1.5 text-xs" :class="pagoMetaOf(r).text">

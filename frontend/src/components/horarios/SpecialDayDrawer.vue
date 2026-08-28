@@ -20,7 +20,7 @@
               <i :class="form.tipo === 'especial' ? 'icon-[material-symbols--star]' : 'icon-[material-symbols--power-settings-new]'" class="text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-ink-500">{{ drawerTitle }}</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">{{ drawerTitle }}</h2>
               <p class="text-sm text-stone-400">Feriados y excepciones de horario</p>
             </div>
             <button
@@ -43,7 +43,7 @@
                   v-model="form.nombre"
                   type="text"
                   placeholder="Ej: Día de la Independencia"
-                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
 

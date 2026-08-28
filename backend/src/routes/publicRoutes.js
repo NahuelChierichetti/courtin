@@ -12,8 +12,9 @@ const {
   retryReservationPayment
 } = require('../controllers/publicController');
 const { mpOauthCallback, mpWebhook } = require('../controllers/mercadopagoController');
+const { createDemoRequest } = require('../controllers/leadController');
 const { attachUserOptional } = require('../middlewares/authMiddleware');
-const { retryPaymentLimiter } = require('../middlewares/rateLimit');
+const { retryPaymentLimiter, demoRequestLimiter } = require('../middlewares/rateLimit');
 
 const router = express.Router();
 
@@ -26,6 +27,10 @@ router.get('/clubs/:slug', getPublicClubBySlug);
 router.get('/clubs/:slug/availability', getClubAvailability);
 router.get('/clubs/:slug/courts/:courtId/availability', getCourtAvailability);
 router.post('/clubs/:slug/reservations', attachUserOptional, createPublicReservation);
+
+// Pedido de demo desde la landing de complejos. No crea cuenta ni club: sólo
+// deja el contacto para que lo llamemos.
+router.post('/demos', demoRequestLimiter, createDemoRequest);
 
 // Estado y reintento del cobro, para la pantalla a la que vuelve el jugador
 // desde MercadoPago. El token de gestión es la prueba de propiedad.

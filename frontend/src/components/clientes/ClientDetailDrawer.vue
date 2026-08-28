@@ -11,7 +11,7 @@
               {{ initials }}
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="truncate text-lg font-semibold text-ink-500">{{ client?.nombre || 'Cliente' }}</h2>
+              <h2 class="truncate text-lg font-semibold text-brand-green-900">{{ client?.nombre || 'Cliente' }}</h2>
               <p class="truncate text-sm text-stone-400">{{ client?.email }}</p>
             </div>
             <button class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer" @click="emit('close')">
@@ -25,7 +25,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div class="rounded-2xl border border-black/[0.06] p-4">
                 <p class="text-xs text-stone-400">Reservas</p>
-                <p class="mt-1 text-xl font-bold font-secondary text-ink-500">{{ client?.reservasCount ?? 0 }}</p>
+                <p class="mt-1 text-xl font-bold font-secondary text-brand-green-900">{{ client?.reservasCount ?? 0 }}</p>
               </div>
               <div class="rounded-2xl border border-black/[0.06] p-4">
                 <p class="text-xs text-stone-400">Total gastado</p>
@@ -60,7 +60,7 @@
                 v-model="notas"
                 rows="2"
                 placeholder="Notas internas del cliente (preferencias, observaciones...)"
-                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                class="w-full rounded-xl border border-black/[0.08] px-3 py-2.5 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
               ></textarea>
               <button
                 v-if="notas !== (client?.notas || '')"
@@ -87,7 +87,7 @@
                     <span class="h-2 w-2 rounded-full" :class="sportMeta(r.court?.tipo).dot"></span>
                   </span>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-medium text-ink-500">{{ r.court?.nombre || 'Cancha' }}</p>
+                    <p class="truncate text-sm font-medium text-brand-green-900">{{ r.court?.nombre || 'Cancha' }}</p>
                     <p class="text-xs text-stone-400">{{ fmtDateTime(r.inicio) }}</p>
                   </div>
                   <div class="text-right">

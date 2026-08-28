@@ -71,6 +71,15 @@ const registerClubLimiter = porIP({
   texto: 'Ya enviaste varias solicitudes. Esperá un rato antes de mandar otra.'
 });
 
+// Pedidos de demo desde la landing. Es público, guarda un registro y nos manda
+// un email: sin límite, alguien podría inundarnos la casilla con formularios
+// falsos y dejarnos los pedidos reales enterrados. Por IP, porque el email del
+// cuerpo lo inventa quien abusa y no sirve de clave.
+const demoRequestLimiter = porIP({
+  max: 5,
+  texto: 'Ya nos mandaste varios pedidos. Esperá un rato o escribinos por mail.'
+});
+
 // Reenvío del email de verificación. Va por usuario en sesión, no por email del
 // cuerpo: el endpoint no acepta destinatario.
 const resendVerificationLimiter = rateLimit({
@@ -167,6 +176,7 @@ module.exports = {
   loginLimiters,
   googleLoginLimiter,
   registerClubLimiter,
+  demoRequestLimiter,
   resendVerificationLimiter,
   invitationLimiter,
   retryPaymentLimiter

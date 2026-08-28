@@ -11,6 +11,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node src/scripts/seedDemo.js",
+    "seed:demo-club": "node src/scripts/seedDemoClub.js",
     "mail:test": "node src/scripts/sendTestEmail.js",
     "jobs:reminders": "node src/scripts/sendReminders.js",
     "jobs:holds": "node src/scripts/releaseHolds.js",

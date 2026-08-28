@@ -65,7 +65,7 @@ defineExpose({ close })
         </span>
         <span
           class="block truncate text-sm font-medium"
-          :class="value ? 'text-ink-500' : 'text-stone-400'"
+          :class="value ? 'text-brand-green-900' : 'text-stone-400'"
         >
           {{ value || placeholder }}
         </span>

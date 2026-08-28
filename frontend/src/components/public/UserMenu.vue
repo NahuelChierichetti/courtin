@@ -58,7 +58,7 @@ onUnmounted(() => document.removeEventListener('click', close))
       >
         {{ initials }}
       </span>
-      <span class="hidden text-sm font-semibold text-ink-500 sm:block">{{ firstName }}</span>
+      <span class="hidden text-sm font-semibold text-brand-green-900 sm:block">{{ firstName }}</span>
       <i
         class="icon-[material-symbols--keyboard-arrow-down] text-sm text-stone-400 transition-transform"
         :class="{ 'rotate-180': open }"
@@ -72,7 +72,7 @@ onUnmounted(() => document.removeEventListener('click', close))
       @click.stop
     >
       <div class="border-b border-black/[0.06] px-3 py-2.5">
-        <p class="truncate text-sm font-semibold text-ink-500">{{ user?.nombre }}</p>
+        <p class="truncate text-sm font-semibold text-brand-green-900">{{ user?.nombre }}</p>
         <p class="truncate text-xs text-stone-500">{{ user?.email }}</p>
       </div>
 

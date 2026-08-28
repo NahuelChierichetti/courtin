@@ -77,7 +77,7 @@ const handleSubmit = async () => {
         <div class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl">
           <div class="flex items-center justify-between border-b border-black/[0.06] px-4 py-5 sm:px-6">
             <div>
-              <h2 class="text-lg font-semibold text-ink-500">Invitar al equipo</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">Invitar al equipo</h2>
               <p class="mt-0.5 text-sm text-stone-500">Le llega un email para crear su acceso.</p>
             </div>
             <button
@@ -97,7 +97,7 @@ const handleSubmit = async () => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="invite-email">Email</label>
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="invite-email">Email</label>
               <div class="relative">
                 <i class="icon-[material-symbols--mail-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                 <input
@@ -106,13 +106,13 @@ const handleSubmit = async () => {
                   type="email"
                   placeholder="persona@ejemplo.com"
                   required
-                  class="h-11 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-11 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="invite-nombre">
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="invite-nombre">
                 Nombre <span class="font-normal text-stone-400">(opcional)</span>
               </label>
               <div class="relative">
@@ -122,13 +122,13 @@ const handleSubmit = async () => {
                   v-model="form.nombre"
                   type="text"
                   placeholder="Cómo se llama"
-                  class="h-11 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-11 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
             </div>
 
             <div>
-              <span class="mb-2 block text-sm font-medium text-ink-500">Rol</span>
+              <span class="mb-2 block text-sm font-medium text-brand-green-900">Rol</span>
               <div class="space-y-2">
                 <button
                   v-for="r in ROLES"
@@ -149,7 +149,7 @@ const handleSubmit = async () => {
                     <i :class="r.icon" class="text-lg"></i>
                   </span>
                   <span class="min-w-0">
-                    <span class="block text-sm font-semibold text-ink-500">{{ r.label }}</span>
+                    <span class="block text-sm font-semibold text-brand-green-900">{{ r.label }}</span>
                     <span class="mt-0.5 block text-xs leading-relaxed text-stone-500">{{ r.description }}</span>
                   </span>
                 </button>

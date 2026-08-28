@@ -11,7 +11,7 @@
               <i class="icon-[material-symbols--push-pin] text-base"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-ink-500">Turnos fijos</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">Turnos fijos</h2>
               <p class="truncate text-sm text-stone-400">Se repiten todas las semanas, sin vencimiento</p>
             </div>
             <button
@@ -33,7 +33,7 @@
               <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
                 <i class="icon-[material-symbols--push-pin] text-xl text-stone-400"></i>
               </div>
-              <h3 class="mt-4 text-base font-semibold text-ink-500">Todavía no hay turnos fijos</h3>
+              <h3 class="mt-4 text-base font-semibold text-brand-green-900">Todavía no hay turnos fijos</h3>
               <p class="!mt-2 max-w-xs text-sm text-stone-500">
                 Abrí un turno del calendario y marcá "se repite todas las semanas" para fijarlo.
               </p>
@@ -47,7 +47,7 @@
               >
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
-                    <p class="truncate text-sm font-semibold text-ink-500">
+                    <p class="truncate text-sm font-semibold text-brand-green-900">
                       {{ r.customer?.nombre || r.guestName || 'Sin nombre' }}
                     </p>
                     <p class="mt-0.5 text-xs text-stone-500">
@@ -92,7 +92,7 @@
 
                 <div class="mt-3 flex items-center gap-3 border-t border-black/[0.04] pt-3">
                   <button
-                    class="text-xs font-medium text-stone-500 transition-colors hover:text-ink-500 cursor-pointer disabled:opacity-50"
+                    class="text-xs font-medium text-stone-500 transition-colors hover:text-brand-green-900 cursor-pointer disabled:opacity-50"
                     :disabled="busyId === r._id"
                     @click="emit('toggle-pause', r)"
                   >

@@ -172,7 +172,7 @@ const handleOverlay = (e) => {
               <img src="/images/mercado-pago.png" alt="MercadoPago" class="h-6 w-auto" />
             </div>
             <div class="min-w-0 flex-1">
-              <h2 class="text-lg font-semibold text-ink-500">Cobros con MercadoPago</h2>
+              <h2 class="text-lg font-semibold text-brand-green-900">Cobros con MercadoPago</h2>
               <p class="text-sm text-stone-400">Cobrá las reservas online</p>
             </div>
             <button class="flex h-8 w-8 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 cursor-pointer" @click="emit('close')">
@@ -187,7 +187,7 @@ const handleOverlay = (e) => {
               <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#009ee3]/10">
                 <img src="/images/mercado-pago.png" alt="MercadoPago" class="h-8 w-auto" />
               </div>
-              <h3 class="mt-3 text-base font-semibold text-ink-500">Conectá tu cuenta</h3>
+              <h3 class="mt-3 text-base font-semibold text-brand-green-900">Conectá tu cuenta</h3>
               <p class="mt-1 text-sm text-stone-500">
                 Te vamos a llevar a MercadoPago para que autorices a CourtIn a cobrar en tu nombre. La plata
                 de cada reserva cae directo en tu cuenta.
@@ -209,7 +209,7 @@ const handleOverlay = (e) => {
                   <i class="icon-[material-symbols--check] text-xl text-success-600"></i>
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="text-sm font-semibold text-ink-500">Cuenta conectada</p>
+                  <p class="text-sm font-semibold text-brand-green-900">Cuenta conectada</p>
                   <p v-if="mp.email" class="mt-0.5 truncate text-xs text-stone-500">{{ mp.email }}</p>
                   <p v-if="conectadoDesde" class="mt-0.5 text-xs text-stone-400">Desde el {{ conectadoDesde }}</p>
                 </div>
@@ -254,7 +254,7 @@ const handleOverlay = (e) => {
                     <span v-if="form.modalidad === m.value" class="h-2.5 w-2.5 rounded-full bg-brand-green-500"></span>
                   </span>
                   <div class="min-w-0">
-                    <p class="text-sm font-semibold text-ink-500">{{ m.label }}</p>
+                    <p class="text-sm font-semibold text-brand-green-900">{{ m.label }}</p>
                     <p class="text-xs text-stone-400">{{ m.desc }}</p>
                   </div>
                 </button>
@@ -285,7 +285,7 @@ const handleOverlay = (e) => {
                     type="number"
                     min="1"
                     :max="form.senaTipo === 'porcentaje' ? 100 : undefined"
-                    class="w-full rounded-xl border border-black/[0.08] py-2.5 pl-3 pr-12 text-sm text-ink-500 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="w-full rounded-xl border border-black/[0.08] py-2.5 pl-3 pr-12 text-sm text-brand-green-900 outline-none transition-colors focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                   <!-- La unidad repetida acá dentro evita tener que mirar el
                        selector para saber si "50" son pesos o por ciento. -->
@@ -303,7 +303,7 @@ const handleOverlay = (e) => {
             <div class="rounded-xl bg-stone-50 px-4 py-3 text-xs text-stone-500">
               <p class="font-semibold text-stone-600">Ejemplo con un turno de {{ formatCurrency(TURNO_EJEMPLO, moneda) }}</p>
               <p class="mt-1">
-                El jugador paga <span class="font-semibold text-ink-500">{{ formatCurrency(senaEjemplo, moneda) }}</span> online
+                El jugador paga <span class="font-semibold text-brand-green-900">{{ formatCurrency(senaEjemplo, moneda) }}</span> online
                 <template v-if="restoEjemplo > 0">
                   y {{ formatCurrency(restoEjemplo, moneda) }} en el complejo.
                 </template>
@@ -321,7 +321,7 @@ const handleOverlay = (e) => {
                 <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all" :class="form.permitePagoEnComplejo ? 'left-[22px]' : 'left-0.5'"></span>
               </button>
               <div class="min-w-0">
-                <p class="text-sm font-semibold text-ink-500">Permitir reservar sin pagar</p>
+                <p class="text-sm font-semibold text-brand-green-900">Permitir reservar sin pagar</p>
                 <p class="mt-0.5 text-xs text-stone-400">
                   El jugador puede elegir pagar al llegar al complejo. Apagalo para exigir el pago online y
                   reducir los turnos que nadie usa.
@@ -339,7 +339,7 @@ const handleOverlay = (e) => {
                  descubre la retención recién en su primer cobro le echa la
                  culpa a CourtIn. Conviene ser el que se lo explicó. -->
             <div class="rounded-xl border border-black/[0.08] px-4 py-3">
-              <p class="flex items-center gap-1.5 text-xs font-semibold text-ink-500">
+              <p class="flex items-center gap-1.5 text-xs font-semibold text-brand-green-900">
                 <i class="icon-[material-symbols--info-outline] text-sm text-stone-400"></i>
                 Comisión y plazos de acreditación
               </p>
@@ -347,14 +347,14 @@ const handleOverlay = (e) => {
               <!-- Con datos reales del último cobro -->
               <template v-if="resumen">
                 <p class="mt-2 text-xs leading-relaxed text-stone-500">
-                  En tu último cobro de <span class="font-semibold text-ink-500">{{ formatCurrency(resumen.monto, resumen.moneda) }}</span>,
+                  En tu último cobro de <span class="font-semibold text-brand-green-900">{{ formatCurrency(resumen.monto, resumen.moneda) }}</span>,
                   MercadoPago retuvo
-                  <span class="font-semibold text-ink-500">{{ formatCurrency(resumen.comisionMp, resumen.moneda) }}</span>
+                  <span class="font-semibold text-brand-green-900">{{ formatCurrency(resumen.comisionMp, resumen.moneda) }}</span>
                   <span v-if="comisionPct"> ({{ comisionPct }}%)</span>
                   <template v-if="resumen.netoRecibido != null">
                     y recibiste {{ formatCurrency(resumen.netoRecibido, resumen.moneda) }}</template>.
                   <template v-if="acreditacion">
-                    El dinero se acredita el <span class="font-semibold text-ink-500">{{ acreditacion }}</span>.
+                    El dinero se acredita el <span class="font-semibold text-brand-green-900">{{ acreditacion }}</span>.
                   </template>
                 </p>
                 <p class="mt-1.5 text-xs text-stone-400">

@@ -41,7 +41,7 @@ const reenviar = async () => {
     <i class="icon-[material-symbols--mark-email-unread-outline] shrink-0 text-xl text-warning-600"></i>
 
     <div class="min-w-0 flex-1">
-      <p class="text-sm font-semibold text-ink-500">Confirmá tu email</p>
+      <p class="text-sm font-semibold text-brand-green-900">Confirmá tu email</p>
       <p class="mt-0.5 text-xs leading-relaxed text-stone-600">
         Te mandamos un link a <span class="font-medium">{{ user.email }}</span
         >. Sin confirmarlo no vas a poder recuperar tu contraseña si la olvidás.

@@ -183,7 +183,7 @@ const exportCsv = () => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Reportes</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Reportes</h1>
         <p class="mt-1 text-sm text-stone-500 print:hidden">Métricas reales de ingresos, reservas y ocupación.</p>
         <p class="mt-1 hidden text-sm text-stone-500 print:block">{{ currentClub?.nombre }} · {{ printSubtitle }}</p>
       </div>
@@ -191,9 +191,9 @@ const exportCsv = () => {
         <!-- Rango personalizado: en mobile toma la fila entera para que los dos
              inputs de fecha no queden apretados contra los presets. -->
         <div class="flex w-full items-center justify-center gap-1.5 rounded-full border border-black/[0.06] bg-white px-3 py-1.5 shadow-sm sm:w-auto sm:justify-start">
-          <input v-model="customDesde" type="date" :max="customHasta" class="bg-transparent text-xs text-ink-500 outline-none [color-scheme:light]" @change="onCustomDate" />
+          <input v-model="customDesde" type="date" :max="customHasta" class="bg-transparent text-xs text-brand-green-900 outline-none [color-scheme:light]" @change="onCustomDate" />
           <i class="icon-[material-symbols--arrow-forward] text-xs text-stone-300"></i>
-          <input v-model="customHasta" type="date" :min="customDesde" class="bg-transparent text-xs text-ink-500 outline-none [color-scheme:light]" @change="onCustomDate" />
+          <input v-model="customHasta" type="date" :min="customDesde" class="bg-transparent text-xs text-brand-green-900 outline-none [color-scheme:light]" @change="onCustomDate" />
         </div>
         <!-- Presets -->
         <div class="flex shrink-0 overflow-hidden rounded-full border border-black/[0.06] bg-white shadow-sm">
@@ -247,7 +247,7 @@ const exportCsv = () => {
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
     </div>
 
     <template v-else>
@@ -261,29 +261,29 @@ const exportCsv = () => {
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--calendar-month] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Reservas</p>
-          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ kpis.reservas }}</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-brand-green-900">{{ kpis.reservas }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--pie-chart] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Ocupación</p>
-          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ kpis.ocupacion }}%</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-brand-green-900">{{ kpis.ocupacion }}%</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--receipt-long] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Ticket promedio</p>
-          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ money(kpis.ticketPromedio) }}</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-brand-green-900">{{ money(kpis.ticketPromedio) }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--person-add] text-lg"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500">Clientes nuevos</p>
-          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-ink-500">{{ kpis.clientesNuevos }}</p>
+          <p class="mt-0.5 truncate text-xl font-bold font-secondary sm:text-2xl text-brand-green-900">{{ kpis.clientesNuevos }}</p>
         </div>
       </div>
 
       <!-- Ingresos por día -->
       <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
         <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <h2 class="text-base font-semibold text-ink-500">Ingresos por día</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Ingresos por día</h2>
           <span class="text-sm text-stone-500">Total: <span class="font-semibold text-stone-700">{{ money(totalIngresosDia) }}</span></span>
         </div>
         <div v-if="loading" class="flex items-center justify-center py-16"><i class="icon-[material-symbols--progress-activity] animate-spin text-2xl text-stone-300"></i></div>
@@ -297,7 +297,7 @@ const exportCsv = () => {
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <!-- En un complejo de un solo deporte el donut sería una torta entera: se oculta. -->
         <div v-if="!deporte && deporteChips.length" class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
-          <h2 class="text-base font-semibold text-ink-500">Reservas por deporte</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Reservas por deporte</h2>
           <div v-if="!reservasPorDeporte.length" class="py-8 text-center text-sm text-stone-400">Sin reservas.</div>
           <div v-else class="mt-5">
             <DonutChart :segments="deporteSegments" center-label="reservas" />
@@ -305,7 +305,7 @@ const exportCsv = () => {
         </div>
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
-          <h2 class="text-base font-semibold text-ink-500">Ingresos por método</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Ingresos por método</h2>
           <div v-if="!ingresosPorMetodo.length" class="py-8 text-center text-sm text-stone-400">Sin ingresos.</div>
           <div v-else class="mt-5">
             <DonutChart :segments="metodoSegments" center-label="ingresos" :format="money" :center-format="moneyShort" />
@@ -316,14 +316,14 @@ const exportCsv = () => {
       <!-- Top canchas + Top clientes -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
-          <h2 class="text-base font-semibold text-ink-500">Canchas más reservadas</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Canchas más reservadas</h2>
           <div v-if="!topCanchas.length" class="py-8 text-center text-sm text-stone-400">Sin datos.</div>
           <div v-else class="mt-4 space-y-1">
             <div v-for="(c, i) in topCanchas" :key="i" class="flex items-center gap-3 py-2">
               <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-xs font-bold text-stone-500">{{ i + 1 }}</span>
               <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" :class="sportMeta(c.tipo).bg"><span class="h-2 w-2 rounded-full" :class="sportMeta(c.tipo).dot"></span></span>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre }}</p>
+                <p class="truncate text-sm font-medium text-brand-green-900">{{ c.nombre }}</p>
                 <p class="text-xs text-stone-400">{{ c.reservas }} reservas</p>
               </div>
               <span class="shrink-0 text-xs font-semibold font-secondary text-stone-700 sm:text-sm">{{ money(c.ingresos) }}</span>
@@ -332,14 +332,14 @@ const exportCsv = () => {
         </div>
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-6">
-          <h2 class="text-base font-semibold text-ink-500">Mejores clientes</h2>
+          <h2 class="text-base font-semibold text-brand-green-900">Mejores clientes</h2>
           <div v-if="!topClientes.length" class="py-8 text-center text-sm text-stone-400">Sin datos.</div>
           <div v-else class="mt-4 space-y-1">
             <div v-for="(c, i) in topClientes" :key="i" class="flex items-center gap-3 py-2">
               <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-xs font-bold text-stone-500">{{ i + 1 }}</span>
               <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-green-100 text-xs font-bold text-brand-green-600">{{ initials(c.nombre) }}</span>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre }}</p>
+                <p class="truncate text-sm font-medium text-brand-green-900">{{ c.nombre }}</p>
                 <p class="text-xs text-stone-400">{{ c.reservas }} reservas</p>
               </div>
               <span class="shrink-0 text-xs font-semibold font-secondary text-success-600 sm:text-sm">{{ money(c.gastado) }}</span>

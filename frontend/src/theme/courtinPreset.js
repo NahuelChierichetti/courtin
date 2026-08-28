@@ -60,7 +60,7 @@ const CourtInPreset = definePreset(Aura, {
         },
         // Espejo exacto de los inputs de Tailwind de la app:
         //   border  → border-black/[0.08]
-        //   texto   → text-ink-500
+        //   texto   → text-brand-green-900
         //   placeholder → placeholder:text-stone-400
         //   foco    → border-brand-green-400 + ring brand-green-100
         formField: {

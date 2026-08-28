@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Canchas</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Canchas</h1>
         <p class="mt-1 text-sm text-stone-500">
           {{ activeCourtsCount }} canchas activas &middot; {{ deporteCount }} deportes
         </p>
@@ -48,7 +48,7 @@
     >
       <i class="icon-[material-symbols--info-outline] shrink-0 text-xl text-warning-600"></i>
       <div class="min-w-0 flex-1">
-        <p class="text-sm font-semibold text-ink-500">Llegaste al límite de tu plan</p>
+        <p class="text-sm font-semibold text-brand-green-900">Llegaste al límite de tu plan</p>
         <p class="mt-0.5 text-xs leading-relaxed text-stone-600">
           El plan {{ cupo.planLabel }} incluye hasta {{ cupo.limite }} canchas y tenés
           {{ cupo.usadas }}. Pasá al plan {{ cupo.planSugerido }} para sumar más.
@@ -67,7 +67,7 @@
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-stone-500">
         Seleccioná un club desde el selector en el encabezado para ver las canchas.
       </p>
@@ -95,7 +95,7 @@
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--grid-view] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">
         {{ activeFilter === 'todas' ? 'No hay canchas' : 'No hay canchas de ' + filtroLabel }}
       </h3>
       <p class="!mt-2 text-sm text-stone-500">
@@ -126,7 +126,7 @@
         <!-- Court info -->
         <div class="p-5">
           <div class="flex items-center justify-between gap-2">
-            <h3 class="min-w-0 truncate text-base font-semibold text-ink-500">{{ court.nombre }}</h3>
+            <h3 class="min-w-0 truncate text-base font-semibold text-brand-green-900">{{ court.nombre }}</h3>
             <span
               class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
               :class="[sportMeta(court.tipo).bgSoft, sportMeta(court.tipo).text]"
@@ -153,7 +153,7 @@
 
           <div class="mt-4 flex items-end justify-between">
             <div class="flex items-center gap-1">
-              <p class="text-lg font-bold font-secondary text-ink-500">
+              <p class="text-lg font-bold font-secondary text-brand-green-900">
                 {{ formatPrice(getBasePrice(court)) }}
               </p>
               <p class="text-xs !mt-1 text-stone-400"> / hora</p>

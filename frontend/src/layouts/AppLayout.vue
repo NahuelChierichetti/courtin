@@ -168,7 +168,7 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
 
     <!-- Sidebar: drawer en mobile, columna fija desde lg -->
     <aside
-      class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-brand-green-500 transition-transform duration-200 ease-out lg:static lg:z-auto lg:translate-x-0 lg:transition-[width] print:hidden"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col bg-brand-green-900 transition-transform duration-200 ease-out lg:static lg:z-auto lg:translate-x-0 lg:transition-[width] print:hidden"
       :class="[
         mobileOpen ? 'translate-x-0' : '-translate-x-full',
         railed ? 'lg:w-[76px]' : 'lg:w-64',
@@ -277,7 +277,7 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
               </span>
               <div class="min-w-0 flex-1 text-left">
                 <p class="hidden text-[10px] font-semibold tracking-wider text-brand-green-500 uppercase sm:block">Complejo</p>
-                <p class="truncate text-sm font-semibold text-ink-500">
+                <p class="truncate text-sm font-semibold text-brand-green-900">
                   {{ selectedClubName || 'Seleccionar club' }}
                 </p>
               </div>
@@ -335,7 +335,7 @@ const userRoleLabel = computed(() => (isClubAdmin.value ? 'Administrador' : 'Emp
                 {{ userInitials }}
               </span>
               <span class="hidden min-w-0 text-left sm:block">
-                <span class="block truncate text-sm font-semibold text-ink-500">{{ userShortName }}</span>
+                <span class="block truncate text-sm font-semibold text-brand-green-900">{{ userShortName }}</span>
                 <span class="block text-xs text-stone-500">{{ userRoleLabel }}</span>
               </span>
               <i

@@ -112,7 +112,7 @@ watch(currentClubId, fetchAll)
 <template>
   <div class="space-y-6">
     <div>
-      <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Suscripción</h1>
+      <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Suscripción</h1>
       <p class="mt-1 text-sm text-stone-500">Tu plan, tu estado de pago y el historial de facturas.</p>
     </div>
 
@@ -120,7 +120,7 @@ watch(currentClubId, fetchAll)
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
     </div>
 
     <div v-else-if="loading" class="flex items-center justify-center py-16">
@@ -130,9 +130,9 @@ watch(currentClubId, fetchAll)
     <template v-else-if="data">
       <!-- Aviso de estado -->
       <div v-if="aviso" class="flex flex-wrap items-start gap-3 rounded-2xl border px-4 py-4 sm:px-5" :class="TONOS[aviso.tono]">
-        <i :class="estadoMeta.icono" class="mt-0.5 shrink-0 text-xl text-ink-500"></i>
+        <i :class="estadoMeta.icono" class="mt-0.5 shrink-0 text-xl text-brand-green-900"></i>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-semibold text-ink-500">{{ aviso.titulo }}</p>
+          <p class="text-sm font-semibold text-brand-green-900">{{ aviso.titulo }}</p>
           <p class="mt-1 text-xs leading-relaxed text-stone-600">{{ aviso.texto }}</p>
         </div>
       </div>
@@ -141,7 +141,7 @@ watch(currentClubId, fetchAll)
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <p class="text-sm font-medium text-stone-500">Plan</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ data.suscripcion.planLabel }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ data.suscripcion.planLabel }}</p>
           <p class="mt-1 text-xs text-stone-400">
             {{ data.uso.canchas }} de {{ data.uso.limite ?? '∞' }} canchas
           </p>
@@ -159,14 +159,14 @@ watch(currentClubId, fetchAll)
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <p class="text-sm font-medium text-stone-500">Abono {{ data.suscripcion.ciclo }}</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ money(data.suscripcion.precio) }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ money(data.suscripcion.precio) }}</p>
         </div>
 
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <p class="text-sm font-medium text-stone-500">
             {{ data.estado === 'trial' ? 'Prueba hasta' : 'Pago hasta' }}
           </p>
-          <p class="mt-1 text-lg font-bold font-secondary text-ink-500">
+          <p class="mt-1 text-lg font-bold font-secondary text-brand-green-900">
             {{ fecha(data.estado === 'trial' ? data.suscripcion.trialHasta : data.suscripcion.vigenciaHasta) }}
           </p>
         </div>
@@ -175,21 +175,21 @@ watch(currentClubId, fetchAll)
       <!-- Facturas -->
       <div class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
-          <h2 class="text-sm font-semibold text-ink-500">Facturas</h2>
+          <h2 class="text-sm font-semibold text-brand-green-900">Facturas</h2>
         </div>
 
         <div v-if="!data.facturas.length" class="flex flex-col items-center justify-center py-14 text-center">
           <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
             <i class="icon-[material-symbols--receipt-long-outline] text-xl text-stone-400"></i>
           </div>
-          <h3 class="mt-4 text-sm font-semibold text-ink-500">Todavía no hay facturas</h3>
+          <h3 class="mt-4 text-sm font-semibold text-brand-green-900">Todavía no hay facturas</h3>
           <p class="mt-1 text-xs text-stone-500">Se emiten al terminar tu período de prueba.</p>
         </div>
 
         <div v-else class="divide-y divide-black/[0.05]">
           <div v-for="f in data.facturas" :key="f._id" class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 sm:gap-4 sm:px-6">
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-ink-500">{{ f.periodo }}</p>
+              <p class="text-sm font-medium text-brand-green-900">{{ f.periodo }}</p>
               <p class="text-xs text-stone-400">
                 Vence {{ fecha(f.vencimiento) }}
                 <template v-if="f.pagadaEn"> · Pagada el {{ fecha(f.pagadaEn) }}</template>
@@ -216,7 +216,7 @@ watch(currentClubId, fetchAll)
       <!-- Planes -->
       <div v-if="planes.length" class="rounded-2xl border border-black/[0.06] bg-white shadow-sm">
         <div class="border-b border-black/[0.06] px-4 py-4 sm:px-6">
-          <h2 class="text-sm font-semibold text-ink-500">Planes</h2>
+          <h2 class="text-sm font-semibold text-brand-green-900">Planes</h2>
           <p class="mt-0.5 text-xs text-stone-500">
             Todas las funciones están en todos los planes: sólo cambia cuántas canchas podés cargar.
             Escribinos para cambiar de plan.
@@ -230,7 +230,7 @@ watch(currentClubId, fetchAll)
             :class="p.key === data.suscripcion.plan ? 'border-brand-green-400 bg-brand-green-50' : 'border-black/[0.08]'"
           >
             <div class="flex items-center justify-between">
-              <p class="text-sm font-bold text-ink-500">{{ p.label }}</p>
+              <p class="text-sm font-bold text-brand-green-900">{{ p.label }}</p>
               <span v-if="p.key === data.suscripcion.plan" class="rounded-full bg-brand-green-500 px-2 py-0.5 text-[11px] font-semibold text-white">
                 Actual
               </span>
@@ -238,7 +238,7 @@ watch(currentClubId, fetchAll)
             <p class="mt-1 text-xs text-stone-500">
               {{ p.maxCanchas ? `Hasta ${p.maxCanchas} canchas` : '7 canchas o más' }}
             </p>
-            <p class="mt-3 text-xl font-bold font-secondary text-ink-500">{{ money(p.precios.mensual) }}</p>
+            <p class="mt-3 text-xl font-bold font-secondary text-brand-green-900">{{ money(p.precios.mensual) }}</p>
             <p class="text-xs text-stone-400">por mes</p>
             <p class="mt-2 text-xs text-stone-500">
               o {{ money(p.precioMensualizadoAnual) }}/mes pagando el año ({{ money(p.precios.anual) }})

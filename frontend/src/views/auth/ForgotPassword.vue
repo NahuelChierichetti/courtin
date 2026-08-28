@@ -38,8 +38,8 @@ const handleSubmit = async () => {
       <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-normal tracking-tight text-ink-500">
-            Court<span class="text-brand-lime-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-brand-green-900">
+            Court<span class="text-brand-lime-500">in</span>
           </p>
         </div>
       </RouterLink>
@@ -51,9 +51,9 @@ const handleSubmit = async () => {
             <div class="flex h-14 w-14 items-center justify-center rounded-full bg-brand-lime-100">
               <i class="icon-[material-symbols--mark-email-read-outline] text-2xl text-brand-green-500"></i>
             </div>
-            <h1 class="mt-6 text-3xl font-bold text-ink-500 sm:text-4xl">Revisá tu correo</h1>
+            <h1 class="mt-6 text-3xl font-bold text-brand-green-900 sm:text-4xl">Revisá tu correo</h1>
             <p class="mt-3 text-sm leading-relaxed text-stone-500">
-              Si <span class="font-medium text-ink-500">{{ email }}</span> está registrado, te
+              Si <span class="font-medium text-brand-green-900">{{ email }}</span> está registrado, te
               mandamos un link para crear una contraseña nueva. Vence en 60 minutos.
             </p>
             <p class="mt-6 text-sm leading-relaxed text-stone-500">
@@ -70,7 +70,7 @@ const handleSubmit = async () => {
 
           <!-- Formulario -->
           <template v-else>
-            <h1 class="text-3xl font-bold text-ink-500 sm:text-4xl">¿Olvidaste tu contraseña?</h1>
+            <h1 class="text-3xl font-bold text-brand-green-900 sm:text-4xl">¿Olvidaste tu contraseña?</h1>
             <p class="mt-3 text-sm leading-relaxed text-stone-500">
               Escribí tu email y te mandamos un link para crear una nueva.
             </p>
@@ -81,7 +81,7 @@ const handleSubmit = async () => {
 
             <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-ink-500" for="email">Email</label>
+                <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="email">Email</label>
                 <div class="relative">
                   <i class="icon-[material-symbols--mail-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                   <input
@@ -91,7 +91,7 @@ const handleSubmit = async () => {
                     autocomplete="email"
                     placeholder="tuemail@ejemplo.com"
                     required
-                    class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                    class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                   />
                 </div>
               </div>

@@ -131,7 +131,7 @@ onMounted(async () => {
 
     <!-- Explorá por deporte -->
     <!-- <section class="mt-12">
-      <h2 class="text-xl font-bold text-ink-500">Explorá por deporte</h2>
+      <h2 class="text-xl font-bold text-brand-green-900">Explorá por deporte</h2>
       <div class="mt-6 grid grid-cols-4 gap-3 sm:flex sm:flex-wrap sm:gap-6">
         <button
           v-for="s in sports"
@@ -143,7 +143,7 @@ onMounted(async () => {
           <span class="flex h-16 w-16 items-center justify-center rounded-full border border-black/[0.06] bg-white text-brand-green-500 shadow-sm transition-all group-hover:-translate-y-0.5 group-hover:shadow-md">
             <SportIcon :sport="s.value || 'otro'" class="h-7 w-7" />
           </span>
-          <span class="text-sm font-medium text-ink-500">{{ s.label }}</span>
+          <span class="text-sm font-medium text-brand-green-900">{{ s.label }}</span>
         </button>
       </div>
     </section> -->
@@ -151,7 +151,7 @@ onMounted(async () => {
     <!-- Complejos destacados -->
     <section class="mt-12">
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-ink-500">Complejos destacados</h2>
+        <h2 class="text-xl font-bold text-brand-green-900">Complejos destacados</h2>
         <RouterLink :to="{ name: 'public-buscar' }" class="flex items-center gap-1.5 text-sm font-semibold text-brand-green-500 no-underline hover:text-brand-green-600">
           Ver todos <i class="icon-[material-symbols--arrow-forward] text-xs"></i>
         </RouterLink>

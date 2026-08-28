@@ -129,7 +129,7 @@ const draftPrecio = () => {
       >
         <div class="flex items-start justify-between">
           <div>
-            <p class="text-sm font-semibold text-ink-500">Nuevo turno</p>
+            <p class="text-sm font-semibold text-brand-green-900">Nuevo turno</p>
             <p class="mt-0.5 text-xs text-stone-500">
               {{ draftCourt()?.nombre }} ·
               {{ minutesToTime(draft.startMin) }}–{{ minutesToTime(draft.startMin + draft.duracion) }}
@@ -149,7 +149,7 @@ const draftPrecio = () => {
         <input
           v-model="draft.nombre"
           type="text"
-          class="mt-1 h-9 w-full rounded-lg border border-black/[0.08] px-3 text-sm text-ink-500 outline-none focus:ring-2 focus:ring-brand-green-200"
+          class="mt-1 h-9 w-full rounded-lg border border-black/[0.08] px-3 text-sm text-brand-green-900 outline-none focus:ring-2 focus:ring-brand-green-200"
         />
 
         <p class="mt-3 text-xs font-medium text-stone-500">Duración</p>
@@ -179,7 +179,7 @@ const draftPrecio = () => {
 
         <div class="mt-4 flex items-center justify-between rounded-lg bg-brand-sand-500 px-3 py-2">
           <span class="text-xs text-stone-500">Total</span>
-          <span class="font-secondary text-sm font-bold text-ink-500">{{ formatCurrency(draftPrecio()) }}</span>
+          <span class="font-secondary text-sm font-bold text-brand-green-900">{{ formatCurrency(draftPrecio()) }}</span>
         </div>
 
         <button

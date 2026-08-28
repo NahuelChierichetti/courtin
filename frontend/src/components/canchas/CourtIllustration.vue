@@ -63,5 +63,5 @@ const LINEA = '#16241b'
     <path d="M135 50a22 22 0 0 0 0 40" :stroke="LINEA" stroke-opacity="0.35" stroke-width="1.5" fill="none" />
   </svg>
 
-  <SportIcon v-else :sport="tipo" class="h-16 w-16 text-ink-500/30" />
+  <SportIcon v-else :sport="tipo" class="h-16 w-16 text-brand-green-900/30" />
 </template>

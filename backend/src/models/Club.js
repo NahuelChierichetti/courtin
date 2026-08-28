@@ -346,6 +346,22 @@ const clubSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    // Complejo de demostración: el que usamos para mostrar el producto en vivo.
+    //
+    // Es ortogonal a `publicado` y resuelve algo que ese flag solo no puede.
+    // `publicado: false` lo saca del buscador PERO también rompe el link
+    // público (`getPublicClubBySlug` filtra por lo mismo), y sin link no hay
+    // demo del flujo de reserva. `publicado: true` habilita el link pero lo
+    // mete en el buscador, donde un jugador real puede reservar una cancha que
+    // no existe.
+    //
+    // Con esto el club queda publicado (link vivo, reserva real) pero fuera del
+    // descubrimiento: no sale en el buscador ni aporta su ciudad al filtro.
+    // Sólo llega quien tiene el link.
+    demo: {
+      type: Boolean,
+      default: false
+    },
     // Qué avisos por email quiere recibir el complejo en `Club.email`.
     //
     // Vienen activados: un complejo que empieza a recibir reservas online

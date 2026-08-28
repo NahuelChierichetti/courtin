@@ -64,15 +64,15 @@ const onGoogleCredential = async (credential) => {
       <RouterLink :to="{ name: 'public-home' }" class="inline-flex items-center gap-2.5 no-underline">
         <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
         <div class="leading-none">
-          <p class="text-lg font-normal tracking-tight text-ink-500">
-            Court<span class="text-brand-lime-500">In</span>
+          <p class="text-lg font-normal tracking-tight text-brand-green-900">
+            Court<span class="text-brand-lime-500">in</span>
           </p>
         </div>
       </RouterLink>
 
       <div class="flex flex-1 flex-col justify-center py-10">
         <div class="mx-auto w-full max-w-md">
-          <h1 class="text-3xl font-bold text-ink-500 sm:text-4xl">Crear una cuenta</h1>
+          <h1 class="text-3xl font-bold text-brand-green-900 sm:text-4xl">Crear una cuenta</h1>
           <p class="mt-3 text-sm leading-relaxed text-stone-500">
             Registrate para reservar canchas y ver tus reservas en un solo lugar.
           </p>
@@ -93,7 +93,7 @@ const onGoogleCredential = async (credential) => {
 
           <form class="mt-7 space-y-5" @submit.prevent="handleSubmit">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="nombre">Nombre</label>
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="nombre">Nombre</label>
               <div class="relative">
                 <i class="icon-[material-symbols--person-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                 <input
@@ -102,13 +102,13 @@ const onGoogleCredential = async (credential) => {
                   autocomplete="name"
                   placeholder="Tu nombre"
                   required
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="email">Email</label>
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="email">Email</label>
               <div class="relative">
                 <i class="icon-[material-symbols--mail-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                 <input
@@ -118,13 +118,13 @@ const onGoogleCredential = async (credential) => {
                   autocomplete="email"
                   placeholder="tuemail@ejemplo.com"
                   required
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
               </div>
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="password">Contraseña</label>
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="password">Contraseña</label>
               <div class="relative">
                 <i class="icon-[material-symbols--lock-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                 <input
@@ -134,7 +134,7 @@ const onGoogleCredential = async (credential) => {
                   autocomplete="new-password"
                   placeholder="Mínimo 6 caracteres"
                   required
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
                 <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 transition-colors hover:text-stone-600 cursor-pointer" @click="showPassword = !showPassword">
                   <i :class="showPassword ? 'icon-[material-symbols--visibility-off]' : 'icon-[material-symbols--visibility]'"></i>
@@ -143,7 +143,7 @@ const onGoogleCredential = async (credential) => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-ink-500" for="confirmPassword">Confirmar contraseña</label>
+              <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="confirmPassword">Confirmar contraseña</label>
               <div class="relative">
                 <i class="icon-[material-symbols--lock-outline] absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400"></i>
                 <input
@@ -153,7 +153,7 @@ const onGoogleCredential = async (credential) => {
                   autocomplete="new-password"
                   placeholder="Repetí la contraseña"
                   required
-                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+                  class="h-12 w-full rounded-xl border border-black/[0.08] bg-white pl-11 pr-11 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
                 />
                 <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 transition-colors hover:text-stone-600 cursor-pointer" @click="showConfirm = !showConfirm">
                   <i :class="showConfirm ? 'icon-[material-symbols--visibility-off]' : 'icon-[material-symbols--visibility]'"></i>

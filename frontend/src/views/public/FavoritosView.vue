@@ -25,7 +25,7 @@ onMounted(() => load({ force: true }))
     todo el contenido de lugar.
   -->
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <h1 class="text-2xl font-bold text-ink-500">Favoritos</h1>
+    <h1 class="text-2xl font-bold text-brand-green-900">Favoritos</h1>
     <p class="mt-1 text-sm text-stone-500">Los complejos que guardaste para reservar rápido.</p>
 
     <div class="mt-6">
@@ -43,7 +43,7 @@ onMounted(() => load({ force: true }))
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--favorite-outline] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Todavía no guardaste ningún complejo</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Todavía no guardaste ningún complejo</h3>
       <p class="mt-1 max-w-sm text-sm text-stone-500">
         Tocá el corazón en cualquier complejo y va a aparecer acá para reservar sin buscarlo de nuevo.
       </p>

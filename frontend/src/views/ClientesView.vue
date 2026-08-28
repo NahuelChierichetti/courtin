@@ -92,7 +92,7 @@ const onUpdated = (updated) => {
     <!-- Header -->
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-ink-500 sm:text-2xl">Clientes</h1>
+        <h1 class="text-xl font-bold text-brand-green-900 sm:text-2xl">Clientes</h1>
         <p class="mt-1 text-sm text-stone-500">Se registran automáticamente al reservar (identificados por email).</p>
       </div>
     </div>
@@ -102,7 +102,7 @@ const onUpdated = (updated) => {
       <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100">
         <i class="icon-[material-symbols--apartment] text-2xl text-stone-400"></i>
       </div>
-      <h3 class="mt-4 text-lg font-semibold text-ink-500">Sin club seleccionado</h3>
+      <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Sin club seleccionado</h3>
       <p class="!mt-2 text-sm text-stone-500">Seleccioná un club desde el encabezado para ver los clientes.</p>
     </div>
 
@@ -112,22 +112,22 @@ const onUpdated = (updated) => {
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--group] text-xl"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Total clientes</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ resumen.total }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ resumen.total }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-success-50 text-success-600"><i class="icon-[material-symbols--person-add] text-xl"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Nuevos este mes</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ nuevosMes }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ nuevosMes }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-purple-50 text-brand-purple-500"><i class="icon-[material-symbols--repeat] text-xl"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Recurrentes</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ resumen.recurrentes }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ resumen.recurrentes }}</p>
         </div>
         <div class="rounded-2xl border border-black/[0.06] bg-white p-4 shadow-sm sm:p-5">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 bg-brand-green-50 text-brand-green-500"><i class="icon-[material-symbols--calendar-month] text-xl"></i></span>
           <p class="mt-3 text-xs font-medium text-stone-500 sm:mt-4 sm:text-sm">Reservas totales</p>
-          <p class="mt-1 truncate text-xl font-bold font-secondary text-ink-500 sm:text-2xl">{{ resumen.reservasTotales }}</p>
+          <p class="mt-1 truncate text-xl font-bold font-secondary text-brand-green-900 sm:text-2xl">{{ resumen.reservasTotales }}</p>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ const onUpdated = (updated) => {
               v-model="search"
               type="text"
               placeholder="Buscar por nombre, email o teléfono"
-              class="h-10 w-full rounded-full border border-black/[0.08] bg-white pl-10 pr-4 text-sm text-ink-500 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
+              class="h-10 w-full rounded-full border border-black/[0.08] bg-white pl-10 pr-4 text-sm text-brand-green-900 outline-none transition-colors placeholder:text-stone-400 focus:border-brand-green-400 focus:ring-2 focus:ring-brand-green-100"
             />
           </div>
           <div class="flex shrink-0 overflow-hidden rounded-full border border-black/[0.06]">
@@ -166,7 +166,7 @@ const onUpdated = (updated) => {
           <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100">
             <i class="icon-[material-symbols--group] text-xl text-stone-400"></i>
           </div>
-          <h3 class="mt-4 text-sm font-semibold text-ink-500">{{ search ? 'Sin resultados' : 'Todavía no hay clientes' }}</h3>
+          <h3 class="mt-4 text-sm font-semibold text-brand-green-900">{{ search ? 'Sin resultados' : 'Todavía no hay clientes' }}</h3>
           <p class="mt-1 text-xs text-stone-500">{{ search ? 'Probá con otro término.' : 'Se registran automáticamente cuando alguien reserva.' }}</p>
         </div>
 
@@ -189,7 +189,7 @@ const onUpdated = (updated) => {
               <div class="flex min-w-0 items-center gap-3">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-green-100 text-xs font-bold text-brand-green-600">{{ initials(c) }}</span>
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-medium text-ink-500">{{ c.nombre || 'Sin nombre' }}</p>
+                  <p class="truncate text-sm font-medium text-brand-green-900">{{ c.nombre || 'Sin nombre' }}</p>
                   <p class="truncate text-xs text-stone-400">{{ c.email }}</p>
                 </div>
               </div>
