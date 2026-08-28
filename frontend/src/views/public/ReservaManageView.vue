@@ -161,7 +161,7 @@ onUnmounted(() => clearTimeout(pollTimer))
         <i class="icon-[material-symbols--warning] text-2xl text-stone-400"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-stone-900">{{ error }}</h3>
-      <RouterLink :to="{ name: 'public-buscar' }" class="!mt-3 text-sm font-medium text-brand-green-500 no-underline">
+      <RouterLink :to="{ name: 'public-home' }" class="!mt-3 text-sm font-medium text-brand-green-500 no-underline">
         Buscar canchas
       </RouterLink>
     </div>

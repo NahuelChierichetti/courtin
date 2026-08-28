@@ -1,11 +1,12 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { useUserNotifications } from '@/composables/useUserNotifications'
 import { useFavorites } from '@/composables/useFavorites'
 import UserMenu from '@/components/public/UserMenu.vue'
 
+const route = useRoute()
 const router = useRouter()
 const { isAuthenticated } = useAuth()
 const { unreadCount, fetch: fetchNotifications } = useUserNotifications()
@@ -25,10 +26,20 @@ watch(
   { immediate: true },
 )
 
-const q = ref('')
+// La barra de arriba y el campo "Complejo" del home son el mismo filtro visto
+// desde dos lugares: sin esto, limpiar la búsqueda en el home dejaba acá una
+// palabra escrita que ya no filtraba nada.
+const q = ref(typeof route.query.q === 'string' ? route.query.q : '')
+
+watch(
+  () => route.query.q,
+  (value) => {
+    q.value = typeof value === 'string' ? value : ''
+  },
+)
 
 const onSearch = () => {
-  router.push({ name: 'public-buscar', query: q.value.trim() ? { q: q.value.trim() } : {} })
+  router.push({ name: 'public-home', query: q.value.trim() ? { q: q.value.trim() } : {} })
 }
 </script>
 
@@ -36,7 +47,7 @@ const onSearch = () => {
   <div class="flex min-h-screen flex-col bg-brand-sand-500">
     <!-- Top bar -->
     <header class="sticky top-0 z-30 border-b border-black/[0.06] bg-brand-sand-500/90 backdrop-blur">
-      <div class="mx-auto flex h-[72px] w-full max-w-7xl items-center gap-4 px-4 sm:gap-6">
+      <div class="mx-auto flex h-[72px] w-full max-w-shell items-center gap-4 px-4 sm:gap-6">
         <!-- Brand -->
         <RouterLink :to="{ name: 'public-home' }" class="flex shrink-0 items-center gap-2.5 no-underline">
           <img src="/images/logo-lime.svg" alt="CourtIn" class="h-10 w-auto" />
@@ -115,7 +126,7 @@ const onSearch = () => {
       de link. Todo lo que quedó apunta a algo que existe.
     -->
     <footer class="mt-16 bg-brand-green-900">
-      <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between">
+      <div class="mx-auto flex w-full max-w-shell flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between">
         <RouterLink :to="{ name: 'public-home' }" class="flex shrink-0 items-center gap-2.5 no-underline">
           <img src="/images/logo-lime.svg" alt="" class="h-9 w-auto" />
           <span class="text-lg font-normal tracking-tight text-white">
@@ -124,7 +135,7 @@ const onSearch = () => {
         </RouterLink>
 
         <nav class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/70">
-          <RouterLink :to="{ name: 'public-buscar' }" class="no-underline text-white/70 transition-colors hover:text-white">
+          <RouterLink :to="{ name: 'public-home' }" class="no-underline text-white/70 transition-colors hover:text-white">
             Buscar canchas
           </RouterLink>
           <!-- Sólo con sesión: la ruta está detrás del guard y sin login manda
@@ -148,7 +159,7 @@ const onSearch = () => {
       </div>
 
       <div class="border-t border-white/10">
-        <div class="mx-auto flex w-full max-w-7xl flex-col items-center gap-1 px-4 py-4 text-xs text-white/50 sm:flex-row sm:justify-between">
+        <div class="mx-auto flex w-full max-w-shell flex-col items-center gap-1 px-4 py-4 text-xs text-white/50 sm:flex-row sm:justify-between">
           <p>© {{ new Date().getFullYear() }} CourtIn. Todos los derechos reservados.</p>
           <p>Reservá tu cancha de pádel, tenis o fútbol en segundos.</p>
         </div>

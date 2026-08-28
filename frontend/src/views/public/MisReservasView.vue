@@ -140,7 +140,7 @@ onMounted(fetchReservations)
 
 <template>
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <h1 class="text-2xl font-bold text-brand-green-900">Mis reservas</h1>
+    <h1 class="text-2xl font-medium text-brand-green-900">Mis reservas</h1>
     <p class="mt-1 text-sm text-stone-500">Gestioná tus turnos y revisá tu historial.</p>
 
     <div class="mt-6">
@@ -178,7 +178,7 @@ onMounted(fetchReservations)
       <h3 class="mt-4 text-lg font-semibold text-brand-green-900">Todavía no tenés reservas</h3>
       <p class="mt-1 text-sm text-stone-500">Buscá un complejo y reservá tu primera cancha.</p>
       <RouterLink
-        :to="{ name: 'public-buscar' }"
+        :to="{ name: 'public-home' }"
         class="mt-5 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
       >
         Buscar canchas
@@ -220,7 +220,7 @@ onMounted(fetchReservations)
         </p>
         <RouterLink
           v-if="tab === 'proximas'"
-          :to="{ name: 'public-buscar' }"
+          :to="{ name: 'public-home' }"
           class="mt-4 inline-block rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
         >
           Reservar una cancha

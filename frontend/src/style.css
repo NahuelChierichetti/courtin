@@ -15,6 +15,10 @@
 --------------------------------------------------------------------------- */
 
 @theme {
+  /* Ancho del sitio público. El buscador tiene cinco campos en fila: con los
+     1280px de `max-w-7xl` el de nombre quedaba de un par de caracteres. */
+  --container-shell: 1600px;
+
   --color-brand-green-50: #eef6f1;
   --color-brand-green-100: #d7ebde;
   --color-brand-green-200: #b0d6bf;
