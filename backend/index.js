@@ -1,5 +1,10 @@
 'use strict';
 
+// Primero que nada: Sentry instrumenta Express y Mongoose al cargarse, así que
+// tiene que ir antes de que se requiera cualquier módulo de la app. Levanta el
+// .env por su cuenta (ver instrument.js).
+require('./instrument');
+
 require('dotenv').config();
 
 const app = require('./src/app');

@@ -19,6 +19,11 @@
 
 require('dotenv').config();
 
+// Aborta si la URI y la intención no coinciden (ver utils/scriptTarget.js).
+const { confirmarDestino } = require('../utils/scriptTarget');
+
+confirmarDestino('npm run migrate:deportes');
+
 const connectDB = require('../config/db');
 const Club = require('../models/Club');
 const Court = require('../models/Court');
