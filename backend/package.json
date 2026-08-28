@@ -19,6 +19,7 @@
     "jobs:recurring": "node src/scripts/materializeRecurring.js",
     "users:grandfather": "node src/scripts/verifyExistingUsers.js",
     "fix:facturas": "node src/scripts/fixFacturasNacidasVencidas.js",
+    "fix:googleid": "node src/scripts/fixGoogleIdIndex.js",
     "migrate:planes": "node src/scripts/migratePlanes.js",
     "migrate:deportes": "node src/scripts/migrateDeportes.js"
   },

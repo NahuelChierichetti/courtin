@@ -2,6 +2,7 @@ const Court = require('../models/Court');
 const Club = require('../models/Club');
 const { excedeLimite, limiteCanchas, planParaCanchas, getPlan } = require('../config/plans');
 const { sportLabel } = require('../config/sports');
+const { scopedById, esSuperadmin } = require('../utils/scope');
 
 // Un club sólo puede tener canchas de los deportes que el superadmin le
 // habilitó. Se valida acá y no en el schema porque la lista vive en otro
@@ -127,7 +128,9 @@ const getCourts = async (req, res, next) => {
 
 const getCourtById = async (req, res, next) => {
   try {
-    const court = await Court.findById(req.params.id).populate(
+    // Acotado al club autorizado: la ruta no lleva `:clubId`, así que sin esto
+    // cualquier miembro de cualquier complejo lee la cancha de otro.
+    const court = await Court.findOne(scopedById(req, req.params.id)).populate(
       'club',
       'nombre slug estado'
     );
@@ -152,7 +155,7 @@ const updateCourt = async (req, res, next) => {
   try {
     const { clubId, nombre, tipo, superficie, cubierta, jugadores, estado, tarifas, duracionTurno, descripcion, visible } = req.body;
 
-    const existente = await Court.findById(req.params.id);
+    const existente = await Court.findOne(scopedById(req, req.params.id));
 
     if (!existente) {
       return res.status(404).json({
@@ -161,9 +164,14 @@ const updateCourt = async (req, res, next) => {
       });
     }
 
+    // Mudar una cancha de complejo es una operación de superadmin. Aceptar el
+    // `clubId` del body de cualquiera convertía este endpoint en "traeme la
+    // cancha del competidor a mi complejo".
+    const destinoClubId = (esSuperadmin(req) && clubId) || existente.club;
+
     // El deporte se valida contra el club de destino: el que viene en el body si
     // la cancha se está mudando, o el actual de la cancha.
-    const club = await Club.findById(clubId || existente.club);
+    const club = await Club.findById(destinoClubId);
 
     if (!club) {
       return res.status(404).json({
@@ -196,11 +204,11 @@ const updateCourt = async (req, res, next) => {
       updateData.visible = visible;
     }
 
-    if (clubId) {
+    if (esSuperadmin(req) && clubId) {
       updateData.club = clubId;
     }
 
-    const court = await Court.findByIdAndUpdate(req.params.id, updateData, {
+    const court = await Court.findOneAndUpdate(scopedById(req, req.params.id), updateData, {
       new: true,
       runValidators: true
     }).populate('club', 'nombre slug estado');
@@ -225,7 +233,10 @@ const deleteCourt = async (req, res, next) => {
   try {
     // Borrado lógico: se marca `deletedAt` y deja de aparecer en las lecturas,
     // pero el registro se conserva en la base (historial de reservas, caja, etc.).
-    const court = await Court.softDeleteById(req.params.id);
+    // Se busca acotado al club autorizado antes de borrar: la ruta no lleva
+    // `:clubId`, así que un `softDeleteById` suelto acá daba de baja la cancha
+    // de cualquier complejo.
+    const court = await Court.findOne(scopedById(req, req.params.id));
 
     if (!court) {
       return res.status(404).json({
@@ -234,6 +245,7 @@ const deleteCourt = async (req, res, next) => {
       });
     }
 
+    await court.softDelete();
     await court.populate('club', 'nombre slug estado');
 
     res.status(200).json({
