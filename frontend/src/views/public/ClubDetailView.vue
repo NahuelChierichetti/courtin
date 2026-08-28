@@ -214,7 +214,7 @@ const onCloseModal = () => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-7xl px-4 py-8">
+  <div class="mx-auto w-full max-w-shell px-4 py-8">
     <!-- Loading -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-24 text-center">
       <i class="icon-[material-symbols--progress-activity] animate-spin text-3xl text-stone-300"></i>
@@ -227,7 +227,7 @@ const onCloseModal = () => {
         <i class="icon-[material-symbols--warning] text-2xl text-stone-300"></i>
       </div>
       <h3 class="mt-4 text-lg font-semibold text-brand-green-900">{{ error }}</h3>
-      <RouterLink :to="{ name: 'public-buscar' }" class="mt-3 text-sm font-semibold text-brand-green-500 no-underline">
+      <RouterLink :to="{ name: 'public-home' }" class="mt-3 text-sm font-semibold text-brand-green-500 no-underline">
         ← Volver a la búsqueda
       </RouterLink>
     </div>
@@ -238,7 +238,7 @@ const onCloseModal = () => {
         <RouterLink :to="{ name: 'public-home' }" class="no-underline text-stone-400 hover:text-stone-600">Inicio</RouterLink>
         <span>/</span>
         <RouterLink
-          :to="{ name: 'public-buscar', query: primarySport ? { tipo: primarySport } : {} }"
+          :to="{ name: 'public-home', query: primarySport ? { tipo: primarySport } : {} }"
           class="no-underline text-stone-400 hover:text-stone-600"
         >
           {{ primarySport ? sportMeta(primarySport).label : 'Complejos' }}
@@ -262,7 +262,7 @@ const onCloseModal = () => {
           Sirve para mostrar cómo funciona CourtIn: las canchas y los turnos son de mentira, así
           que no reserves acá esperando jugar.
           <RouterLink
-            :to="{ name: 'public-buscar' }"
+            :to="{ name: 'public-home' }"
             class="font-medium text-warning-700 underline underline-offset-2"
             >Buscá complejos reales</RouterLink
           >.

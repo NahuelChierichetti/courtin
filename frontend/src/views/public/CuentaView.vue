@@ -104,7 +104,7 @@ const inputClass =
 
 <template>
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <h1 class="text-2xl font-bold text-brand-green-900">Mi cuenta</h1>
+    <h1 class="text-2xl font-medium text-brand-green-900">Mi cuenta</h1>
     <p class="mt-1 text-sm text-stone-500">Tus datos y la seguridad de tu cuenta.</p>
 
     <div class="mt-6">
