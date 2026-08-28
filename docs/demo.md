@@ -39,9 +39,14 @@ demostración... no reserves acá esperando jugar"), y el slug está en
 # Local
 npm run seed:demo-club -- --password=demo1234
 
-# Producción (hay que pedirlo explícito)
-npm run seed:demo-club -- --prod --password='<una que elijas>'
+# Producción (hay que pedirlo explícito, y con la URI de Atlas)
+MONGODB_URI="$(grep -m1 '^MONGODB_URI=' .env.production | cut -d= -f2-)" \
+  npm run seed:demo-club -- --prod --password='<una que elijas>' --app-url=https://courtinapp.com
 ```
+
+`--app-url` es sólo para que los links del resumen final salgan bien: pisar
+`MONGODB_URI` en la línea de comandos no cambia `APP_PUBLIC_URL`, que se sigue
+leyendo del `.env` local y apunta a localhost. Si te olvidás, el script te avisa.
 
 El script (`src/scripts/seedDemoClub.js`) es **idempotente y no borra nada por su
 cuenta**: se puede correr contra producción y volver a correr antes de cada demo.
