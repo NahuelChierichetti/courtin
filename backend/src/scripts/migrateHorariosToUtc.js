@@ -12,6 +12,11 @@
  */
 
 require('dotenv').config();
+
+// Aborta si la URI y la intención no coinciden (ver utils/scriptTarget.js).
+const { confirmarDestino } = require('../utils/scriptTarget');
+
+confirmarDestino('node src/scripts/migrateHorariosToUtc.js');
 const mongoose = require('mongoose');
 const Club = require('../models/Club');
 const { localTimeToUtc, DEFAULT_TZ } = require('../utils/timezone');
