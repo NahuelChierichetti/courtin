@@ -1,0 +1,184 @@
+/* --- Identidad de marca CourtIn sobre el tema por defecto de VitePress -------
+   Los cuatro colores oficiales son los mismos que usa la app
+   (frontend/src/style.css). Si alguno cambia allá, cambia acá:
+
+     #347048  verde    -> color primario (links, acentos, estados activos)
+     #B9CF32  amarillo -> CTA (botón del hero, con texto verde oscuro)
+     #926699  violeta  -> secundario
+     #F9F9F5  arena    -> fondo de la app
+
+   El neutro está teñido en cálido para acompañar al arena, igual que en el
+   panel: un gris azulado al lado de estas capturas se ve sucio.
+--------------------------------------------------------------------------- */
+
+:root {
+  --courtin-green-50: #eef6f1;
+  --courtin-green-100: #d7ebde;
+  --courtin-green-300: #7fb997;
+  --courtin-green-400: #4d9269;
+  --courtin-green-500: #347048;
+  --courtin-green-600: #2a5b3a;
+  --courtin-green-700: #22492f;
+  --courtin-green-900: #12241a;
+
+  --courtin-lime-400: #c8dc4b;
+  --courtin-lime-500: #b9cf32;
+  --courtin-lime-600: #9cb026;
+
+  --courtin-purple-400: #a982b1;
+  --courtin-purple-500: #926699;
+  --courtin-purple-600: #79517f;
+
+  --courtin-sand: #f9f9f5;
+  --courtin-ink-500: #16241b;
+  --courtin-ink-600: #101a13;
+  --courtin-ink-700: #0a110c;
+
+  /* --- Marca --- */
+  --vp-c-brand-1: var(--courtin-green-500);
+  --vp-c-brand-2: var(--courtin-green-600);
+  --vp-c-brand-3: var(--courtin-green-400);
+  --vp-c-brand-soft: rgba(52, 112, 72, 0.14);
+
+  /* --- Fondos: arena, con las tarjetas en blanco --- */
+  --vp-c-bg: var(--courtin-sand);
+  --vp-c-bg-alt: #f4f2ec;
+  --vp-c-bg-soft: #ffffff;
+  --vp-c-bg-elv: #ffffff;
+
+  --vp-c-text-1: var(--courtin-green-900);
+  --vp-c-text-2: #5a6b5f;
+  --vp-c-text-3: #8a9a8f;
+
+  --vp-c-divider: rgba(18, 36, 26, 0.09);
+  --vp-c-gutter: rgba(18, 36, 26, 0.09);
+  --vp-c-border: rgba(18, 36, 26, 0.12);
+
+  /* --- Tipografía: la misma de la app --- */
+  --vp-font-family-base: 'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* --- Hero: el amarillo es el CTA, igual que en el panel --- */
+  --vp-home-hero-name-color: var(--courtin-green-500);
+  --vp-button-brand-bg: var(--courtin-lime-500);
+  --vp-button-brand-hover-bg: var(--courtin-lime-600);
+  --vp-button-brand-active-bg: var(--courtin-lime-600);
+  --vp-button-brand-text: var(--courtin-green-900);
+  --vp-button-brand-hover-text: var(--courtin-green-900);
+  --vp-button-brand-active-text: var(--courtin-green-900);
+  --vp-button-brand-border: transparent;
+
+  --vp-button-alt-bg: #ffffff;
+  --vp-button-alt-text: var(--courtin-green-700);
+  --vp-button-alt-border: rgba(18, 36, 26, 0.12);
+  --vp-button-alt-hover-bg: var(--courtin-green-50);
+
+  /* --- Bloques de aviso --- */
+  --vp-custom-block-tip-border: transparent;
+  --vp-custom-block-tip-bg: var(--courtin-green-50);
+  --vp-custom-block-tip-text: var(--courtin-green-700);
+
+  --vp-custom-block-info-bg: #f4f1f6;
+  --vp-custom-block-info-text: var(--courtin-purple-600);
+  --vp-custom-block-info-border: transparent;
+}
+
+.dark {
+  --vp-c-bg: var(--courtin-ink-600);
+  --vp-c-bg-alt: var(--courtin-ink-700);
+  --vp-c-bg-soft: #16241b;
+  --vp-c-bg-elv: #16241b;
+
+  --vp-c-brand-1: var(--courtin-lime-400);
+  --vp-c-brand-2: var(--courtin-lime-500);
+  --vp-c-brand-3: var(--courtin-green-300);
+  --vp-c-brand-soft: rgba(185, 207, 50, 0.14);
+
+  --vp-c-text-1: #edf1ec;
+  --vp-c-text-2: #a8b6ac;
+  --vp-c-text-3: #7d8d82;
+
+  --vp-c-divider: rgba(255, 255, 255, 0.08);
+  --vp-c-gutter: rgba(255, 255, 255, 0.08);
+  --vp-c-border: rgba(255, 255, 255, 0.12);
+
+  --vp-home-hero-name-color: var(--courtin-lime-500);
+
+  --vp-custom-block-tip-bg: rgba(52, 112, 72, 0.22);
+  --vp-custom-block-tip-text: #d7ebde;
+  --vp-custom-block-info-bg: rgba(146, 102, 153, 0.18);
+  --vp-custom-block-info-text: #e0cfe3;
+}
+
+/* --- Capturas de pantalla -----------------------------------------------
+   Cada imagen es una captura real del panel, con su propio borde y sombra:
+   sin eso se funden con el fondo de la página y no se entiende dónde termina
+   la interfaz y dónde empieza el artículo.
+------------------------------------------------------------------------- */
+
+.vp-doc img {
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--vp-c-border);
+  box-shadow: 0 12px 32px -18px rgba(18, 36, 26, 0.5);
+  margin: 1.5rem 0 0.5rem;
+  background: #ffffff;
+}
+
+/* El texto alternativo se muestra como epígrafe (ver el markdown-it de
+   .vitepress/config.js): la captura muestra el dónde, el epígrafe dice el qué. */
+.vp-doc figure {
+  margin: 0 0 2rem;
+}
+
+.vp-doc figcaption {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--vp-c-text-3);
+  padding-left: 0.15rem;
+}
+
+/* --- Home ---------------------------------------------------------------- */
+
+.VPHero .name {
+  letter-spacing: -0.02em;
+}
+
+.VPFeature {
+  border-radius: 16px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-2px);
+}
+
+/* --- Detalles ------------------------------------------------------------ */
+
+.vp-doc h2 {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 1.6rem;
+  margin-top: 3rem;
+  letter-spacing: -0.01em;
+}
+
+.vp-doc table {
+  display: table;
+  width: 100%;
+}
+
+.vp-doc kbd {
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0.1em 0.45em;
+  font-size: 0.85em;
+  font-family: var(--vp-font-family-base);
+}
+
+/* Los pasos numerados largos se leen mejor con aire entre ítems. */
+.vp-doc ol > li {
+  margin-bottom: 0.5rem;
+}
