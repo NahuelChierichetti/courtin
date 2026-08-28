@@ -23,9 +23,11 @@ const router = createRouter({
           component: () => import('@/views/public/PublicHomeView.vue'),
         },
         {
+          // La búsqueda vive en el home: eran dos páginas corriendo la misma
+          // query. `/buscar` queda por los links ya compartidos, con sus
+          // filtros intactos.
           path: 'buscar',
-          name: 'public-buscar',
-          component: () => import('@/views/public/BuscarView.vue'),
+          redirect: (to) => ({ name: 'public-home', query: to.query }),
         },
         {
           path: 'club/:slug',

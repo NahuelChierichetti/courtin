@@ -53,14 +53,14 @@ defineExpose({ close })
   <div ref="root" class="relative">
     <button
       type="button"
-      class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-colors hover:bg-stone-50 cursor-pointer"
+      class="flex w-full items-start gap-2.5 rounded-xl px-3 py-2 text-left transition-colors hover:bg-stone-50 cursor-pointer"
       :aria-expanded="open"
       aria-haspopup="dialog"
       @click="open = !open"
     >
       <i :class="icon" class="shrink-0 text-base text-brand-green-500"></i>
       <span class="min-w-0 flex-1">
-        <span class="block text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+        <span class="block text-[11px] font-semibold uppercase tracking-wide text-brand-green-500">
           {{ label }}
         </span>
         <span

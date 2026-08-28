@@ -14,11 +14,11 @@ defineEmits(['update:modelValue'])
 
 <template>
   <label
-    class="flex w-full cursor-text items-center gap-2.5 rounded-xl px-3 py-2 transition-colors hover:bg-stone-50"
+    class="flex w-full cursor-text items-start gap-2.5 rounded-xl px-3 py-2 transition-colors hover:bg-stone-50"
   >
     <i class="icon-[material-symbols--search] shrink-0 text-base text-brand-green-500"></i>
     <span class="min-w-0 flex-1">
-      <span class="block text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+      <span class="block text-[11px] font-semibold uppercase tracking-wide text-brand-green-500">
         Complejo
       </span>
       <input

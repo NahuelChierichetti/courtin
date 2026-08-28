@@ -34,7 +34,7 @@ const filtros = computed(() => [
     <!-- Encabezado -->
     <div class="flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-brand-green-900">Canchas</h1>
+        <h1 class="text-2xl font-medium text-brand-green-900">Canchas</h1>
         <p class="mt-1 text-sm text-stone-500">
           {{ activas }} canchas activas &middot; {{ deportes }} deportes
         </p>

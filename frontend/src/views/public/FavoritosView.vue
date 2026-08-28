@@ -25,7 +25,7 @@ onMounted(() => load({ force: true }))
     todo el contenido de lugar.
   -->
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <h1 class="text-2xl font-bold text-brand-green-900">Favoritos</h1>
+    <h1 class="text-2xl font-medium text-brand-green-900">Favoritos</h1>
     <p class="mt-1 text-sm text-stone-500">Los complejos que guardaste para reservar rápido.</p>
 
     <div class="mt-6">
@@ -48,7 +48,7 @@ onMounted(() => load({ force: true }))
         Tocá el corazón en cualquier complejo y va a aparecer acá para reservar sin buscarlo de nuevo.
       </p>
       <RouterLink
-        :to="{ name: 'public-buscar' }"
+        :to="{ name: 'public-home' }"
         class="mt-5 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
       >
         Explorar complejos

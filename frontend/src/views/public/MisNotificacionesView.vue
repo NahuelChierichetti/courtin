@@ -47,7 +47,7 @@ onMounted(fetch)
   <div class="mx-auto max-w-2xl px-4 py-8">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold text-brand-green-900">Notificaciones</h1>
+        <h1 class="text-2xl font-medium text-brand-green-900">Notificaciones</h1>
         <p class="mt-1 text-sm text-stone-500">Novedades de tus reservas y tus complejos.</p>
       </div>
       <button
@@ -82,7 +82,7 @@ onMounted(fetch)
         novedades de un complejo.
       </p>
       <RouterLink
-        :to="{ name: 'public-buscar' }"
+        :to="{ name: 'public-home' }"
         class="mt-5 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-semibold text-brand-green-900 no-underline transition-colors hover:bg-brand-lime-600"
       >
         Buscar canchas
