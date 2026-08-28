@@ -33,7 +33,21 @@ app.use(
       if (!origin || !allowedOrigins || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+
+      // El `status: 403` no es cosmético, hace dos cosas.
+      //
+      // La primera es responder lo que corresponde: un origen no autorizado es
+      // "no tenés permiso", no "se rompió el servidor". Antes salía 500 porque
+      // el error llegaba pelado al errorHandler, que ante la duda asume 500.
+      //
+      // La segunda es que Sentry deja de reportarlo. Su filtro por defecto
+      // (`defaultShouldHandleError`) lee `error.status` y sólo captura de 500
+      // para arriba, así que con el 500 anterior cada escáner o bot que pegara
+      // en la API con un Origin cualquiera abría un issue. Eso es ruido que
+      // compite con los errores reales y consume el cupo del plan gratuito.
+      const error = new Error(`Origen no permitido por CORS: ${origin}`);
+      error.status = 403;
+      return callback(error);
     },
   })
 );
