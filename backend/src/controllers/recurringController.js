@@ -8,10 +8,12 @@ const Reservation = require('../models/Reservation');
 const Court = require('../models/Court');
 const Club = require('../models/Club');
 const Client = require('../models/Client');
+const User = require('../models/User');
 const { occurrencesBetween, checkHorario, materializeRule, ruleToLocal, HORIZON_DAYS } = require('../utils/recurring');
 const { puedeCrearReservas } = require('../utils/subscriptions');
 const { notify } = require('../utils/notifications');
 const { DEFAULT_TZ } = require('../utils/timezone');
+const { normalizePhone } = require('../utils/phone');
 
 // Turnos fijos: el CRUD de la regla. Las ocurrencias son `Reservation` normales
 // y se gestionan con los endpoints de siempre — en particular, cancelar UN día
@@ -179,6 +181,27 @@ const createRecurring = async (req, res, next) => {
       return res.status(400).json({ ok: false, message: 'Debes indicar un cliente registrado o el nombre del jugador' });
     }
 
+    // Teléfono obligatorio, igual que en una reserva suelta. Un fijo pesa más
+    // que un turno: son 90 días de ocurrencias, y si el complejo necesita
+    // avisar que la cancha se rompió o que cambia el horario, el teléfono es lo
+    // único que tiene. Con cuenta registrada se cae al del perfil.
+    let telefono = guestPhone;
+    if (!telefono && customerId) {
+      const customer = await User.findById(customerId).select('telefono');
+      telefono = customer?.telefono || null;
+    }
+
+    if (!telefono) {
+      return res.status(400).json({ ok: false, message: 'Debes indicar un teléfono de contacto para el turno fijo' });
+    }
+
+    if (!normalizePhone(telefono)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El teléfono no parece válido. Revisá que tenga característica y número (ej: 221 456 7890).'
+      });
+    }
+
     const { club, court, error } = await cargarContexto({ clubId, courtId });
     if (error) return res.status(error.status).json({ ok: false, message: error.message });
 
@@ -206,7 +229,7 @@ const createRecurring = async (req, res, next) => {
           $setOnInsert: { primeraReserva: new Date() },
           $set: {
             ...(guestName ? { nombre: guestName } : {}),
-            ...(guestPhone ? { telefono: guestPhone } : {}),
+            ...(telefono ? { telefono } : {}),
             ...(customerId ? { user: customerId } : {})
           }
         },
@@ -220,7 +243,7 @@ const createRecurring = async (req, res, next) => {
       client: client?._id || null,
       customer: customerId || null,
       guestName: customerId ? null : guestName,
-      guestPhone: customerId ? null : guestPhone,
+      guestPhone: telefono,
       guestEmail: customerId ? null : (guestEmail || null),
       ...reglaDesdeInstante(inicio, Number(duracionMin)),
       precioPorTurno: Number(precioPorTurno) || court.precio || 0,
@@ -261,6 +284,16 @@ const updateRecurring = async (req, res, next) => {
 
     if (estado && !['activo', 'pausado'].includes(estado)) {
       return res.status(400).json({ ok: false, message: 'Para dar de baja un turno fijo usá la baja, no el estado' });
+    }
+
+    // Se valida sólo si viene: una edición de precio no tiene por qué cargar
+    // con un teléfono que quedó mal escrito antes de que el dato fuera
+    // obligatorio. Pero si lo mandan, tiene que servir para escribirle.
+    if (guestPhone !== undefined && !normalizePhone(guestPhone)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El teléfono no parece válido. Revisá que tenga característica y número (ej: 221 456 7890).'
+      });
     }
 
     const precioCambio = precioPorTurno !== undefined && Number(precioPorTurno) !== rule.precioPorTurno;

@@ -18,10 +18,30 @@ const toMinutes = (hhmm) => {
   return h * 60 + m;
 };
 
-// "00:00" como cierre representa fin del día.
+// Minuto de cierre efectivo, es decir el instante hasta el que se puede jugar.
+//
+// Dos convenciones de escritura que significan "hasta el final":
+//
+// - "00:00" es fin del día, no el minuto cero. Un club que cierra a medianoche
+//   se escribe así, y sin esto su horario mediría cero minutos.
+// - "hh:59" es la forma clásica de decir "hasta la hora siguiente en punto":
+//   "23:59" es medianoche y "20:59" son las 21. Tomarlo literal deja el último
+//   turno del día afuera por un minuto — un turno de 20 a 21 contra un cierre
+//   de 20:59 se rechazaba, que es justo el turno que el complejo más vende.
+//
+// La regla que queda: un turno puede TERMINAR en la hora de cierre, nunca
+// pasarse ni empezar después.
 const normalizeCloseMinutes = (hhmm) => {
   const v = toMinutes(hhmm);
-  return v === 0 ? 24 * 60 : v;
+  if (v === 0) return 24 * 60;
+  return v % 60 === 59 ? v + 1 : v;
+};
+
+// "20:59" -> "21:00": el cierre efectivo, para que los mensajes de error digan
+// la misma hora hasta la que el sistema deja reservar.
+const formatCloseTime = (hhmm) => {
+  const min = normalizeCloseMinutes(hhmm) % (24 * 60);
+  return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 };
 
 // Configuración efectiva del día (horario semanal + día especial), en horario
@@ -85,7 +105,7 @@ const validateReservationSlot = (club, { inicio, fin, estado, isNew, validateSch
       if (startMin < openStart || endMin > openEnd) {
         return {
           ok: false,
-          message: `El horario debe estar dentro del horario de atención (${cfg.horaInicio} a ${cfg.horaFin}).`
+          message: `El horario debe estar dentro del horario de atención (${cfg.horaInicio} a ${formatCloseTime(cfg.horaFin)}).`
         };
       }
 
@@ -143,5 +163,6 @@ module.exports = {
   canCancelReservation,
   dayConfigForDate,
   toMinutes,
-  normalizeCloseMinutes
+  normalizeCloseMinutes,
+  formatCloseTime
 };

@@ -21,6 +21,7 @@ const { sendReservationConfirmation, sendClubReservationNotice } = require('../u
 const { filtroClubVisible, filtroClubDescubrible, puedeCrearReservas } = require('../utils/subscriptions');
 const { montoACobrar, holdExpiresAt, cobraOnline, confirmarPagoDeReserva } = require('../utils/payments');
 const { getClubAccessToken, createPreference, searchPayments } = require('../utils/mercadopago');
+const { normalizePhone } = require('../utils/phone');
 const { appUrl, apiUrl } = require('../utils/publicUrls');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
@@ -476,6 +477,16 @@ const createPublicReservation = async (req, res, next) => {
 
     if (!guestName || !guestPhone) {
       return res.status(400).json({ ok: false, message: 'Indicá tu nombre y teléfono para reservar' });
+    }
+
+    // El teléfono es por donde el complejo avisa si algo cambia (y por donde
+    // manda la confirmación por WhatsApp), así que tiene que ser un número al
+    // que efectivamente se pueda escribir, no cualquier texto.
+    if (!normalizePhone(guestPhone)) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El teléfono no parece válido. Revisá que tenga característica y número (ej: 221 456 7890).'
+      });
     }
 
     const a = new Date(inicio).getTime();
