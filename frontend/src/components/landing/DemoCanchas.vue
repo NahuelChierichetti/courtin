@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject } from 'vue'
 import CourtIllustration from '@/components/canchas/CourtIllustration.vue'
+import { CANCHA_PASO } from '@/composables/useDemoPanel'
 import { sportMeta } from '@/utils/sports'
 import { formatCurrency } from '@/utils/datetime'
 
@@ -9,8 +10,13 @@ import { formatCurrency } from '@/utils/datetime'
 // La ilustración es el componente de producción (`CourtIllustration`), así que
 // eso no puede quedar desactualizado.
 
-const { courts, courtDraft, openCourtDraft, closeCourtDraft, toggleCourtEstado } =
+const { courts, courtDraft, stepId, openCourtDraft, closeCourtDraft, toggleCourtEstado } =
   inject('demoPanel')
+
+// El paso pide "editá una y desactivala", y el lápiz es un botón de 32px entre
+// otros dos: sin un anillo encima nadie lo encuentra, y menos en un teléfono.
+const señalado = (court) =>
+  stepId.value === 'canchas' && !courtDraft.value && court._id === CANCHA_PASO
 
 const activas = computed(() => courts.value.filter((c) => c.estado === 'activa').length)
 const deportes = computed(() => new Set(courts.value.map((c) => c.tipo)).size)
@@ -110,11 +116,16 @@ const filtros = computed(() => [
             <div class="flex items-center gap-1">
               <button
                 type="button"
-                class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600"
+                class="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-stone-100 hover:text-stone-600"
+                :class="señalado(court) ? 'text-brand-green-700 ring-2 ring-brand-lime-500' : 'text-stone-400'"
                 :aria-label="`Editar ${court.nombre}`"
                 @click="openCourtDraft(court._id)"
               >
-                <i class="icon-[material-symbols--edit] text-md"></i>
+                <span
+                  v-if="señalado(court)"
+                  class="absolute inset-0 animate-pulse rounded-full bg-brand-lime-500/20"
+                ></span>
+                <i class="icon-[material-symbols--edit] text-md relative"></i>
               </button>
               <span
                 class="flex h-8 w-8 items-center justify-center rounded-full text-error-600 opacity-60"

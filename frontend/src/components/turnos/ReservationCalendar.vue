@@ -1,6 +1,10 @@
 <template>
   <div class="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
-    <div ref="scrollEl" class="max-h-[calc(100dvh-19rem)] overflow-auto lg:max-h-[calc(100vh-13rem)]">
+    <div
+      ref="scrollEl"
+      class="overflow-auto"
+      :class="grow ? '' : 'max-h-[calc(100dvh-19rem)] lg:max-h-[calc(100vh-13rem)]'"
+    >
       <div class="min-w-max">
         <!-- Header row -->
         <div
@@ -151,6 +155,11 @@ const props = defineProps({
   // Turno a resaltar y centrar al abrir (viene del dashboard por la URL).
   focusId: { type: String, default: null },
   currency: { type: String, default: 'ARS' },
+  // Por defecto la grilla se recorta contra el alto de la ventana y scrollea
+  // sola. `grow` la deja crecer con su contenido y le pasa el scroll a quien la
+  // monta: lo necesita la demo de la landing, que la dibuja adentro de un panel
+  // escalado donde el alto de la ventana real no significa nada.
+  grow: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['create', 'edit', 'move'])

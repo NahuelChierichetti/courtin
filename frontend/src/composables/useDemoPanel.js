@@ -90,6 +90,11 @@ const CLIENTE_NUEVO = 'Nicolás Ferrari'
 // hacer cuando le piden mover un turno.
 const MOVIMIENTO = { reservaId: 'r2', columnKey: 'c2', startMin: 20 * 60 + 30 }
 
+// La cancha que el paso 4 propone editar. La demo la resalta y es también la que
+// abre sola si el visitante no hace nada: si fueran distintas, el guión estaría
+// señalando una tarjeta y abriendo otra.
+const CANCHA_PASO = 'c2'
+
 // --- Guión ------------------------------------------------------------------
 
 const IDLE_MS = 9000 // si el visitante no toca nada, el paso se hace solo
@@ -107,6 +112,10 @@ const PASOS = [
     tab: 'turnos',
     titulo: 'Movelo de lugar',
     hint: 'Te llaman para cambiarlo: arrastrá el turno de Martín a Pádel 2.',
+    // Con el dedo no se arrastra: el gesto vertical sobre la grilla es el
+    // scroll, así que en el panel real el calendario no lo toma como arrastre
+    // (ver `ReservationCalendar`). En táctil el mismo movimiento son dos toques.
+    hintTouch: 'Te llaman para cambiarlo: tocá el turno de Martín y después el hueco de Pádel 2.',
     logro: 'Turno movido. Sin borrar y volver a cargar, sin llamar a nadie.',
   },
   {
@@ -125,7 +134,7 @@ const PASOS = [
   },
 ]
 
-export { PASOS, COURTS, SLOT_NUEVO, MOVIMIENTO, DURACIONES, yFor }
+export { PASOS, COURTS, SLOT_NUEVO, MOVIMIENTO, CANCHA_PASO, DURACIONES, yFor }
 
 // --- Composable -------------------------------------------------------------
 
@@ -375,7 +384,7 @@ export function useDemoPanel() {
     }
     if (id === 'canchas') {
       tab.value = 'canchas'
-      openCourtDraft('c2')
+      openCourtDraft(CANCHA_PASO)
       chainTimer = setTimeout(toggleCourtEstado, 1600)
     }
   }
