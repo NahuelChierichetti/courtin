@@ -23,7 +23,11 @@ El horario **aplica a todas tus canchas**. Si una cancha abre distinto que el re
 ### Qué pasa fuera del horario
 
 - **Tus clientes no pueden reservar.** Esos horarios no aparecen en tu link.
-- **Vos sí podés cargar turnos.** En la grilla se ven sombreados, avisándote que a esa hora el complejo figura cerrado, pero nada te impide cargar el turno. Es a propósito: el sistema no te va a decir que no cuando la realidad dice que sí.
+- **Vos tampoco podés cargar turnos ahí.** En la grilla se ven sombreados, y si igual intentás cargar uno te avisa que el horario queda fuera de tu horario de atención. La regla vale para los turnos del panel, los del link público y los [turnos fijos](/panel/turnos-fijos), para que la grilla y lo que ve tu cliente digan siempre lo mismo.
+
+Un turno **puede terminar justo en la hora de cierre**: si cerrás a las 21, el turno de 20 a 21 entra sin problema. Lo que no puede es pasarse ni empezar después.
+
+Si necesitás cargar un turno fuera del horario —te quedás abierto por un torneo, o alguien te pide la cancha más tarde—, la salida no es forzar el turno sino cambiar el horario de ese día: para algo puntual, un [día especial](#dias-especiales) con horario extendido; si pasa todas las semanas, corregí la fila del día.
 
 ## Días especiales
 

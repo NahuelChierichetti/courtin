@@ -10,6 +10,8 @@ Un turno fijo es el cliente de todas las semanas: "Juan, martes a las 20, cancha
 
 Se crea desde el mismo formulario que un turno normal. En **Turnos → Nuevo turno**, cargá los datos del cliente, la cancha, el día y la hora del **primer** turno, y tildá **Se repite todas las semanas**.
 
+El **teléfono es obligatorio**, igual que en un turno suelto y por más motivo todavía: un fijo son tres meses de turnos por delante, y si un día tenés que avisar que la cancha está rota o que cambia el horario, es lo único con lo que ubicás a esa persona.
+
 El día de la semana y el horario salen de la fecha que pusiste: si elegiste un viernes a las 21:00, el turno fijo va a ser todos los viernes a las 21:00.
 
 ## Revisá las fechas antes de confirmar

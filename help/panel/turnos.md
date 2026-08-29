@@ -7,7 +7,7 @@ Es la pantalla donde vas a pasar casi todo el tiempo. Muestra el día completo, 
 ## Cómo leer la grilla
 
 - **Las columnas** son tus canchas, agrupadas por deporte y con el color del deporte.
-- **Las horas sombreadas** (con rayitas) son las que están fuera de tu horario de atención. Se pueden cargar turnos ahí igual, pero te está avisando que a esa hora, según [Horarios](/panel/horarios), el complejo está cerrado.
+- **Las horas sombreadas** (con rayitas) son las que están fuera de tu horario de atención. Ahí **no se pueden cargar turnos**: si lo intentás, te avisa que el horario queda fuera de lo que configuraste en [Horarios](/panel/horarios). Para usar esa franja hay que ampliar el horario del día o cargar un [día especial](/panel/horarios#dias-especiales).
 - **La línea horizontal** marca la hora actual. Sólo aparece si estás mirando el día de hoy.
 - **Los turnos ya pasados** se ven apagados.
 
@@ -45,7 +45,7 @@ Qué va en cada campo:
 | Campo | Detalle |
 |---|---|
 | **Cliente** | Nombre y apellido. Obligatorio |
-| **Teléfono** | Obligatorio: es con lo que lo ubicás si hay que avisarle algo |
+| **Teléfono** | Obligatorio. Es con lo que lo ubicás si hay que avisarle algo, y lo que habilita los avisos [por WhatsApp](#avisar-por-whatsapp). Escribilo con característica: `221 456 7890` |
 | **Email** | Opcional, pero es lo que identifica a un cliente. Si lo cargás, el turno se le suma a su ficha en [Clientes](/panel/clientes) y le llega la confirmación por mail |
 | **Cancha**, **Fecha**, **Desde**, **Hasta** | Debajo de la fecha te recuerda el horario de atención de ese día |
 | **Estado** | Ver abajo |
@@ -76,6 +76,31 @@ Si el turno tenía un pago online, cancelarlo **no** dispara la devolución. Es 
 :::
 
 Si el turno viene de un [turno fijo](/panel/turnos-fijos), la ficha te lo aclara arriba: cancelarlo ahí libera **sólo ese día**, no la serie.
+
+## Avisar por WhatsApp
+
+En la ficha de un turno **confirmado** hay un bloque verde con dos botones:
+
+- **Confirmación** — para mandar apenas cargás el turno. Lleva cancha, día, horario y precio.
+- **Recordatorio** — para el día anterior o unas horas antes. Es más corto y le pide que avise si no puede venir, así liberás el horario a tiempo.
+
+![El bloque verde aparece en la ficha del turno, justo debajo de los datos del cliente.](/img/turnos-whatsapp.jpg)
+
+Al tocar cualquiera de los dos se te abre WhatsApp con el mensaje **ya escrito** en el chat de esa persona. Lo podés editar antes de mandarlo, y el envío lo hacés vos apretando Enviar.
+
+::: info No es un envío automático
+CourtIn no manda mensajes de WhatsApp solo, ni sabe si llegaron. Lo que hace es abrirte la conversación con el texto listo, que es lo que te ahorra escribir lo mismo veinte veces por día.
+
+Desde la computadora se abre **WhatsApp Web**, así que necesitás tenerlo vinculado con tu celular. Desde el celular se abre la app directamente.
+:::
+
+Por qué sólo en los turnos confirmados: un turno **pendiente** todavía está esperando el pago y confirmarlo por WhatsApp sería prometer un horario que se puede liberar solo; uno **cancelado** o **completado** ya no se va a jugar. Si pasás el turno a confirmada, guardás y lo volvés a abrir, los botones aparecen.
+
+Si en lugar del bloque verde ves un recuadro gris, es porque ese turno **no tiene un teléfono al que se le pueda escribir**: o está vacío, o quedó escrito de una forma que WhatsApp no reconoce. Corregilo en el campo Teléfono, guardá, y los botones aparecen.
+
+::: tip El mail y el WhatsApp no compiten
+La confirmación por email sale sola cuando el cliente dejó su dirección. El WhatsApp es para el cliente que sólo te dejó el teléfono —que en la mayoría de los complejos son casi todos— y para el recordatorio, que por mail se lee mucho menos.
+:::
 
 ## Exportar a CSV
 
