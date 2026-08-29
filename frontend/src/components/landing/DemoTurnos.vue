@@ -1,5 +1,5 @@
 <script setup>
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ReservationCalendar from '@/components/turnos/ReservationCalendar.vue'
 import {
   DAY_END_MIN,
@@ -7,8 +7,11 @@ import {
   DEMO_DATE_KEY,
   DEMO_NOW_MIN,
   GUTTER_WIDTH,
+  HOUR_HEIGHT,
+  MOVIMIENTO,
   SLOT_NUEVO,
   DURACIONES,
+  yFor,
 } from '@/composables/useDemoPanel'
 import { formatCurrency } from '@/utils/datetime'
 import { minutesToTime } from '@/utils/turnos'
@@ -18,6 +21,7 @@ const {
   reservations,
   openRanges,
   hotspot,
+  stepId,
   draft,
   duracionesPosibles,
   courts,
@@ -26,6 +30,42 @@ const {
   confirmDraft,
   moveReservation,
 } = inject('demoPanel')
+
+// Con el dedo el paso 2 no se arrastra sino que se toca dos veces: el
+// calendario real ignora el arrastre táctil a propósito (ahí el gesto vertical
+// es el scroll de la grilla), así que la demo no puede pedir un gesto que el
+// producto no tiene. Se mide una vez: el tipo de puntero no cambia a mitad de
+// visita.
+const tactil =
+  typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+
+// Turno agarrado esperando destino.
+const agarrado = ref(false)
+watch(stepId, () => (agarrado.value = false))
+
+// El hueco al que hay que llevarlo, en las mismas coordenadas que el hotspot.
+const destino = computed(() => {
+  const r = reservations.value.find((x) => x._id === MOVIMIENTO.reservaId)
+  if (!r) return null
+  return {
+    colIndex: courts.value.findIndex((c) => c._id === MOVIMIENTO.columnKey),
+    cols: courts.value.length,
+    top: yFor(MOVIMIENTO.startMin),
+    height: ((r.endMin - r.startMin) / 60) * HOUR_HEIGHT,
+  }
+})
+
+const soltar = () => {
+  const reservation = reservations.value.find((x) => x._id === MOVIMIENTO.reservaId)
+  agarrado.value = false
+  if (reservation) {
+    moveReservation({
+      reservation,
+      columnKey: MOVIMIENTO.columnKey,
+      startMin: MOVIMIENTO.startMin,
+    })
+  }
+}
 
 // El overlay del punto pulsante se dibuja sobre el calendario, así que necesita
 // saber dónde termina su fila de encabezados. Se mide en vez de hardcodearse:
@@ -66,7 +106,12 @@ const draftPrecio = () => {
 
 <template>
   <div ref="wrap" class="relative">
+    <!-- `grow`: la grilla no se recorta sola. El punto pulsante y el resaltado
+         del paso se dibujan encima en coordenadas del wrapper, así que si el
+         calendario scrolleara por dentro quedarían señalando el lugar
+         equivocado. Con `grow` scrollea el panel entero y todo se mueve junto. -->
     <ReservationCalendar
+      grow
       mode="day"
       :columns="columns"
       :reservations="reservations"
@@ -100,6 +145,43 @@ const draftPrecio = () => {
         Tocá acá
       </span>
     </button>
+
+    <!-- Paso "mover" con el dedo: se toca el turno y después el hueco. -->
+    <template v-else-if="hotspot && tactil">
+      <button
+        type="button"
+        class="absolute z-20 cursor-pointer rounded-lg ring-2 ring-offset-2"
+        :class="agarrado ? 'ring-brand-lime-500/40' : 'ring-brand-lime-500'"
+        :style="colStyle(hotspot)"
+        aria-label="Mover el turno de Martín"
+        @click="agarrado = true"
+      >
+        <span
+          v-if="!agarrado"
+          class="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-brand-green-600 px-2.5 py-0.5 text-[10px] font-medium whitespace-nowrap text-white shadow"
+        >
+          <i class="icon-[material-symbols--touch-app] text-xs"></i>
+          Tocame
+        </span>
+      </button>
+
+      <button
+        v-if="agarrado && destino"
+        type="button"
+        class="absolute z-20 cursor-pointer rounded-lg border-2 border-dashed border-brand-lime-600 bg-brand-lime-100/70 transition-colors"
+        :style="colStyle(destino)"
+        aria-label="Soltar el turno acá"
+        @click="soltar"
+      >
+        <span class="flex h-full w-full items-center justify-center gap-1.5 text-xs font-semibold text-brand-green-800">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-green-500 opacity-75"></span>
+            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand-green-600"></span>
+          </span>
+          Soltalo acá
+        </span>
+      </button>
+    </template>
 
     <div
       v-else-if="hotspot"
