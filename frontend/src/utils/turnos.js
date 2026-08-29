@@ -19,10 +19,20 @@ export const minutesToTime = (mins) => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
-// Para horarios de cierre: "00:00"/"00:30" significan después de medianoche.
+// Minuto de cierre efectivo: hasta cuándo se puede jugar.
+//
+// Espeja `normalizeCloseMinutes` de backend/src/utils/reservationRules.js, que
+// es quien valida de verdad. Si divergen, la grilla sombrea horas que el
+// backend sí acepta (o al revés).
+//
+// "00:00" es fin del día, no el minuto cero. Y "hh:59" es la forma clásica de
+// escribir "hasta la hora siguiente en punto" ("23:59" es medianoche, "20:59"
+// son las 21): tomarlo literal dejaba el último turno del día afuera por un
+// minuto.
 export const normalizeCloseMinutes = (hhmm) => {
   const min = timeToMinutes(hhmm)
-  return min === 0 ? 24 * 60 : min
+  if (min === 0) return 24 * 60
+  return min % 60 === 59 ? min + 1 : min
 }
 
 // Los metadatos por deporte (label, colores, superficies) viven en

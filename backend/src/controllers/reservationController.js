@@ -16,6 +16,7 @@ const { puedeCrearReservas } = require('../utils/subscriptions');
 const { registrarReembolso } = require('../utils/payments');
 const { getClubAccessToken, refundPayment } = require('../utils/mercadopago');
 const { formatInstant, localDayRange } = require('../utils/timezone');
+const { normalizePhone } = require('../utils/phone');
 
 const ACTIVE_RESERVATION_STATUSES = ['pendiente', 'confirmada'];
 
@@ -42,14 +43,25 @@ const isValidInstantRange = (inicio, fin) => {
   return Number.isFinite(a) && Number.isFinite(b) && a < b;
 };
 
-const validateCustomerData = async ({ customerId, guestName, guestPhone }) => {
+// Valida quién juega el turno y devuelve el teléfono de contacto ya normalizado.
+//
+// El teléfono es obligatorio SIEMPRE, haya o no cuenta registrada. Es el único
+// canal por el que el complejo puede avisar de un cambio a alguien que reservó
+// por teléfono o como invitado, y es lo que habilita los mensajes de WhatsApp.
+// Con una cuenta registrada se cae al teléfono del perfil, pero si tampoco está
+// ahí hay que pedirlo: una reserva sin forma de contactar al jugador es
+// exactamente el turno que después nadie puede confirmar.
+//
+// `exigirTelefono` en false es para las ediciones que no tocan el teléfono: los
+// turnos cargados antes de que el dato fuera obligatorio tienen que poder
+// editarse igual. Bloquear un cambio de precio porque un turno de hace seis
+// meses no tiene teléfono no arregla nada y frena al complejo.
+const validateCustomerData = async ({ customerId, guestName, guestPhone, exigirTelefono = true }) => {
   if (!customerId && !guestName) {
     return { ok: false, status: 400, message: 'Debes indicar un cliente registrado o el nombre del invitado' };
   }
 
-  if (!customerId && !guestPhone) {
-    return { ok: false, status: 400, message: 'Debes indicar el teléfono del invitado si no hay usuario registrado' };
-  }
+  let telefono = guestPhone;
 
   if (customerId) {
     const customer = await User.findById(customerId);
@@ -61,9 +73,27 @@ const validateCustomerData = async ({ customerId, guestName, guestPhone }) => {
     if (customer.estado !== 'activo') {
       return { ok: false, status: 403, message: 'El usuario cliente está inactivo' };
     }
+
+    if (!telefono) telefono = customer.telefono;
   }
 
-  return { ok: true };
+  if (!exigirTelefono) {
+    return { ok: true, phone: telefono || null };
+  }
+
+  if (!telefono) {
+    return { ok: false, status: 400, message: 'Debes indicar un teléfono de contacto para el turno' };
+  }
+
+  if (!normalizePhone(telefono)) {
+    return {
+      ok: false,
+      status: 400,
+      message: 'El teléfono no parece válido. Revisá que tenga característica y número (ej: 221 456 7890).'
+    };
+  }
+
+  return { ok: true, phone: telefono };
 };
 
 // Solapamiento por instantes: inicioA < finB && finA > inicioB.
@@ -137,7 +167,12 @@ const createReservation = async (req, res, next) => {
         court: courtId,
         customer: customerId || null,
         guestName: customerId ? null : guestName,
-        guestPhone: customerId ? null : guestPhone,
+        // El teléfono se guarda siempre en la reserva, incluso con cuenta
+        // registrada: es el dato de contacto DE ESE TURNO. Dejarlo sólo en el
+        // perfil significaría que cambiar el teléfono de la cuenta reescribe el
+        // contacto de turnos que ya pasaron, y que el panel necesite un populate
+        // para poder escribirle a alguien.
+        guestPhone: customerValidation.phone,
         guestEmail: customerId ? null : (guestEmail || null),
         inicio: new Date(inicio),
         fin: new Date(fin),
@@ -304,7 +339,8 @@ const updateReservation = async (req, res, next) => {
     const customerValidation = await validateCustomerData({
       customerId: nextCustomerId,
       guestName: nextGuestName,
-      guestPhone: nextGuestPhone
+      guestPhone: nextGuestPhone,
+      exigirTelefono: guestPhone !== undefined
     });
     if (!customerValidation.ok) {
       return res.status(customerValidation.status).json({ ok: false, message: customerValidation.message });
@@ -359,7 +395,9 @@ const updateReservation = async (req, res, next) => {
       court: nextCourtId,
       customer: nextCustomerId || null,
       guestName: nextCustomerId ? null : nextGuestName,
-      guestPhone: nextCustomerId ? null : nextGuestPhone,
+      // Ver el comentario en `createReservation`: el teléfono de contacto vive
+      // en la reserva, tenga o no cuenta el jugador.
+      guestPhone: customerValidation.phone,
       inicio: nextInicio,
       fin: nextFin
     };
