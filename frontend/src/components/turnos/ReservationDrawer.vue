@@ -140,6 +140,63 @@
                 </div>
               </div>
 
+              <!-- Avisar por WhatsApp.
+                   Sólo en turnos guardados Y confirmados (ver `avisable`): el
+                   mensaje se arma con los datos guardados (`reservation`), no
+                   con lo que hay a medio editar en el formulario. -->
+              <!-- Pintado con el verde de WhatsApp (#25D366), igual que el
+                   bloque de MercadoPago usa su celeste: es una marca de afuera y
+                   se reconoce por el color antes que por el texto. Los botones
+                   blancos son los que tienen que saltar sobre el verde. -->
+              <div v-if="avisable && puedeAvisar" class="rounded-xl bg-[#25D366] p-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold tracking-wider text-white uppercase">
+                    Avisar por WhatsApp
+                  </span>
+                  <WhatsappIcon class="h-4 w-4 text-white" />
+                </div>
+
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    class="flex items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#25D366] shadow-sm transition-colors hover:bg-stone-50 cursor-pointer"
+                    @click="abrirWhatsapp('confirmacion')"
+                  >
+                    <i class="icon-[material-symbols--check-circle-outline] text-sm"></i>
+                    Confirmación
+                  </button>
+                  <button
+                    class="flex items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#25D366] shadow-sm transition-colors hover:bg-stone-50 cursor-pointer"
+                    @click="abrirWhatsapp('recordatorio')"
+                  >
+                    <i class="icon-[material-symbols--alarm-outline] text-sm"></i>
+                    Recordatorio
+                  </button>
+                </div>
+
+                <!-- Que quede claro que abre el chat con el mensaje escrito y
+                     que el envío lo hace la persona. Un botón que promete
+                     "enviar" y en realidad abre WhatsApp se siente roto. -->
+                <p class="mt-2.5 text-xs text-white">
+                  Se abre WhatsApp con el mensaje listo para enviar.
+                </p>
+              </div>
+
+              <!-- Sin teléfono usable no hay nada que hacer, así que el bloque
+                   no se pinta: el verde es la invitación a apretar el botón. -->
+              <div v-else-if="avisable" class="rounded-xl border border-black/[0.08] p-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Avisar por WhatsApp</span>
+                  <WhatsappIcon class="h-4 w-4 text-stone-300" />
+                </div>
+                <p class="mt-2 text-xs text-stone-400">
+                  {{
+                    reservation?.guestPhone
+                      ? 'El teléfono guardado no permite armar un chat de WhatsApp. Corregilo y guardá para poder avisarle.'
+                      : 'Este turno no tiene teléfono cargado. Agregalo y guardá para poder avisarle.'
+                  }}
+                </p>
+              </div>
+
               <!-- Cancha -->
               <div>
                 <label class="mb-1.5 block text-xs font-semibold tracking-wider text-stone-400 uppercase">Cancha<span class="ml-0.5 text-error-500">*</span></label>
@@ -306,6 +363,8 @@ import { ref, computed, watch } from 'vue'
 import Select from 'primevue/select'
 import { formatCurrency, dayjs, zonedToUtcISO, DEFAULT_TZ } from '@/utils/datetime'
 import { sportMeta, timeToMinutes, minutesToTime, priceForDuration, openRangeForDate, pagoMeta } from '@/utils/turnos'
+import { waLink, puedeWhatsapp, mensajeConfirmacion, mensajeRecordatorio } from '@/utils/whatsapp'
+import WhatsappIcon from '@/components/common/WhatsappIcon.vue'
 
 const props = defineProps({
   visible: Boolean,
@@ -313,6 +372,9 @@ const props = defineProps({
   reservation: Object,
   courts: { type: Array, default: () => [] },
   currency: { type: String, default: 'ARS' },
+  // Para firmar los mensajes de WhatsApp: el jugador tiene que leer el nombre
+  // del complejo, no el de la plataforma.
+  clubNombre: { type: String, default: '' },
   // Zona horaria del club: para convertir fecha+hora local <-> instante UTC.
   timezone: { type: String, default: DEFAULT_TZ },
   // Solo para mostrar el horario de atención como guía (la validación es del backend).
@@ -392,6 +454,39 @@ const sportLabel = (tipo) => sportMeta(tipo).label
 const courtOptions = computed(() =>
   props.courts.map((c) => ({ value: c._id, label: `${c.nombre} · ${sportLabel(c.tipo)}` })),
 )
+
+// --- Avisos por WhatsApp ---
+//
+// No hay integración con Meta: se abre un chat con el mensaje ya escrito y el
+// complejo aprieta Enviar. Por eso tampoco queda registro de envío — desde acá
+// es imposible saber si el mensaje salió.
+
+// Sólo se avisa por un turno confirmado, y se mira el estado GUARDADO y no el
+// del formulario. Los otros estados no tienen nada que mandar: una `pendiente`
+// todavía está esperando el pago y confirmarla por WhatsApp es prometer un
+// horario que se puede liberar solo; una `cancelada` o una `completada` ya no
+// van a jugarse. Si el complejo pasa el turno a confirmada, guarda y lo vuelve
+// a abrir, los botones aparecen.
+const avisable = computed(() => isEditing.value && props.reservation?.estado === 'confirmada')
+
+const puedeAvisar = computed(() => puedeWhatsapp(props.reservation?.guestPhone))
+
+const abrirWhatsapp = (tipo) => {
+  const reservation = props.reservation
+  if (!reservation) return
+
+  const armar = tipo === 'confirmacion' ? mensajeConfirmacion : mensajeRecordatorio
+  const texto = armar({
+    reservation,
+    club: { nombre: props.clubNombre },
+    court: selectedCourt.value || reservation.court,
+    tz: props.timezone,
+    moneda: props.currency,
+  })
+
+  const link = waLink(reservation.guestPhone, texto)
+  if (link) window.open(link, '_blank', 'noopener')
+}
 
 const subtitle = computed(() => {
   if (selectedCourt.value) return `${selectedCourt.value.nombre} · ${dayjs(form.value.fecha).format('ddd DD MMM')}`

@@ -5,6 +5,7 @@ import { dayjs, formatCurrency } from '@/utils/datetime'
 import { sportMeta } from '@/utils/turnos'
 import { useAuth } from '@/composables/useAuth'
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue'
+import { puedeWhatsapp } from '@/utils/whatsapp'
 
 const props = defineProps({
   visible: Boolean,
@@ -148,6 +149,15 @@ const goToPago = () => {
   if (faltan.length) {
     submitError.value = `Completá ${faltan.join(' y ')} para continuar.`
     if (!form.value.telefono.trim()) enfocarTelefono()
+    return
+  }
+
+  // El complejo confirma y avisa por WhatsApp a este número, así que un
+  // teléfono a medio escribir no sirve de nada. Se avisa acá y no después del
+  // pago, que es donde más caro sale enterarse.
+  if (!puedeWhatsapp(form.value.telefono)) {
+    submitError.value = 'Revisá el teléfono: necesitamos característica y número (ej: 221 456 7890).'
+    enfocarTelefono()
     return
   }
 

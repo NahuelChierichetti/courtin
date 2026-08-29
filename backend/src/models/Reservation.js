@@ -23,6 +23,17 @@ const reservationSchema = new mongoose.Schema(
       trim: true,
       default: null
     },
+    // Teléfono de contacto DEL TURNO, obligatorio en todos los caminos de alta.
+    //
+    // El nombre dice "guest" por historia, pero se guarda siempre: también
+    // cuando el jugador tiene cuenta. Es a propósito. El teléfono del perfil
+    // cambia, y un turno tiene que conservar el número con el que se reservó;
+    // además, sin esta copia el panel necesitaría un populate sólo para poder
+    // escribirle a alguien. Es el dato con el que el complejo confirma o avisa
+    // un cambio por WhatsApp (ver frontend/src/utils/whatsapp.js).
+    //
+    // Puede ser null en reservas viejas, anteriores a que el dato fuera
+    // obligatorio: todo lo que lo consume tiene que tolerarlo.
     guestPhone: {
       type: String,
       trim: true,

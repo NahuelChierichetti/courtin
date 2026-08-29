@@ -192,6 +192,7 @@
       :reservation="drawerReservation"
       :courts="courts"
       :currency="currency"
+      :club-nombre="currentClub?.nombre || ''"
       :horarios="horarios"
       :timezone="tz"
       :saving="saving"

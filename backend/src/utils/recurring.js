@@ -146,7 +146,10 @@ const findOverlapping = (rule, { inicio, fin }) =>
 const datosDelCliente = (rule) => ({
   customer: rule.customer || null,
   guestName: rule.customer ? null : rule.guestName,
-  guestPhone: rule.customer ? null : rule.guestPhone,
+  // El teléfono viaja siempre a la ocurrencia, aunque el jugador tenga cuenta:
+  // es el contacto del turno, y sin él el complejo no puede avisarle nada a
+  // quien tiene el fijo. Ver `createReservation` en reservationController.
+  guestPhone: rule.guestPhone,
   guestEmail: rule.customer ? null : rule.guestEmail
 });
 
