@@ -65,6 +65,8 @@ De dónde sale cada cosa:
 
 En los dos casos, tu cliente recibe un **link personal** para ver y cancelar su turno. No necesita crearse una cuenta.
 
+Para reservar tiene que dejar **nombre y teléfono** sí o sí (el email es opcional). Ese teléfono es el que después te deja mandarle la confirmación o el recordatorio [por WhatsApp](/panel/turnos#avisar-por-whatsapp) desde la ficha del turno.
+
 ## Dónde compartirlo
 
 - **En la bio de Instagram y Facebook.** Es el lugar de mayor rendimiento: la gente entra al perfil justamente para averiguar cómo reservar.

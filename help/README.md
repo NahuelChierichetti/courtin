@@ -84,6 +84,7 @@ Si cambiás una pantalla del panel, revisá acá:
 |---|---|
 | Precios o límites de los planes (`config/plans.js`) | `cuenta/suscripcion.md`, `panel/canchas.md` |
 | Los estados de una reserva | `panel/turnos.md` |
+| Los mensajes de WhatsApp o los datos obligatorios del cliente | `panel/turnos.md`, `panel/turnos-fijos.md`, `reservas-online/link-de-reservas.md` |
 | Cómo se cobra online | `reservas-online/mercadopago.md`, `senas-y-devoluciones.md` |
 | Permisos de empleado vs. administrador | `panel/equipo.md` |
 | Cualquier pantalla con captura | La imagen en `public/img/` |
