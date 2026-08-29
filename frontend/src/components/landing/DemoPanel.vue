@@ -1,49 +1,39 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, provide, ref } from 'vue'
+import { onBeforeUnmount, onMounted, provide, ref } from 'vue'
 import { useDemoPanel } from '@/composables/useDemoPanel'
-import DemoTurnos from './DemoTurnos.vue'
-import DemoReportes from './DemoReportes.vue'
-import DemoCanchas from './DemoCanchas.vue'
+import DemoWindow from './DemoWindow.vue'
+import DemoMobileViewer from './DemoMobileViewer.vue'
 
 const demo = useDemoPanel()
 provide('demoPanel', demo)
 
-const { tab, step, stepIndex, finished, toast, pasos, setTab, reset, start } = demo
-
-// El menú completo del panel real (espejo de `ALL_NAV_ITEMS` en AppLayout), con
-// las tres pantallas que la demo sabe abrir. Las otras se muestran deshabilitadas
-// en vez de esconderse: el menú entero es parte del argumento —el sistema es más
-// grande que lo que se puede probar acá— y recortarlo lo haría parecer más chico
-// de lo que es.
-const NAV = [
-  { label: 'Dashboard', icon: 'icon-[material-symbols--home]', tab: null },
-  { label: 'Turnos', icon: 'icon-[material-symbols--calendar-month]', tab: 'turnos' },
-  { label: 'Clientes', icon: 'icon-[material-symbols--group]', tab: null },
-  { label: 'Control de caja', icon: 'icon-[material-symbols--account-balance-wallet]', tab: null },
-  { label: 'Canchas', icon: 'icon-[material-symbols--grid-view]', tab: 'canchas' },
-  { label: 'Horarios', icon: 'icon-[material-symbols--schedule]', tab: null },
-  { label: 'Reportes', icon: 'icon-[material-symbols--bar-chart]', tab: 'reportes' },
-  { label: 'Equipo', icon: 'icon-[material-symbols--badge-outline]', tab: null },
-  { label: 'Suscripción', icon: 'icon-[material-symbols--credit-card-outline]', tab: null },
-  { label: 'Notificaciones', icon: 'icon-[material-symbols--notifications]', tab: null },
-]
-
-const TITULOS = {
-  turnos: 'Turnos',
-  reportes: 'Reportes',
-  canchas: 'Canchas',
-}
-
-// El paso al que le toca el brillo en el menú, para que se vea dónde hay que ir.
-const navHint = computed(() =>
-  step.value && step.value.tab !== tab.value ? step.value.tab : null,
-)
+const { step, stepIndex, finished, pasos, reset, start } = demo
 
 // La demo arranca cuando entra en pantalla, no al montar: si arrancara antes,
 // quien llega scrolleando se encontraría los cuatro pasos ya jugados.
+//
+// En celular no arranca acá sino al abrir el visor: la ventana no está a la
+// vista, y dejar corriendo el guión contra una pantalla que nadie mira sólo
+// gasta el final antes de tiempo.
+// El corte es el mismo `lg` que usan las clases de abajo, pero acá hace falta en
+// JavaScript: en celular la ventana no se esconde con CSS sino que no se monta.
+// Montarla escondida costaría un calendario entero de más en el aparato más
+// lento de los dos.
+const DESKTOP_QUERY = '(min-width: 1024px)'
+const desktopMq = window.matchMedia(DESKTOP_QUERY)
+const isDesktop = ref(desktopMq.matches)
+const onDesktopChange = (e) => {
+  isDesktop.value = e.matches
+  // Si la ventana creció hasta escritorio, la demo ya está a la vista: el
+  // observador que la arranca no va a volver a dispararse.
+  if (e.matches) start()
+}
+
 const root = ref(null)
 let io
 onMounted(() => {
+  desktopMq.addEventListener('change', onDesktopChange)
+  if (!isDesktop.value) return
   io = new IntersectionObserver(
     (entries) => {
       if (entries[0].isIntersecting) {
@@ -55,7 +45,40 @@ onMounted(() => {
   )
   if (root.value) io.observe(root.value)
 })
-onBeforeUnmount(() => io?.disconnect())
+onBeforeUnmount(() => {
+  io?.disconnect()
+  desktopMq.removeEventListener('change', onDesktopChange)
+})
+
+// --- Visor de celular -------------------------------------------------------
+// El 90% de los que abren esta página llegan de un link de WhatsApp o de
+// Instagram, o sea con el teléfono en la mano. Antes ahí la demo no existía:
+// decía "abrila en una computadora", que es pedirle al que todavía no confía
+// que vuelva más tarde. Ahora se abre a pantalla completa.
+const viewerOpen = ref(false)
+
+const openViewer = async () => {
+  viewerOpen.value = true
+  // Android acepta las dos cosas y la pantalla se acuesta sola. iOS rechaza las
+  // dos, y ahí el visor muestra el aviso de girar el teléfono: por eso el
+  // `catch` vacío no esconde nada, es el camino previsto.
+  try {
+    await document.documentElement.requestFullscreen?.({ navigationUI: 'hide' })
+    await screen.orientation?.lock?.('landscape')
+  } catch {
+    /* sin pantalla completa ni bloqueo: se gira a mano */
+  }
+}
+
+const closeViewer = async () => {
+  viewerOpen.value = false
+  try {
+    screen.orientation?.unlock?.()
+    if (document.fullscreenElement) await document.exitFullscreen()
+  } catch {
+    /* nada que deshacer */
+  }
+}
 </script>
 
 <template>
@@ -63,7 +86,7 @@ onBeforeUnmount(() => io?.disconnect())
     <!-- ---------- Guía (desktop) ---------------------------------------- -->
     <!-- Vive fuera de la ventana del panel a propósito: es el narrador, no
          parte del producto. Adentro se confundiría con la interfaz real. -->
-    <div class="hidden lg:block">
+    <div v-if="isDesktop">
       <ol class="flex flex-wrap items-center gap-2">
         <li v-for="(p, i) in pasos" :key="p.id" class="flex items-center gap-2">
           <span
@@ -104,132 +127,42 @@ onBeforeUnmount(() => io?.disconnect())
     </div>
 
     <!-- ---------- Ventana del panel (desktop) --------------------------- -->
-    <div
-      class="mt-6 hidden overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-2xl shadow-brand-green-900/10 lg:block"
-    >
-      <!-- Barra del navegador: encuadra la demo como "esto es una app web" -->
-      <div class="flex items-center gap-2 border-b border-black/[0.06] bg-stone-100 px-4 py-2.5">
-        <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
-        <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
-        <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
-        <div
-          class="mx-auto flex items-center gap-1.5 rounded-md bg-white px-3 py-1 text-xs text-stone-400"
-        >
-          <i class="icon-[material-symbols--lock] text-[11px]"></i>
-          courtinapp.com/panel/{{ tab }}
-        </div>
-      </div>
-
-      <div class="flex h-[620px]">
-        <!-- Sidebar -->
-        <aside class="flex w-56 shrink-0 flex-col bg-brand-green-900">
-          <div class="flex items-center gap-2.5 px-5 pt-5 pb-4">
-            <img src="/images/logo-lime.svg" alt="" class="h-10 w-auto" />
-            <p class="text-xl leading-none text-white">
-              Court<span class="text-brand-lime-500">In</span>
-            </p>
-          </div>
-          <nav class="mt-3 flex-1 space-y-0.5 overflow-y-auto px-3">
-            <button
-              v-for="item in NAV"
-              :key="item.label"
-              type="button"
-              :disabled="!item.tab"
-              :title="item.tab ? null : `${item.label} está en el sistema completo`"
-              class="group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors disabled:cursor-not-allowed"
-              :class="
-                !item.tab
-                  ? 'text-white/35'
-                  : item.tab === tab
-                    ? 'cursor-pointer bg-white/12 text-white'
-                    : 'cursor-pointer text-white/70 hover:bg-white/8 hover:text-white'
-              "
-              @click="setTab(item.tab)"
-            >
-              <i
-                :class="[
-                  item.icon,
-                  !item.tab ? 'text-white/30' : item.tab === tab ? 'text-brand-lime-500' : 'text-white/60',
-                ]"
-                class="text-lg"
-              ></i>
-              <span class="flex-1">{{ item.label }}</span>
-              <!-- Anillo pulsante sobre la pantalla a la que hay que ir.
-                   El `item.tab &&` no sobra: sin él, las secciones decorativas
-                   (`tab: null`) matchean contra un `navHint` nulo y se prenden
-                   todas juntas. -->
-              <span
-                v-if="item.tab && navHint === item.tab"
-                class="absolute inset-0 rounded-xl ring-2 ring-brand-lime-500"
-              >
-                <span class="absolute inset-0 animate-pulse rounded-xl bg-brand-lime-500/15"></span>
-              </span>
-            </button>
-          </nav>
-          <div class="border-t border-white/10 px-5 py-4">
-            <p class="text-xs font-semibold text-white">Complejo Los Amigos</p>
-            <p class="text-[11px] text-white/50">Plan Pro · 3 canchas</p>
-          </div>
-        </aside>
-
-        <!-- Contenido -->
-        <div class="relative flex min-w-0 flex-1 flex-col bg-brand-sand-500">
-          <header
-            class="flex shrink-0 items-center justify-between border-b border-black/[0.06] bg-white px-6 py-3.5"
-          >
-            <div>
-              <h3 class="text-base font-semibold text-brand-green-900">{{ TITULOS[tab] }}</h3>
-              <p class="text-xs text-stone-500">Viernes 13 de marzo</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span
-                class="rounded-lg border border-black/[0.08] px-2.5 py-1.5 text-xs font-medium text-stone-500"
-              >Hoy</span>
-              <span
-                class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-purple-100 text-xs font-bold text-brand-purple-700"
-              >LP</span>
-            </div>
-          </header>
-
-          <div class="min-h-0 flex-1 overflow-auto p-5">
-            <DemoTurnos v-if="tab === 'turnos'" />
-            <DemoReportes v-else-if="tab === 'reportes'" />
-            <DemoCanchas v-else-if="tab === 'canchas'" />
-          </div>
-
-          <!-- Aviso de lo que acaba de pasar -->
-          <Transition
-            enter-active-class="transition duration-200 ease-out"
-            enter-from-class="translate-y-2 opacity-0"
-            leave-active-class="transition duration-200 ease-in"
-            leave-to-class="translate-y-2 opacity-0"
-          >
-            <div
-              v-if="toast"
-              class="absolute bottom-4 left-1/2 z-40 flex max-w-[90%] -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg"
-              :class="toast.tono === 'error' ? 'bg-error-600' : 'bg-ink-500'"
-            >
-              <i
-                :class="
-                  toast.tono === 'error'
-                    ? 'icon-[material-symbols--block] text-white'
-                    : 'icon-[material-symbols--check-circle] text-brand-lime-500'
-                "
-                class="shrink-0 text-base"
-              ></i>
-              {{ toast.msg }}
-            </div>
-          </Transition>
-        </div>
-      </div>
+    <div v-if="isDesktop" class="mt-6">
+      <DemoWindow />
     </div>
 
-    <!-- ---------- Fallback (mobile) -------------------------------------- -->
-    <!-- La grilla de turnos necesita ancho: en un teléfono no se puede
-         arrastrar un turno entre tres columnas sin que sea una pelea. En vez de
-         encajarla a la fuerza, acá se cuenta lo mismo en cuatro tarjetas. -->
-    <div class="lg:hidden">
-      <ul class="space-y-3">
+    <!-- ---------- Celular ------------------------------------------------ -->
+    <!-- La grilla de turnos necesita ancho, así que en el teléfono la demo no
+         va incrustada en la página sino a pantalla completa y acostada. Acá
+         queda la invitación y el resumen de lo que se va a probar. -->
+    <div v-if="!isDesktop">
+      <div class="rounded-2xl border border-brand-green-100 bg-brand-green-50 p-5">
+        <div class="flex items-start gap-3">
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand-green-600"
+          >
+            <i class="icon-[material-symbols--screen-rotation] text-xl"></i>
+          </span>
+          <div>
+            <p class="text-base font-medium text-brand-green-900">Probala acá, desde el celular</p>
+            <p class="mt-1 text-sm leading-relaxed text-stone-600">
+              Se abre a pantalla completa y con el teléfono acostado, para que entre el panel
+              entero: el menú, la grilla de las tres canchas y los reportes.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-lime-500 py-3 text-base font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600"
+          @click="openViewer"
+        >
+          <i class="icon-[material-symbols--play-arrow] text-xl"></i>
+          Iniciar demo
+        </button>
+      </div>
+
+      <ul class="mt-4 space-y-3">
         <li
           v-for="(p, i) in pasos"
           :key="p.id"
@@ -244,10 +177,8 @@ onBeforeUnmount(() => io?.disconnect())
           </div>
         </li>
       </ul>
-      <p class="mt-4 flex items-center justify-center gap-2 text-center text-xs text-stone-500">
-        <i class="icon-[material-symbols--desktop-windows-outline] text-sm"></i>
-        Abrí esta página en una computadora para probar la demo.
-      </p>
     </div>
+
+    <DemoMobileViewer v-if="viewerOpen" @close="closeViewer" />
   </div>
 </template>

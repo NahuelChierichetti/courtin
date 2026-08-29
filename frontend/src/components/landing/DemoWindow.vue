@@ -1,0 +1,188 @@
+<script setup>
+import { computed, inject, nextTick, ref, watch } from 'vue'
+import DemoTurnos from './DemoTurnos.vue'
+import DemoReportes from './DemoReportes.vue'
+import DemoCanchas from './DemoCanchas.vue'
+
+// La ventana del panel: la barra del navegador, el menú y la pantalla que toca.
+// Vive en su propio componente porque se monta en dos lados —la landing en
+// desktop y el visor a pantalla completa del celular— y no puede haber dos
+// copias del mismo markup: la segunda envejece.
+defineProps({
+  // En la landing el alto es fijo (620px es lo que entra sin empujar la página).
+  // En el visor del celular la ventana ocupa todo lo que le deja la pantalla
+  // girada, que es bastante menos.
+  fill: { type: Boolean, default: false },
+  // La barra de navegador falsa encuadra la demo como "esto es una app web".
+  // En el visor del celular sobra: ya está a pantalla completa dentro de un
+  // navegador de verdad, y ahí esos 41px de alto valen más como grilla.
+  chrome: { type: Boolean, default: true },
+})
+
+const { tab, step, toast, setTab } = inject('demoPanel')
+
+// El menú completo del panel real (espejo de `ALL_NAV_ITEMS` en AppLayout), con
+// las tres pantallas que la demo sabe abrir. Las otras se muestran deshabilitadas
+// en vez de esconderse: el menú entero es parte del argumento —el sistema es más
+// grande que lo que se puede probar acá— y recortarlo lo haría parecer más chico
+// de lo que es.
+const NAV = [
+  { label: 'Dashboard', icon: 'icon-[material-symbols--home]', tab: null },
+  { label: 'Turnos', icon: 'icon-[material-symbols--calendar-month]', tab: 'turnos' },
+  { label: 'Clientes', icon: 'icon-[material-symbols--group]', tab: null },
+  { label: 'Control de caja', icon: 'icon-[material-symbols--account-balance-wallet]', tab: null },
+  { label: 'Canchas', icon: 'icon-[material-symbols--grid-view]', tab: 'canchas' },
+  { label: 'Horarios', icon: 'icon-[material-symbols--schedule]', tab: null },
+  { label: 'Reportes', icon: 'icon-[material-symbols--bar-chart]', tab: 'reportes' },
+  { label: 'Equipo', icon: 'icon-[material-symbols--badge-outline]', tab: null },
+  { label: 'Suscripción', icon: 'icon-[material-symbols--credit-card-outline]', tab: null },
+  { label: 'Notificaciones', icon: 'icon-[material-symbols--notifications]', tab: null },
+]
+
+const TITULOS = {
+  turnos: 'Turnos',
+  reportes: 'Reportes',
+  canchas: 'Canchas',
+}
+
+// El paso al que le toca el brillo en el menú, para que se vea dónde hay que ir.
+const navHint = computed(() =>
+  step.value && step.value.tab !== tab.value ? step.value.tab : null,
+)
+
+// Con la pantalla baja —un teléfono acostado— el menú no entra entero y el paso
+// puede estar señalando un ítem que quedó abajo del corte. Se lo trae a la
+// vista: un brillo que no se ve no guía a nadie.
+const nav = ref(null)
+watch(navHint, async (destino) => {
+  if (!destino) return
+  await nextTick()
+  nav.value
+    ?.querySelector('[data-nav-hint]')
+    ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+})
+</script>
+
+<template>
+  <div
+    class="overflow-hidden border-black/[0.08] bg-white"
+    :class="fill ? 'flex h-full flex-col' : 'rounded-2xl border shadow-2xl shadow-brand-green-900/10'"
+  >
+    <!-- Barra del navegador: encuadra la demo como "esto es una app web" -->
+    <div v-if="chrome" class="flex shrink-0 items-center gap-2 border-b border-black/[0.06] bg-stone-100 px-4 py-2.5">
+      <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
+      <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
+      <span class="h-2.5 w-2.5 rounded-full bg-stone-300"></span>
+      <div
+        class="mx-auto flex items-center gap-1.5 rounded-md bg-white px-3 py-1 text-xs text-stone-400"
+      >
+        <i class="icon-[material-symbols--lock] text-[11px]"></i>
+        courtinapp.com/panel/{{ tab }}
+      </div>
+    </div>
+
+    <div class="flex" :class="fill ? 'min-h-0 flex-1' : 'h-[620px]'">
+      <!-- Sidebar -->
+      <aside class="flex w-56 shrink-0 flex-col bg-brand-green-900">
+        <div class="flex items-center gap-2.5 px-5 pt-5 pb-4">
+          <img src="/images/logo-lime.svg" alt="" class="h-10 w-auto" />
+          <p class="text-xl leading-none text-white">
+            Court<span class="text-brand-lime-500">In</span>
+          </p>
+        </div>
+        <nav ref="nav" class="mt-3 flex-1 space-y-0.5 overflow-y-auto px-3">
+          <button
+            v-for="item in NAV"
+            :key="item.label"
+            type="button"
+            :data-nav-hint="item.tab && navHint === item.tab ? '' : null"
+            :disabled="!item.tab"
+            :title="item.tab ? null : `${item.label} está en el sistema completo`"
+            class="group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors disabled:cursor-not-allowed"
+            :class="
+              !item.tab
+                ? 'text-white/35'
+                : item.tab === tab
+                  ? 'cursor-pointer bg-white/12 text-white'
+                  : 'cursor-pointer text-white/70 hover:bg-white/8 hover:text-white'
+            "
+            @click="setTab(item.tab)"
+          >
+            <i
+              :class="[
+                item.icon,
+                !item.tab ? 'text-white/30' : item.tab === tab ? 'text-brand-lime-500' : 'text-white/60',
+              ]"
+              class="text-lg"
+            ></i>
+            <span class="flex-1">{{ item.label }}</span>
+            <!-- Anillo pulsante sobre la pantalla a la que hay que ir.
+                 El `item.tab &&` no sobra: sin él, las secciones decorativas
+                 (`tab: null`) matchean contra un `navHint` nulo y se prenden
+                 todas juntas. -->
+            <span
+              v-if="item.tab && navHint === item.tab"
+              class="absolute inset-0 rounded-xl ring-2 ring-brand-lime-500"
+            >
+              <span class="absolute inset-0 animate-pulse rounded-xl bg-brand-lime-500/15"></span>
+            </span>
+          </button>
+        </nav>
+        <div class="border-t border-white/10 px-5 py-4">
+          <p class="text-xs font-semibold text-white">Complejo Los Amigos</p>
+          <p class="text-[11px] text-white/50">Plan Pro · 3 canchas</p>
+        </div>
+      </aside>
+
+      <!-- Contenido -->
+      <div class="relative flex min-w-0 flex-1 flex-col bg-brand-sand-500">
+        <header
+          class="flex shrink-0 items-center justify-between border-b border-black/[0.06] bg-white px-6 py-3.5"
+        >
+          <div>
+            <h3 class="text-base font-semibold text-brand-green-900">{{ TITULOS[tab] }}</h3>
+            <p class="text-xs text-stone-500">Viernes 13 de marzo</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span
+              class="rounded-lg border border-black/[0.08] px-2.5 py-1.5 text-xs font-medium text-stone-500"
+            >Hoy</span>
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-purple-100 text-xs font-bold text-brand-purple-700"
+            >LP</span>
+          </div>
+        </header>
+
+        <div class="min-h-0 flex-1 overflow-auto p-5">
+          <DemoTurnos v-if="tab === 'turnos'" />
+          <DemoReportes v-else-if="tab === 'reportes'" />
+          <DemoCanchas v-else-if="tab === 'canchas'" />
+        </div>
+
+        <!-- Aviso de lo que acaba de pasar -->
+        <Transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="translate-y-2 opacity-0"
+          leave-active-class="transition duration-200 ease-in"
+          leave-to-class="translate-y-2 opacity-0"
+        >
+          <div
+            v-if="toast"
+            class="absolute bottom-4 left-1/2 z-40 flex max-w-[90%] -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg"
+            :class="toast.tono === 'error' ? 'bg-error-600' : 'bg-ink-500'"
+          >
+            <i
+              :class="
+                toast.tono === 'error'
+                  ? 'icon-[material-symbols--block] text-white'
+                  : 'icon-[material-symbols--check-circle] text-brand-lime-500'
+              "
+              class="shrink-0 text-base"
+            ></i>
+            {{ toast.msg }}
+          </div>
+        </Transition>
+      </div>
+    </div>
+  </div>
+</template>
