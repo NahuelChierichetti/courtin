@@ -2,6 +2,7 @@
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import { Analytics } from '@vercel/analytics/vue'
+import { SpeedInsights } from '@vercel/speed-insights/vue'
 </script>
 
 <template>
@@ -18,6 +19,7 @@ import { Analytics } from '@vercel/analytics/vue'
        Los datos SÓLO se envían desde un deploy de Vercel; en local el script no
        existe y el paquete se limita a loguear el evento por consola. -->
   <Analytics />
+  <SpeedInsights />
   <Toast position="bottom-right" />
   <ConfirmDialog />
   <RouterView />
