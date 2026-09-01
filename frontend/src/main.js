@@ -34,6 +34,8 @@ Sentry.init({
   // un complejo llame por teléfono, se ve en video qué apretó antes de romperse.
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 1.0,
+  ignoreErrors: [/Java object is gone/, /Error invoking postMessage/],
+  denyUrls: [/^iabjs:\/\//],
 })
 
 app.use(router)
