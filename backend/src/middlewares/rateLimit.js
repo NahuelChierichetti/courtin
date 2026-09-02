@@ -157,6 +157,20 @@ const invitationLimiter = rateLimit({
   keyGenerator: (req) => (req.user ? String(req.user._id) : ipKeyGenerator(req.ip))
 });
 
+// Subida de imágenes. Ya exige sesión, suscripción activa y rol tenant_admin,
+// así que no es un endpoint abierto: el límite es contra el gasto, no contra un
+// anónimo. Cada llamada sube 5 MB como mucho a Cloudinary, y la cuota del plan
+// gratuito se quema con unos pocos cientos de subidas. Por usuario, porque el
+// que gasta es la cuenta, no la conexión.
+const uploadLimiter = rateLimit({
+  windowMs: UNA_HORA,
+  limit: 60,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: mensaje('Subiste muchas imágenes seguidas. Esperá un rato.'),
+  keyGenerator: (req) => (req.user ? String(req.user._id) : ipKeyGenerator(req.ip))
+});
+
 // Reintento de pago de una reserva. Cada llamada crea una preferencia en
 // MercadoPago, así que sin límite alguien podría usar el endpoint para
 // martillar la API del complejo con el token del complejo. La clave es el token
@@ -171,7 +185,61 @@ const retryPaymentLimiter = rateLimit({
   keyGenerator: (req) => req.params.token || ipKeyGenerator(req.ip)
 });
 
+// --- Límite general de la API ---
+//
+// Los límites de arriba son quirúrgicos: cubren los endpoints que gastan plata
+// (emails, MercadoPago, Cloudinary) o que son blanco de fuerza bruta. Pero
+// dejan sin techo a todo el resto, y ahí están justamente las consultas más
+// caras y más públicas: la disponibilidad de un complejo, que resuelve varias
+// queries a Mongo por llamada y no pide autenticación. Un `for` de bash contra
+// /public/clubs/:slug/availability alcanza para saturar la instancia.
+//
+// Éste es el piso que faltaba: no busca frenar a nadie en particular, sino que
+// ninguna IP pueda martillar la API sin control. Por eso es holgado —40 req por
+// minuto sostenidas— y no molesta ni al panel de un complejo con varios
+// empleados detrás de la misma conexión (el frontend casi no hace polling: sólo
+// refresca los próximos turnos cada 5 minutos). Un script abusivo se lo come en
+// segundos igual.
+//
+// Lo que esto NO es: defensa contra un DDoS. Si el ataque viene de miles de IPs
+// distintas, el request ya entró a Node y ya costó CPU. Eso se frena antes de
+// la app, en un CDN o WAF; acá lo que se corta es el abuso de un actor único,
+// que es el escenario realista.
+const globalLimiter = rateLimit({
+  windowMs: QUINCE_MINUTOS,
+  limit: 600,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: mensaje('Demasiadas solicitudes. Esperá un momento y volvé a intentar.'),
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  skip: (req) => {
+    // Preflights de CORS: el navegador los manda solo, antes de cada POST/PUT
+    // cross-origin. Contarlos gastaría el presupuesto del usuario legítimo al
+    // doble de velocidad sin que él haga nada.
+    if (req.method === 'OPTIONS') return true;
+
+    // Se compara contra `originalUrl` (la ruta completa desde la raíz) y no
+    // contra `req.path`, que es relativo al punto de montaje: así las
+    // excepciones siguen valiendo aunque el limiter se mueva de lugar.
+    const url = req.originalUrl;
+
+    // El webhook de MercadoPago llega en ráfagas —reintenta ante cualquier
+    // demora— y un 429 acá significa una reserva paga que no se confirma. No
+    // queda abierto: lo que lo protege es el HMAC de la firma, que es mejor
+    // control que un contador por IP.
+    if (url.startsWith('/api/public/mp/webhook')) return true;
+
+    // Healthcheck: lo pinga Render para decidir si la instancia está viva. Si
+    // se lo limita, un pico de tráfico se convierte en un reinicio.
+    if (url.startsWith('/api/health')) return true;
+
+    return false;
+  }
+});
+
 module.exports = {
+  globalLimiter,
+  uploadLimiter,
   forgotPasswordLimiters,
   loginLimiters,
   googleLoginLimiter,

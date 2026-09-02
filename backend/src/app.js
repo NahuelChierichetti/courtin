@@ -2,10 +2,12 @@
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const Sentry = require('@sentry/node');
 
 const notFound = require('./middlewares/notFound');
 const errorHandler = require('./middlewares/errorHandler');
+const { globalLimiter } = require('./middlewares/rateLimit');
 
 const routes = require('./routes');
 const app = express();
@@ -18,6 +20,29 @@ const app = express();
 // X-Forwarded-For deja que el cliente invente su propia IP y esquive el límite.
 // El valor es la cantidad de saltos de confianza: 1 para Render, 0 en local.
 app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 0));
+
+// Headers de seguridad. Conviene aclarar qué hace y qué no: Helmet no protege
+// al servidor de nada —no frena tráfico ni evita que se sature—, protege al
+// NAVEGADOR de quien consume la API. Como acá casi todo son respuestas JSON, el
+// beneficio es más chico que en una app que sirve HTML, pero es real y gratis:
+// saca el header `X-Powered-By` (que hoy le anuncia "Express" a cualquier
+// escáner), impide que el navegador adivine el tipo de contenido (`nosniff`, la
+// vía por la que un JSON con datos de un usuario puede terminar ejecutándose
+// como script), fuerza HTTPS con HSTS y recorta el `Referer` que se filtra a
+// terceros.
+//
+// Va primero de todo para que los headers estén también en las respuestas de
+// error y en las que cortan antes de llegar a las rutas.
+app.use(
+  helmet({
+    // El default de Helmet es `same-origin`, pensado para una app que sirve sus
+    // propios recursos. Acá el frontend vive en otro dominio (Vercel) y la API
+    // en otro (Render), así que dejarlo en el default es pedir que el navegador
+    // bloquee respuestas legítimas. CORS sigue siendo el que decide quién puede
+    // leer qué: esto sólo evita que CORP contradiga esa decisión.
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
 
 // Orígenes permitidos (separados por coma en CORS_ORIGIN).
 // Si no se define, se permite cualquier origen (útil en desarrollo).
@@ -51,8 +76,17 @@ app.use(
     },
   })
 );
-app.use(express.json());
-app.use('/api', routes);
+// El `limit` es el default de Express, pero escrito: ningún cuerpo de esta API
+// se acerca a 100 kB (las imágenes van por multipart en /uploads, no por acá),
+// y dejarlo explícito evita que un cambio distraído lo abra y permita mandar
+// megabytes de JSON que Node tiene que parsear antes de poder rechazarlos.
+app.use(express.json({ limit: '100kb' }));
+
+// Techo general por IP, antes de todas las rutas. Los límites finos de cada
+// endpoint (login, recupero de contraseña, pagos) siguen viviendo en sus
+// routers: éste es sólo el piso para que ninguna ruta quede sin ningún control,
+// sobre todo las públicas de disponibilidad. Ver src/middlewares/rateLimit.js.
+app.use('/api', globalLimiter, routes);
 app.use(notFound);
 
 // Va DESPUÉS de las rutas y ANTES del errorHandler propio: ése responde el JSON

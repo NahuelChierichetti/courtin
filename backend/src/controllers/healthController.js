@@ -62,6 +62,53 @@ const getHealth = async (req, res) => {
   });
 };
 
+/**
+ * GET /health/proxy?token=<DIAG_TOKEN>
+ *
+ * Diagnóstico de la cadena de proxies. Existe porque `trust proxy` es un número
+ * mágico que no se puede adivinar: si es más chico que la cantidad real de
+ * saltos, `req.ip` termina siendo la IP de un proxy intermedio —compartida por
+ * todos y, si ese proxy rota entre varias IPs de salida, distinta en cada
+ * request— y TODOS los límites por IP dejan de limitar sin un solo error en los
+ * logs. Si es más grande, el cliente puede inventarse la IP en el header y
+ * esquivarlos igual. Las dos fallas son silenciosas, así que la única forma
+ * honesta de elegir el valor es mirar la cadena que llega de verdad.
+ *
+ * Cómo se lee: `ips` es la cadena de confianza ya resuelta y `ip` es la que van
+ * a usar los limiters. Si `ip` no es la IP real de quien hace la consulta, el
+ * valor de TRUST_PROXY está mal: contá cuántas entradas hay que saltar desde la
+ * derecha de `xForwardedFor` para llegar al cliente, y ése es el número.
+ *
+ * Pide token porque expone detalles de infraestructura. Sin `DIAG_TOKEN` en el
+ * entorno la ruta no existe: así queda apagada por defecto en producción y no
+ * hay que acordarse de sacarla.
+ */
+const getProxyDiag = (req, res) => {
+  const esperado = process.env.DIAG_TOKEN;
+
+  // Sin token configurado se responde 404 y no 403: que la ruta no delate
+  // siquiera que existe.
+  if (!esperado) return res.status(404).json({ ok: false, message: 'No encontrado' });
+  if (req.query.token !== esperado) {
+    return res.status(404).json({ ok: false, message: 'No encontrado' });
+  }
+
+  res.status(200).json({
+    ok: true,
+    trustProxySetting: req.app.get('trust proxy'),
+    ip: req.ip,
+    ips: req.ips,
+    socketRemoteAddress: req.socket.remoteAddress,
+    headers: {
+      'x-forwarded-for': req.get('x-forwarded-for') || null,
+      'cf-connecting-ip': req.get('cf-connecting-ip') || null,
+      'true-client-ip': req.get('true-client-ip') || null,
+      'x-real-ip': req.get('x-real-ip') || null
+    }
+  });
+};
+
 module.exports = {
-  getHealth
+  getHealth,
+  getProxyDiag
 };
