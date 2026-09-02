@@ -7,14 +7,18 @@ import DemoMobileViewer from './DemoMobileViewer.vue'
 const demo = useDemoPanel()
 provide('demoPanel', demo)
 
-const { step, stepIndex, finished, pasos, reset, start } = demo
+const { step, stepIndex, finished, started, pasos, reset, start } = demo
 
-// La demo arranca cuando entra en pantalla, no al montar: si arrancara antes,
-// quien llega scrolleando se encontraría los cuatro pasos ya jugados.
+// La demo se enciende a mano, con el botón de abajo.
 //
-// En celular no arranca acá sino al abrir el visor: la ventana no está a la
-// vista, y dejar corriendo el guión contra una pantalla que nadie mira sólo
-// gasta el final antes de tiempo.
+// Antes arrancaba sola al entrar en pantalla. El problema no era el arranque
+// sino lo que venía después: el guión sigue corriendo mientras el visitante
+// baja a leer precios, y cada paso que cambia de pantalla mueve cosas —y movía
+// también el scroll— atrás de alguien que ya estaba en otra sección. Con el
+// botón, la animación empieza cuando alguien decide mirarla.
+//
+// En celular es igual desde siempre: el visor a pantalla completa se abre con
+// "Iniciar demo".
 // El corte es el mismo `lg` que usan las clases de abajo, pero acá hace falta en
 // JavaScript: en celular la ventana no se esconde con CSS sino que no se monta.
 // Montarla escondida costaría un calendario entero de más en el aparato más
@@ -24,31 +28,10 @@ const desktopMq = window.matchMedia(DESKTOP_QUERY)
 const isDesktop = ref(desktopMq.matches)
 const onDesktopChange = (e) => {
   isDesktop.value = e.matches
-  // Si la ventana creció hasta escritorio, la demo ya está a la vista: el
-  // observador que la arranca no va a volver a dispararse.
-  if (e.matches) start()
 }
 
-const root = ref(null)
-let io
-onMounted(() => {
-  desktopMq.addEventListener('change', onDesktopChange)
-  if (!isDesktop.value) return
-  io = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting) {
-        start()
-        io.disconnect()
-      }
-    },
-    { threshold: 0.35 },
-  )
-  if (root.value) io.observe(root.value)
-})
-onBeforeUnmount(() => {
-  io?.disconnect()
-  desktopMq.removeEventListener('change', onDesktopChange)
-})
+onMounted(() => desktopMq.addEventListener('change', onDesktopChange))
+onBeforeUnmount(() => desktopMq.removeEventListener('change', onDesktopChange))
 
 // --- Visor de celular -------------------------------------------------------
 // El 90% de los que abren esta página llegan de un link de WhatsApp o de
@@ -82,7 +65,7 @@ const closeViewer = async () => {
 </script>
 
 <template>
-  <div ref="root">
+  <div>
     <!-- ---------- Guía (desktop) ---------------------------------------- -->
     <!-- Vive fuera de la ventana del panel a propósito: es el narrador, no
          parte del producto. Adentro se confundiría con la interfaz real. -->
@@ -92,25 +75,46 @@ const closeViewer = async () => {
           <span
             class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors"
             :class="
-              finished || i < stepIndex
+              finished || (started && i < stepIndex)
                 ? 'bg-brand-green-500 text-white'
-                : i === stepIndex
+                : started && i === stepIndex
                   ? 'bg-brand-purple-500 text-white'
                   : 'bg-white text-stone-400 ring-1 ring-black/[0.06]'
             "
           >
-            <i v-if="finished || i < stepIndex" class="icon-[material-symbols--check] text-sm"></i>
+            <i
+              v-if="finished || (started && i < stepIndex)"
+              class="icon-[material-symbols--check] text-sm"
+            ></i>
             <template v-else>{{ i + 1 }}</template>
           </span>
           <span
             class="hidden text-xs sm:block"
-            :class="i === stepIndex && !finished ? 'text-brand-green-900' : 'text-stone-400'"
+            :class="
+              started && i === stepIndex && !finished ? 'text-brand-green-900' : 'text-stone-400'
+            "
           >{{ p.titulo }}</span>
           <span v-if="i < pasos.length - 1" class="h-px w-6 bg-black/[0.08]"></span>
         </li>
       </ol>
 
-      <p v-if="step" class="mt-4 text-base text-stone-600">
+      <!-- Antes de arrancar: el botón, y el aviso de que igual se puede tocar
+           todo por cuenta propia. El guión es una ayuda, no un riel. -->
+      <div v-if="!started" class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <button
+          type="button"
+          class="flex cursor-pointer items-center gap-2 rounded-full bg-brand-lime-500 px-5 py-2.5 text-sm font-medium text-brand-green-900 transition-colors hover:bg-brand-lime-600"
+          @click="start"
+        >
+          <i class="icon-[material-symbols--play-arrow] text-lg"></i>
+          Iniciar demo
+        </button>
+        <p class="text-base text-stone-600">
+          Cuatro pasos guiados, o tocá el panel por tu cuenta.
+        </p>
+      </div>
+
+      <p v-else-if="step" class="mt-4 text-base text-stone-600">
         <span class="font-medium text-brand-green-900">{{ step.titulo }}.</span>
         {{ step.hint }}
       </p>
