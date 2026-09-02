@@ -144,6 +144,10 @@ export function useDemoPanel() {
   const tab = ref('turnos')
   const stepIndex = ref(0)
   const finished = ref(false)
+  // La demo no arranca sola: espera a que aprieten "Iniciar" (o a que toquen el
+  // panel). Antes arrancaba al entrar en pantalla, y el guión terminaba
+  // corriendo abajo de alguien que ya se había ido scrolleando a otra sección.
+  const started = ref(false)
   const toast = ref(null)
   // Borrador del turno nuevo mientras el cajón de la derecha está abierto.
   const draft = ref(null)
@@ -208,6 +212,10 @@ export function useDemoPanel() {
   const armIdle = () => {
     clearIdle()
     if (finished.value) return
+    // Armar el reloj ES encender la demo: acá se marca `started` para que
+    // también cuente como encendida la que arrancó porque el visitante tocó el
+    // panel por su cuenta, sin apretar "Iniciar".
+    started.value = true
     idleTimer = setTimeout(runCurrentStep, IDLE_MS)
   }
 
@@ -402,13 +410,8 @@ export function useDemoPanel() {
     armIdle()
   }
 
-  // La demo no arranca al montar sino cuando entra en pantalla: si arrancara
-  // arriba de todo, el visitante llega scrolleando y se encuentra los cuatro
-  // pasos ya jugados.
-  const started = ref(false)
   const start = () => {
     if (started.value) return
-    started.value = true
     armIdle()
   }
 

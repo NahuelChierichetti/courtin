@@ -53,13 +53,26 @@ const navHint = computed(() =>
 // Con la pantalla baja —un teléfono acostado— el menú no entra entero y el paso
 // puede estar señalando un ítem que quedó abajo del corte. Se lo trae a la
 // vista: un brillo que no se ve no guía a nadie.
+//
+// A mano y no con `scrollIntoView`: ese método scrollea TODOS los ancestros
+// scrolleables hasta dejar el elemento a la vista, y el último de la lista es
+// la página. O sea que cada vez que el guión cambiaba de pantalla, la landing
+// se volvía sola a la demo y le arrebataba el scroll a quien estaba bajando.
+// Acá se mueve únicamente el `scrollTop` del menú.
 const nav = ref(null)
+
+const traerAlMenu = (contenedor, item) => {
+  const c = contenedor.getBoundingClientRect()
+  const r = item.getBoundingClientRect()
+  if (r.top < c.top) contenedor.scrollTop += r.top - c.top
+  else if (r.bottom > c.bottom) contenedor.scrollTop += r.bottom - c.bottom
+}
+
 watch(navHint, async (destino) => {
   if (!destino) return
   await nextTick()
-  nav.value
-    ?.querySelector('[data-nav-hint]')
-    ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  const item = nav.value?.querySelector('[data-nav-hint]')
+  if (item) traerAlMenu(nav.value, item)
 })
 </script>
 

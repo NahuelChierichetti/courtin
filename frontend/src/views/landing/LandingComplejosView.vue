@@ -9,6 +9,7 @@ import SenaSimulador from '@/components/landing/SenaSimulador.vue'
 import PricingPlans from '@/components/landing/PricingPlans.vue'
 import FaqList from '@/components/landing/FaqList.vue'
 import DemoRequestForm from '@/components/landing/DemoRequestForm.vue'
+import WhatsappBubble from '@/components/landing/WhatsappBubble.vue'
 
 // Página de venta para dueños de complejo.
 //
@@ -409,5 +410,8 @@ const PUNTOS_COBRO = [
         <p class="text-xs text-stone-400">© {{ new Date().getFullYear() }} CourtIn</p>
       </div>
     </footer>
+
+    <!-- ---------- WhatsApp ------------------------------------------------ -->
+    <WhatsappBubble />
   </div>
 </template>
