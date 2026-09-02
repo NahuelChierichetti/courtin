@@ -4,6 +4,7 @@ const multer = require('multer');
 const { uploadImage } = require('../controllers/uploadController');
 const { protect, authorizeClubRoles } = require('../middlewares/authMiddleware');
 const { requiereSuscripcionActiva } = require('../middlewares/subscriptionGuard');
+const { uploadLimiter } = require('../middlewares/rateLimit');
 const ROLES = require('../config/roles');
 
 const upload = multer({
@@ -30,6 +31,8 @@ const router = express.Router();
 router.use(protect);
 // Nivel 2: un complejo suspendido no accede al panel.
 router.use(requiereSuscripcionActiva);
-router.post('/', authorizeClubRoles(ROLES.TENANT_ADMIN), uploadSingle, uploadImage);
+// El limiter va ANTES de multer: así el 429 se responde sin haber leído los
+// 5 MB del cuerpo, que es justo el gasto que se quiere evitar.
+router.post('/', authorizeClubRoles(ROLES.TENANT_ADMIN), uploadLimiter, uploadSingle, uploadImage);
 
 module.exports = router;
