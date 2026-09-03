@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { isChunkLoadError } from '@/utils/chunkErrors'
 import AppLayout from '@/layouts/AppLayout.vue'
 import BackofficeLayout from '@/layouts/BackofficeLayout.vue'
 import PublicLayout from '@/layouts/PublicLayout.vue'
@@ -332,6 +333,56 @@ router.beforeEach(async (to) => {
   }
 
   return true
+})
+
+// Sin esto, cuando un deploy deja sin chunk a una pestaña vieja la navegación
+// muere en silencio: el usuario aprieta el link y no pasa absolutamente nada,
+// porque vue-router aborta la ruta y deja la pantalla anterior puesta.
+//
+// La salida es recargar de verdad contra la URL destino (no `router.push`, que
+// volvería a pedir el mismo chunk fantasma): así el browser trae el index.html
+// nuevo, con los hashes que sí existen, y aterriza donde el usuario quería ir.
+//
+// La marca en sessionStorage evita el ciclo de recargas si el chunk falta por
+// algo que un deploy no arregla; se limpia sola en cuanto una navegación
+// termina bien, que es justo lo que pasa cuando la recarga funcionó.
+const CHUNK_RELOAD_KEY = 'courtin_chunk_reload'
+
+// sessionStorage tira excepción en contextos con el almacenamiento bloqueado, y
+// esto corre dentro del manejador de errores: si acá explota, no queda nadie
+// atrás para atajarlo.
+const readReloadMark = () => {
+  try {
+    return sessionStorage.getItem(CHUNK_RELOAD_KEY)
+  } catch {
+    return null
+  }
+}
+
+const writeReloadMark = (value) => {
+  try {
+    if (value === null) sessionStorage.removeItem(CHUNK_RELOAD_KEY)
+    else sessionStorage.setItem(CHUNK_RELOAD_KEY, value)
+  } catch {
+    // Sin marca no hay protección contra el ciclo, pero tampoco podemos
+    // recargar a ciegas: de eso se encarga el chequeo de `writeReloadMark`
+    // fallido más abajo, que directamente no recarga.
+  }
+}
+
+router.onError((error, to) => {
+  if (!isChunkLoadError(error)) return
+  if (readReloadMark() === to.fullPath) return
+
+  writeReloadMark(to.fullPath)
+  // Si la marca no se pudo guardar, recargar sería apostar a un ciclo infinito.
+  if (readReloadMark() !== to.fullPath) return
+
+  window.location.assign(to.fullPath)
+})
+
+router.afterEach(() => {
+  if (readReloadMark() !== null) writeReloadMark(null)
 })
 
 export default router

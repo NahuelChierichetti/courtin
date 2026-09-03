@@ -5,6 +5,7 @@ import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import App from './App.vue'
 import router from './router'
+import { CHUNK_ERROR_PATTERNS } from './utils/chunkErrors'
 import CourtInPreset from './theme/courtinPreset'
 import 'primeicons/primeicons.css'
 import './style.css'
@@ -34,7 +35,11 @@ Sentry.init({
   // un complejo llame por teléfono, se ve en video qué apretó antes de romperse.
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 1.0,
-  ignoreErrors: [/Java object is gone/, /Error invoking postMessage/],
+  // Los dos primeros son de WebViews de Android y de apps que abren el link en
+  // su navegador embebido: no hay código nuestro involucrado. Los de chunks son
+  // la pestaña vieja pidiendo un archivo que el deploy borró, y de eso ya se
+  // ocupa el `router.onError` recargando; en Sentry sólo hacen ruido.
+  ignoreErrors: [/Java object is gone/, /Error invoking postMessage/, ...CHUNK_ERROR_PATTERNS],
   denyUrls: [/^iabjs:\/\//],
 })
 
