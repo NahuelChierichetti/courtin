@@ -10,6 +10,7 @@ const { sendEmail } = require('../utils/email');
 const { appUrl } = require('../utils/publicUrls');
 const passwordResetEmail = require('../emails/templates/passwordReset');
 const verifyEmailTemplate = require('../emails/templates/verifyEmail');
+const welcomeEmailTemplate = require('../emails/templates/welcome');
 const { normalizeSports } = require('../config/sports');
 const { planParaCanchas } = require('../config/plans');
 const { slugUnico, notificarSolicitud } = require('../utils/clubOnboarding');
@@ -53,6 +54,24 @@ const sendVerificationEmail = async (user) => {
     subject,
     html,
     template: 'email-verify',
+    refId: user._id
+  });
+};
+
+const sendWelcomeEmail = async (user) => {
+  const base = publicBaseUrl();
+  const { subject, html } = welcomeEmailTemplate({
+    nombre: user.nombre,
+    appUrl: base,
+    cuentaUrl: `${base}/cuenta`
+  });
+
+  return sendEmail({
+    to: user.email,
+    subject,
+    html,
+    template: 'bienvenida-google',
+    dedupeKey: `bienvenida-google:${user._id}`,
     refId: user._id
   });
 };
@@ -463,6 +482,10 @@ const loginWithGoogle = async (req, res, next) => {
       return res.status(bloqueo.status).json(bloqueo.body);
     }
 
+    // Best-effort, igual que el de verificación: si el proveedor falla, la
+    // cuenta ya existe y la sesión se abre lo mismo.
+    if (creado) await sendWelcomeEmail(user);
+
     res.status(creado ? 201 : 200).json({
       ok: true,
       token: generateToken(user._id),
@@ -485,9 +508,17 @@ const getMe = async (req, res, next) => {
       // de canchas: sin él, la sesión no sabe con qué deportes trabaja el club.
     }).populate('club', 'nombre slug estado timezone moneda deportes');
 
+    // Si la cuenta tiene contraseña o todavía no.
+    //
+    // No se deduce del `googleId`: una cuenta de Google puede sumar contraseña
+    // después (ver changePassword), y ahí tiene las dos cosas. Y no viene en
+    // `req.user` porque el campo es `select: false`, así que se pregunta aparte
+    // y sólo por SI existe — el hash no sale de acá bajo ninguna forma.
+    const conPassword = await User.findById(req.user._id).select('+password').lean();
+
     res.status(200).json({
       ok: true,
-      user: req.user,
+      user: { ...req.user.toObject(), tienePassword: Boolean(conPassword?.password) },
       memberships
     });
   } catch (error) {

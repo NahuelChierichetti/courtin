@@ -7,7 +7,7 @@ import AccountNav from '@/components/public/AccountNav.vue'
 import VerifyEmailBanner from '@/components/common/VerifyEmailBanner.vue'
 
 const toast = useToast()
-const { user, isEmailVerified, updateProfile } = useAuth()
+const { user, isEmailVerified, updateProfile, refreshUser } = useAuth()
 
 // --- Datos personales ---
 
@@ -57,6 +57,7 @@ const guardarPerfil = async () => {
 }
 
 // --- Contraseña ---
+const tienePassword = computed(() => user.value?.tienePassword !== false)
 
 const password = reactive({ currentPassword: '', password: '', confirmPassword: '' })
 const mostrarActual = ref(false)
@@ -76,19 +77,26 @@ const cambiarPassword = async () => {
     return
   }
 
+  const definiendo = !tienePassword.value
+
   guardandoPassword.value = true
   try {
     await authService.changePassword({
-      currentPassword: password.currentPassword,
+      currentPassword: definiendo ? undefined : password.currentPassword,
       password: password.password,
     })
     password.currentPassword = ''
     password.password = ''
     password.confirmPassword = ''
+
+    if (definiendo) await refreshUser()
+
     toast.add({
       severity: 'success',
-      summary: 'Contraseña actualizada',
-      detail: 'La próxima vez ingresá con tu contraseña nueva.',
+      summary: definiendo ? 'Contraseña definida' : 'Contraseña actualizada',
+      detail: definiendo
+        ? 'Ahora también podés entrar con tu email y contraseña.'
+        : 'La próxima vez ingresá con tu contraseña nueva.',
       life: 4000,
     })
   } catch (error) {
@@ -192,9 +200,15 @@ const inputClass =
 
       <!-- Contraseña -->
       <section class="rounded-2xl border border-black/[0.06] bg-white p-6">
-        <h2 class="text-base font-semibold text-brand-green-900">Contraseña</h2>
+        <h2 class="text-base font-semibold text-brand-green-900">
+          {{ tienePassword ? 'Contraseña' : 'Definir contraseña' }}
+        </h2>
         <p class="mt-1 text-sm text-stone-500">
-          Te pedimos la actual para confirmar que sos vos.
+          {{
+            tienePassword
+              ? 'Te pedimos la actual para confirmar que sos vos.'
+              : 'Entrás con Google. Si querés, podés sumar una contraseña para entrar también con tu email.'
+          }}
         </p>
 
         <div
@@ -205,7 +219,8 @@ const inputClass =
         </div>
 
         <form class="mt-5 space-y-5" @submit.prevent="cambiarPassword">
-          <div>
+          <!-- Sin contraseña que cambiar no hay una actual que pedir. -->
+          <div v-if="tienePassword">
             <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="currentPassword">
               Contraseña actual
             </label>
@@ -237,7 +252,7 @@ const inputClass =
 
           <div>
             <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="newPassword">
-              Contraseña nueva
+              {{ tienePassword ? 'Contraseña nueva' : 'Contraseña' }}
             </label>
             <div class="relative">
               <input
@@ -268,7 +283,7 @@ const inputClass =
 
           <div>
             <label class="mb-1.5 block text-sm font-medium text-brand-green-900" for="confirmPassword">
-              Repetir contraseña nueva
+              {{ tienePassword ? 'Repetir contraseña nueva' : 'Repetir contraseña' }}
             </label>
             <input
               id="confirmPassword"
@@ -286,7 +301,15 @@ const inputClass =
             class="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black/[0.08] bg-white text-sm font-semibold text-brand-green-900 transition-colors hover:bg-stone-50 disabled:opacity-50 cursor-pointer sm:w-auto sm:px-8"
           >
             <i v-if="guardandoPassword" class="icon-[material-symbols--progress-activity] animate-spin"></i>
-            {{ guardandoPassword ? 'Cambiando...' : 'Cambiar contraseña' }}
+            {{
+              guardandoPassword
+                ? tienePassword
+                  ? 'Cambiando...'
+                  : 'Definiendo...'
+                : tienePassword
+                  ? 'Cambiar contraseña'
+                  : 'Definir contraseña'
+            }}
           </button>
         </form>
       </section>
