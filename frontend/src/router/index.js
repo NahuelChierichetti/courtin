@@ -72,6 +72,13 @@ const router = createRouter({
       component: () => import('@/views/landing/LandingComplejosView.vue'),
     },
     {
+      // `/suma-tu-complejo` fue la URL con la que se probó el rediseño de esta
+      // misma página. Queda como redirección y no se borra: cualquier link que
+      // se haya compartido mientras se probaba tiene que seguir llegando.
+      path: '/suma-tu-complejo',
+      redirect: '/complejos',
+    },
+    {
       // Gestión de una reserva por token (invitado sin cuenta).
       path: '/reserva/:token',
       component: PublicLayout,

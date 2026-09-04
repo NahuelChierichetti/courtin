@@ -162,6 +162,35 @@ body,
   font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
+/* Tipografía de la landing /complejos.
+   Poppins es una geométrica redondeada: buena para el producto, pero en una
+   página de venta lee blanda y genérica. Bricolage Grotesque tiene carácter
+   propio y un eje de tamaño óptico: `font-optical-sizing: auto` hace que el
+   titular use un dibujo más ajustado y el cuerpo uno más abierto, en vez de la
+   misma letra estirada. Es la diferencia entre una fuente puesta y una fuente
+   usada.
+   Se aplica por clase y no al `body` para no tocar el resto de la app: la
+   familia se hereda, así que alcanza con ponerla en la raíz de la página. */
+.font-landing {
+  font-family: 'Bricolage Grotesque', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-optical-sizing: auto;
+}
+
+/* Grano. Los planos grandes de color plano (el hero y el pie de la landing)
+   se ven digitales y muertos; un ruido muy leve les devuelve materia sin que
+   se llegue a distinguir de qué está hecho. Va en un `::after` para no gastar
+   un elemento en el marcado, y en `overlay` para que respete el color de abajo
+   en vez de grisarlo. */
+.textura-grano::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.42'/%3E%3C/svg%3E");
+}
+
 .font-secondary {
   font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
 }
